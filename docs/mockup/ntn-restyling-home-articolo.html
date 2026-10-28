@@ -1,0 +1,1008 @@
+<title>NTN Journal Restyling</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap">
+<style>
+/* Layout: sistema Nothing OS dell'anteprima Hub esteso a home e articolo. Fascia nera fissa ("momento nero"), poi sezioni a celle con linee da 1px. */
+:root {
+  --bg: #ffffff;
+  --surface: #fafafa;
+  --fg: #09090b;
+  --muted: #52525b;
+  --faint: #71717a;
+  --line: #e4e4e7;
+  --line-strong: #a1a1aa;
+  --accent: #dc2626;
+  --accent-ink: #ef4444;
+  --note-bg: #fef2f2;
+  /* fascia nera: identica in chiaro e scuro */
+  --ink: #000000;
+  --ink-fg: #ffffff;
+  --ink-soft: #d4d4d8;
+  --ink-muted: #a1a1aa;
+  --ink-line: #27272a;
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #000000; --surface: #09090b; --fg: #e4e4e7; --muted: #a1a1aa; --faint: #8b8b94;
+    --line: #1c1c1f; --line-strong: #52525b; --accent: #ef4444; --note-bg: #1c0a0a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #000000; --surface: #09090b; --fg: #e4e4e7; --muted: #a1a1aa; --faint: #8b8b94;
+  --line: #1c1c1f; --line-strong: #52525b; --accent: #ef4444; --note-bg: #1c0a0a;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-sans); font-size: 15px; line-height: 1.55; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; }
+.mono { font-family: var(--font-mono); }
+.wrap { max-width: 80rem; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+@media (min-width: 768px) { .wrap { padding-left: max(40px, env(safe-area-inset-left, 0px)); padding-right: max(40px, env(safe-area-inset-right, 0px)); } }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+/* ── Barra anteprima + selettore ── */
+.preview-bar { background: var(--accent); color: #fff; font-family: var(--font-mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; }
+.preview-bar .wrap { padding-block: 8px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; justify-content: space-between; }
+.switch { display: flex; gap: 0; border: 1px solid rgba(255,255,255,.7); }
+.switch button { background: transparent; border: 0; color: #fff; font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; padding: 6px 12px; cursor: pointer; }
+.switch button + button { border-left: 1px solid rgba(255,255,255,.7); }
+.switch button[aria-pressed="true"] { background: #fff; color: #b91c1c; }
+.switch button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+
+/* ── Ticker ultime notizie ── */
+.ticker { background: var(--ink); color: var(--ink-soft); border-bottom: 1px solid var(--ink-line); font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: .08em; }
+.ticker .wrap { display: flex; align-items: center; gap: 14px; padding-block: 7px; overflow: hidden; }
+.ticker .lbl { display: inline-flex; align-items: center; gap: 6px; color: var(--accent-ink); font-weight: 700; flex: none; }
+.ticker .track { overflow: hidden; flex: 1; min-width: 0; white-space: nowrap; mask-image: linear-gradient(90deg, transparent, #000 4%, #000 92%, transparent); -webkit-mask-image: linear-gradient(90deg, transparent, #000 4%, #000 92%, transparent); }
+.ticker .run { display: inline-block; padding-left: 100%; animation: run 38s linear infinite; }
+.ticker .run span { margin-right: 36px; }
+.ticker .run b { color: var(--ink-fg); font-weight: 700; margin-right: 8px; }
+.ticker:hover .run { animation-play-state: paused; }
+@keyframes run { to { transform: translateX(-100%); } }
+
+/* ── Testata ── */
+.site-head { border-bottom: 1px solid var(--line); background: var(--bg); position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; }
+.site-head .wrap { padding-block: 12px; display: flex; align-items: center; gap: 24px; }
+.logo { font-weight: 900; letter-spacing: -.05em; font-size: 22px; text-transform: uppercase; line-height: 1; display: flex; align-items: baseline; gap: 1px; }
+.logo span { color: var(--accent); }
+.nav { display: flex; gap: 20px; font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); flex-wrap: wrap; flex: 1; }
+.nav a:hover { color: var(--fg); }
+.nav .on { color: var(--fg); font-weight: 700; box-shadow: inset 0 -2px 0 var(--accent); padding-bottom: 3px; }
+.tools { display: flex; gap: 6px; margin-left: auto; }
+.sq { width: 34px; height: 34px; border: 1px solid var(--line); background: var(--bg); display: grid; place-items: center; cursor: pointer; }
+.sq:hover { border-color: var(--fg); }
+.sq svg { width: 15px; height: 15px; }
+@media (max-width: 860px) { .nav { display: none; } }
+
+/* ── Primitive comuni ── */
+.chip { font-family: var(--font-mono); font-size: 9px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; padding: 5px 8px; line-height: 1; border: 1px solid var(--ink-fg); background: rgba(0,0,0,.9); color: var(--ink-fg); display: inline-block; }
+.chip.red { background: #dc2626; border-color: #ef4444; color: #fff; }
+.chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; display: inline-block; flex: none; animation: pulse 2s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .3; } }
+@media (prefers-reduced-motion: reduce) { .dot, .ticker .run { animation: none; } .ticker .run { padding-left: 0; } }
+.entity { color: var(--accent); font-family: var(--font-mono); font-weight: 700; display: inline-flex; align-items: center; gap: 6px; text-transform: uppercase; }
+.on-ink .entity { color: var(--accent-ink); }
+.sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; border-bottom: 1px solid var(--line-strong); padding-bottom: 12px; margin-bottom: 0; }
+.sec-head h2 { margin: 0; font-family: var(--font-mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; font-weight: 700; color: var(--faint); display: flex; align-items: center; gap: 8px; }
+.sec-head h2 .dot { color: var(--accent); }
+.sec-head .aside { font-family: var(--font-mono); font-size: 10px; color: var(--faint); text-transform: uppercase; letter-spacing: .1em; }
+.sec-head .aside:hover { color: var(--accent); }
+section.block { padding-block: 56px 0; }
+.meta { font-family: var(--font-mono); font-size: 10px; color: var(--faint); text-transform: uppercase; letter-spacing: .06em; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; }
+.meta b { color: var(--fg); font-weight: 700; }
+.t { font-weight: 800; text-transform: uppercase; line-height: 1.12; margin: 0; text-wrap: balance; letter-spacing: -.01em; }
+.ex { color: var(--muted); font-weight: 300; margin: 0; max-width: 62ch; }
+.hit:hover .t, .hit:focus-visible .t { color: var(--accent); }
+
+/* Foto segnaposto: simulano foto vere a colori (niente filtri, niente zoom) */
+.ph { position: relative; overflow: hidden; border: 1px solid var(--line); max-width: 100%;
+  background:
+    radial-gradient(ellipse at 28% 38%, var(--a, #7c2d12) 0%, transparent 58%),
+    radial-gradient(ellipse at 78% 72%, var(--b, #f59e0b) 0%, transparent 52%),
+    radial-gradient(ellipse at 60% 10%, var(--c, #1e293b) 0%, transparent 60%),
+    linear-gradient(160deg, #18181b, #3f3f46); }
+.ph .ph-l { position: absolute; right: 8px; bottom: 6px; font-family: var(--font-mono); font-size: 8px; color: rgba(255,255,255,.55); letter-spacing: .14em; text-transform: uppercase; }
+.on-ink .ph { border-color: var(--ink-line); }
+.badge { position: absolute; z-index: 2; top: 8px; left: 8px; font-family: var(--font-mono); font-size: 8px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; padding: 3px 6px; background: rgba(9,9,11,.9); color: #fff; }
+.badge.r { left: auto; right: 8px; background: #dc2626; }
+
+/* Fascia nera con matrice di punti */
+.ink { position: relative; background: var(--ink); color: var(--ink-fg); overflow: hidden; border-bottom: 1px solid var(--ink-line); }
+.ink::before { content: ""; position: absolute; inset: 0; background-image: radial-gradient(rgba(255,255,255,.2) 1px, transparent 1.2px); background-size: 9px 9px; mask-image: linear-gradient(100deg, transparent 35%, #000 90%); -webkit-mask-image: linear-gradient(100deg, transparent 35%, #000 90%); pointer-events: none; }
+.ink > .wrap { position: relative; }
+
+/* ════════════ HOME ════════════ */
+.edition { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 10px 24px; padding-block: 22px 18px; border-bottom: 1px solid var(--ink-line); font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: .14em; color: var(--ink-muted); }
+.edition strong { color: var(--ink-fg); font-weight: 700; }
+.edition .counts { display: flex; gap: 22px; flex-wrap: wrap; }
+.edition .counts span b { color: var(--ink-fg); font-size: 13px; margin-right: 6px; font-variant-numeric: tabular-nums; }
+.lead { display: grid; grid-template-columns: 1fr; gap: 0; padding-block: 0 0; }
+@media (min-width: 960px) { .lead { grid-template-columns: 1.45fr 1fr; } }
+.lead-main { padding-block: 28px 36px; display: grid; gap: 18px; min-width: 0; }
+@media (min-width: 960px) { .lead-main { padding-right: 32px; border-right: 1px solid var(--ink-line); } }
+.lead-main .ph { aspect-ratio: 16 / 9; }
+.lead-main .t { font-size: clamp(30px, 5.2vw, 64px); font-weight: 900; letter-spacing: -.045em; line-height: .95; max-width: 18ch; }
+.lead-main .ex { color: var(--ink-soft); font-size: 16px; }
+.on-ink .meta { color: var(--ink-muted); }
+.on-ink .meta b { color: var(--ink-fg); }
+.on-ink.hit:hover .t, .on-ink .hit:hover .t { color: var(--accent-ink); }
+.lead-side { display: grid; min-width: 0; }
+.lead-side .hit { display: grid; grid-template-columns: 1fr; gap: 12px; align-content: start; padding-block: 24px; border-bottom: 1px solid var(--ink-line); min-width: 0; }
+.lead-side .hit:last-child { border-bottom: 0; }
+@media (min-width: 960px) {
+  /* le tre notizie si dividono tutta l'altezza dell'articolo principale */
+  .lead-side { padding-left: 32px; grid-template-rows: repeat(3, 1fr); }
+  .lead-side .hit { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 18px; align-content: stretch; align-items: center; }
+  .lead-side .hit:first-child { padding-top: 28px; }
+}
+@media (max-width: 959px) { .lead-side { border-top: 1px solid var(--ink-line); } .lead-side .hit { grid-template-columns: 140px 1fr; gap: 16px; } }
+@media (max-width: 480px) { .lead-side .hit { grid-template-columns: 104px 1fr; } }
+.lead-side .ph { aspect-ratio: 4 / 3; }
+.lead-side .t { font-size: clamp(14px, 1.45vw, 19px); color: var(--ink-fg); margin-top: 6px; line-height: 1.1; }
+.lead-side .sx { color: var(--ink-muted); font-size: 13px; font-weight: 300; margin: 8px 0 0; line-height: 1.45; }
+@media (max-width: 1199px) { .lead-side .sx { display: none; } }
+.lead-side .kicker { font-family: var(--font-mono); font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-muted); }
+
+/* Notizie: lista compatta */
+.news { display: grid; grid-template-columns: 1fr; gap: 0 40px; }
+@media (min-width: 900px) { .news { grid-template-columns: 1fr 1fr; } }
+.row { display: grid; grid-template-columns: 52px 1fr auto; gap: 4px 18px; align-items: baseline; padding: 15px 0; border-bottom: 1px solid var(--line); }
+.row .h { font-family: var(--font-mono); font-size: 11px; color: var(--faint); font-variant-numeric: tabular-nums; }
+.row .s { display: block; font-size: 9px; letter-spacing: .1em; margin-bottom: 3px; }
+.row .t { font-size: 14px; font-weight: 700; }
+.row .m { font-family: var(--font-mono); font-size: 10px; color: var(--faint); white-space: nowrap; }
+.row:hover .t { color: var(--accent); }
+
+/* Recensioni: griglia a celle */
+.cells { display: grid; grid-template-columns: 1fr; border-left: 1px solid var(--line); }
+@media (min-width: 600px) { .cells { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1024px) { .cells.c4 { grid-template-columns: repeat(4, 1fr); } .cells.c3 { grid-template-columns: repeat(3, 1fr); } }
+.cell { border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 18px; display: grid; gap: 14px; align-content: start; min-width: 0; transition: background .2s; }
+.cell:hover { background: var(--surface); }
+.cell .ph { aspect-ratio: 16 / 10; }
+.cell .t { font-size: 15px; }
+.score { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; border-top: 1px solid var(--line); padding-top: 12px; }
+.score b { font-family: var(--font-mono); font-size: 30px; line-height: 1; font-variant-numeric: tabular-nums; }
+.score b small { font-size: 12px; color: var(--faint); font-weight: 400; }
+.score span { font-family: var(--font-mono); font-size: 9px; letter-spacing: .12em; color: var(--faint); text-transform: uppercase; text-align: right; }
+.score.top b { color: var(--accent); }
+
+/* Teaser Hub */
+.hubband { margin-top: 56px; }
+.hubband .wrap { display: grid; grid-template-columns: 1fr; gap: 24px; padding-block: 40px; min-height: 260px; }
+@media (min-width: 900px) { .hubband .wrap { grid-template-columns: 1.2fr 1fr; align-items: center; } }
+.hubband h2 { margin: 12px 0 10px; font-weight: 900; text-transform: uppercase; letter-spacing: -.045em; line-height: .95; font-size: clamp(28px, 4.4vw, 52px); text-wrap: balance; }
+.hubband p { margin: 0 0 20px; color: var(--ink-soft); font-weight: 300; max-width: 52ch; }
+.hubband .stats { display: flex; gap: 32px; flex-wrap: wrap; border-top: 1px solid var(--ink-line); padding-top: 16px; }
+.stat .k { display: block; font-family: var(--font-mono); font-size: 9px; letter-spacing: .14em; color: var(--ink-muted); text-transform: uppercase; margin-bottom: 2px; }
+.stat .v { font-family: var(--font-mono); font-weight: 700; font-size: 22px; font-variant-numeric: tabular-nums; }
+.cta { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; border: 1px solid currentColor; padding: 10px 14px; margin-top: 22px; }
+.cta:hover { background: var(--ink-fg); color: var(--ink); }
+.hubband canvas { width: 100%; height: 240px; display: block; }
+@media (max-width: 899px) { .hubband canvas { height: 160px; } }
+
+/* Uscite dal catalogo */
+.rel { width: 100%; border-collapse: collapse; font-size: 14px; }
+.rel th { text-align: left; font-family: var(--font-mono); font-size: 9px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--faint); padding: 12px 12px 10px 0; border-bottom: 1px solid var(--line); }
+.rel td { padding: 14px 12px 14px 0; border-bottom: 1px solid var(--line); vertical-align: baseline; }
+.rel td.d { font-family: var(--font-mono); font-size: 12px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.rel td.g { font-weight: 800; text-transform: uppercase; }
+.rel td.p { font-family: var(--font-mono); font-size: 10px; color: var(--muted); text-transform: uppercase; }
+.rel tr:hover td.g { color: var(--accent); }
+.rel .soon { color: var(--accent); font-weight: 700; }
+.tablebox { overflow-x: auto; }
+@media (max-width: 640px) { .rel .hide-sm { display: none; } }
+
+/* ════════════ ARTICOLO ════════════ */
+.crumbs { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: .12em; color: var(--ink-muted); padding-block: 18px; border-bottom: 1px solid var(--ink-line); display: flex; gap: 8px; flex-wrap: wrap; }
+.crumbs a:hover { color: var(--ink-fg); }
+.art-head { padding-block: 36px 32px; display: grid; gap: 20px; }
+.art-head h1 { margin: 0; font-weight: 900; text-transform: uppercase; letter-spacing: -.045em; line-height: .95; font-size: clamp(32px, 6vw, 72px); max-width: 20ch; text-wrap: balance; }
+.art-head .sub { margin: 0; color: var(--ink-soft); font-weight: 300; font-size: 18px; max-width: 60ch; }
+.art-head .meta { border-top: 1px solid var(--ink-line); padding-top: 16px; font-size: 10px; }
+.figure-hero { margin: 0; }
+.figure-hero .ph { aspect-ratio: 21 / 9; border: 0; }
+@media (max-width: 640px) { .figure-hero .ph { aspect-ratio: 16 / 10; } }
+figcaption { font-family: var(--font-mono); font-size: 11px; color: var(--faint); padding-top: 10px; line-height: 1.5; }
+.on-ink figcaption { color: var(--ink-muted); padding-bottom: 18px; }
+
+.art { display: grid; grid-template-columns: 1fr; gap: 48px; padding-block: 48px 0; }
+@media (min-width: 1080px) { .art { grid-template-columns: minmax(0, 1fr) 320px; gap: 64px; } }
+.body { min-width: 0; max-width: 68ch; font-size: 18px; line-height: 1.7; }
+.body > p { margin: 0 0 1.25em; }
+.body > p:first-of-type::first-letter { font-weight: 900; font-size: 3.4em; float: left; line-height: .82; margin: .06em .1em 0 0; }
+.body h2 { font-weight: 800; text-transform: uppercase; font-size: 22px; letter-spacing: -.01em; line-height: 1.2; margin: 2em 0 .8em; padding-top: 14px; border-top: 1px solid var(--line-strong); display: grid; gap: 6px; text-wrap: balance; }
+.body h2 small { font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: .14em; color: var(--faint); }
+.body a.inl { color: var(--accent); text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--accent) 40%, transparent); text-underline-offset: 3px; font-weight: 500; }
+.body blockquote { margin: 2em 0; padding: 4px 0 4px 20px; border-left: 3px solid var(--accent); font-family: var(--font-mono); font-size: 15px; line-height: 1.6; }
+.body blockquote cite { display: block; font-style: normal; font-size: 10px; letter-spacing: .12em; color: var(--faint); text-transform: uppercase; margin-top: 10px; }
+.body figure { margin: 2em 0; }
+.body figure .ph { aspect-ratio: 16 / 9; }
+.gallery { display: grid; grid-template-columns: 1.4fr 1fr; gap: 4px; }
+.gallery .ph { aspect-ratio: auto; height: 100%; min-height: 120px; }
+.gallery .col { display: grid; gap: 4px; }
+.suggest { margin: 2.2em 0; border: 1px solid var(--line-strong); display: grid; grid-template-columns: 120px 1fr; gap: 0; }
+.suggest .ph { border: 0; border-right: 1px solid var(--line-strong); height: 100%; min-height: 96px; }
+.suggest .in { padding: 14px 16px; display: grid; gap: 6px; align-content: center; min-width: 0; }
+.suggest .lbl { font-family: var(--font-mono); font-size: 9px; letter-spacing: .14em; text-transform: uppercase; color: var(--faint); }
+.suggest .t { font-size: 15px; }
+.suggest .go { font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); display: inline-flex; align-items: center; gap: 6px; }
+.suggest:hover .t { color: var(--accent); }
+.ai-note { font-family: var(--font-mono); font-size: 9px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-muted); display: block; margin-bottom: 8px; }
+
+.tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 2.4em; padding-top: 16px; border-top: 1px solid var(--line); }
+.tag { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; border: 1px solid var(--line-strong); padding: 6px 9px; line-height: 1; color: var(--muted); }
+.tag:hover { border-color: var(--fg); color: var(--fg); }
+.tag.game { border-color: var(--accent); color: var(--accent); display: inline-flex; align-items: center; gap: 6px; }
+
+.author { margin-top: 32px; border: 1px solid var(--line); display: grid; grid-template-columns: 72px 1fr; gap: 18px; padding: 18px; align-items: start; }
+.avatar { width: 72px; height: 72px; background: var(--fg); color: var(--bg); display: grid; place-items: center; font-weight: 900; font-size: 24px; letter-spacing: -.04em; position: relative; overflow: hidden; }
+.avatar::after { content: ""; position: absolute; inset: 0; background-image: radial-gradient(color-mix(in srgb, var(--bg) 30%, transparent) 1px, transparent 1.2px); background-size: 6px 6px; }
+.author h3 { margin: 0 0 2px; font-size: 16px; font-weight: 800; text-transform: uppercase; }
+.author .role { font-family: var(--font-mono); font-size: 9px; letter-spacing: .14em; color: var(--faint); text-transform: uppercase; }
+.author p { margin: 8px 0 0; color: var(--muted); font-size: 14px; font-weight: 300; }
+.author .stats-inline { display: flex; gap: 18px; margin-top: 12px; font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: var(--faint); flex-wrap: wrap; }
+.author .stats-inline b { color: var(--fg); font-size: 13px; margin-right: 4px; }
+
+/* Barra laterale */
+.aside-col { display: grid; gap: 28px; align-content: start; min-width: 0; }
+@media (min-width: 1080px) { .aside-col { position: sticky; top: 84px; } }
+.panel { border: 1px solid var(--line-strong); }
+.panel-h { font-family: var(--font-mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; font-weight: 700; padding: 10px 14px; border-bottom: 1px solid var(--line-strong); display: flex; justify-content: space-between; gap: 8px; color: var(--faint); }
+.panel-h .entity { font-size: 10px; }
+.game-card .ph { aspect-ratio: 16 / 9; border: 0; border-bottom: 1px solid var(--line-strong); }
+.game-card .name { padding: 14px 14px 4px; font-weight: 900; text-transform: uppercase; font-size: 20px; letter-spacing: -.03em; line-height: 1; }
+.kv { display: grid; grid-template-columns: 1fr 1fr; }
+.kv div { padding: 12px 14px; border-top: 1px solid var(--line); min-width: 0; }
+.kv div:nth-child(odd) { border-right: 1px solid var(--line); }
+.kv dt { font-family: var(--font-mono); font-size: 8px; letter-spacing: .14em; color: var(--faint); text-transform: uppercase; margin-bottom: 3px; }
+.kv dd { margin: 0; font-family: var(--font-mono); font-size: 11px; font-weight: 700; text-transform: uppercase; overflow-wrap: anywhere; }
+.kv dd.red { color: var(--accent); }
+.game-card .more { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; border-top: 1px solid var(--line-strong); font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+.game-card .more:hover { color: var(--accent); }
+.toc ol { list-style: none; margin: 0; padding: 6px 0; counter-reset: c; }
+.toc li { counter-increment: c; }
+.toc a { display: grid; grid-template-columns: 30px 1fr; gap: 6px; padding: 8px 14px; font-size: 13px; font-weight: 600; line-height: 1.35; }
+.toc a::before { content: counter(c, decimal-leading-zero); font-family: var(--font-mono); font-size: 10px; color: var(--faint); padding-top: 2px; }
+.toc a:hover { color: var(--accent); }
+.toc a.cur { color: var(--accent); }
+.toc a.cur::before { color: var(--accent); }
+.share { display: grid; grid-template-columns: repeat(4, 1fr); }
+.share a { border-right: 1px solid var(--line); padding: 12px 0; text-align: center; font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+.share a:last-child { border-right: 0; }
+.share a:hover { background: var(--fg); color: var(--bg); }
+
+.related { margin-top: 64px; }
+.comments-cta { margin-top: 48px; border-top: 1px solid var(--line-strong); padding-block: 22px 0; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+.comments-cta .k { font-family: var(--font-mono); font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--faint); }
+.btn { font-family: var(--font-mono); font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; border: 1px solid var(--fg); padding: 10px 14px; background: var(--fg); color: var(--bg); cursor: pointer; }
+.btn:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* ════════════ RECENSIONE: i cinque LED ════════════ */
+.leds { display: flex; gap: 6px; align-items: center; }
+.led { width: 12px; height: 12px; background: var(--line); flex: none; }
+.led.on { background: var(--fg); }
+.led.last { background: var(--accent); box-shadow: 0 0 10px color-mix(in srgb, var(--accent) 55%, transparent); }
+.on-ink .led { background: var(--ink-line); }
+.on-ink .led.on { background: var(--ink-fg); }
+.on-ink .led.last { background: var(--accent-ink); box-shadow: 0 0 12px rgba(239,68,68,.6); }
+.leds.xl { gap: 8px; }
+.leds.xl .led { width: 22px; height: 22px; }
+@media (max-width: 480px) { .leds.xl .led { width: 16px; height: 16px; } }
+
+/* Box recensione completo */
+.rbox { border: 1px solid var(--line-strong); margin: 2.4em 0; font-size: 15px; line-height: 1.55; }
+.rbox-origin { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 16px; padding: 10px 18px; border-bottom: 1px solid var(--line-strong); font-family: var(--font-mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--faint); }
+.rbox-origin b { color: var(--fg); letter-spacing: .06em; }
+.rbox-eval { position: relative; background: var(--ink); color: var(--ink-fg); padding: 28px 22px; display: grid; gap: 22px; grid-template-columns: 1fr; align-items: end; overflow: hidden; }
+.rbox-eval::before { content: ""; position: absolute; inset: 0; background-image: radial-gradient(rgba(255,255,255,.16) 1px, transparent 1.2px); background-size: 9px 9px; mask-image: linear-gradient(100deg, transparent 45%, #000 100%); -webkit-mask-image: linear-gradient(100deg, transparent 45%, #000 100%); pointer-events: none; }
+.rbox-eval > * { position: relative; }
+@media (min-width: 640px) { .rbox-eval { grid-template-columns: 1fr auto; padding: 34px 30px; } }
+.rbox-eval .k { font-family: var(--font-mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-muted); display: block; margin-bottom: 10px; }
+.verdict-word { font-weight: 900; text-transform: uppercase; letter-spacing: -.045em; line-height: .9; font-size: clamp(34px, 6vw, 60px); color: var(--accent-ink); display: inline-flex; align-items: center; gap: 14px; }
+.verdict-word .dot { width: 12px; height: 12px; color: var(--accent-ink); }
+.verdict-word:hover { color: #fca5a5; }
+.scorebox { display: grid; gap: 10px; justify-items: start; }
+@media (min-width: 640px) { .scorebox { justify-items: end; } }
+.scorebox .n { font-family: var(--font-mono); font-size: 11px; letter-spacing: .14em; color: var(--ink-muted); text-transform: uppercase; }
+.scorebox .n b { color: var(--ink-fg); font-size: 15px; }
+.rbox-pc { display: grid; grid-template-columns: 1fr; }
+@media (min-width: 640px) { .rbox-pc { grid-template-columns: 1fr 1fr; } .rbox-pc > div + div { border-left: 1px solid var(--line-strong); } }
+.rbox-pc > div { padding: 22px; border-bottom: 1px solid var(--line-strong); min-width: 0; }
+.rbox-pc h4 { margin: 0 0 14px; font-family: var(--font-mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--faint); display: flex; justify-content: space-between; }
+.rbox-pc ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.rbox-pc li { display: grid; grid-template-columns: 18px 1fr; gap: 8px; font-size: 14px; font-weight: 500; line-height: 1.45; }
+.rbox-pc li::before { font-family: var(--font-mono); font-weight: 700; }
+.rbox-pc .pro li::before { content: "+"; color: var(--fg); }
+.rbox-pc .con li::before { content: "−"; color: var(--accent); }
+.rbox-verdict { padding: 22px 22px 26px; }
+.rbox-verdict .k { font-family: var(--font-mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--faint); display: block; margin-bottom: 10px; }
+.rbox-verdict p { margin: 0; font-size: 18px; font-weight: 500; line-height: 1.55; max-width: 62ch; }
+.rbox .readmore { display: flex; justify-content: space-between; padding: 12px 22px; border-top: 1px solid var(--line-strong); font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+.rbox .readmore:hover { background: var(--fg); color: var(--bg); }
+
+/* Scheda rapida da telefono */
+.rmob { border: 1px solid var(--line-strong); display: grid; grid-template-columns: 104px 1fr; margin: 0 0 2em; }
+.rmob .ph { aspect-ratio: 3 / 4; border: 0; border-right: 1px solid var(--line-strong); height: 100%; }
+.rmob .in { padding: 14px; display: grid; gap: 10px; align-content: center; min-width: 0; }
+.rmob .lbl { font-family: var(--font-mono); font-size: 9px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); font-weight: 700; }
+.rmob .name { font-weight: 900; text-transform: uppercase; font-size: 17px; letter-spacing: -.02em; line-height: 1.05; }
+.rmob .row2 { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; color: var(--muted); }
+.rmob .row2 b { color: var(--accent); }
+
+/* Sezione voto nella barra laterale */
+.side-score { padding: 16px 14px; border-top: 1px solid var(--line-strong); display: grid; gap: 12px; }
+.side-score .k { font-family: var(--font-mono); font-size: 9px; letter-spacing: .14em; text-transform: uppercase; color: var(--faint); }
+.side-score .w { font-weight: 900; text-transform: uppercase; font-size: 24px; letter-spacing: -.04em; line-height: .95; color: var(--accent); display: inline-flex; gap: 10px; align-items: center; }
+.side-score .w .dot { width: 9px; height: 9px; }
+.igdb-btn { display: block; text-align: center; background: #dc2626; color: #fff; font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; padding: 10px; border-top: 1px solid var(--line-strong); }
+.igdb-btn:hover { background: #b91c1c; }
+
+/* Banco dei componenti */
+.bench { margin-top: 64px; }
+.scale { display: grid; grid-template-columns: 1fr; border-left: 1px solid var(--line); }
+@media (min-width: 700px) { .scale { grid-template-columns: repeat(5, 1fr); } }
+.scale > div { border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 18px; display: grid; gap: 12px; align-content: start; }
+.scale .v { font-family: var(--font-mono); font-size: 10px; color: var(--faint); letter-spacing: .12em; }
+.scale .w { font-weight: 900; text-transform: uppercase; font-size: 15px; letter-spacing: -.02em; line-height: 1.05; }
+.scale .w.red { color: var(--accent); }
+.scale .tag-l { font-family: var(--font-mono); font-size: 9px; color: var(--faint); text-transform: uppercase; letter-spacing: .08em; }
+.bench-grid { display: grid; grid-template-columns: 1fr; gap: 32px; margin-top: 40px; }
+@media (min-width: 900px) { .bench-grid { grid-template-columns: 1fr 1fr; } }
+.bench-cap { font-family: var(--font-mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--faint); margin: 0 0 10px; }
+
+/* ════════════ HUB DEL GIOCO ════════════ */
+.ghero { display: grid; grid-template-columns: 1fr; gap: 32px; padding-block: 36px 40px; }
+@media (min-width: 960px) { .ghero { grid-template-columns: minmax(0, 1fr) 280px; gap: 56px; align-items: end; } }
+.ghero h1 { margin: 18px 0 0; font-weight: 900; text-transform: uppercase; letter-spacing: -.05em; line-height: .9; font-size: clamp(38px, 7.5vw, 92px); text-wrap: balance; }
+.ghero h1 span { display: block; color: var(--ink-muted); font-size: .42em; letter-spacing: -.02em; margin-top: 10px; }
+.igdb-chip { font-family: var(--font-mono); font-size: 9px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; padding: 5px 8px; line-height: 1; background: #dc2626; border: 1px solid #ef4444; color: #fff; }
+.igdb-chip:hover { background: #b91c1c; }
+.gcover { aspect-ratio: 3 / 4; max-width: 280px; width: 100%; }
+@media (max-width: 959px) { .gcover { display: none; } }
+.specs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-top: 1px solid var(--ink-line); margin-top: 28px; }
+@media (min-width: 768px) { .specs { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.specs > div { padding: 16px 16px 16px 0; border-bottom: 1px solid var(--ink-line); min-width: 0; }
+.specs .k { display: block; font-family: var(--font-mono); font-size: 9px; letter-spacing: .14em; color: var(--ink-muted); text-transform: uppercase; margin-bottom: 6px; }
+.specs .v { font-family: var(--font-mono); font-weight: 700; font-size: 12px; text-transform: uppercase; overflow-wrap: anywhere; }
+.specs a.v { color: var(--accent-ink); }
+.specs a.v:hover { text-decoration: underline; }
+.specs .wide { grid-column: span 2; }
+@media (min-width: 768px) { .specs .wide { grid-column: span 3; } }
+.plats { display: flex; flex-wrap: wrap; gap: 6px; }
+.plat { font-family: var(--font-mono); font-size: 9px; text-transform: uppercase; border: 1px solid var(--ink-line); color: var(--ink-soft); padding: 5px 7px; line-height: 1; }
+.engine { font-family: var(--font-mono); font-size: 9px; font-weight: 700; text-transform: uppercase; border: 1px solid var(--accent-ink); color: var(--accent-ink); padding: 5px 7px; line-height: 1; display: inline-block; }
+.engine:hover { background: var(--accent-ink); color: #000; }
+.gcounts { display: flex; gap: 28px; flex-wrap: wrap; margin-top: 22px; font-family: var(--font-mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-muted); }
+.gcounts b { color: var(--ink-fg); font-size: 14px; margin-right: 6px; font-variant-numeric: tabular-nums; }
+
+.hubgrid { display: grid; grid-template-columns: 1fr; gap: 48px; padding-top: 48px; }
+@media (min-width: 1024px) { .hubgrid { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 48px; } }
+.hubgrid .rbox { margin: 20px 0 0; }
+.media { border: 1px solid var(--line-strong); margin-top: 20px; }
+.media h3 { margin: 0; font-family: var(--font-mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--faint); padding: 10px 14px; border-bottom: 1px solid var(--line-strong); display: flex; justify-content: space-between; }
+.trailer { position: relative; display: block; width: 100%; aspect-ratio: 16 / 9; border: 0; padding: 0; cursor: pointer; background: none; }
+.trailer .ph { position: absolute; inset: 0; border: 0; }
+.trailer .play { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 56px; height: 56px; background: #dc2626; display: grid; place-items: center; transition: background .2s; }
+.trailer:hover .play { background: #ef4444; }
+.trailer .play svg { width: 22px; height: 22px; fill: #fff; margin-left: 3px; }
+.trailer .len { position: absolute; left: 10px; bottom: 8px; font-family: var(--font-mono); font-size: 9px; color: #fff; background: rgba(0,0,0,.8); padding: 3px 6px; letter-spacing: .1em; }
+.trailer-note { font-family: var(--font-mono); font-size: 10px; color: var(--faint); padding: 8px 14px; border-top: 1px solid var(--line); text-transform: uppercase; letter-spacing: .06em; }
+.shots { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--line-strong); border-top: 1px solid var(--line-strong); }
+.shot { position: relative; aspect-ratio: 16 / 9; border: 0; padding: 0; cursor: zoom-in; background: none; display: block; }
+.shot .ph { position: absolute; inset: 0; border: 0; }
+.shot .n { position: absolute; right: 6px; top: 6px; font-family: var(--font-mono); font-size: 8px; color: #fff; background: rgba(0,0,0,.75); padding: 2px 5px; letter-spacing: .1em; }
+.shot:hover .n { background: #dc2626; }
+.featured-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; border-bottom: 1px solid var(--line-strong); padding-bottom: 12px; }
+.featured-head h2 { margin: 0; font-family: var(--font-mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; font-weight: 700; color: var(--faint); display: flex; align-items: center; gap: 8px; }
+.featured-head h2 .dot { color: var(--accent); }
+.prio { display: flex; gap: 4px; flex-wrap: wrap; font-family: var(--font-mono); font-size: 9px; text-transform: uppercase; letter-spacing: .08em; color: var(--faint); }
+.prio span { border: 1px solid var(--line); padding: 3px 6px; }
+.prio span.cur { border-color: var(--fg); color: var(--fg); font-weight: 700; }
+.pager { display: flex; justify-content: center; gap: 6px; padding-block: 32px 0; font-family: var(--font-mono); font-size: 11px; font-weight: 700; flex-wrap: wrap; }
+.pager a, .pager span { min-width: 36px; height: 36px; display: inline-grid; place-items: center; padding: 0 10px; border: 1px solid var(--line); }
+.pager a:hover { border-color: var(--fg); }
+.pager .cur { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.pager .gap { border: 0; color: var(--faint); }
+
+/* Lightbox screenshot */
+.lightbox { position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,.94); display: grid; place-items: center; padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+.lightbox .frame { width: min(1100px, 100%); }
+.lightbox .ph { aspect-ratio: 16 / 9; border-color: #27272a; }
+.lightbox .bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-top: 12px; font-family: var(--font-mono); font-size: 10px; color: #a1a1aa; text-transform: uppercase; letter-spacing: .12em; }
+.lightbox button { background: transparent; border: 1px solid #52525b; color: #fff; font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; padding: 8px 12px; cursor: pointer; }
+.lightbox button:hover { border-color: #fff; }
+
+/* Note di progetto */
+.notes { margin-top: 72px; border-top: 2px dashed var(--accent); background: var(--note-bg); }
+.notes .wrap { padding-block: 36px 48px; }
+.notes h2 { margin: 0 0 18px; font-family: var(--font-mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+.notes ol { margin: 0; padding-left: 20px; display: grid; gap: 10px; max-width: 80ch; font-size: 14px; color: var(--muted); }
+.notes ol b { color: var(--fg); }
+
+footer.site-foot { border-top: 1px solid var(--line); }
+footer.site-foot .wrap { padding-block: 22px; font-family: var(--font-mono); font-size: 10px; color: var(--faint); text-transform: uppercase; letter-spacing: .1em; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+</style>
+
+<div class="preview-bar">
+  <div class="wrap">
+    <span>Anteprima di progetto · Restyling NTN Journal · Foto e numeri di esempio</span>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <div class="switch" role="group" aria-label="Pagina da mostrare">
+        <button type="button" id="go-home" aria-pressed="true">Home</button>
+        <button type="button" id="go-art" aria-pressed="false">Articolo</button>
+        <button type="button" id="go-rev" aria-pressed="false">Recensione</button>
+        <button type="button" id="go-hub" aria-pressed="false">Hub gioco</button>
+      </div>
+      <div class="switch" role="group" aria-label="Tema">
+        <button type="button" id="th-light" aria-pressed="false">Chiaro</button>
+        <button type="button" id="th-dark" aria-pressed="false">Scuro</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="ticker" aria-label="Ultime notizie">
+  <div class="wrap">
+    <span class="lbl"><span class="dot"></span>Live</span>
+    <div class="track"><div class="run">
+      <span><b>14:32</b>AfterZero: The Last Drive è il nuovo videogioco di 3DClouds</span>
+      <span><b>12:05</b>Monster Chef: la demo gratuita è disponibile su Steam</span>
+      <span><b>10:48</b>When Sirens Fall Silent arriva anche su PS5 e Xbox Series</span>
+      <span><b>09:15</b>Calcio Totale esce oggi su Steam</span>
+    </div></div>
+  </div>
+</div>
+
+<header class="site-head">
+  <div class="wrap">
+    <a class="logo" href="#home">Q-Gin<span>.</span></a>
+    <nav class="nav" aria-label="Menu di esempio">
+      <a href="#home" class="on" id="nav-home">Notizie</a><a href="#home">Recensioni</a><a href="#home">Anteprime</a><a href="#home">Sviluppatori italiani</a><a href="#home">Catalogo</a><a href="#home">Comunicati</a>
+    </nav>
+    <div class="tools">
+      <button class="sq" type="button" aria-label="Cerca"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></button>
+      <button class="sq" type="button" aria-label="Cambia tema" id="th-toggle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 0 0 16z" fill="currentColor"/></svg></button>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════════════════ HOME ═══════════════════════ -->
+<div id="page-home">
+  <section class="ink on-ink" aria-labelledby="lead-title">
+    <div class="wrap">
+      <div class="edition">
+        <span><strong>Edizione di sabato</strong> · 17.10.2026</span>
+        <span class="counts"><span><b>12</b>Articoli oggi</span><span><b>3</b>Recensioni</span><span><b>1.284</b>Giochi nel catalogo</span></span>
+      </div>
+      <div class="lead">
+        <a class="hit lead-main" href="#articolo" data-go="art">
+          <div class="ph" style="--a:#9a3412;--b:#facc15;--c:#7f1d1d"><span class="badge">Sviluppatori italiani</span><span class="badge r">Demo gratuita</span><span class="ph-l">Foto</span></div>
+          <div class="chips"><span class="chip red">In evidenza</span><span class="chip">Anteprima</span></div>
+          <h2 class="t" id="lead-title">Monster Chef: l'indie italiano dove combatti i mostri e li cucini</h2>
+          <p class="ex">L'action RPG di Studio Pizza unisce combattimento, cucina e gestione di una locanda. La demo gratuita è già su Steam.</p>
+          <div class="meta"><span class="entity"><span class="dot"></span>// Studio_Pizza</span><span>by <b>Flavio Lavoratori</b></span><span>16.10.2026</span><span>4 min</span></div>
+        </a>
+        <div class="lead-side">
+          <a class="hit" href="#articolo" data-go="art">
+            <div class="ph" style="--a:#1e3a8a;--b:#38bdf8;--c:#0f172a"><span class="ph-l">Foto</span></div>
+            <div><span class="kicker">Notizie</span><h3 class="t">AfterZero: The Last Drive è il nuovo gioco di 3DClouds</h3><p class="sx">Gli autori di Formula Legends cambiano genere.</p><div class="meta" style="margin-top:8px"><span class="entity"><span class="dot"></span>// 3DClouds</span></div></div>
+          </a>
+          <a class="hit" href="#articolo" data-go="art">
+            <div class="ph" style="--a:#581c87;--b:#ec4899;--c:#111827"><span class="ph-l">Foto</span></div>
+            <div><span class="kicker">Retro</span><h3 class="t">Foreclosed: il cyberpunk italiano che sembra un fumetto</h3><p class="sx">Da riscoprire, oggi a meno di 2€.</p><div class="meta" style="margin-top:8px"><span class="entity"><span class="dot"></span>// Antab_Studio</span></div></div>
+          </a>
+          <a class="hit" href="#articolo" data-go="art">
+            <div class="ph" style="--a:#14532d;--b:#a3e635;--c:#1c1917"><span class="ph-l">Foto</span></div>
+            <div><span class="kicker">Notizie</span><h3 class="t">Ghosts of the Mountain Pass arriva nel 2028</h3><p class="sx">Il racing RPG di Sorpasso Games ha una data.</p><div class="meta" style="margin-top:8px"><span class="entity"><span class="dot"></span>// Sorpasso_Games</span></div></div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <main>
+    <section class="block wrap" aria-labelledby="h-news">
+      <div class="sec-head"><h2 id="h-news"><span class="dot"></span>// Ultime notizie</h2><a class="aside" href="#home">Tutte le notizie →</a></div>
+      <div class="news">
+        <div>
+          <a class="row" href="#articolo" data-go="art"><span class="h">14:32</span><span><span class="s entity">// 3DClouds</span><span class="t">AfterZero: The Last Drive è il nuovo videogioco degli autori di Formula Legends</span></span><span class="m">2 min</span></a>
+          <a class="row" href="#articolo" data-go="art"><span class="h">12:05</span><span><span class="s entity">// Studio_Pizza</span><span class="t">Monster Chef: la demo gratuita è disponibile su Steam</span></span><span class="m">4 min</span></a>
+          <a class="row" href="#articolo" data-go="art"><span class="h">10:48</span><span><span class="s entity">// LKA</span><span class="t">When Sirens Fall Silent, nuovo trailer Act III: annunciato per PS5 e Xbox Series</span></span><span class="m">3 min</span></a>
+        </div>
+        <div>
+          <a class="row" href="#articolo" data-go="art"><span class="h">09:15</span><span><span class="s" style="color:var(--faint);font-family:var(--font-mono);font-weight:700">// Notizie</span><span class="t">Calcio Totale esce oggi su Steam: il gestionale che ti rende dirigente</span></span><span class="m">3 min</span></a>
+          <a class="row" href="#articolo" data-go="art"><span class="h">Ieri</span><span><span class="s entity">// Matteo_Lippera</span><span class="t">Condominium: l'horror italiano anni '90 senza jumpscare ha una demo</span></span><span class="m">2 min</span></a>
+          <a class="row" href="#articolo" data-go="art"><span class="h">Ieri</span><span><span class="s entity">// One-O-One_Games</span><span class="t">The Alighieri Circle: che fine ha fatto Aftermath?</span></span><span class="m">4 min</span></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="block wrap" aria-labelledby="h-rev">
+      <div class="sec-head"><h2 id="h-rev">// Recensioni</h2><a class="aside" href="#home">Archivio recensioni →</a></div>
+      <div class="cells c4">
+        <a class="cell hit" href="#articolo" data-go="art"><div class="ph" style="--a:#7f1d1d;--b:#fca5a5;--c:#18181b"><span class="ph-l">Foto</span></div><div class="meta"><span class="entity">// Stormind_Games</span></div><h3 class="t">Remothered: Red Nun's Legacy</h3><div class="score top"><b>8.5<small>/10</small></b><span>Consigliato<br>dalla redazione</span></div></a>
+        <a class="cell hit" href="#articolo" data-go="art"><div class="ph" style="--a:#0c4a6e;--b:#22d3ee;--c:#082f49"><span class="ph-l">Foto</span></div><div class="meta"><span class="entity">// 34BigThings</span></div><h3 class="t">Redout 2: la prova definitiva</h3><div class="score"><b>7.8<small>/10</small></b><span>PC · PS5</span></div></a>
+        <a class="cell hit" href="#articolo" data-go="art"><div class="ph" style="--a:#3f6212;--b:#fde047;--c:#1a2e05"><span class="ph-l">Foto</span></div><div class="meta"><span class="entity">// Falling_Saints</span></div><h3 class="t">Slackers – Carts of Glory</h3><div class="score"><b>7.0<small>/10</small></b><span>PC · Switch</span></div></a>
+        <a class="cell hit" href="#articolo" data-go="art"><div class="ph" style="--a:#44403c;--b:#d6d3d1;--c:#0c0a09"><span class="ph-l">Foto</span></div><div class="meta"><span class="entity">// LKA</span></div><h3 class="t">The Town of Light, dieci anni dopo</h3><div class="score"><b>8.0<small>/10</small></b><span>Riscoperta</span></div></a>
+      </div>
+    </section>
+
+    <section class="ink on-ink hubband" aria-labelledby="h-hub">
+      <div class="wrap">
+        <div>
+          <div class="chips"><span class="chip">Hub di sezione</span><span class="chip red">Made in Italy</span></div>
+          <h2 id="h-hub">Sviluppatori italiani di videogiochi</h2>
+          <p>Gli studi italiani che seguiamo da vicino, con tutti i loro giochi e gli articoli in un unico indice.</p>
+          <div class="stats"><div class="stat"><span class="k">Studi</span><span class="v">10</span></div><div class="stat"><span class="k">Giochi</span><span class="v">14</span></div><div class="stat"><span class="k">Articoli</span><span class="v">96</span></div></div>
+          <a class="cta" href="#home">Apri l'indice degli studi →</a>
+        </div>
+        <canvas id="italy" aria-hidden="true"></canvas>
+      </div>
+    </section>
+
+    <section class="block wrap" aria-labelledby="h-cat">
+      <div class="sec-head"><h2 id="h-cat">// Prossime uscite dal catalogo</h2><a class="aside" href="#home">Catalogo completo →</a></div>
+      <div class="tablebox">
+        <table class="rel">
+          <thead><tr><th>Uscita</th><th>Gioco</th><th class="hide-sm">Studio</th><th>Piattaforme</th></tr></thead>
+          <tbody>
+            <tr><td class="d soon">23.10.2026</td><td class="g">Monster Chef</td><td class="p hide-sm">Studio Pizza</td><td class="p">PC</td></tr>
+            <tr><td class="d">06.11.2026</td><td class="g">When Sirens Fall Silent</td><td class="p hide-sm">LKA</td><td class="p">PC · PS5 · XSX</td></tr>
+            <tr><td class="d">2027</td><td class="g">AfterZero: The Last Drive</td><td class="p hide-sm">3DClouds</td><td class="p">PC · PS5</td></tr>
+            <tr><td class="d">2028</td><td class="g">Ghosts of the Mountain Pass</td><td class="p hide-sm">Sorpasso Games</td><td class="p">PC</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="block wrap" aria-labelledby="h-more">
+      <div class="sec-head"><h2 id="h-more">// Approfondimenti</h2><a class="aside" href="#home">Tutti →</a></div>
+      <div class="cells c3">
+        <a class="cell hit" href="#articolo" data-go="art"><div class="ph" style="--a:#78350f;--b:#fdba74;--c:#1c1917"><span class="ph-l">Foto</span></div><div class="meta"><span>Editoriale</span><span>4 min</span></div><h3 class="t">34BigThings rinasce ancora: lo studio torna indipendente</h3><p class="ex" style="font-size:13px">Cosa cambia per Redout e per i progetti in corso dopo l'uscita dal gruppo.</p></a>
+        <a class="cell hit" href="#articolo" data-go="art"><div class="ph" style="--a:#312e81;--b:#a78bfa;--c:#0f172a"><span class="ph-l">Foto</span></div><div class="meta"><span>Guida</span><span>7 min</span></div><h3 class="t">Le demo italiane da provare questo autunno</h3><p class="ex" style="font-size:13px">Una selezione delle prove gratuite su Steam, dall'horror al gestionale.</p></a>
+        <a class="cell hit" href="#articolo" data-go="art"><div class="ph" style="--a:#134e4a;--b:#5eead4;--c:#042f2e"><span class="ph-l">Foto</span></div><div class="meta"><span>Intervista</span><span>9 min</span></div><h3 class="t">Come nasce un racing RPG: parla Sorpasso Games</h3><p class="ex" style="font-size:13px">Il team racconta i primi anni di sviluppo di Ghosts of the Mountain Pass.</p></a>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- ═══════════════════════ ARTICOLO ═══════════════════════ -->
+<div id="page-art" hidden>
+  <section class="ink on-ink" aria-labelledby="art-title">
+    <div class="wrap">
+      <nav class="crumbs" aria-label="Percorso"><a href="#home" data-go="home">Home</a><span>/</span><a href="#home" data-go="home">Sviluppatori italiani</a><span>/</span><span style="color:var(--ink-fg)">Monster Chef</span></nav>
+      <header class="art-head">
+        <div class="chips"><span class="chip">Sviluppatori italiani</span><span class="chip red">Demo gratuita</span></div>
+        <h1 id="art-title">Monster Chef: l'indie italiano dove combatti i mostri e li cucini sul campo di battaglia</h1>
+        <p class="sub"><span class="ai-note">// Estratto by AI</span>Monster Chef è l'action RPG italiano di Studio Pizza: combatti e cucini mostri, gestisci una locanda e scopri il mondo di Delizia. La demo gratuita è già su Steam.</p>
+        <div class="meta"><span class="entity"><span class="dot"></span>// Monster_Chef</span><span>by <b>Flavio Lavoratori</b></span><span>16.10.2026 · 11:20</span><span>4 min di lettura</span><span>Aggiornato 17.10.2026</span></div>
+      </header>
+      <figure class="figure-hero">
+        <div class="ph" style="--a:#9a3412;--b:#facc15;--c:#7f1d1d"><span class="ph-l">Foto in evidenza</span></div>
+        <figcaption>Monster Chef, la locanda nella demo. Immagine: Studio Pizza.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <main class="wrap">
+    <div class="art">
+      <article class="body">
+        <p>Il testo che segue è di esempio e serve solo a mostrare come appare un articolo lungo nel nuovo stile. In Monster Chef l'avventura comincia sul campo di battaglia: si affrontano creature di ogni taglia e quello che resta dopo lo scontro diventa ingrediente.</p>
+        <p>Il secondo pilastro è la locanda. Tra una spedizione e l'altra si cucina, si servono i clienti e si migliora il locale, e le ricette sbloccate in cucina cambiano il modo di combattere. Il gioco è sviluppato da <a class="inl" href="#home">Studio Pizza</a>, una squadra indipendente italiana.</p>
+
+        <h2 id="s1"><small>01 // Il gioco</small>Combattere per riempire la dispensa</h2>
+        <p>Il sistema di combattimento è un action RPG in tempo reale. Ogni mostro ha punti deboli diversi e il modo in cui lo si sconfigge decide quali parti si possono recuperare per la cucina.</p>
+        <blockquote>Volevamo che ogni combattimento avesse una conseguenza in cucina, e che ogni piatto cambiasse il combattimento successivo.<cite>// Studio Pizza, citazione di esempio</cite></blockquote>
+        <p>Il mondo di gioco si chiama Delizia ed è diviso in regioni, ognuna con le sue creature e i suoi ingredienti tipici.</p>
+
+        <aside class="suggest" aria-label="Lettura consigliata">
+          <div class="ph" style="--a:#1e3a8a;--b:#38bdf8;--c:#0f172a"></div>
+          <a class="in" href="#articolo">
+            <span class="lbl">// Consigliati</span>
+            <span class="t">AfterZero: The Last Drive è il nuovo videogioco di 3DClouds</span>
+            <span class="go"><span class="dot"></span>Leggi qui →</span>
+          </a>
+        </aside>
+
+        <h2 id="s2"><small>02 // La locanda</small>Una cucina che cresce con te</h2>
+        <p>La parte gestionale è leggera ma presente: si scelgono i piatti del giorno, si sistemano i tavoli e si accolgono clienti con richieste diverse. Gli incassi servono a migliorare la locanda e a sbloccare nuove ricette.</p>
+        <figure>
+          <div class="gallery">
+            <div class="ph" style="--a:#7c2d12;--b:#fb923c;--c:#1c1917"><span class="ph-l">Foto</span></div>
+            <div class="col">
+              <div class="ph" style="--a:#365314;--b:#bef264;--c:#1a2e05"><span class="ph-l">Foto</span></div>
+              <div class="ph" style="--a:#4c1d95;--b:#f0abfc;--c:#0f172a"><span class="ph-l">Foto</span></div>
+            </div>
+          </div>
+          <figcaption>Galleria: tre momenti della demo. Immagini: Studio Pizza.</figcaption>
+        </figure>
+
+        <h2 id="s3"><small>03 // La demo</small>Dove provarlo e cosa contiene</h2>
+        <p>La demo gratuita è disponibile su Steam e permette di provare le prime regioni di Delizia, il ciclo tra combattimento e cucina e i primi miglioramenti della locanda.</p>
+        <p>Seguiremo lo sviluppo nella nostra <a class="inl" href="#home">sezione dedicata agli sviluppatori italiani</a>.</p>
+
+        <div class="tags">
+          <a class="tag game" href="#home"><span class="dot"></span>Monster Chef</a>
+          <a class="tag" href="#home">#Studio Pizza</a>
+          <a class="tag" href="#home">#Action RPG</a>
+          <a class="tag" href="#home">#Demo</a>
+          <a class="tag" href="#home">#Steam</a>
+        </div>
+
+        <div class="author">
+          <div class="avatar" aria-hidden="true">FL</div>
+          <div>
+            <span class="role">Autore · Redazione Q-Gin</span>
+            <h3>Flavio Lavoratori</h3>
+            <p>Scrive di giochi indipendenti e di sviluppo italiano. Biografia di esempio.</p>
+            <div class="stats-inline"><span><b>214</b>Articoli</span><span><b>38</b>Recensioni</span><span><b>Dal 2019</b></span></div>
+          </div>
+        </div>
+
+        <div class="comments-cta"><span class="k">// Commenti (12)</span><button class="btn" type="button">Partecipa alla discussione</button></div>
+      </article>
+
+      <aside class="aside-col" aria-label="Informazioni sul gioco">
+        <div class="panel game-card">
+          <div class="panel-h"><span>Scheda del gioco</span><span class="entity">IGDB</span></div>
+          <div class="ph" style="--a:#9a3412;--b:#facc15;--c:#7f1d1d"><span class="ph-l">Copertina</span></div>
+          <div class="name">Monster Chef</div>
+          <dl class="kv" style="margin:12px 0 0">
+            <div><dt>Sviluppatore</dt><dd class="red">Studio Pizza</dd></div>
+            <div><dt>Uscita</dt><dd>23.10.2026</dd></div>
+            <div><dt>Genere</dt><dd>Action RPG</dd></div>
+            <div><dt>Piattaforme</dt><dd>PC</dd></div>
+            <div><dt>Motore</dt><dd>Unity</dd></div>
+            <div><dt>Articoli</dt><dd>2</dd></div>
+          </dl>
+          <a class="more" href="#home"><span>Apri la Hub del gioco</span><span>→</span></a>
+        </div>
+
+        <nav class="panel toc" aria-label="Indice dei contenuti">
+          <div class="panel-h"><span>Indice</span><span>3 sezioni</span></div>
+          <ol>
+            <li><a href="#s1" class="cur">Combattere per riempire la dispensa</a></li>
+            <li><a href="#s2">Una cucina che cresce con te</a></li>
+            <li><a href="#s3">Dove provarlo e cosa contiene</a></li>
+          </ol>
+        </nav>
+
+        <div class="panel">
+          <div class="panel-h"><span>Condividi</span></div>
+          <div class="share"><a href="#articolo">X</a><a href="#articolo">FB</a><a href="#articolo">WA</a><a href="#articolo">Link</a></div>
+        </div>
+      </aside>
+    </div>
+
+    <section class="related" aria-labelledby="h-rel">
+      <div class="sec-head"><h2 id="h-rel">// Leggi anche</h2><span class="aside">Dalla stessa sezione</span></div>
+      <div class="cells c3">
+        <a class="cell hit" href="#articolo"><div class="ph" style="--a:#1e3a8a;--b:#38bdf8;--c:#0f172a"><span class="ph-l">Foto</span></div><div class="meta"><span class="entity">// 3DClouds</span><span>16.10.2026</span></div><h3 class="t">AfterZero: The Last Drive è il nuovo videogioco di 3DClouds</h3></a>
+        <a class="cell hit" href="#articolo"><div class="ph" style="--a:#581c87;--b:#ec4899;--c:#111827"><span class="ph-l">Foto</span></div><div class="meta"><span class="entity">// Antab_Studio</span><span>08.10.2026</span></div><h3 class="t">Foreclosed: riscopriamo il cyberpunk italiano a meno di 2€</h3></a>
+        <a class="cell hit" href="#articolo"><div class="ph" style="--a:#44403c;--b:#d6d3d1;--c:#0c0a09"><span class="ph-l">Foto</span></div><div class="meta"><span class="entity">// Matteo_Lippera</span><span>06.10.2026</span></div><h3 class="t">Condominium: l'horror italiano anni '90 ha una demo su Steam</h3></a>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- ═══════════════════════ RECENSIONE ═══════════════════════ -->
+<div id="page-rev" hidden>
+  <section class="ink on-ink" aria-labelledby="rev-title">
+    <div class="wrap">
+      <nav class="crumbs" aria-label="Percorso"><a href="#home" data-go="home">Home</a><span>/</span><a href="#home" data-go="home">Recensioni</a><span>/</span><span style="color:var(--ink-fg)">Ace Combat 8</span></nav>
+      <header class="art-head">
+        <div class="chips"><span class="chip red">Recensione</span><span class="chip">PS5</span></div>
+        <h1 id="rev-title">Ace Combat 8: Wings of Theve, la recensione</h1>
+        <p class="sub">Testo di esempio. Il sommario della recensione racconta in due righe com'è il gioco e a chi lo consigliamo.</p>
+        <div class="meta"><a class="entity" href="#hub" data-go="hub"><span class="dot"></span>// Ace_Combat_8</a><span>by <b>Flavio Lavoratori</b></span><span>17.10.2026</span><span>11 min di lettura</span><span class="entity" style="gap:8px">Consigliato <span class="leds" aria-hidden="true"><i class="led on"></i><i class="led on"></i><i class="led on"></i><i class="led on last"></i><i class="led"></i></span></span></div>
+      </header>
+      <figure class="figure-hero">
+        <div class="ph" style="--a:#1e3a8a;--b:#fb923c;--c:#0c4a6e"><span class="ph-l">Foto in evidenza</span></div>
+        <figcaption>Ace Combat 8: Wings of Theve. Immagine: Bandai Namco.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <main class="wrap">
+    <div class="art">
+      <article class="body">
+        <div class="bench-cap">// Da telefono: scheda rapida in cima all'articolo</div>
+        <div class="rmob">
+          <div class="ph" style="--a:#1e3a8a;--b:#fb923c;--c:#0c4a6e"></div>
+          <div class="in">
+            <span class="lbl">// Scheda gioco</span>
+            <a class="name" href="#hub" data-go="hub">Ace Combat 8: Wings of Theve</a>
+            <div class="row2"><span>PC · PS5 · XSX</span><span>2026</span></div>
+            <div class="row2"><b>Consigliato</b><span class="leds" aria-hidden="true"><i class="led on"></i><i class="led on"></i><i class="led on"></i><i class="led on last"></i><i class="led"></i></span></div>
+          </div>
+        </div>
+
+        <p>Il testo che segue è di esempio. Serve a mostrare dove compare il box della recensione e come si legge accanto al resto dell'articolo.</p>
+        <h2><small>01 // La campagna</small>Una guerra raccontata dall'alto</h2>
+        <p>La recensione prosegue con i suoi paragrafi, le immagini e le citazioni nello stile già visto nella pagina articolo.</p>
+        <h2><small>02 // Il verdetto</small>Tirando le somme</h2>
+        <p>In chiusura arriva il box con la valutazione finale, i pro, i contro e il verdetto.</p>
+
+        <section class="rbox" aria-labelledby="rb-k">
+          <div class="rbox-origin"><span>// Origine del videogioco</span><b>Copia digitale fornita dall'editore</b></div>
+          <div class="rbox-eval">
+            <div>
+              <span class="k" id="rb-k">// Valutazione finale</span>
+              <a class="verdict-word" href="#rev">Consigliato <span class="dot"></span></a>
+            </div>
+            <div class="scorebox">
+              <div class="leds xl" role="img" aria-label="Voto 4 su 5"><i class="led on"></i><i class="led on"></i><i class="led on"></i><i class="led on last"></i><i class="led"></i></div>
+              <span class="n"><b>4</b> / 5 · Consigliato</span>
+            </div>
+          </div>
+          <div class="rbox-pc">
+            <div class="pro"><h4><span>// Pro</span><span>3</span></h4><ul><li>Combattimenti aerei veloci e leggibili anche nelle missioni più affollate</li><li>Cieli e nuvole tra i più belli della serie</li><li>Colonna sonora all'altezza della tradizione</li></ul></div>
+            <div class="con"><h4><span>// Contro</span><span>2</span></h4><ul><li>Alcune missioni di scorta ripetono la stessa struttura</li><li>Il multigiocatore al lancio offre poche modalità</li></ul></div>
+          </div>
+          <div class="rbox-verdict"><span class="k">// Il verdetto</span><p>Verdetto di esempio: un ritorno solido che punta tutto sul piacere del volo e sullo spettacolo, con qualche missione di troppo costruita sullo stesso schema.</p></div>
+        </section>
+
+        <div class="tags"><a class="tag game" href="#hub" data-go="hub"><span class="dot"></span>Ace Combat 8</a><a class="tag" href="#rev">#Consigliato</a><a class="tag" href="#rev">#Bandai Namco</a><a class="tag" href="#rev">#Simulatore di volo</a></div>
+      </article>
+
+      <aside class="aside-col" aria-label="Scheda del gioco e voto">
+        <div class="panel game-card">
+          <div class="panel-h"><span>// Scheda gioco</span><span class="entity">IGDB</span></div>
+          <div class="ph" style="--a:#1e3a8a;--b:#fb923c;--c:#0c4a6e"><span class="ph-l">Copertina</span></div>
+          <a class="name" href="#hub" data-go="hub" style="display:block">Ace Combat 8: Wings of Theve</a>
+          <dl class="kv" style="margin:12px 0 0">
+            <div><dt>Sviluppatore</dt><dd class="red">Bandai Namco Aces</dd></div>
+            <div><dt>Editore</dt><dd class="red">Bandai Namco</dd></div>
+            <div><dt>Uscita</dt><dd>2026</dd></div>
+            <div><dt>Genere</dt><dd>Simulatore</dd></div>
+            <div><dt>Motore</dt><dd class="red">Unreal Engine 5</dd></div>
+            <div><dt>Piattaforme</dt><dd>PC · PS5 · XSX</dd></div>
+            <div style="grid-column:span 2;border-right:0"><dt>Origine</dt><dd>Copia digitale fornita dall'editore</dd></div>
+          </dl>
+          <div class="side-score">
+            <span class="k">// Valutazione finale</span>
+            <a class="w" href="#rev">Consigliato <span class="dot"></span></a>
+            <div class="leds" role="img" aria-label="Voto 4 su 5"><i class="led on"></i><i class="led on"></i><i class="led on"></i><i class="led on last"></i><i class="led"></i></div>
+          </div>
+          <a class="igdb-btn" href="#rev">Vedi su IGDB.com</a>
+        </div>
+      </aside>
+    </div>
+
+    <section class="bench" aria-labelledby="h-scale">
+      <div class="sec-head"><h2 id="h-scale">// I cinque LED: tutta la scala</h2><span class="aside">Ogni giudizio porta al suo tag</span></div>
+      <div class="scale">
+        <div><span class="v">1 / 5</span><span class="leds"><i class="led on last"></i><i class="led"></i><i class="led"></i><i class="led"></i><i class="led"></i></span><span class="w">Bocciato</span><span class="tag-l">/tag/bocciato</span></div>
+        <div><span class="v">2 / 5</span><span class="leds"><i class="led on"></i><i class="led on last"></i><i class="led"></i><i class="led"></i><i class="led"></i></span><span class="w">Bocciato</span><span class="tag-l">/tag/bocciato</span></div>
+        <div><span class="v">3 / 5</span><span class="leds"><i class="led on"></i><i class="led on"></i><i class="led on last"></i><i class="led"></i><i class="led"></i></span><span class="w">Consigliato con riserva</span><span class="tag-l">/tag/consigliato-con-riserva</span></div>
+        <div><span class="v">4 / 5</span><span class="leds"><i class="led on"></i><i class="led on"></i><i class="led on"></i><i class="led on last"></i><i class="led"></i></span><span class="w">Consigliato</span><span class="tag-l">/tag/consigliato</span></div>
+        <div><span class="v">5 / 5</span><span class="leds"><i class="led on"></i><i class="led on"></i><i class="led on"></i><i class="led on"></i><i class="led on last"></i></span><span class="w red">Must Play</span><span class="tag-l">/tag/must-play</span></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- ═══════════════════════ HUB DEL GIOCO ═══════════════════════ -->
+<div id="page-hub" hidden>
+  <section class="ink on-ink" aria-labelledby="hub-title">
+    <div class="wrap">
+      <nav class="crumbs" aria-label="Percorso"><a href="#home" data-go="home">Home</a><span>/</span><a href="#home" data-go="home">Catalogo</a><span>/</span><span style="color:var(--ink-fg)">Ace Combat 8</span></nav>
+      <div class="ghero">
+        <div>
+          <div class="chips"><span class="chip">Hub page</span><a class="igdb-chip" href="#hub">Vedi su IGDB.com →</a></div>
+          <h1 id="hub-title">Ace Combat 8<span>Wings of Theve</span></h1>
+          <div class="gcounts"><span><b>14</b>Articoli</span><span><b>1</b>Recensione</span><span><b>3</b>Anteprime</span><span><b>17.10.2026</b>Ultimo articolo</span></div>
+          <div class="specs">
+            <div><span class="k">Uscita</span><span class="v">2026</span></div>
+            <div><span class="k">Sviluppatore</span><a class="v" href="#hub">Bandai Namco Aces</a></div>
+            <div><span class="k">Editore</span><a class="v" href="#hub">Bandai Namco</a></div>
+            <div><span class="k">Genere</span><span class="v">Simulatore, Azione</span></div>
+            <div class="wide"><span class="k">Piattaforme</span><div class="plats"><span class="plat">PC (Windows)</span><span class="plat">PlayStation 5</span><span class="plat">Xbox Series X|S</span></div></div>
+            <div><span class="k">Motore grafico</span><a class="engine" href="#hub">Unreal Engine 5</a></div>
+          </div>
+        </div>
+        <div class="ph gcover" style="--a:#1e3a8a;--b:#fb923c;--c:#0c4a6e"><span class="ph-l">Copertina IGDB</span></div>
+      </div>
+    </div>
+  </section>
+
+  <main class="wrap">
+    <div class="hubgrid">
+      <div>
+        <div class="featured-head">
+          <h2><span class="dot"></span>// Recensione in evidenza</h2>
+          <div class="prio" aria-label="Priorità del contenuto in evidenza"><span>Manuale</span><span class="cur">Recensione</span><span>Anteprima</span><span>Editoriale</span><span>Notizia</span></div>
+        </div>
+        <section class="rbox" aria-label="Recensione di Ace Combat 8">
+          <div class="rbox-origin"><span>// Origine del videogioco</span><b>Copia digitale fornita dall'editore</b></div>
+          <div class="rbox-eval">
+            <div><span class="k">// Valutazione finale</span><a class="verdict-word" href="#rev" data-go="rev">Consigliato <span class="dot"></span></a></div>
+            <div class="scorebox"><div class="leds xl" role="img" aria-label="Voto 4 su 5"><i class="led on"></i><i class="led on"></i><i class="led on"></i><i class="led on last"></i><i class="led"></i></div><span class="n"><b>4</b> / 5 · Consigliato</span></div>
+          </div>
+          <div class="rbox-pc">
+            <div class="pro"><h4><span>// Pro</span><span>3</span></h4><ul><li>Combattimenti aerei veloci e leggibili anche nelle missioni più affollate</li><li>Cieli e nuvole tra i più belli della serie</li><li>Colonna sonora all'altezza della tradizione</li></ul></div>
+            <div class="con"><h4><span>// Contro</span><span>2</span></h4><ul><li>Alcune missioni di scorta ripetono la stessa struttura</li><li>Il multigiocatore al lancio offre poche modalità</li></ul></div>
+          </div>
+          <a class="readmore" href="#rev" data-go="rev"><span>Leggi la recensione completa</span><span>→</span></a>
+        </section>
+      </div>
+
+      <aside aria-labelledby="h-media">
+        <div class="featured-head"><h2 id="h-media">// Scheda media</h2></div>
+        <div class="media">
+          <h3><span>Trailer</span><span>YouTube</span></h3>
+          <button class="trailer" type="button" id="trailer" aria-label="Avvia il trailer ufficiale">
+            <span class="ph" style="--a:#7c2d12;--b:#fdba74;--c:#1e3a8a"></span>
+            <span class="play"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></span>
+            <span class="len">Trailer ufficiale</span>
+          </button>
+          <div class="trailer-note" id="trailer-note">Il video si carica solo al clic, per non rallentare la pagina</div>
+          <h3 style="border-top:1px solid var(--line-strong)"><span>Screenshot</span><span>4</span></h3>
+          <div class="shots">
+            <button class="shot" type="button" data-shot="1" aria-label="Ingrandisci lo screenshot 1"><span class="ph" style="--a:#0c4a6e;--b:#bae6fd;--c:#082f49"></span><span class="n">01</span></button>
+            <button class="shot" type="button" data-shot="2" aria-label="Ingrandisci lo screenshot 2"><span class="ph" style="--a:#78350f;--b:#fcd34d;--c:#1c1917"></span><span class="n">02</span></button>
+            <button class="shot" type="button" data-shot="3" aria-label="Ingrandisci lo screenshot 3"><span class="ph" style="--a:#1e293b;--b:#94a3b8;--c:#020617"></span><span class="n">03</span></button>
+            <button class="shot" type="button" data-shot="4" aria-label="Ingrandisci lo screenshot 4"><span class="ph" style="--a:#7f1d1d;--b:#fb923c;--c:#1c1917"></span><span class="n">04</span></button>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <section class="block" aria-labelledby="h-all" style="padding-left:0;padding-right:0">
+      <div class="sec-head"><h2 id="h-all">// Tutti gli articoli · Ace Combat 8 (14)</h2><span class="aside">Dal più recente</span></div>
+      <div class="cells c3">
+        <a class="cell hit" href="#rev" data-go="rev"><div class="ph" style="--a:#1e3a8a;--b:#fb923c;--c:#0c4a6e"><span class="badge">Recensioni</span><span class="badge r">Voto: C</span><span class="ph-l">Foto</span></div><div class="meta"><span>by <b>Flavio Lavoratori</b></span><span>17.10.2026</span><span>11 min</span></div><h3 class="t">Ace Combat 8: Wings of Theve, la recensione</h3></a>
+        <a class="cell hit" href="#articolo" data-go="art"><div class="ph" style="--a:#0c4a6e;--b:#bae6fd;--c:#082f49"><span class="badge">Anteprime</span><span class="ph-l">Foto</span></div><div class="meta"><span>by <b>Redazione</b></span><span>02.10.2026</span><span>6 min</span></div><h3 class="t">Ace Combat 8: abbiamo provato le prime missioni della campagna</h3></a>
+        <a class="cell hit" href="#articolo" data-go="art"><div class="ph" style="--a:#78350f;--b:#fcd34d;--c:#1c1917"><span class="badge">Notizie</span><span class="ph-l">Foto</span></div><div class="meta"><span>by <b>Redazione</b></span><span>24.09.2026</span><span>2 min</span></div><h3 class="t">Ace Combat 8 ha una data di uscita: nuovo trailer</h3></a>
+        <a class="cell hit" href="#articolo" data-go="art"><div class="ph" style="--a:#1e293b;--b:#94a3b8;--c:#020617"><span class="badge">Notizie</span><span class="ph-l">Foto</span></div><div class="meta"><span>by <b>Redazione</b></span><span>11.09.2026</span><span>3 min</span></div><h3 class="t">Ace Combat 8: requisiti PC minimi e consigliati</h3></a>
+        <a class="cell hit" href="#articolo" data-go="art"><div class="ph" style="--a:#7f1d1d;--b:#fb923c;--c:#1c1917"><span class="badge">Editoriali</span><span class="ph-l">Foto</span></div><div class="meta"><span>by <b>Flavio Lavoratori</b></span><span>30.08.2026</span><span>9 min</span></div><h3 class="t">Ace Combat, trent'anni di cieli: la serie dal 1995 a oggi</h3></a>
+        <a class="cell hit" href="#articolo" data-go="art"><div class="ph" style="--a:#134e4a;--b:#5eead4;--c:#042f2e"><span class="badge">Anteprime</span><span class="ph-l">Foto</span></div><div class="meta"><span>by <b>Redazione</b></span><span>14.06.2026</span><span>5 min</span></div><h3 class="t">Ace Combat 8 visto da vicino: aerei, armi e personalizzazione</h3></a>
+      </div>
+      <nav class="pager" aria-label="Paginazione di esempio"><span class="cur">1</span><a href="#hub">2</a><a href="#hub">3</a><a href="#hub">Successivo →</a></nav>
+    </section>
+  </main>
+</div>
+
+<div class="lightbox" id="lightbox" hidden role="dialog" aria-modal="true" aria-label="Screenshot ingrandito">
+  <div class="frame">
+    <div class="ph" id="lb-img"></div>
+    <div class="bar"><span id="lb-n">Screenshot 01 di 04 · Ace Combat 8</span><span style="display:flex;gap:6px"><button type="button" id="lb-prev">← Prec.</button><button type="button" id="lb-next">Succ. →</button><button type="button" id="lb-close">Chiudi ✕</button></span></div>
+  </div>
+</div>
+
+<section class="notes" aria-labelledby="h-notes">
+  <div class="wrap">
+    <h2 id="h-notes">// Cosa cambia rispetto al sito di oggi</h2>
+    <ol id="notes-home">
+      <li><b>Apertura nera fissa al posto del carosello.</b> L'articolo principale e le tre notizie in evidenza si vedono tutte subito, senza aspettare lo scorrimento.</li>
+      <li><b>Riga dell'edizione.</b> Data del giorno e contatori in Mono, come sulla Hub.</li>
+      <li><b>Ultime notizie come lista compatta</b> a due colonne, con l'ora e lo studio in rosso, al posto della striscia a scorrimento orizzontale.</li>
+      <li><b>Recensioni a celle</b> con il voto come numero grande: niente ombre, niente zoom sulle foto.</li>
+      <li><b>Fascia della Hub</b> con la cartina a punti, per portare i lettori all'indice degli studi.</li>
+      <li><b>Prossime uscite</b> lette dal catalogo IGDB, in forma di tabella.</li>
+    </ol>
+    <ol id="notes-art" hidden>
+      <li><b>Testata nera</b> con titolo molto grande, sommario e riga dei dati in Mono. Il gioco collegato appare in rosso con il pallino.</li>
+      <li><b>Foto in evidenza a tutta larghezza</b> dentro la fascia nera, senza filtri.</li>
+      <li><b>Sottotitoli numerati</b> (01, 02, 03) che corrispondono all'indice nella colonna di destra.</li>
+      <li><b>Colonna di destra fissa</b> con la scheda del gioco dai dati IGDB, l'indice e la condivisione. Da telefono finisce sotto l'articolo.</li>
+      <li><b>Box "Consigliati", citazioni e gallerie</b> con linee sottili al posto dei riquadri con ombra.</li>
+      <li><b>Scheda autore</b> con le iniziali su matrice di punti, e "Leggi anche" a celle.</li>
+    </ol>
+    <ol id="notes-rev" hidden>
+      <li><b>I cinque LED restano</b> con la stessa regola di oggi: i LED accesi sono pieni, l'ultimo acceso è rosso e luminoso, gli spenti sono grigi. Diventano quadrati veri, più grandi, e compaiono anche accanto ai dati dell'articolo e nella scheda da telefono.</li>
+      <li><b>Valutazione su fascia nera</b>, in chiaro e in scuro: il giudizio è la parola più grande del box e porta sempre al suo tag (Bocciato, Consigliato con riserva, Consigliato, Must Play).</li>
+      <li><b>Voto anche in numero</b> ("4 / 5") per chi non legge i LED, e il lettore di schermo annuncia "Voto 4 su 5".</li>
+      <li><b>Pro e contro senza il verde</b>: il "+" è nero o bianco, il "−" è rosso, così restano solo i tre colori del sistema. Accanto all'intestazione c'è il loro numero.</li>
+      <li><b>Le funzioni restano tutte</b>: striscia dell'origine, verdetto (che sulla Hub si nasconde, come oggi), scheda rapida da telefono, barra laterale con i dati IGDB, i collegamenti a studi e motore e il pulsante IGDB.</li>
+    </ol>
+    <ol id="notes-hub" hidden>
+      <li><b>Le funzioni di oggi restano tutte</b>: link a IGDB, scheda tecnica (uscita, sviluppatore, editore, genere, fino a 8 piattaforme, motore grafico), contenuto in evidenza, trailer, screenshot ingrandibili e tutti gli articoli con la paginazione.</li>
+      <li><b>Copertina in cornice al posto dello sfondo sfumato</b>: la copertina IGDB si vede intera, senza sfumature né zoom. Da telefono resta solo il testo, per andare subito ai contenuti.</li>
+      <li><b>Contatori</b> degli articoli per tipo e data dell'ultimo articolo, come sulla Hub degli sviluppatori italiani.</li>
+      <li><b>La priorità del contenuto in evidenza è visibile</b> (Manuale, Recensione, Anteprima, Editoriale, Notizia): la redazione capisce subito perché compare proprio quell'articolo. Se c'è una recensione, compare il suo box senza il verdetto.</li>
+      <li><b>Trailer e screenshot</b> con pulsante e bordi squadrati. Il video continua a caricarsi solo al clic. Prova a cliccare uno screenshot.</li>
+    </ol>
+  </div>
+</section>
+
+<footer class="site-foot"><div class="wrap"><span>Q-Gin · NTN Journal · Anteprima</span><span>Divisione WP Temi · 17.10.2026</span></div></footer>
+
+<script>
+(function () {
+  var PAGES = { home: "home", art: "articolo", rev: "recensione", hub: "hub" };
+  function show(which, scroll) {
+    Object.keys(PAGES).forEach(function (k) {
+      var on = k === which;
+      document.getElementById("page-" + k).hidden = !on;
+      document.getElementById("notes-" + k).hidden = !on;
+      document.getElementById("go-" + k).setAttribute("aria-pressed", String(on));
+    });
+    try { history.replaceState(null, "", "#" + PAGES[which]); } catch (e) {}
+    if (scroll) window.scrollTo(0, 0);
+    if (which === "home") draw();
+  }
+  Object.keys(PAGES).forEach(function (k) {
+    document.getElementById("go-" + k).addEventListener("click", function () { show(k, true); });
+  });
+  document.querySelectorAll("[data-go]").forEach(function (a) {
+    a.addEventListener("click", function (e) { e.preventDefault(); show(a.getAttribute("data-go"), true); });
+  });
+  document.querySelectorAll('a[href^="#"]:not([data-go])').forEach(function (a) {
+    var h = a.getAttribute("href");
+    if (/^#(home|articolo|rev|hub)$/.test(h)) a.addEventListener("click", function (e) { e.preventDefault(); });
+  });
+  var start = { "#articolo": "art", "#recensione": "rev", "#hub": "hub" }[location.hash];
+  if (start) show(start, false);
+
+  // Trailer: il video si carica solo al clic
+  document.getElementById("trailer").addEventListener("click", function () {
+    document.getElementById("trailer-note").textContent = "Sul sito qui parte il video YouTube. Nell'anteprima non si può incorporare.";
+  });
+
+  // Lightbox screenshot
+  var shots = Array.prototype.slice.call(document.querySelectorAll(".shot")), lb = document.getElementById("lightbox"), lbImg = document.getElementById("lb-img"), lbN = document.getElementById("lb-n"), cur = 0, opener = null;
+  function openShot(i) {
+    cur = (i + shots.length) % shots.length;
+    lbImg.setAttribute("style", shots[cur].querySelector(".ph").getAttribute("style"));
+    lbN.textContent = "Screenshot 0" + (cur + 1) + " di 0" + shots.length + " · Ace Combat 8";
+    lb.hidden = false;
+  }
+  function closeShot() { lb.hidden = true; if (opener) opener.focus(); }
+  shots.forEach(function (s, i) { s.addEventListener("click", function () { opener = s; openShot(i); document.getElementById("lb-close").focus(); }); });
+  document.getElementById("lb-prev").addEventListener("click", function () { openShot(cur - 1); });
+  document.getElementById("lb-next").addEventListener("click", function () { openShot(cur + 1); });
+  document.getElementById("lb-close").addEventListener("click", closeShot);
+  lb.addEventListener("click", function (e) { if (e.target === lb) closeShot(); });
+  document.addEventListener("keydown", function (e) {
+    if (lb.hidden) return;
+    if (e.key === "Escape") closeShot();
+    if (e.key === "ArrowLeft") openShot(cur - 1);
+    if (e.key === "ArrowRight") openShot(cur + 1);
+  });
+
+  // Tema
+  var root = document.documentElement, tL = document.getElementById("th-light"), tD = document.getElementById("th-dark");
+  function isDark() { var t = root.getAttribute("data-theme"); return t ? t === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches; }
+  function sync() { var d = isDark(); tD.setAttribute("aria-pressed", String(d)); tL.setAttribute("aria-pressed", String(!d)); }
+  function setT(t) { root.setAttribute("data-theme", t); sync(); }
+  tL.addEventListener("click", function () { setT("light"); });
+  tD.addEventListener("click", function () { setT("dark"); });
+  document.getElementById("th-toggle").addEventListener("click", function () { setT(isDark() ? "light" : "dark"); });
+  sync();
+
+  // Italia a matrice di punti
+  var ITALIA = [[7.53,43.79],[7.0,44.15],[6.85,44.5],[7.0,44.85],[6.63,45.1],[7.1,45.25],[6.95,45.65],[6.87,45.83],[7.17,45.87],[7.55,45.98],[7.87,45.92],[8.15,46.25],[8.44,46.46],[8.6,46.12],[8.85,46.0],[9.02,45.83],[9.1,46.05],[9.28,46.3],[9.45,46.5],[9.85,46.37],[10.1,46.25],[10.15,46.62],[10.47,46.86],[11.15,46.97],[11.75,46.97],[12.2,47.08],[12.45,46.7],[13.0,46.6],[13.7,46.52],[13.65,46.3],[13.48,46.2],[13.65,45.98],[13.6,45.82],[13.92,45.64],[13.77,45.6],[13.5,45.75],[13.1,45.7],[12.6,45.52],[12.33,45.4],[12.35,45.15],[12.55,44.95],[12.28,44.6],[12.4,44.2],[12.65,44.0],[13.2,43.8],[13.62,43.55],[13.85,43.1],[14.1,42.6],[14.5,42.25],[14.9,42.0],[15.3,41.92],[15.75,41.92],[16.18,41.88],[16.05,41.7],[15.9,41.55],[16.3,41.32],[16.87,41.12],[17.4,40.88],[17.95,40.65],[18.3,40.3],[18.52,40.13],[18.37,39.8],[18.05,40.0],[17.95,40.25],[17.4,40.4],[17.2,40.47],[16.85,40.4],[16.6,40.1],[16.5,39.75],[17.0,39.45],[17.15,39.05],[16.7,38.75],[16.55,38.4],[16.15,38.0],[16.06,37.92],[15.68,37.95],[15.65,38.25],[15.85,38.65],[16.2,38.85],[16.05,39.3],[15.8,39.65],[15.65,40.05],[15.3,40.0],[14.95,40.2],[15.0,40.4],[14.75,40.66],[14.4,40.6],[14.3,40.72],[14.25,40.83],[14.05,40.82],[13.75,41.25],[13.05,41.23],[12.62,41.45],[12.25,41.75],[11.8,42.1],[11.4,42.38],[11.1,42.42],[10.75,42.75],[10.5,42.95],[10.55,43.25],[10.3,43.55],[10.25,43.9],[9.85,44.07],[9.5,44.2],[8.93,44.41],[8.48,44.3],[8.15,43.95],[7.53,43.79]];
+  var SICILIA = [[12.43,37.8],[12.55,38.1],[12.95,38.05],[13.35,38.2],[13.7,37.98],[14.0,38.04],[14.6,38.05],[15.1,38.15],[15.65,38.27],[15.5,38.0],[15.25,37.8],[15.1,37.5],[15.2,37.25],[15.3,37.05],[15.1,36.68],[14.65,36.75],[14.35,36.95],[14.0,37.1],[13.6,37.25],[13.0,37.5],[12.6,37.62]];
+  var SARDEGNA = [[9.18,41.25],[9.5,41.05],[9.65,40.9],[9.82,40.5],[9.65,40.2],[9.7,39.9],[9.65,39.5],[9.58,39.15],[9.15,39.2],[8.95,38.95],[8.65,38.87],[8.38,39.2],[8.5,39.7],[8.4,40.0],[8.47,40.3],[8.32,40.56],[8.15,40.65],[8.22,40.94],[8.4,40.84],[8.7,40.92],[8.95,41.12]];
+  var AREE = [ITALIA, SICILIA, SARDEGNA];
+  var LON0 = 6.5, LON1 = 18.7, LAT0 = 36.5, LAT1 = 47.2, K = Math.cos(42 * Math.PI / 180);
+  function inside(p, x, y) { var o = false; for (var i = 0, j = p.length - 1; i < p.length; j = i++) { var xi = p[i][0], yi = p[i][1], xj = p[j][0], yj = p[j][1]; if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) o = !o; } return o; }
+  var cv = document.getElementById("italy");
+  function draw() {
+    var r = cv.getBoundingClientRect(); if (!r.width) return;
+    var dpr = window.devicePixelRatio || 1;
+    cv.width = r.width * dpr; cv.height = r.height * dpr;
+    var c = cv.getContext("2d"); c.scale(dpr, dpr);
+    var ratio = ((LON1 - LON0) * K) / (LAT1 - LAT0);
+    var h = r.height, w = h * ratio;
+    if (w > r.width) { w = r.width; h = w / ratio; }
+    var ox = (r.width - w) / 2, oy = (r.height - h) / 2;
+    var step = Math.max(4, Math.round(h / 60)), rad = step * .3;
+    c.fillStyle = "rgba(255,255,255,.6)";
+    for (var y = step / 2; y < h; y += step) for (var x = step / 2; x < w; x += step) {
+      var lon = LON0 + (x / w) * (LON1 - LON0), lat = LAT1 - (y / h) * (LAT1 - LAT0);
+      if (!AREE.some(function (p) { return inside(p, lon, lat); })) continue;
+      c.beginPath(); c.arc(ox + x, oy + y, rad, 0, Math.PI * 2); c.fill();
+    }
+  }
+  draw(); window.addEventListener("resize", draw);
+})();
+</script>

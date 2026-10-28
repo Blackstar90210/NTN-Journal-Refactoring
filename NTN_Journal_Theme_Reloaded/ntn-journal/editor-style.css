@@ -1,0 +1,292 @@
+/* ==========================================================================
+   Stile dell'editor (fase 10, v3.15.0)
+   La redazione vede in scrittura il testo dell'articolo come sul sito:
+   stesse misure di .ntn-prose (build/input.css) e delle regole .prose e
+   .wp-block-* di style.css. WordPress applica questo file solo dentro
+   l'editor e premette .editor-styles-wrapper a ogni regola.
+   L'editor resta sempre chiaro: i colori sono quelli del tema chiaro.
+   ========================================================================== */
+
+/* Testo di base */
+body {
+    font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 18px;
+    line-height: 1.7;
+    color: #3f3f46; /* zinc-700, come il testo degli articoli */
+    background-color: #ffffff;
+    -webkit-font-smoothing: antialiased;
+}
+
+p {
+    margin-top: 1.25em;
+    margin-bottom: 1.25em;
+}
+
+strong,
+b {
+    font-weight: 600;
+    color: #09090b;
+}
+
+/* Titolo dell'articolo, come nella fascia di apertura */
+.editor-post-title,
+.editor-post-title__input,
+.wp-block-post-title,
+h1 {
+    font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    font-size: clamp(32px, 4vw, 56px);
+    font-weight: 900;
+    line-height: 0.95;
+    letter-spacing: -0.045em;
+    text-transform: uppercase;
+    text-wrap: balance;
+    overflow-wrap: anywhere;
+    color: #09090b;
+    margin-top: 0.5em;
+    margin-bottom: 0.75em;
+}
+
+/* Capolettera sul primo paragrafo */
+.is-root-container > p:first-of-type::first-letter {
+    float: left;
+    margin: 0.06em 0.1em 0 0;
+    font-size: 3.4em;
+    font-weight: 900;
+    line-height: 0.82;
+    color: #09090b;
+}
+
+/* Titoli di sezione: maiuscolo, riga sopra e numero "01, 02…" in Mono */
+.is-root-container {
+    counter-reset: ntn-h2;
+}
+
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    color: #09090b;
+    margin-bottom: 1rem;
+}
+
+h2 {
+    counter-increment: ntn-h2;
+    margin-top: 2em;
+    padding-top: 14px;
+    border-top: 1px solid #a1a1aa; /* zinc-400 */
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    text-wrap: balance;
+}
+
+h2::before {
+    content: counter(ntn-h2, decimal-leading-zero);
+    display: block;
+    margin-bottom: 6px;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    color: #71717a; /* zinc-500 */
+}
+
+h3 {
+    margin-top: 2rem;
+    font-size: 1.25rem;
+    font-weight: 800;
+    line-height: 1.4;
+    text-transform: uppercase;
+}
+
+h4 {
+    margin-top: 2rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #e4e4e7; /* zinc-200 */
+    font-size: 1.125rem;
+    font-weight: 700;
+    line-height: 1.45;
+}
+
+h5,
+h6 {
+    margin-top: 1.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #e4e4e7;
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.5;
+}
+
+/* Link nel testo: rossi e sottolineati */
+a {
+    color: #dc2626; /* red-600 */
+    font-weight: 500;
+    text-decoration: underline;
+    text-decoration-color: rgba(220, 38, 38, 0.4);
+    text-underline-offset: 3px;
+    transition: color 0.2s ease-in-out, text-decoration-color 0.2s ease-in-out;
+}
+
+a:hover {
+    color: #b91c1c; /* red-700 */
+    text-decoration-color: #b91c1c;
+}
+
+/* Citazioni: Mono, bordo rosso a sinistra, fondo grigio chiarissimo */
+blockquote,
+.wp-block-quote {
+    margin: 2rem 0;
+    padding: 1rem 1.5rem;
+    border-left: 4px solid #dc2626;
+    background-color: #fafafa;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 0.95em;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 1.7;
+    color: #3f3f46;
+}
+
+blockquote p,
+.wp-block-quote p {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+}
+
+blockquote cite,
+.wp-block-quote cite,
+.wp-block-quote .wp-block-quote__citation {
+    display: block;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 0.75rem;
+    font-style: normal;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #71717a;
+}
+
+/* Elenchi */
+ul,
+ol {
+    margin-top: 1.25em;
+    margin-bottom: 1.5rem;
+    padding-left: 2rem;
+    list-style-position: outside;
+}
+
+ul {
+    list-style-type: disc;
+}
+
+ol {
+    list-style-type: decimal;
+}
+
+li {
+    margin-bottom: 0.75rem;
+    padding-left: 0.375em;
+}
+
+li::marker {
+    color: #71717a;
+}
+
+/* Immagini e didascalie */
+figure.wp-block-image,
+.wp-block-image,
+.wp-block-gallery {
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.wp-block-image img {
+    display: block;
+    border: 1px solid #e4e4e7;
+    border-radius: 0;
+}
+
+figcaption,
+.wp-element-caption,
+.blocks-gallery-caption {
+    margin-top: 0.75rem;
+    margin-bottom: 0;
+    padding: 0 0.5rem;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    text-align: center;
+    text-transform: none;
+    color: #71717a;
+}
+
+/* Codice */
+code {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 0.875em;
+    font-weight: 600;
+    color: #09090b;
+    background: transparent;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+}
+
+pre,
+.wp-block-code {
+    margin: 1.5rem 0;
+    padding: 1rem 1.25rem;
+    border: 1px solid #27272a;
+    border-radius: 0;
+    background-color: #09090b;
+    color: #e4e4e7;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 0.875em;
+    line-height: 1.7;
+    overflow-x: auto;
+}
+
+pre code,
+.wp-block-code code {
+    font-weight: 400;
+    color: inherit;
+}
+
+/* Tabelle */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.75rem 0;
+    font-size: 0.875em;
+}
+
+th,
+td {
+    padding: 0.6rem 0.75rem;
+    border: 1px solid #e4e4e7;
+    text-align: left;
+    vertical-align: top;
+}
+
+th {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #09090b;
+    background-color: #fafafa;
+}
+
+/* Separatore: una linea da 1 pixel */
+hr,
+.wp-block-separator {
+    margin: 3em auto;
+    border: 0;
+    border-top: 1px solid #e4e4e7;
+    opacity: 1;
+}

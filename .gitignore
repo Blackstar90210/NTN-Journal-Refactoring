@@ -1,0 +1,15 @@
+# Dipendenze e output di build
+node_modules/
+
+# Pacchetti ZIP e archivi delle release (le release si pubblicano su GitHub)
+*.zip
+archive/
+
+# Cartella di lavoro con materiale da valutare, non fa parte del codice
+_da_valutare/
+
+# Segreti e file locali
+.env
+.env.*
+*.pem
+*.key

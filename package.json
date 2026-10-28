@@ -1,0 +1,14 @@
+{
+  "name": "ntn-journal-build",
+  "private": true,
+  "description": "Strumenti di compilazione CSS (fuori dalle cartelle dei temi, per non finire negli ZIP)",
+  "scripts": {
+    "build": "tailwindcss -i \"./NTN_Journal_Theme_Reloaded/ntn-journal/build/input.css\" -o \"./NTN_Journal_Theme_Reloaded/ntn-journal/style-tailwind-output.css\" --minify",
+    "build:prova": "tailwindcss -i \"./NTN_Journal_Theme_Reloaded/ntn-journal/build/input.css\" -o \"./_da_valutare/prova-tailwind-output.css\" --minify"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "4.3.2",
+    "@tailwindcss/typography": "0.5.20",
+    "tailwindcss": "4.3.2"
+  }
+}

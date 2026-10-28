@@ -1,0 +1,36 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/theme.json",
+	"version": 2,
+	"settings": {
+		"appearanceTools": true,
+		"layout": {
+			"contentSize": "896px",
+			"wideSize": "1248px"
+		},
+		"color": {
+			"palette": [
+				{ "slug": "black", "color": "#000000", "name": "Black" },
+				{ "slug": "white", "color": "#ffffff", "name": "White" },
+				{ "slug": "red-600", "color": "#dc2626", "name": "Red Accent" },
+				{ "slug": "zinc-50", "color": "#fafafa", "name": "Zinc 50" },
+				{ "slug": "zinc-500", "color": "#71717a", "name": "Zinc 500" },
+				{ "slug": "zinc-900", "color": "#18181b", "name": "Zinc 900" },
+				{ "slug": "zinc-950", "color": "#09090b", "name": "Zinc 950" }
+			]
+		},
+		"typography": {
+			"fontFamilies": [
+				{
+					"fontFamily": "\"Inter\", sans-serif",
+					"slug": "inter",
+					"name": "Inter"
+				},
+				{
+					"fontFamily": "\"JetBrains Mono\", monospace",
+					"slug": "jetbrains-mono",
+					"name": "JetBrains Mono"
+				}
+			]
+		}
+	}
+}

@@ -1,0 +1,664 @@
+/*
+Theme Name: NTN Journal
+Theme URI: https://github.com/Blackstar90210/ntn-journal
+Author: Luca Maiolini & Divisione_WP
+Author URI: https://github.com/Blackstar90210
+Description: Tema Parent minimalista per il Network, con estetica brutalista e integrazione Tailwind CSS.
+Version: 4.0.0
+Requires at least: 6.0
+Requires PHP: 7.4
+License: GNU General Public License v2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: ntn-journal
+Tags: black, white, dark, light, two-columns, custom-colors, custom-menu, featured-images, post-formats, theme-options, translation-ready, accessibility-ready, blog
+*/
+
+/* ============================================================
+ * CSS generato in locale con Tailwind CSS CLI v4.
+ * Include Inter (Body e Titoli) e JetBrains Mono (Monospace tech).
+ * ============================================================ */
+
+
+
+/* Regole Custom NTN Journal */
+
+
+
+/* Gutenberg Blocks Overrides */
+.wp-block-quote {
+  border-left: 4px solid #dc2626 !important;
+  /* red-600 */
+  padding: 1rem 1.5rem !important;
+  background: #fafafa;
+  margin-top: 2rem !important;
+  margin-bottom: 2rem !important;
+  font-family: "JetBrains Mono", monospace !important;
+  font-style: normal !important;
+  font-size: 0.95rem !important;
+  color: #3f3f46 !important;
+  /* zinc-700 */
+}
+
+.dark .wp-block-quote {
+  background: rgba(39, 39, 42, 0.3) !important;
+  color: #a1a1aa !important;
+  /* zinc-400 */
+}
+
+.wp-block-quote p {
+  margin-bottom: 0.5rem !important;
+}
+
+.wp-block-quote cite {
+  font-size: 0.75rem !important;
+  text-transform: uppercase;
+  color: #71717a !important;
+  /* zinc-500 */
+  font-style: normal !important;
+  letter-spacing: 0.05em;
+}
+
+/* WP Core Images & Figures Unified Spacing (Nothing OS) */
+figure.wp-block-image,
+.wp-block-image,
+figure.wp-block-gallery,
+.wp-block-gallery {
+  margin-top: 1.5rem !important;
+  margin-bottom: 1.5rem !important;
+}
+
+.wp-block-image img,
+figure.wp-block-image img {
+  display: block !important;
+  width: 100% !important;
+  height: auto !important;
+  margin: 0 !important;
+  border: 1px solid #e4e4e7; /* zinc-200 */
+}
+
+.dark .wp-block-image img,
+.dark figure.wp-block-image img {
+  border: 1px solid #27272a; /* zinc-800 */
+}
+
+.wp-block-image > a,
+figure.wp-block-image > a {
+  display: block !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.wp-block-image figcaption,
+.wp-block-image .wp-element-caption,
+figure.wp-block-image figcaption {
+  display: block !important;
+  position: relative !important;
+  width: 100% !important;
+  font-family: "JetBrains Mono", monospace !important;
+  font-size: 0.75rem !important;
+  line-height: 1.5 !important;
+  text-align: center !important;
+  text-transform: none;
+  color: #71717a !important; /* zinc-500 */
+  margin-top: 0.75rem !important;
+  margin-bottom: 0 !important;
+  padding: 0 0.5rem !important;
+  box-sizing: border-box !important;
+}
+
+.dark .wp-block-image figcaption,
+.dark .wp-block-image .wp-element-caption,
+.dark figure.wp-block-image figcaption {
+  color: #a1a1aa !important; /* zinc-400 */
+}
+
+/* --- CUSTOM MOBILE OVERRIDES --- */
+@media (max-width: 767px) {
+
+  /* Mobile Typography Overrides (v3.15.1: testo a 20px, scelta del CEO; titoli in proporzione) */
+  .dynamic-content-body,
+  #primary:not(.ntn-main) article>header>h2,
+  #review-summary-card p {
+    font-size: 20px !important;
+    line-height: 1.6 !important;
+  }
+
+  .dynamic-content-body h2 {
+    font-size: 24px !important;
+    line-height: 1.25 !important;
+  }
+
+  .dynamic-content-body h3 {
+    font-size: 22px !important;
+    line-height: 1.35 !important;
+  }
+
+  .dynamic-content-body h4 {
+    font-size: 21px !important;
+  }
+
+  /* Fix header vertical spacing */
+  .main-bar-wrapper {
+    padding-top: 1.25rem !important;
+    /* 20px */
+    padding-bottom: 0.75rem !important;
+    /* 12px */
+  }
+
+  .sub-header-wrapper {
+    padding-top: 0.75rem !important;
+    /* 12px */
+    padding-bottom: 0.75rem !important;
+    /* 12px */
+  }
+
+  /* Fix main content spacing and horizontal symmetry
+     (v3.6.0: non si applica alle pagine rifatte, segnate con .ntn-main, che gestiscono da sole i margini) */
+  #primary:not(.ntn-main) {
+    padding: 1.5rem 0.5rem 1.5rem 0.5rem !important;
+    /* Top 24px, L/R 8px, Bottom 24px */
+    overflow-x: hidden !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  #primary:not(.ntn-main) article {
+    padding: 1.25rem 1rem !important;
+    /* Top/Bottom 20px, L/R 16px */
+    overflow-x: hidden !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  nav[aria-label="Breadcrumb"] {
+    margin-bottom: 1.5rem !important;
+    /* 24px */
+  }
+}
+
+@media (min-width: 768px) {
+
+  /* Fix PC vertical spacing symmetry */
+  nav[aria-label="Breadcrumb"] {
+    margin-bottom: 2.5rem !important;
+    /* 40px to match #primary py-10 */
+  }
+}
+
+.screen-reader-text {
+  border: 0;
+  clip: rect(1px, 1px, 1px, 1px);
+  clip-path: inset(50%);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+  word-wrap: normal !important;
+}
+
+.screen-reader-text:focus {
+  background-color: #eee;
+  clip: auto !important;
+  clip-path: none;
+  color: #444;
+  display: block;
+  font-size: 1em;
+  height: auto;
+  left: 5px;
+  padding: 15px 23px 14px;
+  text-decoration: none;
+  top: 5px;
+  width: auto;
+  z-index: 100000;
+}
+
+/* Inserisci qui il resto del codice minificato generato da npx @tailwindcss/cli */
+/* Esempio: .group{display:block} .bg-white{background-color:#fff} ... */
+
+/* ==========================================================================
+   NTN Horizontal Scrollbar (Nothing OS Style)
+   ========================================================================== */
+
+.ntn-horizontal-scrollbar {
+  /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: #dc2626 #f4f4f5;
+}
+
+.dark .ntn-horizontal-scrollbar {
+  /* Firefox Dark Mode */
+  scrollbar-color: #dc2626 #09090b;
+}
+
+.ntn-horizontal-scrollbar::-webkit-scrollbar {
+  height: 6px;
+}
+
+.ntn-horizontal-scrollbar::-webkit-scrollbar-track {
+  background-color: #e4e4e7;
+  /* zinc-200 */
+  border-radius: 0px;
+}
+
+.dark .ntn-horizontal-scrollbar::-webkit-scrollbar-track {
+  background-color: #18181b;
+  /* zinc-900 */
+}
+
+.ntn-horizontal-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #dc2626;
+  /* red-600 */
+  border-radius: 0px;
+}
+
+.ntn-horizontal-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #b91c1c;
+  /* red-700 */
+}
+
+/* ==========================================================================
+   NTN Bug Fixes (Elenchi puntati e X embeds) - Aggiornato
+   ========================================================================== */
+
+/* Fix elenchi puntati mancanti nei post (override Tailwind) */
+.prose ul,
+.entry-content ul {
+  list-style-type: disc !important;
+  list-style-position: outside !important;
+  padding-left: 2rem !important;
+  margin-bottom: 1.5rem !important;
+}
+
+.prose ol,
+.entry-content ol {
+  list-style-type: decimal !important;
+  list-style-position: outside !important;
+  padding-left: 2rem !important;
+  margin-bottom: 1.5rem !important;
+}
+
+.prose li,
+.entry-content li {
+  margin-bottom: 0.75rem !important;
+  display: list-item !important;
+}
+
+/* Fix TOC vertical symmetry */
+.ntn-toc ul {
+  margin-bottom: 0 !important;
+}
+
+.ntn-toc li {
+  margin-bottom: 0 !important;
+}
+
+/* Fix post di X (Twitter) tagliati su mobile/desktop */
+.wp-block-embed-twitter,
+.twitter-tweet,
+.wp-block-embed-twitter iframe {
+  max-width: 100% !important;
+  width: 100% !important;
+  overflow: visible !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+/* Breaking News Marquee */
+.ntn-marquee-container {
+  overflow: hidden;
+  white-space: nowrap;
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.ntn-marquee-content {
+  display: inline-block;
+  padding-left: 100%;
+  animation: ntn-marquee 25s linear infinite;
+}
+
+@keyframes ntn-marquee {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  100% {
+    transform: translate3d(-100%, 0, 0);
+  }
+}
+
+.ntn-marquee-container:hover .ntn-marquee-content {
+  animation-play-state: paused;
+}
+
+/* ==========================================================================
+   Gallerie Mosaico & Lightbox (Sub-Piano 3)
+   ========================================================================== */
+.glightbox {
+  cursor: zoom-in;
+}
+
+/* Didascalie delle singole immagini all'interno delle gallerie (Nothing OS brutalist style) */
+.wp-block-gallery figure.wp-block-image figcaption,
+.wp-block-gallery.has-nested-images figure.wp-block-image figcaption {
+  display: block !important;
+  position: relative !important;
+  bottom: auto !important;
+  left: auto !important;
+  width: 100% !important;
+  max-height: none !important;
+  overflow: visible !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  font-family: "JetBrains Mono", monospace !important;
+  font-size: 0.75rem !important;
+  line-height: 1.5 !important;
+  text-align: center !important;
+  text-transform: none;
+  color: #71717a !important; /* zinc-500 */
+  margin-top: 0.75rem !important;
+  margin-bottom: 0 !important;
+  padding: 0 0.5rem !important;
+  box-sizing: border-box !important;
+}
+
+.dark .wp-block-gallery figure.wp-block-image figcaption,
+.dark .wp-block-gallery.has-nested-images figure.wp-block-image figcaption {
+  color: #a1a1aa !important; /* zinc-400 */
+}
+
+/* Didascalia principale globale della galleria (Nothing OS brutalist style) */
+.wp-block-gallery > figcaption.blocks-gallery-caption,
+.wp-block-gallery > figcaption,
+.wp-block-gallery.has-nested-images > figcaption.blocks-gallery-caption,
+.wp-block-gallery.has-nested-images > figcaption {
+  display: block !important;
+  width: 100% !important;
+  flex-basis: 100% !important;
+  font-family: "JetBrains Mono", monospace !important;
+  font-size: 0.75rem !important;
+  line-height: 1.5 !important;
+  text-align: center !important;
+  text-transform: none;
+  color: #71717a !important; /* zinc-500 */
+  margin-top: 0.75rem !important;
+  padding: 0 0.5rem !important;
+  box-sizing: border-box !important;
+}
+
+.dark .wp-block-gallery > figcaption.blocks-gallery-caption,
+.dark .wp-block-gallery > figcaption,
+.dark .wp-block-gallery.has-nested-images > figcaption.blocks-gallery-caption,
+.dark .wp-block-gallery.has-nested-images > figcaption {
+  color: #a1a1aa !important; /* zinc-400 */
+}
+
+/* ==========================================================================
+   NTN Single Post Prose Styling (Spostato da single.php per Performance)
+   ========================================================================== */
+
+/* Custom Nothing-style prose headings */
+.prose h2,
+.prose h3,
+.prose h4,
+.prose h5,
+.prose h6 {
+  position: relative;
+  font-family: inherit;
+  font-weight: 700;
+  color: #09090b !important;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e4e4e7;
+  display: block;
+}
+
+.prose h2 {
+  font-size: 1.5rem;
+  line-height: 2rem;
+}
+
+.prose h3 {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+}
+
+.prose h4 {
+  font-size: 1.125rem;
+  line-height: 1.625rem;
+}
+
+.prose h5,
+.prose h6 {
+  font-size: 1rem;
+  line-height: 1.5rem;
+}
+
+.dark .prose h2,
+.dark .prose h3,
+.dark .prose h4,
+.dark .prose h5,
+.dark .prose h6 {
+  color: #f4f4f5 !important;
+  border-bottom-color: #27272a;
+}
+
+/* ==========================================================================
+   NTN Article Prose Links (Nothing OS Style)
+   ========================================================================== */
+.prose p a,
+.prose li a {
+  color: #dc2626;
+  font-family: inherit;
+  font-weight: 500;
+  text-transform: none;
+  font-size: inherit;
+  letter-spacing: normal;
+  text-decoration: underline;
+  text-decoration-color: rgba(220, 38, 38, 0.4);
+  text-underline-offset: 3px;
+  transition: color 0.2s ease-in-out, text-decoration-color 0.2s ease-in-out;
+}
+
+.prose p a:hover,
+.prose li a:hover {
+  color: #b91c1c;
+  text-decoration-color: #b91c1c;
+}
+
+.dark .prose p a:hover,
+.dark .prose li a:hover {
+  color: #ef4444;
+  text-decoration-color: #ef4444;
+}
+
+
+
+
+
+
+/* ==========================================================================
+   NTN Brutalist Pagination (Nothing OS Style)
+   ========================================================================== */
+.navigation.pagination {
+  width: 100%;
+}
+
+.navigation.pagination .nav-links,
+.navigation .nav-links,
+.ntn-pagination .nav-links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
+.navigation.pagination .page-numbers,
+.navigation .page-numbers,
+.ntn-pagination .page-numbers {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.25rem;
+  height: 2.25rem;
+  padding: 0 0.5rem;
+  border: 1px solid #d4d4d8;
+  background-color: #fafafa;
+  color: #52525b;
+  text-decoration: none;
+  font-weight: 700;
+  transition: all 0.2s ease-in-out;
+}
+
+.navigation.pagination .page-numbers:hover,
+.navigation .page-numbers:hover,
+.ntn-pagination .page-numbers:hover {
+  border-color: #18181b;
+  color: #18181b;
+  background-color: #f4f4f5;
+}
+
+.navigation.pagination .page-numbers.current,
+.navigation .page-numbers.current,
+.ntn-pagination .page-numbers.current {
+  background-color: #09090b !important;
+  color: #ffffff !important;
+  border-color: #09090b !important;
+}
+
+.navigation.pagination .page-numbers.prev,
+.navigation.pagination .page-numbers.next,
+.navigation .page-numbers.prev,
+.navigation .page-numbers.next,
+.ntn-pagination .page-numbers.prev,
+.ntn-pagination .page-numbers.next {
+  min-width: auto;
+  padding: 0 0.75rem;
+}
+
+.navigation.pagination .page-numbers.dots,
+.navigation .page-numbers.dots,
+.ntn-pagination .page-numbers.dots {
+  border: none;
+  background: transparent;
+  min-width: auto;
+  color: #a1a1aa;
+}
+
+.dark .navigation.pagination .page-numbers,
+.dark .navigation .page-numbers,
+.dark .ntn-pagination .page-numbers {
+  border-color: #27272a;
+  background-color: #09090b;
+  color: #a1a1aa;
+}
+
+.dark .navigation.pagination .page-numbers:hover,
+.dark .navigation .page-numbers:hover,
+.dark .ntn-pagination .page-numbers:hover {
+  border-color: #52525b;
+  color: #f4f4f5;
+  background-color: #18181b;
+}
+
+.dark .navigation.pagination .page-numbers.current,
+.dark .navigation .page-numbers.current,
+.dark .ntn-pagination .page-numbers.current {
+  background-color: #f4f4f5 !important;
+  color: #09090b !important;
+  border-color: #f4f4f5 !important;
+}
+
+.dark .navigation.pagination .page-numbers.dots,
+.dark .navigation .page-numbers.dots,
+.dark .ntn-pagination .page-numbers.dots {
+  border: none;
+  background: transparent;
+  color: #52525b;
+}
+
+/* Responsive and full-width styling for video content iframes (YouTube, Vimeo, Twitch) */
+.wp-block-embed-youtube iframe,
+.wp-block-embed-vimeo iframe,
+.prose iframe[src*="youtube.com"],
+.prose iframe[src*="youtu.be"],
+.prose iframe[src*="vimeo.com"],
+.prose iframe[src*="twitch.tv"] {
+  width: 100% !important;
+  max-width: 100% !important;
+  aspect-ratio: 16 / 9 !important;
+  height: auto !important;
+  border: none !important;
+  border-radius: 0 !important;
+  margin-top: 1.5rem !important;
+  margin-bottom: 1.5rem !important;
+}
+
+/* Generic styling for ALL other iframes/embeds to adapt dynamically to their injected scripts (X, Instagram, TikTok) */
+.prose iframe:not([src*="youtube.com"]):not([src*="youtu.be"]):not([src*="vimeo.com"]):not([src*="twitch.tv"]):not([src*="store.steampowered.com"]),
+.prose embed,
+.prose object,
+.prose video,
+.wp-block-embed iframe:not([src*="youtube.com"]):not([src*="youtu.be"]):not([src*="vimeo.com"]):not([src*="twitch.tv"]):not([src*="store.steampowered.com"]) {
+  max-width: 100% !important;
+  border: none !important;
+  border-radius: 0 !important;
+  margin-top: 1.5rem !important;
+  margin-bottom: 1.5rem !important;
+}
+
+/* Styling specifically for Steam widgets to make them full width without breaking height */
+.prose iframe[src*="store.steampowered.com"] {
+  width: 100% !important;
+  max-width: 100% !important;
+  border: none !important;
+  margin-top: 1.5rem !important;
+  margin-bottom: 1.5rem !important;
+}
+
+.wp-block-embed,
+.wp-block-embed-youtube,
+.embed-youtube,
+.wp-block-embed__wrapper {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* Fix lists missing bullets/numbers in prose */
+.prose ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+}
+
+.prose ol {
+  list-style-type: decimal;
+  padding-left: 1.5rem;
+}
+
+.prose li {
+  margin-bottom: 0.5rem;
+}
+
+/* Ensures that any iframe dropped into the custom widget area automatically fills the Nothing OS container */
+.ntn-video-widget iframe,
+.ntn-video-widget embed,
+.ntn-video-widget object {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
