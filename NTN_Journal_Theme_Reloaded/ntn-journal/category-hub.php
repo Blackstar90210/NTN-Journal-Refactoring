@@ -68,7 +68,7 @@ $hub_row_tag = static function ( $post_id ) use ( $hub_is_console, $hub_platform
 					<span class="ntn-chip">Hub di sezione</span>
 					<?php if ( $hub_is_console ) : ?>
 						<span class="ntn-chip ntn-chip--red"><?php echo esc_html( $hub_chip ); ?></span>
-					<?php else : ?>
+					<?php elseif ( 'studi' === $hub['type'] ) : ?>
 						<span class="ntn-chip ntn-chip--red">Made in Italy</span>
 					<?php endif; ?>
 				</div>

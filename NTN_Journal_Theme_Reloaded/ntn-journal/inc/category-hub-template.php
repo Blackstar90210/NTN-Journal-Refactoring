@@ -26,7 +26,9 @@ function ntn_journal_is_category_hub() {
  */
 function ntn_journal_category_hub_template( $template ) {
 	if ( ntn_journal_is_category_hub() ) {
-		$hub_template = locate_template( 'category-hub.php' );
+		// v4.2.0: il tipo Statistiche userà il suo modello appena esiste; fino ad allora, quello comune
+		$hub_context  = ntn_core_category_hub_context();
+		$hub_template = locate_template( 'statistiche' === $hub_context['type'] ? array( 'category-hub-statistiche.php', 'category-hub.php' ) : array( 'category-hub.php' ) );
 		if ( $hub_template ) {
 			return $hub_template;
 		}

@@ -8,6 +8,7 @@
  *   con il marchio già scelto, ognuno sul suo indirizzo di sempre.
  * - 'studi':   la categoria (es. Sviluppatori italiani) mostra l'indice degli studi, ricavato dallo
  *   sviluppatore dei giochi collegati a IGDB.
+ * - 'statistiche' (v4.2.0): la categoria mostra i numeri della sezione. Le sottocategorie restano archivi normali.
  *
  * Qui stanno impostazioni, dati, cache e dati strutturati. Il tema legge solo tramite
  * ntn_core_category_hub_context() e ntn_core_get_category_hub_data(), sempre dietro function_exists().
@@ -34,6 +35,7 @@ function ntn_core_category_hub_choices(): array {
 		'type'         => array(
 			'console' => 'Piattaforme: console, mobile, PC (marchi e dispositivi)',
 			'studi'   => 'Studi (indice degli sviluppatori)',
+			'statistiche' => 'Statistiche (i numeri della sezione)',
 		),
 		'illustration' => array(
 			'auto'     => 'Automatica',
@@ -508,6 +510,18 @@ function ntn_core_get_category_hub_data( $term = null ): ?array {
 			array( 'Articoli', (string) $posts_total ),
 			array( 'Aggiornato', $latest_date ),
 		) ) );
+	} elseif ( 'statistiche' === $ctx['type'] ) {
+		// v4.2.0: disegno e contatori essenziali, con i giochi contati su tutti gli articoli. Il modello dedicato arriverà dopo.
+		$illu = ntn_core_category_hub_illustration( $root, 'statistiche' );
+		if ( 'none' !== $illu ) {
+			$data['illustration'][] = $illu;
+		}
+		$hub_stats     = ntn_core_category_hub_stats_query( $tree, (int) wp_date( 'Y' ) );
+		$data['stats'] = array(
+			array( 'Giochi', (string) $hub_stats['games'] ),
+			array( 'Articoli', (string) $posts_total ),
+			array( 'Aggiornato', $latest_date ),
+		);
 	} else {
 		// Studi: sviluppatore dei giochi del catalogo, nomi uniti senza spazi e maiuscole
 		$excluded = array_filter( array_map( static function ( $n ) {
@@ -747,6 +761,9 @@ function ntn_core_category_hub_seo_description( WP_Term $term ): string {
 		}
 		return $text . ', con tutti gli articoli' . ( '' !== $site ? ' di ' . $site : '' ) . '.';
 	}
+	if ( 'statistiche' === $data['type'] ) {
+		return 'I numeri di ' . $title . ': articoli, autori e giochi' . ( '' !== $site ? ' di ' . $site : '' ) . '.';
+	}
 	$names = wp_list_pluck( $data['studios'], 'name' );
 	$text  = 'Gli studi di ' . $title . ' e i loro giochi';
 	if ( $names ) {
@@ -881,13 +898,24 @@ add_filter( 'the_seo_framework_sitemap_additional_urls', 'ntn_core_category_hub_
  *
  * - Console: piattaforme senza articoli (un marchio senza sottocategorie conta come piattaforma).
  * - Studi: giochi del catalogo senza sviluppatore su IGDB (non entrano nell'indice degli studi).
+ * - Statistiche: categoria senza articoli (i numeri resterebbero a zero).
  *
  * @param WP_Term $term Categoria con la Hub accesa.
  * @return array<int,array{title:string,text:string,url:string,action:string}>
  */
 function ntn_core_category_hub_coverage( WP_Term $term ): array {
 	$issues = array();
-	if ( 'console' === ntn_core_category_hub_meta( (int) $term->term_id, 'type' ) ) {
+	$type   = ntn_core_category_hub_meta( (int) $term->term_id, 'type' );
+	if ( 'statistiche' === $type ) {
+		if ( 0 === ntn_core_category_hub_count( ntn_core_category_hub_tree( (int) $term->term_id ) ) ) {
+			$issues[] = array(
+				'title'  => ntn_core_category_hub_label( $term ),
+				'text'   => 'Categoria senza articoli: le statistiche resterebbero a zero.',
+				'url'    => (string) get_edit_term_link( $term->term_id, 'category' ),
+				'action' => 'Apri la categoria',
+			);
+		}
+	} elseif ( 'console' === $type ) {
 		foreach ( ntn_core_category_hub_children( (int) $term->term_id ) as $brand ) {
 			// v3.22.0: come nella pagina della Hub, un marchio senza sottocategorie è lui stesso la piattaforma
 			$platforms = ntn_core_category_hub_children( (int) $brand->term_id );

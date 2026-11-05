@@ -40,7 +40,7 @@ $ntn_enabled = wp_list_pluck( $ntn_hubs, 'term_id' );
 						?>
 						<tr<?php echo $ntn_open ? ' class="is-open"' : ''; ?>>
 							<td class="is-t"><a href="<?php echo esc_url( (string) get_term_link( $ntn_hub ) ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html( ntn_core_category_hub_label( $ntn_hub ) ); ?></a></td>
-							<td><?php echo esc_html( 'studi' === $ntn_type ? 'Studi' : 'Console' ); ?></td>
+							<td><?php echo esc_html( 'studi' === $ntn_type ? 'Studi' : ( 'statistiche' === $ntn_type ? 'Statistiche' : 'Console' ) ); ?></td>
 							<td><?php echo esc_html( $ntn_choices['illustration'][ ntn_core_category_hub_meta( $ntn_id, 'illustration' ) ] ); ?></td>
 							<td><?php echo esc_html( $ntn_featured ? get_the_title( $ntn_featured ) . ' (fisso)' : 'Automatico (ultima recensione)' ); ?></td>
 							<td class="is-n"><?php echo esc_html( number_format_i18n( ntn_core_category_hub_count( ntn_core_category_hub_tree( $ntn_id ) ) ) ); ?></td>
@@ -92,7 +92,7 @@ $ntn_enabled = wp_list_pluck( $ntn_hubs, 'term_id' );
 											<input type="text" id="ntn_hub_excluded" name="ntn_hub_excluded" value="<?php echo esc_attr( ntn_core_category_hub_meta( $ntn_id, 'excluded' ) ); ?>">
 											<span class="nadm-help">Nomi separati da virgola, per esempio studi stranieri indicati da IGDB come co-sviluppatori.</span>
 										</div>
-									<?php else : ?>
+									<?php elseif ( 'console' === $ntn_type ) : ?>
 										<div class="nadm-field is-wide"><span class="nadm-fl">Marchi (sottocategorie) e nome mostrato</span>
 											<div class="nadm-form">
 												<?php foreach ( ntn_core_category_hub_children( $ntn_id ) as $ntn_brand ) : ?>
@@ -151,6 +151,7 @@ $ntn_enabled = wp_list_pluck( $ntn_hubs, 'term_id' );
 				<div class="nadm-field is-wide"><span class="nadm-fl">I tipi possibili</span>
 					<span class="nadm-help"><b>Console</b>: un selettore con i marchi (le sottocategorie) e una scheda per ogni piattaforma, come la Hub Console.</span>
 					<span class="nadm-help"><b>Studi</b>: l'indice A–Z degli sviluppatori, ricavato dai giochi del catalogo IGDB, come la Hub Sviluppatori italiani.</span>
+						<span class="nadm-help"><b>Statistiche</b>: i numeri della sezione, sottocategorie comprese. Per ora la pagina usa ancora l'impaginazione delle altre Hub.</span>
 				</div>
 			</div>
 			<div class="nadm-actions"><button type="submit" class="nadm-btn is-solid">Accendi la Hub</button><span class="nadm-help">Poi la trovi qui sopra, tra le Hub accese, per completarla.</span></div>

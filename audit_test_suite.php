@@ -1618,24 +1618,24 @@ echo "\n--- 24. SEMVER SIMULTANEOUS 4-HEADER SYNCHRONIZATION ---\n";
 $parent_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $parent_css, $m_parent );
 $parent_ver = isset( $m_parent[1] ) ? trim( $m_parent[1] ) : '';
-assert_test( $parent_ver === '4.1.0', "24.1: Parent Theme style.css declares Version: 4.1.0 (found: {$parent_ver})" );
+assert_test( $parent_ver === '4.2.0', "24.1: Parent Theme style.css declares Version: 4.2.0 (found: {$parent_ver})" );
 
 $child_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $child_css, $m_child );
 $child_ver = isset( $m_child[1] ) ? trim( $m_child[1] ) : '';
-assert_test( $child_ver === '4.1.0', "24.2: Child Theme style.css declares Version: 4.1.0 (found: {$child_ver})" );
+assert_test( $child_ver === '4.2.0', "24.2: Child Theme style.css declares Version: 4.2.0 (found: {$child_ver})" );
 
 $core_php = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' );
 preg_match( '/\*\s*Version:\s*([0-9\.]+)/', $core_php, $m_core_hdr );
 $core_hdr_ver = isset( $m_core_hdr[1] ) ? trim( $m_core_hdr[1] ) : '';
-assert_test( $core_hdr_ver === '4.1.0', "24.3: Core Plugin header declares Version: 4.1.0 (found: {$core_hdr_ver})" );
+assert_test( $core_hdr_ver === '4.2.0', "24.3: Core Plugin header declares Version: 4.2.0 (found: {$core_hdr_ver})" );
 
 preg_match( "/define\(\s*'NTN_JOURNAL_CORE_VERSION',\s*'([^']+)'\s*\);/", $core_php, $m_core_const );
 $core_const_ver = isset( $m_core_const[1] ) ? trim( $m_core_const[1] ) : '';
-assert_test( $core_const_ver === '4.1.0', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.1.0 (found: {$core_const_ver})" );
+assert_test( $core_const_ver === '4.2.0', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.2.0 (found: {$core_const_ver})" );
 
 assert_test(
-	$parent_ver === '4.1.0' && $child_ver === '4.1.0' && $core_hdr_ver === '4.1.0' && $core_const_ver === '4.1.0',
+	$parent_ver === '4.2.0' && $child_ver === '4.2.0' && $core_hdr_ver === '4.2.0' && $core_const_ver === '4.2.0',
 	'24.5: All 4 version headers are 100% synchronized and atomic according to Rule 2 of GEMINI.md'
 );
 
@@ -1862,7 +1862,7 @@ $parent_style_ver = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( AB
 $child_style_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' ), $m2 ) ? $m2[1] : '';
 $core_plugin_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m3 ) ? $m3[1] : '';
 $core_const_ver   = preg_match( '/define\(\s*[\'"]NTN_JOURNAL_CORE_VERSION[\'"]\s*,\s*[\'"]([0-9\.]+)[\'"]\s*\)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m4 ) ? $m4[1] : '';
-assert_test( $parent_style_ver === '4.1.0' && $child_style_ver === '4.1.0' && $core_plugin_ver === '4.1.0' && $core_const_ver === '4.1.0', '29.1: All 4 version headers are synchronized to 4.1.0' );
+assert_test( $parent_style_ver === '4.2.0' && $child_style_ver === '4.2.0' && $core_plugin_ver === '4.2.0' && $core_const_ver === '4.2.0', '29.1: All 4 version headers are synchronized to 4.2.0' );
 
 // 29.2: single.php sequence is Google Feed -> Social CTA -> Bottom Related Posts
 $single_php = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/single.php' );
@@ -3938,6 +3938,86 @@ foreach ( array( 9601, 9602, 9603, 9610, 9620, 9630, 9640 ) as $hs_id ) {
 	unset( $mock_terms[ $hs_id ], $mock_termmeta[ $hs_id ] );
 }
 $GLOBALS['mock_author_meta'] = $hs_author_backup;
+
+// --- TEST SUITE 64: Tipo di Hub "Statistiche" v4.2.0 (solo impostazioni) ---
+echo "\n--- 64. TIPO DI HUB STATISTICHE V4.2.0 ---\n";
+
+$st_hub    = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/category-hub.php' );
+$st_tab    = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/admin/views/tab-hub.php' );
+$st_admin  = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/admin/admin-page.php' );
+$st_rt     = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/inc/category-hub-template.php' );
+$st_tpl    = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/category-hub.php' );
+$st_backup = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/backup-restore.php' );
+
+// 64.1: il nuovo tipo è tra quelli ammessi e si salva; un valore sconosciuto torna a Piattaforme
+ntn_core_category_hub_save_settings( 9701, array( 'enabled' => true, 'type' => 'statistiche', 'title' => 'I numeri', 'intro' => 'Testo' ) );
+$st_saved = ntn_core_category_hub_meta( 9701, 'type' );
+ntn_core_category_hub_save_settings( 9702, array( 'enabled' => true, 'type' => '<b>inventato</b>' ) );
+$st_unknown_saved = get_term_meta( 9702, '_ntn_hub_type', true );
+$mock_termmeta[9703] = array( '_ntn_hub_enabled' => '1', '_ntn_hub_type' => 'inventato' );
+assert_test(
+	array( 'console', 'studi', 'statistiche' ) === array_keys( ntn_core_category_hub_choices()['type'] ) && 'statistiche' === $st_saved &&
+	'I numeri' === ntn_core_category_hub_meta( 9701, 'title' ) && 'Testo' === ntn_core_category_hub_meta( 9701, 'intro' ) &&
+	'console' === $st_unknown_saved && 'console' === ntn_core_category_hub_meta( 9703, 'type' ),
+	'64.1: The Statistiche type saves with the common fields; unknown values fall back to the platforms type on save and on read'
+);
+
+// 64.2: le Hub già accese restano del loro tipo, anche quelle senza tipo salvato, e il contesto riconosce il nuovo
+$mock_termmeta[9704] = array( '_ntn_hub_enabled' => '1', '_ntn_hub_type' => 'console' );
+$mock_termmeta[9705] = array( '_ntn_hub_enabled' => '1', '_ntn_hub_type' => 'studi' );
+$mock_termmeta[9706] = array( '_ntn_hub_enabled' => '1' );
+$st_term = new WP_Term( array( 'term_id' => 9701, 'name' => 'Numeri', 'slug' => 'numeri', 'taxonomy' => 'category' ) );
+$st_ctx  = ntn_core_category_hub_context( $st_term );
+assert_test(
+	'console' === ntn_core_category_hub_meta( 9704, 'type' ) && 'studi' === ntn_core_category_hub_meta( 9705, 'type' ) && 'console' === ntn_core_category_hub_meta( 9706, 'type' ) &&
+	is_array( $st_ctx ) && 'statistiche' === $st_ctx['type'] && null === $st_ctx['selected'] &&
+	false !== strpos( $st_hub, "\$parent->term_id, 'enabled' ) && 'console' === ntn_core_category_hub_meta( (int) \$parent->term_id, 'type' )" ),
+	'64.2: Existing Hubs keep their type, Hubs without one stay platforms, and only platform Hubs adopt their subcategories'
+);
+
+// 64.3: nel pannello il tipo ha il suo nome e non mostra i campi di marchi e studi; salvataggio con gli stessi controlli
+assert_test(
+	false !== strpos( $st_tab, "'statistiche' === \$ntn_type ? 'Statistiche' : 'Console'" ) && false !== strpos( $st_tab, "<?php elseif ( 'console' === \$ntn_type ) : ?>" ) &&
+	false !== strpos( $st_tab, '<b>Statistiche</b>' ) && 2 === substr_count( $st_tab, "foreach ( \$ntn_choices['type'] as" ) &&
+	false !== strpos( $st_admin, "ntn_journal_core_admin_nonce_ok( 'ntn_hub_save_nonce', 'ntn_hub_save' )" ) && false !== strpos( $st_admin, "ntn_journal_core_admin_nonce_ok( 'ntn_hub_new_nonce', 'ntn_hub_new' )" ),
+	'64.3: The panel names the type, hides brand and studio fields for it and saves through the same nonce checks'
+);
+
+// 64.4: il controllo copertura ha un caso suo e non mette più gli studi su questo tipo
+assert_test(
+	false !== strpos( $st_hub, "Categoria senza articoli: le statistiche resterebbero a zero." ) && false !== strpos( $st_hub, "} elseif ( 'console' === \$type ) {" ) &&
+	false !== strpos( $st_hub, "if ( 'statistiche' === \$type ) {" ),
+	'64.4: Coverage check flags a Statistiche Hub without articles and skips the brand and studio checks for it'
+);
+
+// 64.5: il backup porta con sé il tipo (tutti i meta _ntn_hub_) e l'importazione non può rompere una Hub
+_ntn_restore_termmeta( 9707, '_ntn_hub_type', 'statistiche' );
+$st_restored = ntn_core_category_hub_meta( 9707, 'type' );
+_ntn_restore_termmeta( 9708, '_ntn_hub_type', 'inventato' );
+assert_test(
+	'statistiche' === $st_restored && 'console' === ntn_core_category_hub_meta( 9708, 'type' ) && 2 <= substr_count( $st_backup, "\$wpdb->esc_like( '_ntn_hub_' )" ),
+	'64.5: Backup exports every Hub setting, import restores the Statistiche type and an unknown type falls back safely'
+);
+
+// 64.6: il tema riconosce il tipo: modello dedicato appena esiste, altrimenti quello comune; le altre Hub non cambiano
+assert_test(
+	false !== strpos( $st_rt, "array( 'category-hub-statistiche.php', 'category-hub.php' ) : array( 'category-hub.php' )" ) &&
+	! file_exists( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/category-hub-statistiche.php' ) &&
+	false !== strpos( $st_tpl, "<?php elseif ( 'studi' === \$hub['type'] ) : ?>" ),
+	'64.6: Theme routes the type to its own template when it exists, otherwise to the shared one, with Made in Italy only on Studi'
+);
+
+// 64.7: i dati di questo tipo non passano dal ramo degli studi: giochi su tutti gli articoli e descrizione propria
+assert_test(
+	false !== strpos( $st_hub, "} elseif ( 'statistiche' === \$ctx['type'] ) {" ) && false !== strpos( $st_hub, "ntn_core_category_hub_stats_query( \$tree, (int) wp_date( 'Y' ) )" ) &&
+	false !== strpos( $st_hub, "array( 'Giochi', (string) \$hub_stats['games'] )" ) && false !== strpos( $st_hub, "'I numeri di ' . \$title" ),
+	'64.7: Hub data for the type counts games on all articles and never builds the studio index or its description'
+);
+
+foreach ( range( 9701, 9708 ) as $st_id ) {
+	unset( $mock_termmeta[ $st_id ] );
+}
+unset( $mock_options['ntn_cat_hub_version'] );
 
 echo "\n=======================================================================\n";
 echo " AUDIT SUMMARY: {$passed} PASSED, {$failed} FAILED\n";
