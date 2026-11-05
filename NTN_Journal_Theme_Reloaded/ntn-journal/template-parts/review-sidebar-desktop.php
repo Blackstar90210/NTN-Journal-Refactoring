@@ -146,41 +146,6 @@ $render_score = static function () use ( $rating, $rating_link, $rating_label, $
 	<?php
 };
 
-// Riga con il link alla recensione del gioco, o l'avviso che non è stato recensito
-$render_review_row = static function ( $game ) {
-	if ( ! $game['review'] ) {
-		?>
-		<div class="ntn-greview-mini is-none">
-			<span>// Non recensito</span>
-			<span class="ntn-leds" aria-hidden="true"><?php echo str_repeat( '<i class="ntn-led is-off"></i>', 5 ); ?></span>
-		</div>
-		<?php
-		return;
-	}
-	$review_rating = (int) $game['review_rating'];
-	?>
-	<a href="<?php echo esc_url( get_permalink( $game['review'] ) ); ?>" class="ntn-greview-mini" aria-label="<?php echo esc_attr( sprintf( 'Leggi la recensione di %s', $game['title'] ) ); ?>">
-		<span>Leggi la recensione →</span>
-		<?php if ( $review_rating > 0 ) : ?>
-			<span class="ntn-leds" aria-hidden="true">
-				<?php
-				for ( $i = 1; $i <= 5; $i++ ) {
-					$led_class = 'ntn-led';
-					if ( $i <= $review_rating ) {
-						$led_class .= ' is-on';
-					}
-					if ( $i === $review_rating ) {
-						$led_class .= ' is-last';
-					}
-					echo '<i class="' . esc_attr( $led_class ) . '"></i>';
-				}
-				?>
-			</span>
-		<?php endif; ?>
-	</a>
-	<?php
-};
-
 // Pulsante verso la pagina del gioco su IGDB
 $render_igdb_button = static function ( $game ) {
 	$igdb_url = $game['igdb_url'];
@@ -229,7 +194,7 @@ if ( $game_count > 1 ) :
 				if ( $is_reviewed ) {
 					$render_score();
 				} else {
-					$render_review_row( $game );
+					ntn_journal_game_review_row( $game, 'ntn-greview-mini' );
 				}
 				$render_igdb_button( $game );
 				?>
@@ -277,7 +242,7 @@ else :
 	$render_score();
 	// Se l'articolo ha un voto è già lui la recensione del gioco: la riga servirebbe solo a smentirlo
 	if ( 1 === $game_count && empty( $rating ) && empty( $game['is_current_review'] ) ) {
-		$render_review_row( $game );
+		ntn_journal_game_review_row( $game, 'ntn-greview-mini' );
 	}
 	$render_igdb_button( $game );
 	?>

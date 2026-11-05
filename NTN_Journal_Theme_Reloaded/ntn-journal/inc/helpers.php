@@ -909,6 +909,53 @@ function ntn_apply_post_meta_to_game( array $game, $post_id ) {
 }
 
 /**
+ * Stampa la riga con il link alla recensione di un gioco, o l'avviso che non è stato recensito.
+ *
+ * @param array    $game        Dati del gioco nel formato di ntn_get_post_games().
+ * @param string   $class       Classe della riga.
+ * @param int|null $panel_index Nelle schede a linguette, il pannello del gioco: dal secondo in poi la riga parte nascosta.
+ */
+function ntn_journal_game_review_row( array $game, $class, $panel_index = null ) {
+	$attributes = '';
+	if ( null !== $panel_index ) {
+		$attributes = ' data-i="' . esc_attr( (string) $panel_index ) . '"' . ( $panel_index > 0 ? ' hidden' : '' );
+	}
+
+	if ( ! $game['review'] ) {
+		?>
+		<div class="<?php echo esc_attr( $class ); ?> is-none"<?php echo $attributes; // phpcs:ignore WordPress.Security.EscapeOutput -- già sanificato qui sopra. ?>>
+			<span>// Non recensito</span>
+			<span class="ntn-leds" aria-hidden="true"><?php echo str_repeat( '<i class="ntn-led is-off"></i>', 5 ); ?></span>
+		</div>
+		<?php
+		return;
+	}
+
+	$review_rating = (int) $game['review_rating'];
+	?>
+	<a href="<?php echo esc_url( get_permalink( $game['review'] ) ); ?>" class="<?php echo esc_attr( $class ); ?>" aria-label="<?php echo esc_attr( sprintf( 'Leggi la recensione di %s', $game['title'] ) ); ?>"<?php echo $attributes; // phpcs:ignore WordPress.Security.EscapeOutput -- già sanificato qui sopra. ?>>
+		<span>Leggi la recensione →</span>
+		<?php if ( $review_rating > 0 ) : ?>
+			<span class="ntn-leds" aria-hidden="true">
+				<?php
+				for ( $i = 1; $i <= 5; $i++ ) {
+					$led_class = 'ntn-led';
+					if ( $i <= $review_rating ) {
+						$led_class .= ' is-on';
+					}
+					if ( $i === $review_rating ) {
+						$led_class .= ' is-last';
+					}
+					echo '<i class="' . esc_attr( $led_class ) . '"></i>';
+				}
+				?>
+			</span>
+		<?php endif; ?>
+	</a>
+	<?php
+}
+
+/**
  * Prepara un titolo per l'ordinamento e il confronto: senza entità HTML e senza accenti.
  *
  * @param mixed $title Titolo del gioco.

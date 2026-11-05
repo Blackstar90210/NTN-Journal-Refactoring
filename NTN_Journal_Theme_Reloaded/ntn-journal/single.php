@@ -28,7 +28,7 @@ get_header();
 
 		$game_title  = ntn_get_igdb_data( get_the_ID(), '_ntn_game_title' );
 		$game_cover  = ntn_get_igdb_data( get_the_ID(), '_ntn_game_cover' );
-		$has_sidebar = ! empty( $rating ) || ! empty( $game_title );
+		$has_sidebar = ! empty( $rating ) || ! empty( $game_title ) || ! empty( ntn_get_post_games( get_the_ID() ) );
 		$game_entity = function_exists( 'ntn_front_game_entity' ) ? ntn_front_game_entity( get_the_ID() ) : null;
 
 		// Sottotitolo: priorità 1 = estratto (manuale o AI), 2 = campo custom_h2, 3 = primo <h2> del contenuto
