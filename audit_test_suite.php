@@ -4766,7 +4766,7 @@ $mg_post( 10010, 'post', 'publish', 'mg-solo-dati-notizia', '2026-01-01', array(
 $mock_postmeta[10010] = array( '_ntn_game_platforms' => 'PC Articolo' );
 $mg_out = $mg_render_mob( 10010 );
 assert_test(
-	false !== strpos( $mg_out, '<div class="ntn-rmob-wrap">' ) && false === strpos( $mg_out, 'data-ntn-rmob' ) && false === strpos( $mg_out, 'ntn-gnames' ) && false === strpos( $mg_out, ' hidden>' ) &&
+	false !== strpos( $mg_out, '<div class="ntn-rmob-wrap">' ) && false === strpos( $mg_out, 'data-ntn-rmob' ) && false === strpos( $mg_out, 'ntn-gnav' ) && false === strpos( $mg_out, ' hidden>' ) &&
 	false !== strpos( $mg_out, 'PC Articolo' ) && false === strpos( $mg_out, 'PC Tag' ) && false !== strpos( $mg_out, '04/05/2026' ) && false !== strpos( $mg_out, '// Scheda gioco</span>' ) &&
 	false !== strpos( $mg_out, '<div class="ntn-rmob-rev is-none">' ) && strpos( $mg_out, '</h4>' ) < strpos( $mg_out, 'ntn-rmob-rev' ),
 	'70.2: One game stays the classic card inside the frame, article meta wins per field, and the review row sits under it'
@@ -4785,31 +4785,30 @@ assert_test(
 $mg_out = $mg_render_mob( 10007 );
 $mg_panels = explode( '<div class="ntn-rmob" ', $mg_out );
 assert_test(
-	false !== strpos( $mg_out, '<div class="ntn-rmob-wrap" data-ntn-rmob>' ) && 4 === count( $mg_panels ) &&
-	false !== strpos( $mg_panels[1], 'data-i="0"' ) && false !== strpos( $mg_panels[1], '// Scheda gioco · 01 / 03' ) && false !== strpos( $mg_panels[1], 'coalba' ) && false === strpos( $mg_panels[1], 'cozeta' ) && false === strpos( $mg_panels[1], ' hidden>' ) && false === strpos( $mg_panels[1], 'loading="lazy"' ) &&
-	false !== strpos( $mg_panels[2], 'data-i="1"' ) && false !== strpos( $mg_panels[2], '// Scheda gioco · 02 / 03' ) && false !== strpos( $mg_panels[2], 'coercole' ) && false !== strpos( $mg_panels[2], ' hidden>' ) && false !== strpos( $mg_panels[2], 'loading="lazy"' ) &&
+	false !== strpos( $mg_out, '<div class="ntn-rmob-wrap" data-ntn-rmob ' ) && 4 === count( $mg_panels ) && false === strpos( $mg_out, 'ntn-rmob-lbl' ) &&
+	false !== strpos( $mg_panels[1], 'data-i="0"' ) && false !== strpos( $mg_panels[1], 'aria-label="1 di 3: Mg Alba"' ) && false !== strpos( $mg_panels[1], 'coalba' ) && false === strpos( $mg_panels[1], 'cozeta' ) && false === strpos( $mg_panels[1], ' hidden>' ) && false === strpos( $mg_panels[1], 'loading="lazy"' ) &&
+	false !== strpos( $mg_panels[2], 'data-i="1"' ) && false !== strpos( $mg_panels[2], 'aria-label="2 di 3: Mg Èrcole"' ) && false !== strpos( $mg_panels[2], 'coercole' ) && false !== strpos( $mg_panels[2], ' hidden>' ) && false !== strpos( $mg_panels[2], 'loading="lazy"' ) &&
 	false !== strpos( $mg_panels[3], 'data-i="2"' ) && false !== strpos( $mg_panels[3], 'cozeta' ) && false !== strpos( $mg_panels[3], ' hidden>' ) && false !== strpos( $mg_panels[3], 'href="' . get_term_link( $mg_multi_a ) . '"' ),
 	'70.4: Several games make one alphabetical panel each, with only the first visible and each with its own data'
 );
 
-// 70.5: linguette con stato e collegamento ai pannelli, poi le righe recensione: prima visibile, le altre nascoste
+// 70.5: intestazione come su PC con contatore e due tasti, poi i pannelli e le righe recensione: prima visibile, le altre nascoste
 assert_test(
-	false !== strpos( $mg_out, '<div class="ntn-gnames" role="tablist"' ) && 3 === substr_count( $mg_out, 'role="tab" class="ntn-gname"' ) && 1 === substr_count( $mg_out, 'aria-selected="true"' ) && 2 === substr_count( $mg_out, 'aria-selected="false"' ) &&
-	false !== strpos( $mg_out, 'aria-controls="ntn-rmob-10007-2"' ) && false !== strpos( $mg_out, 'id="ntn-rmob-10007-2"' ) && 3 === substr_count( $mg_out, 'role="img" aria-label="Recensito"' ) &&
-	strpos( $mg_out, 'class="ntn-gnames"' ) > strrpos( $mg_out, 'class="ntn-rmob-in"' ) && strpos( $mg_out, 'class="ntn-rmob-rev"' ) > strrpos( $mg_out, 'class="ntn-gname"' ) &&
+	false !== strpos( $mg_out, '<span>// Scheda gioco</span>' ) && false !== strpos( $mg_out, '>01 / 03</span>' ) && false !== strpos( $mg_out, 'data-step="-1" aria-label="Gioco precedente" disabled' ) && false !== strpos( $mg_out, 'data-step="1" aria-label="Gioco successivo">' ) &&
+	false === strpos( $mg_out, 'ntn-gname' ) && false === strpos( $mg_out, 'role="tab' ) && false === strpos( $mg_out, 'data-i="0" data-step' ) &&
+	strpos( $mg_out, 'class="ntn-gnav"' ) < strpos( $mg_out, 'class="ntn-rmob-in"' ) && strpos( $mg_out, 'class="ntn-rmob-rev"' ) > strrpos( $mg_out, 'class="ntn-rmob-in"' ) &&
 	false !== strpos( $mg_out, 'aria-label="Leggi la recensione di Mg Alba" data-i="0">' ) && false !== strpos( $mg_out, 'aria-label="Leggi la recensione di Mg Èrcole" data-i="1" hidden>' ) && false !== strpos( $mg_out, 'aria-label="Leggi la recensione di Mg Zeta" data-i="2" hidden>' ) &&
 	false === strpos( $mg_out, 'Voto ' ),
-	'70.5: Tabs show their state and control their panel, review rows follow them with only the first visible, and a news article has no verdict'
+	'70.5: Several games get the PC header with counter and two arrows, review rows follow the panels with only the first visible, and a news article has no verdict'
 );
 
-// 70.6: un gioco non recensito: quadratino "no" e riga con cinque LED tratteggiati, nascosta se non è il primo
+// 70.6: un gioco non recensito: riga con cinque LED tratteggiati, l'altro gioco ha il suo link nascosto
 $mg_post( 10011, 'post', 'publish', 'mg-misto-notizia', '2026-01-01', array( $mg_one, $mg_none ), array( 'notizie' ) );
 $mg_out = $mg_render_mob( 10011 );
 assert_test(
-	false !== strpos( $mg_out, '<span class="no" role="img" aria-label="Non recensito"></span>' ) && false !== strpos( $mg_out, '<span class="ok" role="img" aria-label="Recensito"></span>' ) &&
 	false !== strpos( $mg_out, '<div class="ntn-rmob-rev is-none" data-i="0">' ) && false !== strpos( $mg_out, '// Non recensito' ) && 5 === substr_count( $mg_out, 'ntn-led is-off' ) &&
 	false !== strpos( $mg_out, 'class="ntn-rmob-rev" aria-label="Leggi la recensione di Mg Uno" data-i="1" hidden>' ),
-	'70.6: A game without reviews gets the empty square and the dashed Non recensito row, the other game links its review'
+	'70.6: A game without reviews gets the dashed Non recensito row, the other game links its review'
 );
 
 // 70.7: recensione con più giochi: solo il gioco recensito ha giudizio e niente riga
@@ -4836,7 +4835,7 @@ $mg_post( 10013, 'post', 'publish', 'mg-escape', '2026-01-01', array( $mg_esc, $
 $mg_out = $mg_render_mob( 10013 );
 assert_test(
 	false === strpos( $mg_out, '<b>Grassetto' ) && 2 <= substr_count( $mg_out, '&lt;b&gt;Grassetto' ),
-	'70.9: Game titles are escaped in panels and tabs'
+	'70.9: Game titles are escaped in panels and their labels'
 );
 
 // 70.10: stili compilati, linguette in main.js e colonna laterale anche per i giochi trovati solo dall'elenco
@@ -4845,10 +4844,12 @@ $mg_built = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal
 $mg_js = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/assets/js/main.js' );
 assert_test(
 	strpos( $mg_css, '.ntn-rmob-row b' ) < strpos( $mg_css, '.ntn-rmob-wrap {' ) && false !== strpos( $mg_css, '.ntn-rmob-wrap .ntn-rmob[hidden], .ntn-rmob-wrap .ntn-rmob-rev[hidden] { display: none; }' ) &&
-	false !== strpos( $mg_built, '.ntn-rmob-wrap{' ) && false !== strpos( $mg_built, '.ntn-gnames{' ) && false !== strpos( $mg_built, '.ntn-gname{' ) && false !== strpos( $mg_built, '.ntn-rmob-rev' ) &&
-	false !== strpos( $mg_js, "'[data-ntn-rmob]'" ) && false !== strpos( $mg_js, "e.key === 'Home'" ) && false !== strpos( $mg_js, "e.key === 'End'" ) && false !== strpos( $mg_js, "'.ntn-rmob, .ntn-rmob-rev'" ) && false !== strpos( $mg_js, "panel.style.minHeight = tallest + 'px'" ) &&
+	false !== strpos( $mg_built, '.ntn-rmob-wrap{' ) && false !== strpos( $mg_built, '.ntn-rmob-rev' ) && false === strpos( $mg_built, '.ntn-gname' ) &&
+	false !== strpos( $mg_css, '.ntn-rmob-wrap .ntn-gnav button { width: 44px; height: 44px; }' ) && false !== strpos( $mg_css, '[data-ntn-rmob].is-ready .ntn-gnav' ) &&
+	false !== strpos( $mg_js, "'[data-ntn-rmob]'" ) && false !== strpos( $mg_js, "'.ntn-rmob, .ntn-rmob-rev'" ) && false !== strpos( $mg_js, "panel.style.minHeight = tallest + 'px'" ) && false === strpos( $mg_js, '.ntn-gname' ) &&
+	false !== strpos( $mg_js, "addEventListener('touchend'" ) && false !== strpos( $mg_js, 'Math.abs(moveX) > 40' ) && 2 <= substr_count( $mg_js, '{ passive: true }' ) &&
 	false !== strpos( file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/single.php' ), "|| ! empty( ntn_get_post_games( get_the_ID() ) );" ),
-	'70.10: Mobile card styles are compiled, main.js drives the tabs, and single.php counts games from the helper'
+	'70.10: Mobile card styles are compiled without the old tabs, main.js drives arrows and swipe, and single.php counts games from the helper'
 );
 
 $GLOBALS['post'] = null;

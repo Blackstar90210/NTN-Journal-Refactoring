@@ -6,8 +6,8 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  * Fase 5 del restyling (v3.7.0): copertina, nome del gioco, piattaforme e uscita,
  * più il giudizio con i cinque LED quando l'articolo è una recensione.
  *
- * Con due o più giochi c'è un pannello per gioco in ordine alfabetico, con le linguette per passare
- * dall'uno all'altro. Con un gioco solo resta la scheda classica con sotto la riga della recensione.
+ * Con due o più giochi c'è un pannello per gioco in ordine alfabetico, con in cima contatore e tasti ← →
+ * come nella scheda su PC. Con un gioco solo resta la scheda classica con sotto la riga della recensione.
  * Senza giochi non cambia nulla.
  */
 
@@ -60,7 +60,9 @@ $render_body = static function ( $game, $label, $show_verdict, $lazy = false ) u
 	?>
 
 	<div class="ntn-rmob-in">
-		<span class="ntn-rmob-lbl"><?php echo esc_html( $label ); ?></span>
+		<?php if ( $label ) : ?>
+			<span class="ntn-rmob-lbl"><?php echo esc_html( $label ); ?></span>
+		<?php endif; ?>
 		<h4 class="ntn-rmob-name">
 			<?php if ( $game['hub_url'] ) : ?>
 				<a href="<?php echo esc_url( $game['hub_url'] ); ?>"><?php echo esc_html( $display_title ); ?></a>
@@ -130,24 +132,27 @@ elseif ( 1 === $game_count ) :
 else :
 	?>
 
-<div class="ntn-rmob-wrap" data-ntn-rmob>
+<div class="ntn-rmob-wrap" data-ntn-rmob aria-roledescription="carosello" aria-label="Giochi dell'articolo" role="group">
+
+	<div class="ntn-gcard-h">
+		<span>// Scheda gioco</span>
+		<span class="ntn-gcard-head-r">
+			<span class="ntn-gcard-count" aria-live="polite"><?php echo esc_html( sprintf( '01 / %02d', $game_count ) ); ?></span>
+			<span class="ntn-gnav">
+				<button type="button" data-step="-1" aria-label="Gioco precedente" disabled>←</button>
+				<button type="button" data-step="1" aria-label="Gioco successivo">→</button>
+			</span>
+		</span>
+	</div>
 
 	<?php foreach ( $games as $panel_index => $game ) : ?>
-		<div class="ntn-rmob" data-i="<?php echo esc_attr( (string) $panel_index ); ?>" id="<?php echo esc_attr( sprintf( 'ntn-rmob-%d-%d', $post_id, $panel_index ) ); ?>" role="tabpanel" aria-labelledby="<?php echo esc_attr( sprintf( 'ntn-rmob-tab-%d-%d', $post_id, $panel_index ) ); ?>"<?php echo $panel_index > 0 ? ' hidden' : ''; ?>>
-			<?php $render_body( $game, sprintf( '// Scheda gioco · %02d / %02d', $panel_index + 1, $game_count ), ! empty( $game['is_current_review'] ), $panel_index > 0 ); ?>
+		<div class="ntn-rmob" data-i="<?php echo esc_attr( (string) $panel_index ); ?>" role="group" aria-roledescription="gioco" aria-label="<?php echo esc_attr( sprintf( '%d di %d: %s', $panel_index + 1, $game_count, $game['title'] ) ); ?>"<?php echo $panel_index > 0 ? ' hidden' : ''; ?>>
+			<?php $render_body( $game, '', ! empty( $game['is_current_review'] ), $panel_index > 0 ); ?>
 		</div>
 	<?php endforeach; ?>
 
-	<div class="ntn-gnames" role="tablist" aria-label="Giochi dell'articolo">
-		<?php foreach ( $games as $tab_index => $game ) : ?>
-			<button type="button" role="tab" class="ntn-gname" id="<?php echo esc_attr( sprintf( 'ntn-rmob-tab-%d-%d', $post_id, $tab_index ) ); ?>" aria-selected="<?php echo 0 === $tab_index ? 'true' : 'false'; ?>" aria-controls="<?php echo esc_attr( sprintf( 'ntn-rmob-%d-%d', $post_id, $tab_index ) ); ?>" tabindex="<?php echo 0 === $tab_index ? '0' : '-1'; ?>">
-				<?php echo esc_html( $game['title'] ); ?><span class="<?php echo $game['review'] ? 'ok' : 'no'; ?>" role="img" aria-label="<?php echo $game['review'] ? 'Recensito' : 'Non recensito'; ?>"></span>
-			</button>
-		<?php endforeach; ?>
-	</div>
-
 	<?php
-	// Le righe stanno dopo le linguette e si accendono insieme al loro pannello. Il gioco recensito ha già il giudizio.
+	// Ogni riga si accende insieme al suo pannello. Il gioco recensito ha già il giudizio.
 	foreach ( $games as $row_index => $game ) {
 		if ( empty( $game['is_current_review'] ) ) {
 			ntn_journal_game_review_row( $game, 'ntn-rmob-rev', $row_index );

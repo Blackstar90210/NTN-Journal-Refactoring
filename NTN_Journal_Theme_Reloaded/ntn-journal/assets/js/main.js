@@ -359,41 +359,35 @@
 		});
 	});
 
-	// Scheda da telefono con più giochi: le linguette cambiano pannello e riga della recensione;
-	// frecce, Home e Fine passano da una linguetta all'altra.
+	// Scheda da telefono con più giochi: tasti ← →, frecce della tastiera e scorrimento col dito
+	// cambiano pannello e riga della recensione, senza mai bloccare lo scorrimento della pagina.
 	document.addEventListener('DOMContentLoaded', function() {
 		var cards = document.querySelectorAll('[data-ntn-rmob]');
-		var reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 		Array.prototype.forEach.call(cards, function(card) {
-			var list = card.querySelector('.ntn-gnames');
-			var tabs = card.querySelectorAll('.ntn-gname');
+			var panels = card.querySelectorAll('.ntn-rmob');
 			var parts = card.querySelectorAll('.ntn-rmob, .ntn-rmob-rev');
-			if (!list || tabs.length < 2) return;
+			var total = panels.length;
+			if (total < 2) return;
+			var counter = card.querySelector('.ntn-gcard-count');
+			var arrows = card.querySelectorAll('.ntn-gnav button');
+			var current = 0;
+			var pad = function(n) { return (n < 10 ? '0' : '') + n; };
 
-			var show = function(index, withFocus) {
-				Array.prototype.forEach.call(tabs, function(tab, position) {
-					tab.setAttribute('aria-selected', position === index ? 'true' : 'false');
-					tab.setAttribute('tabindex', position === index ? '0' : '-1');
+			var goTo = function(index) {
+				current = Math.max(0, Math.min(total - 1, index));
+				if (counter) counter.textContent = pad(current + 1) + ' / ' + pad(total);
+				Array.prototype.forEach.call(arrows, function(arrow, position) {
+					var off = position === 0 ? current === 0 : current === total - 1;
+					// Il tasto che si spegne non può tenere il focus: passa all'altro
+					if (off && arrow === document.activeElement && arrows[1 - position]) arrows[1 - position].focus();
+					arrow.disabled = off;
 				});
 				Array.prototype.forEach.call(parts, function(part) {
-					part.hidden = parseInt(part.getAttribute('data-i'), 10) !== index;
+					part.hidden = parseInt(part.getAttribute('data-i'), 10) !== current;
 				});
-
-				// Solo la fila delle linguette scorre, mai la pagina
-				var listBox = list.getBoundingClientRect();
-				var tabBox = tabs[index].getBoundingClientRect();
-				var shift = tabBox.left < listBox.left ? tabBox.left - listBox.left : Math.max(0, tabBox.right - listBox.right);
-				if (shift) list.scrollBy({ left: shift, behavior: reducedMotion ? 'auto' : 'smooth' });
-
-				if (withFocus) tabs[index].focus({ preventScroll: true });
-			};
-
-			var indexOf = function(tab) {
-				return Array.prototype.indexOf.call(tabs, tab);
 			};
 
 			// Tutti i pannelli alti come il più alto: cambiando gioco la pagina non salta
-			var panels = card.querySelectorAll('.ntn-rmob');
 			var equalize = function() {
 				if (!card.offsetWidth) return;
 				var tallest = 0;
@@ -412,24 +406,31 @@
 			window.addEventListener('load', equalize);
 			window.addEventListener('resize', equalize);
 
-			list.addEventListener('click', function(e) {
-				var tab = e.target.closest ? e.target.closest('.ntn-gname') : null;
-				if (tab) show(indexOf(tab), false);
+			Array.prototype.forEach.call(arrows, function(arrow) {
+				arrow.addEventListener('click', function() {
+					goTo(current + parseInt(arrow.getAttribute('data-step'), 10));
+				});
 			});
 
-			list.addEventListener('keydown', function(e) {
-				var tab = e.target.closest ? e.target.closest('.ntn-gname') : null;
-				if (!tab) return;
-				var current = indexOf(tab);
-				var next = -1;
-				if (e.key === 'ArrowLeft') next = (current - 1 + tabs.length) % tabs.length;
-				else if (e.key === 'ArrowRight') next = (current + 1) % tabs.length;
-				else if (e.key === 'Home') next = 0;
-				else if (e.key === 'End') next = tabs.length - 1;
-				if (next < 0) return;
+			card.addEventListener('keydown', function(e) {
+				if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
 				e.preventDefault();
-				show(next, true);
+				goTo(current + (e.key === 'ArrowLeft' ? -1 : 1));
 			});
+
+			var startX = 0;
+			var startY = 0;
+			card.addEventListener('touchstart', function(e) {
+				startX = e.changedTouches[0].clientX;
+				startY = e.changedTouches[0].clientY;
+			}, { passive: true });
+			card.addEventListener('touchend', function(e) {
+				var moveX = e.changedTouches[0].clientX - startX;
+				var moveY = e.changedTouches[0].clientY - startY;
+				if (Math.abs(moveX) > 40 && Math.abs(moveX) > Math.abs(moveY)) goTo(current + (moveX < 0 ? 1 : -1));
+			}, { passive: true });
+
+			card.classList.add('is-ready');
 		});
 	});
 
