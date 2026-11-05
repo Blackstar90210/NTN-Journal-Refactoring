@@ -4,7 +4,7 @@
 
 *Read this document in: [English](#english) | [Italiano](#italiano)*
 
-**Version:** 4.9.0 · **Authors:** Luca Maiolini & Divisione_WP
+**Version:** 4.9.1 · **Authors:** Luca Maiolini & Divisione_WP
 
 ---
 
@@ -42,7 +42,7 @@ The theme displays the data, the plugin manages it. The theme keeps working if t
 
 ### ⚙️ Requirements
 *   **WordPress**: 6.0 or higher (tested up to 7.x)
-*   **PHP**: 7.4 or higher (tested up to 8.5)
+*   **PHP**: 8.0 or higher (tested up to 8.5)
 *   **Optional**: The SEO Framework 5.x
 
 ### 🚀 Installation
@@ -98,7 +98,7 @@ Il tema mostra i dati, il plugin li gestisce. Il tema funziona anche con il plug
 
 ### ⚙️ Requisiti
 *   **WordPress**: 6.0 o superiore (provato fino alla 7.x)
-*   **PHP**: 7.4 o superiore (provato fino alla 8.5)
+*   **PHP**: 8.0 o superiore (provato fino alla 8.5)
 *   **Facoltativo**: The SEO Framework 5.x
 
 ### 🚀 Installazione
