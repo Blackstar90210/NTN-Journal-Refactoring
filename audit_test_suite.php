@@ -4014,6 +4014,13 @@ assert_test(
 	'64.7: Hub data for the type counts games on all articles and never builds the studio index or its description'
 );
 
+// 64.8: in tutte le Hub la voce "Giochi" conta tutti gli articoli, non più gli ultimi 200
+assert_test(
+	3 === substr_count( $st_hub, "array( 'Giochi', (string) \$hub_stats['games'] )" ) && 0 === substr_count( $st_hub, 'count( $games )' ) &&
+	1 === substr_count( $st_hub, 'ntn_core_category_hub_stats_query(' ) && false === strpos( $st_hub, '$games       = ntn_core_category_hub_games( $recent )' ),
+	'64.8: The Games figure of every Hub type comes from the full count, not from the latest 200 articles'
+);
+
 foreach ( range( 9701, 9708 ) as $st_id ) {
 	unset( $mock_termmeta[ $st_id ] );
 }

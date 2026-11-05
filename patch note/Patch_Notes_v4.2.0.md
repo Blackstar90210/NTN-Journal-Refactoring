@@ -17,10 +17,10 @@ Seconda fase dell'Hub "Statistiche" approvata dal CEO. Il nuovo tipo si può sce
 - **Controllo copertura**: segnala una Hub Statistiche senza articoli.
 - **Descrizione per Google**: se manca il testo di presentazione, ne usa una sui numeri della sezione.
 - **Tema**: userà `category-hub-statistiche.php` appena esiste; fino ad allora resta `category-hub.php`, senza l'etichetta "Made in Italy" e senza indice degli studi.
-- **Giochi**: nella pagina di questo tipo il contatore considera tutti gli articoli.
 - **Backup**: il tipo è già incluso nell'esportazione e nell'importazione JSONL con le altre impostazioni delle Hub.
 
 ### ✅ 3. Hub esistenti e test
 
-- Le Hub già accese mantengono il loro tipo e non cambiano.
-- Aggiunti 7 test (sezione 64 di `audit_test_suite.php`).
+- Le Hub già accese mantengono il loro tipo. L'unica differenza visibile è il contatore "Giochi".
+- **Giochi** (scelta del CEO): in tutte le Hub di categoria il contatore considera ora tutti gli articoli, non più solo gli ultimi 200.
+- Aggiunti 8 test (sezione 64 di `audit_test_suite.php`).

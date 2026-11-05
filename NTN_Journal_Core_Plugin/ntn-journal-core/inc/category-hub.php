@@ -451,7 +451,8 @@ function ntn_core_get_category_hub_data( $term = null ): ?array {
 
 	$posts_total = ntn_core_category_hub_count( $tree );
 	$latest_date = ! empty( $recent ) ? (string) get_the_date( 'd.m.Y', $recent[0] ) : '';
-	$games       = ntn_core_category_hub_games( $recent );
+	// v4.2.0: la voce "Giochi" conta tutti gli articoli, non solo gli ultimi 200 (scelta del CEO)
+	$hub_stats   = ntn_core_category_hub_stats_query( $tree, (int) wp_date( 'Y' ) );
 
 	if ( 'console' === $ctx['type'] ) {
 		// Marchi (figli della Hub) e piattaforme (figli dei marchi)
@@ -506,17 +507,16 @@ function ntn_core_get_category_hub_data( $term = null ): ?array {
 		}
 		$data['stats'] = array_values( array_filter( array(
 			$data['platforms'] ? array( 'Piattaforme', (string) count( $data['platforms'] ) ) : null,
-			array( 'Giochi', (string) count( $games ) ),
+			array( 'Giochi', (string) $hub_stats['games'] ),
 			array( 'Articoli', (string) $posts_total ),
 			array( 'Aggiornato', $latest_date ),
 		) ) );
 	} elseif ( 'statistiche' === $ctx['type'] ) {
-		// v4.2.0: disegno e contatori essenziali, con i giochi contati su tutti gli articoli. Il modello dedicato arriverà dopo.
+		// v4.2.0: disegno e contatori essenziali. Il modello dedicato arriverà dopo.
 		$illu = ntn_core_category_hub_illustration( $root, 'statistiche' );
 		if ( 'none' !== $illu ) {
 			$data['illustration'][] = $illu;
 		}
-		$hub_stats     = ntn_core_category_hub_stats_query( $tree, (int) wp_date( 'Y' ) );
 		$data['stats'] = array(
 			array( 'Giochi', (string) $hub_stats['games'] ),
 			array( 'Articoli', (string) $posts_total ),
@@ -582,7 +582,7 @@ function ntn_core_get_category_hub_data( $term = null ): ?array {
 		}
 		$data['stats'] = array(
 			array( 'Studi', (string) count( $data['studios'] ) ),
-			array( 'Giochi', (string) count( $games ) ),
+			array( 'Giochi', (string) $hub_stats['games'] ),
 			array( 'Articoli', (string) $posts_total ),
 			array( 'Aggiornato', $latest_date ),
 		);
