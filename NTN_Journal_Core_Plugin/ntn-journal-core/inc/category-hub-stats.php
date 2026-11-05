@@ -145,62 +145,6 @@ function ntn_core_get_category_hub_stats( $term = null ): ?array {
 }
 
 /**
- * La pagina corrente è una Hub di tipo Statistiche?
- *
- * @return bool
- */
-function ntn_core_category_hub_stats_is_current(): bool {
-	$ctx = is_category() ? ntn_core_category_hub_context() : null;
-	return is_array( $ctx ) && 'statistiche' === $ctx['type'];
-}
-
-/**
- * Google, v4.4.0: la pagina Statistiche non elenca articoli, quindi /page/2/ e seguenti ripetono la prima.
- * Restano raggiungibili ma fuori dai risultati, con "segui i collegamenti", come le pagine sottili (seo-thin-pages.php).
- * La canonical non punta alla prima pagina: insieme al noindex darebbe a Google due segnali contrastanti.
- *
- * @param array      $meta Direttive robots di The SEO Framework.
- * @param array|null $args Argomenti di TSF (null = pagina corrente).
- * @return array
- */
-function ntn_core_category_hub_stats_tsf_robots( $meta, $args = null ) {
-	if ( is_array( $meta ) && null === $args && (int) get_query_var( 'paged' ) > 1 && ntn_core_category_hub_stats_is_current() ) {
-		$meta['noindex'] = 'noindex';
-	}
-	return $meta;
-}
-add_filter( 'the_seo_framework_robots_meta_array', 'ntn_core_category_hub_stats_tsf_robots', 10, 2 );
-
-/**
- * Stessa regola senza plugin SEO, con le direttive robots di WordPress.
- *
- * @param array $robots Direttive di WordPress.
- * @return array
- */
-function ntn_core_category_hub_stats_wp_robots( $robots ) {
-	if ( is_array( $robots ) && (int) get_query_var( 'paged' ) > 1 && ntn_core_category_hub_stats_is_current() ) {
-		$robots['noindex'] = true;
-		$robots['follow']  = true;
-	}
-	return $robots;
-}
-add_filter( 'wp_robots', 'ntn_core_category_hub_stats_wp_robots' );
-
-/**
- * The SEO Framework: niente rel="prev" e rel="next", perché la pagina non ha paginazione visibile.
- *
- * @param array $tags Dati dei tag di TSF, per nome.
- * @return array
- */
-function ntn_core_category_hub_stats_tsf_tags( $tags ) {
-	if ( is_array( $tags ) && ntn_core_category_hub_stats_is_current() ) {
-		unset( $tags['prev'], $tags['next'] );
-	}
-	return $tags;
-}
-add_filter( 'the_seo_framework_meta_render_data', 'ntn_core_category_hub_stats_tsf_tags' );
-
-/**
  * Distanza di una data da oggi, da calcolare a ogni visita perché le statistiche restano in cache per un giorno.
  *
  * @param string $date Data nel formato d.m.Y.

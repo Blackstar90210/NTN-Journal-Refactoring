@@ -2,7 +2,7 @@
 if ( ! defined( 'ABSPATH' ) ) exit;
 /**
  * Hub di categoria di tipo "Statistiche" (v4.3.0): la fascia con il nome della sezione e quattro numeri.
- * Il corpo della pagina resta vuoto, come nel mockup approvato dal CEO.
+ * v4.5.0: sotto la fascia, tutti gli articoli della sezione (richiesta del CEO), come nelle altre Hub.
  *
  * I dati arrivano dal plugin; se mancano, si torna all'archivio normale.
  *
@@ -88,6 +88,19 @@ $stats_ago    = ( '' !== $stats_latest && function_exists( 'ntn_core_category_hu
 		</div>
 	</header>
 
+	<div class="ntn-wrap ntn-chub-body">
+
+		<!-- ==================== TUTTI GLI ARTICOLI ==================== -->
+		<section class="ntn-home-block" aria-labelledby="ntn-h-cfeed">
+			<div class="ntn-sec-head">
+				<h2 id="ntn-h-cfeed" class="ntn-sec-title">// Tutti gli articoli</h2>
+				<span class="ntn-sec-aside">Dal più recente</span>
+			</div>
+
+			<?php get_template_part( 'template-parts/hub-article-feed', null, array( 'row_tag' => 'ntn_core_category_hub_post_game_name', 'empty' => 'Non ci sono ancora articoli in questa sezione.' ) ); ?>
+		</section>
+
+	</div>
 </main>
 
 <?php

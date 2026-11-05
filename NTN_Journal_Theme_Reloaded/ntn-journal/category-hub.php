@@ -38,15 +38,7 @@ $hub_row_tag = static function ( $post_id ) use ( $hub_is_console, $hub_platform
 		}
 		return '';
 	}
-	$tags = get_the_terms( $post_id, 'post_tag' );
-	if ( is_array( $tags ) ) {
-		foreach ( $tags as $tag ) {
-			if ( function_exists( 'ntn_core_category_hub_is_game_tag' ) && ntn_core_category_hub_is_game_tag( $tag ) ) {
-				return $tag->name;
-			}
-		}
-	}
-	return '';
+	return function_exists( 'ntn_core_category_hub_post_game_name' ) ? ntn_core_category_hub_post_game_name( (int) $post_id ) : '';
 };
 ?>
 
@@ -212,42 +204,7 @@ $hub_row_tag = static function ( $post_id ) use ( $hub_is_console, $hub_platform
 				</nav>
 			<?php endif; ?>
 
-			<?php if ( have_posts() ) : ?>
-				<div class="ntn-chub-feed">
-					<?php
-					while ( have_posts() ) :
-						the_post();
-						$row_tag  = $hub_row_tag( get_the_ID() );
-						$row_mins = (int) get_post_meta( get_the_ID(), '_ntn_reading_time', true );
-						?>
-						<a class="ntn-chub-row" href="<?php the_permalink(); ?>">
-							<span class="ntn-chub-row-date"><?php echo esc_html( get_the_date( 'd.m.Y' ) ); ?></span>
-							<span class="min-w-0">
-								<?php if ( '' !== $row_tag ) : ?>
-									<span class="ntn-chub-row-tag">// <?php echo esc_html( $row_tag ); ?></span>
-								<?php endif; ?>
-								<span class="ntn-chub-row-title"><?php the_title(); ?></span>
-							</span>
-							<span class="ntn-chub-row-min"><?php echo esc_html( max( 1, $row_mins ) . ' min' ); ?></span>
-						</a>
-					<?php endwhile; ?>
-				</div>
-
-				<div class="ntn-pager-wrap">
-					<?php
-					the_posts_pagination( array(
-						'mid_size'  => 2,
-						'prev_text' => '&larr; Precedente',
-						'next_text' => 'Successivo &rarr;',
-					) );
-					?>
-				</div>
-			<?php else : ?>
-				<div class="ntn-empty">
-					<span>Nessun articolo</span>
-					<p>Non ci sono ancora articoli in questa sezione.</p>
-				</div>
-			<?php endif; ?>
+			<?php get_template_part( 'template-parts/hub-article-feed', null, array( 'row_tag' => $hub_row_tag, 'empty' => 'Non ci sono ancora articoli in questa sezione.' ) ); ?>
 		</section>
 
 		<?php if ( ! $hub_is_console && ! empty( $hub['studios'] ) ) : ?>

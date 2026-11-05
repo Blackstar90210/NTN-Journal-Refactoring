@@ -297,6 +297,24 @@ function ntn_core_category_hub_is_game_tag( WP_Term $tag ): bool {
 }
 
 /**
+ * Nome del gioco di un articolo, per l'etichetta nell'elenco delle Hub.
+ *
+ * @param int $post_id Articolo.
+ * @return string Vuota se l'articolo non ha un tag collegato a un gioco.
+ */
+function ntn_core_category_hub_post_game_name( int $post_id ): string {
+	$tags = get_the_terms( $post_id, 'post_tag' );
+	if ( is_array( $tags ) ) {
+		foreach ( $tags as $tag ) {
+			if ( ntn_core_category_hub_is_game_tag( $tag ) ) {
+				return (string) $tag->name;
+			}
+		}
+	}
+	return '';
+}
+
+/**
  * Ultimi articoli di una o più categorie (solo ID).
  *
  * @param int[] $cat_ids  Categorie.
