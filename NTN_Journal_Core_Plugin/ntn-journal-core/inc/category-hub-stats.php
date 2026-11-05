@@ -145,6 +145,54 @@ function ntn_core_get_category_hub_stats( $term = null ): ?array {
 }
 
 /**
+ * La query è quella principale di una Hub di tipo Statistiche?
+ *
+ * @param mixed $query Query da controllare.
+ * @return bool
+ */
+function ntn_core_category_hub_stats_is_main_query( $query ): bool {
+	if ( is_admin() || ! $query instanceof WP_Query || ! $query->is_main_query() || ! $query->is_category() || $query->is_feed() ) {
+		return false;
+	}
+	$ctx = ntn_core_category_hub_context( $query->get_queried_object() );
+	return is_array( $ctx ) && 'statistiche' === $ctx['type'];
+}
+
+/**
+ * Griglia 3x3 (v4.8.0): la prima pagina ha 10 articoli (apertura e 9 schede), le altre 9 schede.
+ *
+ * @param WP_Query $query Query.
+ */
+function ntn_core_category_hub_stats_pre_get_posts( $query ): void {
+	if ( ! ntn_core_category_hub_stats_is_main_query( $query ) ) {
+		return;
+	}
+	$paged = max( 1, (int) $query->get( 'paged' ) );
+	$query->set( 'posts_per_page', 1 === $paged ? 10 : 9 );
+	if ( $paged > 1 ) {
+		$query->set( 'offset', 10 + ( $paged - 2 ) * 9 );
+	}
+}
+add_action( 'pre_get_posts', 'ntn_core_category_hub_stats_pre_get_posts', 20 );
+
+/**
+ * Le pagine hanno misure diverse: WordPress calcola il numero di pagine dividendo per gli articoli della pagina
+ * corrente, quindi il totale viene riportato a un valore che dà lo stesso numero di pagine ovunque.
+ *
+ * @param int      $found Articoli trovati.
+ * @param WP_Query $query Query.
+ * @return int
+ */
+function ntn_core_category_hub_stats_found_posts( $found, $query ) {
+	if ( ! ntn_core_category_hub_stats_is_main_query( $query ) || (int) $found < 1 ) {
+		return $found;
+	}
+	$pages = max( 1, (int) ceil( ( (int) $found - 1 ) / 9 ) );
+	return $pages * ( (int) $query->get( 'offset' ) > 0 ? 9 : 10 );
+}
+add_filter( 'found_posts', 'ntn_core_category_hub_stats_found_posts', 10, 2 );
+
+/**
  * Distanza di una data da oggi, da calcolare a ogni visita perché le statistiche restano in cache per un giorno.
  *
  * @param string $date Data nel formato d.m.Y.

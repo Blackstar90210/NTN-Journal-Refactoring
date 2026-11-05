@@ -1809,17 +1809,13 @@
   .ntn-chub-stats > div { display: grid; gap: 4px; min-width: 0; }
   .ntn-chub-stats dd { margin: 0; color: var(--ntn-band-fg); }
   .ntn-chub-stats dd.is-small { font-size: 14px; padding-top: 6px; }
-  /* Hub Statistiche (v4.7.0): apertura con il testo centrato sull'immagine; schede con le misure del catalogo Videogiochi */
+  /* Hub Statistiche (v4.7.0): apertura con il testo centrato sull'immagine; le schede restano quelle a tre colonne degli archivi (v4.8.0) */
   .ntn-gcounts a:hover { text-decoration: underline; text-underline-offset: 3px; }
   .ntn-stats-lead-text { display: grid; gap: 14px; align-content: start; min-width: 0; }
   .ntn-sec-head + .ntn-stats-cards { margin-top: 24px; }
-  .ntn-stats-cards .ntn-cell { padding: 12px; }
   @media (min-width: 960px) {
     .ntn-stats-lead .ntn-lead-main { align-items: center; }
     .ntn-stats-lead.ntn-lead--solo .ntn-lead-main > .ntn-home-img { grid-row: auto; }
-  }
-  @media (min-width: 1280px) {
-    .ntn-stats-cards { grid-template-columns: repeat(5, minmax(0, 1fr)); }
   }
 
   /* Selettore dei marchi, filtro per console e filtro A–Z: pulsanti squadrati in Mono */

@@ -1626,24 +1626,24 @@ echo "\n--- 24. SEMVER SIMULTANEOUS 4-HEADER SYNCHRONIZATION ---\n";
 $parent_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $parent_css, $m_parent );
 $parent_ver = isset( $m_parent[1] ) ? trim( $m_parent[1] ) : '';
-assert_test( $parent_ver === '4.7.0', "24.1: Parent Theme style.css declares Version: 4.7.0 (found: {$parent_ver})" );
+assert_test( $parent_ver === '4.8.0', "24.1: Parent Theme style.css declares Version: 4.8.0 (found: {$parent_ver})" );
 
 $child_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $child_css, $m_child );
 $child_ver = isset( $m_child[1] ) ? trim( $m_child[1] ) : '';
-assert_test( $child_ver === '4.7.0', "24.2: Child Theme style.css declares Version: 4.7.0 (found: {$child_ver})" );
+assert_test( $child_ver === '4.8.0', "24.2: Child Theme style.css declares Version: 4.8.0 (found: {$child_ver})" );
 
 $core_php = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' );
 preg_match( '/\*\s*Version:\s*([0-9\.]+)/', $core_php, $m_core_hdr );
 $core_hdr_ver = isset( $m_core_hdr[1] ) ? trim( $m_core_hdr[1] ) : '';
-assert_test( $core_hdr_ver === '4.7.0', "24.3: Core Plugin header declares Version: 4.7.0 (found: {$core_hdr_ver})" );
+assert_test( $core_hdr_ver === '4.8.0', "24.3: Core Plugin header declares Version: 4.8.0 (found: {$core_hdr_ver})" );
 
 preg_match( "/define\(\s*'NTN_JOURNAL_CORE_VERSION',\s*'([^']+)'\s*\);/", $core_php, $m_core_const );
 $core_const_ver = isset( $m_core_const[1] ) ? trim( $m_core_const[1] ) : '';
-assert_test( $core_const_ver === '4.7.0', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.7.0 (found: {$core_const_ver})" );
+assert_test( $core_const_ver === '4.8.0', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.8.0 (found: {$core_const_ver})" );
 
 assert_test(
-	$parent_ver === '4.7.0' && $child_ver === '4.7.0' && $core_hdr_ver === '4.7.0' && $core_const_ver === '4.7.0',
+	$parent_ver === '4.8.0' && $child_ver === '4.8.0' && $core_hdr_ver === '4.8.0' && $core_const_ver === '4.8.0',
 	'24.5: All 4 version headers are 100% synchronized and atomic according to Rule 2 of GEMINI.md'
 );
 
@@ -1870,7 +1870,7 @@ $parent_style_ver = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( AB
 $child_style_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' ), $m2 ) ? $m2[1] : '';
 $core_plugin_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m3 ) ? $m3[1] : '';
 $core_const_ver   = preg_match( '/define\(\s*[\'"]NTN_JOURNAL_CORE_VERSION[\'"]\s*,\s*[\'"]([0-9\.]+)[\'"]\s*\)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m4 ) ? $m4[1] : '';
-assert_test( $parent_style_ver === '4.7.0' && $child_style_ver === '4.7.0' && $core_plugin_ver === '4.7.0' && $core_const_ver === '4.7.0', '29.1: All 4 version headers are synchronized to 4.7.0' );
+assert_test( $parent_style_ver === '4.8.0' && $child_style_ver === '4.8.0' && $core_plugin_ver === '4.8.0' && $core_const_ver === '4.8.0', '29.1: All 4 version headers are synchronized to 4.8.0' );
 
 // 29.2: single.php sequence is Google Feed -> Social CTA -> Bottom Related Posts
 $single_php = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/single.php' );
@@ -3856,7 +3856,7 @@ assert_test(
 	false !== strpos( file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), "inc/category-hub-stats.php" ) &&
 	false !== strpos( $hs_src, "get_option( 'ntn_cat_hub_version', '0' )" ) && false !== strpos( $hs_src, 'set_transient( $cache_key, $data, DAY_IN_SECONDS )' ) &&
 	false !== strpos( $hs_src, "\$focus->term_id . '|' . \$year . '|'" ) &&
-	false === strpos( $hs_src, 'foreach' ) && false === strpos( $hs_src, 'WP_Query' ) && false === strpos( $hs_src, 'get_the_terms' ),
+	false === strpos( $hs_src, 'foreach' ) && false === strpos( $hs_src, 'new WP_Query' ) && false === strpos( $hs_src, 'get_the_terms' ),
 	'63.1: Stats module is loaded, shares the Hub cache version for 24 hours, renews with the year and never loops over posts'
 );
 
@@ -4275,9 +4275,8 @@ $pg_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/b
 $pg_out = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/style-tailwind-output.css' );
 $pg_src = file_get_contents( $pg_file );
 assert_test(
-	false === strpos( $pg_css, '.is-numbers' ) && false === strpos( $pg_css, '.ntn-stat-sub' ) && false !== strpos( $pg_css, '.ntn-stats-cards { grid-template-columns: repeat(5, minmax(0, 1fr)); }' ) &&
-	false !== strpos( $pg_css, '.ntn-stats-cards .ntn-cell { padding: 12px; }' ) &&
-	false !== strpos( $pg_out, '.ntn-stats-cards' ) && false === strpos( $pg_out, '.is-numbers' ) &&
+	false === strpos( $pg_css, '.is-numbers' ) && false === strpos( $pg_css, '.ntn-stat-sub' ) && false !== strpos( $pg_css, '.ntn-sec-head + .ntn-stats-cards { margin-top: 24px; }' ) &&
+	false !== strpos( $pg_out, '.ntn-stats-lead' ) && false === strpos( $pg_out, '.is-numbers' ) &&
 	false !== strpos( $pg_src, "locate_template( 'archive.php', true, false )" ) && false !== strpos( $pg_src, "function_exists( 'ntn_core_get_category_hub_stats' )" ),
 	'65.8: Styles use the band colors for light and dark and are compiled; the page falls back to the archive without the plugin'
 );
@@ -4302,7 +4301,7 @@ $se_backup_paged = $mock_query_vars['paged'] ?? null;
 // 66.1: ora che le pagine hanno l'elenco degli articoli, /page/2/ si comporta come nelle altre Hub: nessuna regola SEO dedicata
 assert_test(
 	! function_exists( 'ntn_core_category_hub_stats_tsf_robots' ) && ! function_exists( 'ntn_core_category_hub_stats_wp_robots' ) && ! function_exists( 'ntn_core_category_hub_stats_tsf_tags' ) &&
-	false === strpos( $se_src, 'the_seo_framework_robots_meta_array' ) && false === strpos( $se_src, 'the_seo_framework_meta_render_data' ) && false === strpos( $se_src, "'wp_robots'" ) && false === strpos( $se_src, "'paged'" ),
+	false === strpos( $se_src, 'the_seo_framework_robots_meta_array' ) && false === strpos( $se_src, 'the_seo_framework_meta_render_data' ) && false === strpos( $se_src, "'wp_robots'" ),
 	'66.1: Statistiche Hubs have no dedicated robots or prev/next rule: later pages behave like those of other Hubs'
 );
 
@@ -4334,6 +4333,110 @@ if ( null === $se_backup_paged ) {
 	$GLOBALS['mock_query_vars']['paged'] = $se_backup_paged;
 }
 unset( $mock_termmeta[9901], $mock_options['ntn_cat_hub_version'] );
+
+// --- TEST SUITE 67: Griglia 3x3 dell'Hub Statistiche v4.8.0 ---
+echo "\n--- 67. GRIGLIA 3X3 HUB STATISTICHE V4.8.0 ---\n";
+
+class NTN_Stats_Mock_Query extends WP_Query {
+	public $vars = array();
+	public $main = true;
+	public $cat = true;
+	public $feed = false;
+	public $term = null;
+	public function __construct( $term, $paged ) {
+		$this->term = $term;
+		$this->vars = array( 'paged' => $paged );
+	}
+	public function get( $key ) { return $this->vars[ $key ] ?? ''; }
+	public function set( $key, $value ) { $this->vars[ $key ] = $value; }
+	public function is_main_query() { return $this->main; }
+	public function is_category() { return $this->cat; }
+	public function is_feed() { return $this->feed; }
+	public function get_queried_object() { return $this->term; }
+}
+if ( ! function_exists( 'is_admin' ) ) {
+	function is_admin() { return false; }
+}
+$gr_stat = new WP_Term( array( 'term_id' => 9951, 'name' => 'Numeri', 'slug' => 'numeri', 'taxonomy' => 'category' ) );
+$gr_cons = new WP_Term( array( 'term_id' => 9952, 'name' => 'Console', 'slug' => 'console', 'taxonomy' => 'category' ) );
+$mock_termmeta[9951] = array( '_ntn_hub_enabled' => '1', '_ntn_hub_type' => 'statistiche' );
+$mock_termmeta[9952] = array( '_ntn_hub_enabled' => '1', '_ntn_hub_type' => 'console' );
+
+// Simula la paginazione di WordPress: quali articoli mostra ogni pagina e quante pagine dichiara
+$gr_walk = static function ( $term, $total ) {
+	$pages = array();
+	$page  = 1;
+	do {
+		$q = new NTN_Stats_Mock_Query( $term, $page );
+		ntn_core_category_hub_stats_pre_get_posts( $q );
+		$per    = (int) $q->get( 'posts_per_page' );
+		$offset = (int) $q->get( 'offset' );
+		$found  = ntn_core_category_hub_stats_found_posts( $total, $q );
+		$max    = $per ? (int) ceil( $found / $per ) : 0;
+		$ids    = $offset < $total ? range( $offset + 1, min( $total, $offset + $per ) ) : array();
+		$pages[ $page ] = array( 'per' => $per, 'offset' => $offset, 'max' => $max, 'ids' => $ids );
+		$page++;
+	} while ( $page <= $max && $page < 50 );
+	return $pages;
+};
+
+// 67.1: pagina 1 con 10 articoli, le altre con 9 e l'offset giusto
+$gr_27 = $gr_walk( $gr_stat, 27 );
+assert_test(
+	10 === $gr_27[1]['per'] && 0 === $gr_27[1]['offset'] && 9 === $gr_27[2]['per'] && 10 === $gr_27[2]['offset'] && 9 === $gr_27[3]['per'] && 19 === $gr_27[3]['offset'],
+	'67.1: The first page holds 10 articles (opening and 9 cards), later pages 9 with the right offset'
+);
+
+// 67.2: nessun articolo ripetuto o saltato e stesso numero di pagine ovunque, anche ai bordi
+$gr_ok = true;
+foreach ( array( 1, 9, 10, 11, 19, 20, 27, 28, 29, 100, 137 ) as $gr_total ) {
+	$gr_pages = $gr_walk( $gr_stat, $gr_total );
+	$gr_seen  = array_merge( ...array_column( $gr_pages, 'ids' ) );
+	$gr_maxes = array_unique( array_column( $gr_pages, 'max' ) );
+	$gr_empty = array_filter( $gr_pages, static function ( $p ) { return empty( $p['ids'] ); } );
+	if ( range( 1, $gr_total ) !== $gr_seen || 1 !== count( $gr_maxes ) || count( $gr_pages ) !== (int) reset( $gr_maxes ) || ! empty( $gr_empty ) ) {
+		$gr_ok = false;
+		echo "   Totale {$gr_total}: pagine incoerenti\n";
+	}
+}
+assert_test(
+	$gr_ok && 1 === $gr_walk( $gr_stat, 10 )[1]['max'] && 2 === $gr_walk( $gr_stat, 11 )[1]['max'] && 3 === count( $gr_27 ),
+	'67.2: No article is repeated or skipped across pages, and every page declares the same page count with no empty last page'
+);
+
+// 67.3: solo la query principale di una Hub Statistiche: le altre Hub, le altre query e la categoria vuota non cambiano
+$gr_cons_q = new NTN_Stats_Mock_Query( $gr_cons, 2 );
+ntn_core_category_hub_stats_pre_get_posts( $gr_cons_q );
+$gr_side = new NTN_Stats_Mock_Query( $gr_stat, 2 );
+$gr_side->main = false;
+ntn_core_category_hub_stats_pre_get_posts( $gr_side );
+$gr_tag = new NTN_Stats_Mock_Query( $gr_stat, 2 );
+$gr_tag->cat = false;
+ntn_core_category_hub_stats_pre_get_posts( $gr_tag );
+$gr_feed = new NTN_Stats_Mock_Query( $gr_stat, 1 );
+$gr_feed->feed = true;
+ntn_core_category_hub_stats_pre_get_posts( $gr_feed );
+$gr_zero = new NTN_Stats_Mock_Query( $gr_stat, 1 );
+ntn_core_category_hub_stats_pre_get_posts( $gr_zero );
+assert_test(
+	'' === $gr_cons_q->get( 'posts_per_page' ) && '' === $gr_cons_q->get( 'offset' ) && 123 === ntn_core_category_hub_stats_found_posts( 123, $gr_cons_q ) &&
+	'' === $gr_side->get( 'posts_per_page' ) && '' === $gr_tag->get( 'posts_per_page' ) && '' === $gr_feed->get( 'posts_per_page' ) && 123 === ntn_core_category_hub_stats_found_posts( 123, $gr_side ) &&
+	0 === ntn_core_category_hub_stats_found_posts( 0, $gr_zero ),
+	'67.3: Only the main query of a Statistiche Hub changes: other Hubs, secondary queries, feeds and empty categories are untouched'
+);
+
+// 67.4: tre colonne come gli archivi: niente cinque colonne né spazio interno ridotto della 4.7.0; i contatori in riga restano
+$gr_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/build/input.css' );
+$gr_out = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/style-tailwind-output.css' );
+$gr_tpl = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/category-hub-statistiche.php' );
+assert_test(
+	false !== strpos( $gr_tpl, '<div class="ntn-cells ntn-cells--3 ntn-stats-cards">' ) && false !== strpos( $gr_tpl, '<div class="ntn-gcounts">' ) && false !== strpos( $gr_tpl, '<div class="ntn-arch-head">' ) &&
+	false === strpos( $gr_css, '.ntn-stats-cards { grid-template-columns' ) && false === strpos( $gr_css, '.ntn-stats-cards .ntn-cell' ) &&
+	false === strpos( $gr_out, '.ntn-stats-cards{grid-template-columns' ) && false === strpos( $gr_out, '.ntn-stats-cards .ntn-cell' ),
+	'67.4: Cards use the three-column archive grid without the 4.7.0 overrides, keeping the counters row and the wide header'
+);
+
+unset( $mock_termmeta[9951], $mock_termmeta[9952] );
 
 echo "\n=======================================================================\n";
 echo " AUDIT SUMMARY: {$passed} PASSED, {$failed} FAILED\n";
