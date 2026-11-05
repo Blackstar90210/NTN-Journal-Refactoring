@@ -388,6 +388,9 @@ function get_template_part( $slug, $name = null, $args = array() ) {
 	if ( $slug === 'template-parts/hub-article-feed' ) {
 		require ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/template-parts/hub-article-feed.php';
 	}
+	if ( $slug === 'template-parts/content' && null === $name && ! empty( $GLOBALS['pg_real_cards'] ) ) {
+		require ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/template-parts/content.php';
+	}
 	if ( $slug === 'template-parts/content' && $name === 'game-card' ) {
 		// Mock rendering a game card for tests
 		$post_id = get_the_ID();
@@ -1623,24 +1626,24 @@ echo "\n--- 24. SEMVER SIMULTANEOUS 4-HEADER SYNCHRONIZATION ---\n";
 $parent_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $parent_css, $m_parent );
 $parent_ver = isset( $m_parent[1] ) ? trim( $m_parent[1] ) : '';
-assert_test( $parent_ver === '4.5.0', "24.1: Parent Theme style.css declares Version: 4.5.0 (found: {$parent_ver})" );
+assert_test( $parent_ver === '4.6.0', "24.1: Parent Theme style.css declares Version: 4.6.0 (found: {$parent_ver})" );
 
 $child_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $child_css, $m_child );
 $child_ver = isset( $m_child[1] ) ? trim( $m_child[1] ) : '';
-assert_test( $child_ver === '4.5.0', "24.2: Child Theme style.css declares Version: 4.5.0 (found: {$child_ver})" );
+assert_test( $child_ver === '4.6.0', "24.2: Child Theme style.css declares Version: 4.6.0 (found: {$child_ver})" );
 
 $core_php = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' );
 preg_match( '/\*\s*Version:\s*([0-9\.]+)/', $core_php, $m_core_hdr );
 $core_hdr_ver = isset( $m_core_hdr[1] ) ? trim( $m_core_hdr[1] ) : '';
-assert_test( $core_hdr_ver === '4.5.0', "24.3: Core Plugin header declares Version: 4.5.0 (found: {$core_hdr_ver})" );
+assert_test( $core_hdr_ver === '4.6.0', "24.3: Core Plugin header declares Version: 4.6.0 (found: {$core_hdr_ver})" );
 
 preg_match( "/define\(\s*'NTN_JOURNAL_CORE_VERSION',\s*'([^']+)'\s*\);/", $core_php, $m_core_const );
 $core_const_ver = isset( $m_core_const[1] ) ? trim( $m_core_const[1] ) : '';
-assert_test( $core_const_ver === '4.5.0', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.5.0 (found: {$core_const_ver})" );
+assert_test( $core_const_ver === '4.6.0', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.6.0 (found: {$core_const_ver})" );
 
 assert_test(
-	$parent_ver === '4.5.0' && $child_ver === '4.5.0' && $core_hdr_ver === '4.5.0' && $core_const_ver === '4.5.0',
+	$parent_ver === '4.6.0' && $child_ver === '4.6.0' && $core_hdr_ver === '4.6.0' && $core_const_ver === '4.6.0',
 	'24.5: All 4 version headers are 100% synchronized and atomic according to Rule 2 of GEMINI.md'
 );
 
@@ -1867,7 +1870,7 @@ $parent_style_ver = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( AB
 $child_style_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' ), $m2 ) ? $m2[1] : '';
 $core_plugin_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m3 ) ? $m3[1] : '';
 $core_const_ver   = preg_match( '/define\(\s*[\'"]NTN_JOURNAL_CORE_VERSION[\'"]\s*,\s*[\'"]([0-9\.]+)[\'"]\s*\)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m4 ) ? $m4[1] : '';
-assert_test( $parent_style_ver === '4.5.0' && $child_style_ver === '4.5.0' && $core_plugin_ver === '4.5.0' && $core_const_ver === '4.5.0', '29.1: All 4 version headers are synchronized to 4.5.0' );
+assert_test( $parent_style_ver === '4.6.0' && $child_style_ver === '4.6.0' && $core_plugin_ver === '4.6.0' && $core_const_ver === '4.6.0', '29.1: All 4 version headers are synchronized to 4.6.0' );
 
 // 29.2: single.php sequence is Google Feed -> Social CTA -> Bottom Related Posts
 $single_php = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/single.php' );
@@ -4145,34 +4148,106 @@ assert_test(
 	'65.5: An empty category shows dashes for author and date and the empty state instead of the article list'
 );
 
-// 65.9: l'elenco degli articoli: sezione, righe con data, gioco, titolo e minuti, paginazione
-$pg_a = new WP_Post( array( 'ID' => 98001, 'post_title' => 'Primo articolo <em>vero</em>', 'post_type' => 'post', 'post_status' => 'publish' ) );
-$pg_b = new WP_Post( array( 'ID' => 98002, 'post_title' => 'Secondo articolo', 'post_type' => 'post', 'post_status' => 'publish' ) );
-$GLOBALS['mock_terms'][9820]    = new WP_Term( array( 'term_id' => 9820, 'name' => 'Gioco <b>Uno</b>', 'slug' => 'gioco-uno', 'taxonomy' => 'post_tag' ) );
-$GLOBALS['mock_terms'][9821]    = new WP_Term( array( 'term_id' => 9821, 'name' => 'Tag normale', 'slug' => 'tag-normale', 'taxonomy' => 'post_tag' ) );
-$GLOBALS['mock_termmeta'][9820] = array( '_ntn_igdb_game_id' => '77' );
-$GLOBALS['pg_terms']            = array( 98001 => array( $GLOBALS['mock_terms'][9821], $GLOBALS['mock_terms'][9820] ), 98002 => array( $GLOBALS['mock_terms'][9821] ) );
-$GLOBALS['mock_postmeta'][98001]['_ntn_reading_time'] = 7;
-$pg_feed = $pg_render( $pg_full, array( $pg_a, $pg_b ) );
+// 65.9-65.13 (v4.6.0): apertura e schede. La pagina si genera davvero, con le schede vere di content.php
+require_once ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/inc/front-page-data.php';
+if ( ! function_exists( 'get_post_timestamp' ) ) {
+	function get_post_timestamp( $post = null ) { return time(); }
+}
+if ( ! function_exists( 'get_the_post_thumbnail' ) ) {
+	function get_the_post_thumbnail( $post = null, $size = 'post-thumbnail', $attr = array() ) {
+		return '<img data-size="' . esc_attr( $size ) . '" loading="' . esc_attr( $attr['loading'] ?? '' ) . '" alt="' . esc_attr( $attr['alt'] ?? '' ) . '">';
+	}
+}
+if ( ! function_exists( 'get_post_thumbnail_id' ) ) {
+	function get_post_thumbnail_id( $post = null ) { return 1; }
+}
+if ( ! function_exists( 'wp_get_attachment_image' ) ) {
+	function wp_get_attachment_image( $id, $size = 'thumbnail', $icon = false, $attr = array() ) {
+		return '<img data-size="' . esc_attr( $size ) . '" loading="' . esc_attr( $attr['loading'] ?? '' ) . '" alt="' . esc_attr( $attr['alt'] ?? '' ) . '">';
+	}
+}
+if ( ! function_exists( 'the_author' ) ) {
+	function the_author() { echo esc_html( get_the_author() ); }
+}
+$GLOBALS['pg_real_cards'] = true;
+$pg_loop = array();
+foreach ( array( 98001 => 'Primo <em>articolo</em>', 98002 => 'Secondo articolo', 98003 => 'Terzo articolo', 98004 => 'Quarto articolo' ) as $pg_id => $pg_title ) {
+	$pg_post = new WP_Post( array( 'ID' => $pg_id, 'post_title' => $pg_title, 'post_name' => 'p-' . $pg_id, 'post_type' => 'post', 'post_status' => 'publish' ) );
+	$pg_loop[] = $pg_post;
+	$GLOBALS['mock_posts'][ $pg_id ] = $pg_post;
+}
+$GLOBALS['mock_postmeta'][98001] = array( '_thumbnail_url' => 'https://example.com/a.jpg', '_ntn_reading_time' => 7 );
+$GLOBALS['mock_postmeta'][98002] = array( '_thumbnail_url' => 'https://example.com/b.jpg' );
+$pg_paged_backup = $GLOBALS['mock_query_vars']['paged'] ?? null;
+$GLOBALS['mock_query_vars']['paged'] = 0;
+$pg_p1 = $pg_render( $pg_full, $pg_loop );
+$GLOBALS['mock_query_vars']['paged'] = 2;
+$pg_p2 = $pg_render( $pg_full, $pg_loop );
+$GLOBALS['mock_query_vars']['paged'] = 0;
+$pg_p1_one = $pg_render( $pg_full, array( $pg_loop[0] ) );
+$pg_no_cover = $pg_render( $pg_full, array( $pg_loop[2], $pg_loop[3] ) );
+$pg_card_count = static function ( $html ) {
+	return substr_count( $html, 'ntn-cell ntn-card' );
+};
+
+// 65.9: prima pagina: l'articolo più recente in apertura e gli altri nelle schede degli archivi, a tre colonne, con la paginazione
 assert_test(
-	false !== strpos( $pg_feed, '<div class="ntn-wrap ntn-chub-body">' ) && false !== strpos( $pg_feed, '<section class="ntn-home-block" aria-labelledby="ntn-h-cfeed">' ) &&
-	false !== strpos( $pg_feed, '<h2 id="ntn-h-cfeed" class="ntn-sec-title">// Tutti gli articoli</h2>' ) && false !== strpos( $pg_feed, '<span class="ntn-sec-aside">Dal più recente</span>' ) &&
-	2 === substr_count( $pg_feed, '<a class="ntn-chub-row"' ) && 1 === substr_count( $pg_feed, '<div class="ntn-chub-feed">' ) && 1 === substr_count( $pg_feed, '<div class="ntn-pager-wrap">' ) &&
-	1 === substr_count( $pg_feed, 'class="ntn-chub-row-tag"' ) && false !== strpos( $pg_feed, '// Gioco &lt;b&gt;Uno&lt;/b&gt;' ) && false === strpos( $pg_feed, '// Tag normale' ) &&
-	false !== strpos( $pg_feed, '<span class="ntn-chub-row-min">7 min</span>' ) && false !== strpos( $pg_feed, '<span class="ntn-chub-row-min">1 min</span>' ) && false === strpos( $pg_feed, 'ntn-empty' ),
-	'65.9: The article list has its section, one row per post with game tag and reading time, the pager and no empty state'
+	1 === substr_count( $pg_p1, '<a class="ntn-lead-main group"' ) && 1 === substr_count( $pg_p1, 'class="ntn-lead ntn-lead--solo ntn-stats-lead"' ) &&
+	false !== strpos( $pg_p1, '<h2 id="ntn-h-cfeed" class="ntn-sec-title">// Tutti gli articoli</h2>' ) && false !== strpos( $pg_p1, '<span class="ntn-sec-aside">Dal più recente</span>' ) &&
+	false !== strpos( $pg_p1, 'class="ntn-lead-title"' ) && false !== strpos( $pg_p1, '<span>7 min</span>' ),
+	'65.9a: The first page opens with the latest article in the large block'
+);
+assert_test(
+	3 === $pg_card_count( $pg_p1 ) && 1 === substr_count( $pg_p1, '<div class="ntn-cells ntn-cells--3 ntn-stats-cards">' ) && 1 === substr_count( $pg_p1, '<div class="ntn-pager-wrap">' ) &&
+	false === strpos( $pg_p1, 'ntn-chub-feed' ) && false === strpos( $pg_p1, 'ntn-chub-row' ) && false === strpos( $pg_p1, 'ntn-empty' ),
+	'65.9b: The other articles use the archive cards in three columns with the pager, not the compact list'
 );
 
-// 65.10: l'elenco è uno solo per le Hub di categoria e di statistiche; la pagina lo usa senza filtri per piattaforma
+// 65.10: dalla pagina 2 in poi solo le schede; con un solo articolo solo l'apertura, senza griglia vuota
+assert_test(
+	false === strpos( $pg_p2, 'ntn-lead-main' ) && 4 === $pg_card_count( $pg_p2 ) && 1 === substr_count( $pg_p2, '<div class="ntn-pager-wrap">' ) &&
+	1 === substr_count( $pg_p1_one, 'ntn-lead-main' ) && 0 === $pg_card_count( $pg_p1_one ) && false === strpos( $pg_p1_one, 'ntn-stats-cards' ),
+	'65.10: Later pages show only the cards, and a single article shows only the opening without an empty grid'
+);
+
+// 65.11: l'immagine dell'apertura si carica subito ed è grande; quelle delle schede quando servono; niente HTML dai titoli
+$pg_lead_html = (string) substr( $pg_p1, (int) strpos( $pg_p1, 'ntn-lead-main' ), (int) strpos( $pg_p1, 'ntn-stats-cards' ) - (int) strpos( $pg_p1, 'ntn-lead-main' ) );
+$pg_grid_html = (string) substr( $pg_p1, (int) strpos( $pg_p1, 'ntn-stats-cards' ) );
+assert_test(
+	false !== strpos( $pg_lead_html, 'data-size="large" loading="eager"' ) && false !== strpos( $pg_grid_html, 'data-size="medium_large" loading="lazy"' ) && false === strpos( $pg_grid_html, 'loading="eager"' ) &&
+	false !== strpos( $pg_lead_html, 'Primo &lt;em&gt;articolo&lt;/em&gt;' ) && false === strpos( $pg_lead_html, '<em>' ),
+	'65.11: The opening image loads first at large size, card images load lazily, and the opening title is escaped'
+);
+
+// 65.12: copertina mancante: la copertina a punti in apertura, l'immagine predefinita del tema nelle schede
+$pg_no_grid = (string) substr( $pg_no_cover, (int) strpos( $pg_no_cover, 'ntn-stats-cards' ) );
+assert_test(
+	false !== strpos( $pg_no_cover, '<span class="ntn-ph block w-full h-full" aria-hidden="true"></span>' ) && 1 === $pg_card_count( $pg_no_cover ) &&
+	false !== strpos( $pg_no_grid, 'src="' . esc_url( ntn_journal_default_cover_url() ) . '"' ) && false !== strpos( $pg_no_grid, 'loading="lazy"' ),
+	'65.12: A missing cover falls back to the dotted cover in the opening and to the default theme image in the cards'
+);
+
+// 65.13: l'Hub Statistiche ha il suo elenco; le altre Hub restano sul pezzo condiviso e il loro modello non conosce apertura o schede nuove
 $pg_hub_tpl = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/category-hub.php' );
+$pg_stat_src = file_get_contents( $pg_file );
 $pg_part    = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/template-parts/hub-article-feed.php' );
 assert_test(
-	false !== strpos( $pg_hub_tpl, "get_template_part( 'template-parts/hub-article-feed', null, array( 'row_tag' => \$hub_row_tag," ) && false === strpos( $pg_hub_tpl, 'ntn-chub-row-date' ) &&
-	false !== strpos( file_get_contents( $pg_file ), "'row_tag' => 'ntn_core_category_hub_post_game_name'" ) && false === strpos( $pg_feed, 'ntn-chub-filter' ) &&
-	false !== strpos( $pg_part, "the_posts_pagination( array(\n\t\t\t\t\t\t'mid_size'  => 2," ) && false !== strpos( $pg_part, "'prev_text' => '&larr; Precedente'" ) && false !== strpos( $pg_part, "'next_text' => 'Successivo &rarr;'" ),
-	'65.10: Category and Statistiche Hubs share one article list with the usual pagination, without platform filters on this type'
+	false === strpos( $pg_stat_src, 'hub-article-feed' ) && false !== strpos( $pg_stat_src, "get_template_part( 'template-parts/content' )" ) &&
+	false !== strpos( $pg_hub_tpl, "get_template_part( 'template-parts/hub-article-feed', null, array( 'row_tag' => \$hub_row_tag," ) && false === strpos( $pg_hub_tpl, 'ntn-stats-' ) &&
+	false !== strpos( $pg_part, 'ntn-chub-feed' ) && false !== strpos( $pg_stat_src, "'prev_text' => '&larr; Precedente'" ) && false !== strpos( $pg_stat_src, "'next_text' => 'Successivo &rarr;'" ) &&
+	false === strpos( $pg_stat_src, "ntn_core_get_category_hub_data()['featured']" ) && false === strpos( $pg_stat_src, "\$hub['featured']" ),
+	'65.13: Statistiche Hubs use their own list and always open with the latest article; other Hubs stay on the shared list'
 );
-unset( $GLOBALS['mock_postmeta'][98001], $GLOBALS['mock_terms'][9820], $GLOBALS['mock_terms'][9821], $GLOBALS['mock_termmeta'][9820], $GLOBALS['pg_terms'] );
+
+unset( $GLOBALS['pg_real_cards'], $GLOBALS['mock_postmeta'][98001], $GLOBALS['mock_postmeta'][98002] );
+foreach ( array_keys( array( 98001 => 1, 98002 => 1, 98003 => 1, 98004 => 1 ) ) as $pg_id ) {
+	unset( $GLOBALS['mock_posts'][ $pg_id ] );
+}
+if ( null === $pg_paged_backup ) {
+	unset( $GLOBALS['mock_query_vars']['paged'] );
+} else {
+	$GLOBALS['mock_query_vars']['paged'] = $pg_paged_backup;
+}
 $GLOBALS['mock_loop_posts'] = array();
 $GLOBALS['mock_loop_index'] = 0;
 $GLOBALS['post']            = null;

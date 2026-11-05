@@ -1816,6 +1816,14 @@
   .ntn-chub-stats dd.ntn-stat-sub { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ntn-band-muted); }
   .ntn-stat-sub b { font-weight: 700; color: var(--ntn-band-accent); }
   .ntn-chub-stats dd a:hover { text-decoration: underline; text-underline-offset: 3px; }
+  /* Hub Statistiche (v4.6.0): apertura con il testo centrato sull'immagine e schede degli archivi con la loro linea superiore */
+  .ntn-stats-lead-text { display: grid; gap: 14px; align-content: start; min-width: 0; }
+  .ntn-home-block .ntn-stats-cards { border-top: 1px solid var(--ntn-line); }
+  .ntn-sec-head + .ntn-stats-cards { margin-top: 24px; }
+  @media (min-width: 960px) {
+    .ntn-stats-lead .ntn-lead-main { align-items: center; }
+    .ntn-stats-lead.ntn-lead--solo .ntn-lead-main > .ntn-home-img { grid-row: auto; }
+  }
 
   /* Selettore dei marchi, filtro per console e filtro A–Z: pulsanti squadrati in Mono */
   .ntn-chub-pick { display: flex; flex-wrap: wrap; gap: 4px; }
