@@ -4,7 +4,7 @@
 
 *Read this document in: [English](#english) | [Italiano](#italiano)*
 
-**Version:** 4.9.1 · **Authors:** Luca Maiolini & Divisione_WP
+**Version:** 4.10.0 · **Authors:** Luca Maiolini & Divisione_WP
 
 ---
 
@@ -15,8 +15,8 @@
 
 | Part | Folder | Role |
 |---|---|---|
-| Parent theme | `ntn-journal` | Page templates, Tailwind CSS v4 styles, front-end scripts |
-| Child theme | `ntn-journal-reloaded` | Video game catalog, game Hub page, live search, style tweaks |
+| Parent theme | `ntn-journal` | Page templates (including the video game catalog and game Hub), Tailwind CSS v4 styles, front-end scripts (including live search) |
+| Child theme | `ntn-journal-reloaded` | Your own customizations only (empty since 4.10.0) |
 | Core plugin | `ntn-journal-core` | All data and logic: post types, taxonomies, IGDB, SEO, redirects, backup, Hubs, admin panel |
 
 The theme displays the data, the plugin manages it. The theme keeps working if the plugin is disabled, but most features need it.
@@ -71,8 +71,8 @@ The theme displays the data, the plugin manages it. The theme keeps working if t
 
 | Pezzo | Cartella | Ruolo |
 |---|---|---|
-| Tema parent | `ntn-journal` | Modelli delle pagine, stile con Tailwind CSS v4, script del sito |
-| Tema child | `ntn-journal-reloaded` | Catalogo dei videogiochi, Hub del gioco, ricerca dal vivo, ritocchi grafici |
+| Tema parent | `ntn-journal` | Modelli delle pagine (compresi catalogo dei videogiochi e Hub del gioco), stile con Tailwind CSS v4, script del sito (compresa la ricerca dal vivo) |
+| Tema child | `ntn-journal-reloaded` | Solo le tue personalizzazioni (vuoto dalla 4.10.0) |
 | Plugin | `ntn-journal-core` | Tutti i dati e la logica: tipi di contenuto, tassonomie, IGDB, SEO, redirect, backup, Hub, pannello di gestione |
 
 Il tema mostra i dati, il plugin li gestisce. Il tema funziona anche con il plugin spento, ma gran parte delle funzioni ha bisogno del plugin.

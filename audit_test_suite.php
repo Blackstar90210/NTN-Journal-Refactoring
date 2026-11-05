@@ -397,11 +397,8 @@ function get_template_part( $slug, $name = null, $args = array() ) {
 		require ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/template-parts/content.php';
 	}
 	if ( $slug === 'template-parts/content' && $name === 'game-card' ) {
-		// Mock rendering a game card for tests
-		$post_id = get_the_ID();
-		$cover = ntn_get_social_preview_image( $post_id );
-		echo '<img src="' . esc_url($cover) . '" />';
-		if ( $post_id == 105 ) echo 'NO COVER';
+		// v4.10.0: la scheda vera del catalogo, ora nel parent (prima qui c'era una scheda finta)
+		require ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/template-parts/content-game-card.php';
 	}
 }
 function the_content() { echo "<p>Testo del post.</p>"; }
@@ -1022,10 +1019,10 @@ $mock_loop_index = 0;
 ob_start();
 require ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/archive-videogioco.php';
 $empty_output = ob_get_clean();
-assert_test( strpos( $empty_output, 'VUOTO' ) !== false && strpos( $empty_output, 'Nessun videogioco presente nel catalogo.' ) !== false, '4.11: Empty catalog outputs VUOTO message cleanly' );
+assert_test( strpos( $empty_output, 'VUOTO' ) !== false && strpos( $empty_output, 'Nessun videogioco corrisponde ai criteri di ricerca.' ) !== false, '4.11: Empty catalog outputs VUOTO message cleanly' );
 
-// --- TEST SUITE 5: Child Theme archive-videogioco.php Loop Simulation ---
-echo "\n--- 5. CHILD THEME ARCHIVE LOOP SIMULATION ---\n";
+// --- TEST SUITE 5: secondo giro del catalogo (v4.10.0: il catalogo con i filtri è nel parent) ---
+echo "\n--- 5. CATALOG SECOND LOOP SIMULATION ---\n";
 $mock_loop_posts = array(
 	$mock_posts[101],
 	$mock_posts[104],
@@ -1035,14 +1032,14 @@ $mock_loop_posts = array(
 );
 $mock_loop_index = 0;
 ob_start();
-require ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/archive-videogioco.php';
+require ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/archive-videogioco.php';
 $child_output = ob_get_clean();
 
-assert_test( strpos( $child_output, 'https://images.igdb.com/igdb/image/upload/t_1080p/co1r7f.jpg' ) !== false, '5.1: Child theme renders 1080p IGDB cover' );
-assert_test( strpos( $child_output, 'https://example.com/wp-content/uploads/2026/08/indie-custom-featured.jpg' ) !== false, '5.2: Child theme renders WP featured fallback' );
-assert_test( strpos( $child_output, 'NO COVER' ) !== false, '5.3: Child theme renders NO COVER placeholder' );
-assert_test( strpos( $child_output, 'https://images.igdb.com/igdb/image/upload/t_1080p/co5vmg.jpg' ) !== false, '5.4: Child theme renders raw hash expanded to 1080p' );
-assert_test( strpos( $child_output, 'https://example.com/wp-content/uploads/corrupt-fallback.jpg' ) !== false, '5.5: Child theme handles corrupt metadata safely' );
+assert_test( strpos( $child_output, 'https://images.igdb.com/igdb/image/upload/t_1080p/co1r7f.jpg' ) !== false, '5.1: Catalog renders 1080p IGDB cover' );
+assert_test( strpos( $child_output, 'https://example.com/wp-content/uploads/2026/08/indie-custom-featured.jpg' ) !== false, '5.2: Catalog renders WP featured fallback' );
+assert_test( strpos( $child_output, 'NO COVER' ) !== false, '5.3: Catalog renders NO COVER placeholder' );
+assert_test( strpos( $child_output, 'https://images.igdb.com/igdb/image/upload/t_1080p/co5vmg.jpg' ) !== false, '5.4: Catalog renders raw hash expanded to 1080p' );
+assert_test( strpos( $child_output, 'https://example.com/wp-content/uploads/corrupt-fallback.jpg' ) !== false, '5.5: Catalog handles corrupt metadata safely' );
 
 // --- TEST SUITE 6: The SEO Framework (TSF) Image Resolution & Type Safety ---
 echo "\n--- 6. THE SEO FRAMEWORK (TSF) INTEGRATION & TYPE SAFETY ---\n";
@@ -1648,24 +1645,24 @@ echo "\n--- 24. SEMVER SIMULTANEOUS 4-HEADER SYNCHRONIZATION ---\n";
 $parent_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $parent_css, $m_parent );
 $parent_ver = isset( $m_parent[1] ) ? trim( $m_parent[1] ) : '';
-assert_test( $parent_ver === '4.9.1', "24.1: Parent Theme style.css declares Version: 4.9.1 (found: {$parent_ver})" );
+assert_test( $parent_ver === '4.10.0', "24.1: Parent Theme style.css declares Version: 4.10.0 (found: {$parent_ver})" );
 
 $child_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $child_css, $m_child );
 $child_ver = isset( $m_child[1] ) ? trim( $m_child[1] ) : '';
-assert_test( $child_ver === '4.9.1', "24.2: Child Theme style.css declares Version: 4.9.1 (found: {$child_ver})" );
+assert_test( $child_ver === '4.10.0', "24.2: Child Theme style.css declares Version: 4.10.0 (found: {$child_ver})" );
 
 $core_php = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' );
 preg_match( '/\*\s*Version:\s*([0-9\.]+)/', $core_php, $m_core_hdr );
 $core_hdr_ver = isset( $m_core_hdr[1] ) ? trim( $m_core_hdr[1] ) : '';
-assert_test( $core_hdr_ver === '4.9.1', "24.3: Core Plugin header declares Version: 4.9.1 (found: {$core_hdr_ver})" );
+assert_test( $core_hdr_ver === '4.10.0', "24.3: Core Plugin header declares Version: 4.10.0 (found: {$core_hdr_ver})" );
 
 preg_match( "/define\(\s*'NTN_JOURNAL_CORE_VERSION',\s*'([^']+)'\s*\);/", $core_php, $m_core_const );
 $core_const_ver = isset( $m_core_const[1] ) ? trim( $m_core_const[1] ) : '';
-assert_test( $core_const_ver === '4.9.1', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.9.1 (found: {$core_const_ver})" );
+assert_test( $core_const_ver === '4.10.0', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.10.0 (found: {$core_const_ver})" );
 
 assert_test(
-	$parent_ver === '4.9.1' && $child_ver === '4.9.1' && $core_hdr_ver === '4.9.1' && $core_const_ver === '4.9.1',
+	$parent_ver === '4.10.0' && $child_ver === '4.10.0' && $core_hdr_ver === '4.10.0' && $core_const_ver === '4.10.0',
 	'24.5: All 4 version headers are 100% synchronized and atomic according to Rule 2 of GEMINI.md'
 );
 
@@ -1712,16 +1709,18 @@ assert_test(
 	'26.2: Parent theme style.css allows gallery nested image figcaptions to be displayed'
 );
 
+// v4.10.0: gli stili di immagini e gallerie sono passati dallo style.css del child a build/input.css del parent
+$gallery_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/build/input.css' );
 // 26.3: Child theme style.css declares unified centered JetBrains Mono captions for image blocks and nested images
 assert_test(
-	strpos( $child_css, 'body .wp-block-image figcaption' ) !== false &&
-	strpos( $child_css, 'body .wp-block-gallery figure.wp-block-image figcaption' ) !== false,
-	'26.3: Child theme style.css targets both image blocks and nested gallery images'
+	strpos( $gallery_css, 'body .wp-block-image figcaption' ) !== false &&
+	strpos( $gallery_css, 'body .wp-block-gallery figure.wp-block-image figcaption' ) !== false,
+	'26.3: Parent input.css targets both image blocks and nested gallery images'
 );
 
 // 26.4: Child theme does not contain display: none on gallery nested figcaptions
 assert_test(
-	strpos( $child_css, 'figure.wp-block-image figcaption {\n    display: none;' ) === false,
+	strpos( $gallery_css, 'figure.wp-block-image figcaption {\n    display: none;' ) === false,
 	'26.4: Child theme style.css does not hide nested image figcaptions'
 );
 
@@ -1734,16 +1733,16 @@ assert_test(
 
 // 26.6: Child theme defines unified vertical margins for images and galleries
 assert_test(
-	strpos( $child_css, 'margin-top: 1.5rem !important;' ) !== false &&
-	strpos( $child_css, 'margin-bottom: 1.5rem !important;' ) !== false,
-	'26.6: Child theme style.css defines unified 1.5rem vertical margins for image and gallery blocks'
+	strpos( $gallery_css, 'margin-top: 1.5rem !important;' ) !== false &&
+	strpos( $gallery_css, 'margin-bottom: 1.5rem !important;' ) !== false,
+	'26.6: Parent input.css defines unified 1.5rem vertical margins for image and gallery blocks'
 );
 
 // 26.7: Didascalie have explicit zero bottom margin to prevent paragraph gap distortion
 assert_test(
 	strpos( $parent_css, 'margin-bottom: 0 !important;' ) !== false &&
-	strpos( $child_css, 'margin-bottom: 0 !important;' ) !== false,
-	'26.7: Both parent and child theme styles set margin-bottom: 0 !important on captions'
+	strpos( $gallery_css, 'margin-bottom: 0 !important;' ) !== false,
+	'26.7: Parent style.css and input.css set margin-bottom: 0 !important on captions'
 );
 
 // --- TEST SUITE 27: Audit Remediation v3.1.5 (Security, Decoupling, A11y, SEO & Performance) ---
@@ -1785,9 +1784,9 @@ assert_test( strpos( $rp_code, '$closing_p . $injected_html' ) === false, '27.8:
 $formatted_sample = ntn_format_content_links( '<p><a href="https://example.com"><strong class="font-bold">test link text</strong></a></p>' );
 assert_test( strpos( $formatted_sample, 'class="font-bold"' ) !== false && strpos( $formatted_sample, 'test link text' ) !== false, '27.9: content-format.php preserves clean link text and tag attributes (Nothing OS clean style)' );
 
-// 27.10: single-videogioco.php in child theme does not contain select-none
-$child_sv = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/single-videogioco.php' );
-assert_test( strpos( $child_sv, 'select-none' ) === false, '27.10: single-videogioco.php in child theme has select-none removed' );
+// 27.10: single-videogioco.php (v4.10.0: solo nel parent, la copia del child è stata tolta) does not contain select-none
+$child_sv = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/single-videogioco.php' );
+assert_test( strpos( $child_sv, 'select-none' ) === false, '27.10: single-videogioco.php has select-none removed' );
 assert_test( strpos( $child_sv, 'Visualizza screenshot ingrandito di' ) !== false, '27.11: single-videogioco.php has descriptive aria-label on screenshots' );
 
 // 27.12: archive.php contains clean entities and no mojibake
@@ -1807,7 +1806,7 @@ assert_test( strpos( $author_php, 'update_meta_cache' ) !== false, '27.16: autho
 assert_test( ! file_exists( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/inc/igdb-test-page.php' ), '27.17: Orphan igdb-test-page.php successfully removed from parent theme' );
 
 // 27.16: content-game-card.php and author.php have width and height
-$cgc_content = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/template-parts/content-game-card.php' );
+$cgc_content = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/template-parts/content-game-card.php' );
 assert_test( strpos( $cgc_content, 'width="400" height="533"' ) !== false, '27.18: content-game-card.php declares explicit width and height' );
 
 // 27.17: performance.php contains ntn_png_has_transparency
@@ -1824,9 +1823,9 @@ assert_test( strpos( $parent_sv, 'width="640" height="360"' ) !== false, '28.2: 
 assert_test( strpos( $child_sv, 'rel="noopener noreferrer"' ) !== false, '28.3: single-videogioco.php in child has rel="noopener noreferrer"' );
 assert_test( strpos( $child_sv, 'width="640" height="360"' ) !== false, '28.4: single-videogioco.php in child has explicit 640x360 dimensions on trailer iframe' );
 
-// 28.5: archive-videogioco.php (Parent): 3:4 aspect ratio dimensions (400x533)
-$parent_av = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/archive-videogioco.php' );
-assert_test( strpos( $parent_av, 'width="400" height="533"' ) !== false, '28.5: archive-videogioco.php in parent has 3:4 aspect ratio 400x533' );
+// 28.5 (aggiornato in 4.10.0): il catalogo del parent disegna la scheda comune, con copertine 3:4 (400x533)
+$parent_av = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/template-parts/content-game-card.php' );
+assert_test( strpos( $parent_av, 'width="400" height="533"' ) !== false, '28.5: Parent catalog game card has 3:4 aspect ratio 400x533' );
 
 // 28.6: inc/performance.php: $_GET['author'] sanitized and unslashed
 assert_test( strpos( $perf_content, 'absint( wp_unslash( $_GET[\'author\'] ) )' ) !== false, '28.6: performance.php sanitizes and unslashes $_GET[\'author\']' );
@@ -1869,18 +1868,18 @@ assert_test( strpos( $comments_cb_php, 'esc_html( sprintf(' ) !== false, '28.18:
 $date_social = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/inc/date-social.php' );
 assert_test( strpos( $date_social, 'wp_date(' ) !== false && strpos( $date_social, "\$prefix . date(" ) === false, '28.19: date-social.php uses wp_date() with site timezone' );
 
-// 28.20: Child theme archive-videogioco.php: unslash, labels, esc_html__
-$child_av = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/archive-videogioco.php' );
-assert_test( strpos( $child_av, 'wp_unslash( $_GET[\'year\'] )' ) !== false, '28.20: child archive-videogioco.php unslashes query params' );
-assert_test( strpos( $child_av, 'id="mobile_filter_search"' ) !== false && strpos( $child_av, 'aria-label=' ) !== false, '28.21: child archive-videogioco.php provides aria-label on mobile search input' );
-assert_test( strpos( $child_av, 'for="filter_franchise"' ) !== false && strpos( $child_av, 'for="filter_developer"' ) !== false && strpos( $child_av, 'for="filter_engine"' ) !== false, '28.22: child archive-videogioco.php provides explicit for attributes on all filter labels' );
+// 28.20: archive-videogioco.php (v4.10.0: nel parent): unslash, labels, esc_html__
+$child_av = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/archive-videogioco.php' );
+assert_test( strpos( $child_av, 'wp_unslash( $_GET[\'year\'] )' ) !== false, '28.20: archive-videogioco.php unslashes query params' );
+assert_test( strpos( $child_av, 'id="mobile_filter_search"' ) !== false && strpos( $child_av, 'aria-label=' ) !== false, '28.21: archive-videogioco.php provides aria-label on mobile search input' );
+assert_test( strpos( $child_av, 'for="filter_franchise"' ) !== false && strpos( $child_av, 'for="filter_developer"' ) !== false && strpos( $child_av, 'for="filter_engine"' ) !== false, '28.22: archive-videogioco.php provides explicit for attributes on all filter labels' );
 
 // 28.23: Enqueue & JS resilience: catalog script dependency and vars guard
-$child_enq = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/inc/enqueue.php' );
+$child_enq = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/inc/enqueue.php' );
 assert_test( strpos( $child_enq, "array( 'ntn-live-search' )" ) !== false, '28.23: enqueue.php ensures ntn-catalog-filters depends on ntn-live-search' );
-$cat_filters_js = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/assets/js/catalog-filters.js' );
+$cat_filters_js = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/assets/js/catalog-filters.js' );
 assert_test( strpos( $cat_filters_js, "typeof ntn_catalog_vars === 'undefined'" ) !== false, '28.24: catalog-filters.js guards against missing ntn_catalog_vars' );
-$live_search_js = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/assets/js/live-search.js' );
+$live_search_js = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/assets/js/live-search.js' );
 assert_test( strpos( $live_search_js, "typeof ntn_catalog_vars === 'undefined'" ) !== false, '28.25: live-search.js guards against missing ntn_catalog_vars' );
 assert_test( strpos( $live_search_js, 'width="40" height="56"' ) !== false, '28.26: live-search.js sets explicit dimensions on dynamic result thumbnails' );
 
@@ -1892,7 +1891,7 @@ $parent_style_ver = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( AB
 $child_style_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' ), $m2 ) ? $m2[1] : '';
 $core_plugin_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m3 ) ? $m3[1] : '';
 $core_const_ver   = preg_match( '/define\(\s*[\'"]NTN_JOURNAL_CORE_VERSION[\'"]\s*,\s*[\'"]([0-9\.]+)[\'"]\s*\)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m4 ) ? $m4[1] : '';
-assert_test( $parent_style_ver === '4.9.1' && $child_style_ver === '4.9.1' && $core_plugin_ver === '4.9.1' && $core_const_ver === '4.9.1', '29.1: All 4 version headers are synchronized to 4.9.1' );
+assert_test( $parent_style_ver === '4.10.0' && $child_style_ver === '4.10.0' && $core_plugin_ver === '4.10.0' && $core_const_ver === '4.10.0', '29.1: All 4 version headers are synchronized to 4.10.0' );
 
 // 29.2: single.php sequence is Google Feed -> Social CTA -> Bottom Related Posts
 $single_php = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/single.php' );
@@ -1971,7 +1970,7 @@ assert_test(
 	strpos( $tag_php_content, "'prev_text' => '&larr; Precedente'" ) !== false &&
 	strpos( $author_php_content, "'prev_text' => '&larr; Precedente'" ) !== false &&
 	strpos( $cs_archive_content, "'prev_text' => '&larr; Precedente'" ) !== false &&
-	strpos( $vg_archive_content, "'prev_text' => '&larr; Precedente'" ) !== false &&
+	strpos( $vg_archive_content, 'id="ntn-catalog-sentinel"' ) !== false && // v4.10.0: il catalogo scorre all'infinito, senza numeri di pagina
 	strpos( $archive_php_content, "'prev_text' => '&larr; Precedente'" ) !== false,
 	'29.16: Pagination entities (&larr; Precedente, Successivo &rarr;) unified across all archive templates'
 );
@@ -2003,7 +2002,7 @@ assert_test(
 
 // 29.22: single-videogioco.php in parent and child theme wraps pagination in nav.navigation.pagination and uses standard arrows
 $vg_parent_single = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/single-videogioco.php' );
-$vg_child_single  = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/single-videogioco.php' );
+$vg_child_single  = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/single-videogioco.php' ); // v4.10.0: la copia del child è stata tolta
 assert_test(
 	strpos( $vg_parent_single, '<nav class="navigation pagination"' ) !== false &&
 	strpos( $vg_parent_single, "'prev_text' => '&larr; Precedente'" ) !== false &&
@@ -2116,7 +2115,7 @@ assert_test(
 	strpos( file_get_contents( $theme_dir . 'ntn-journal/inc/related-posts.php' ), 'class="ntn-sec-head mb-6"' ) !== false &&
 	strpos( file_get_contents( $theme_dir . 'ntn-journal/author.php' ), 'class="ntn-sec-head mb-6"' ) !== false &&
 	substr_count( file_get_contents( $theme_dir . 'ntn-journal/single-videogioco.php' ), 'class="ntn-sec-title"' ) === 5 &&
-	substr_count( file_get_contents( $theme_dir . 'ntn-journal-reloaded/single-videogioco.php' ), 'class="ntn-sec-title"' ) === 5 &&
+	! file_exists( $theme_dir . 'ntn-journal-reloaded/single-videogioco.php' ) &&
 	strpos( file_get_contents( $theme_dir . 'ntn-journal/inc/widgets.php' ), '<h2 class="ntn-sec-head mb-3"><span class="ntn-sec-title">' ) !== false,
 	'30.9: Section headings in home, related posts, author, game hub and widgets use .ntn-sec-head / .ntn-sec-title'
 );
@@ -2410,7 +2409,7 @@ echo "\n--- 36. ARCHIVI E HUB DEI GIOCHI V3.8.0 ---\n";
 
 $hh_code  = file_get_contents( $theme_dir . 'ntn-journal/template-parts/hub-header.php' );
 $hub_p    = file_get_contents( $theme_dir . 'ntn-journal/single-videogioco.php' );
-$hub_c    = file_get_contents( $theme_dir . 'ntn-journal-reloaded/single-videogioco.php' );
+$hub_c    = file_get_contents( $theme_dir . 'ntn-journal/single-videogioco.php' ); // v4.10.0: la Hub è solo nel parent
 $card     = file_get_contents( $theme_dir . 'ntn-journal/template-parts/content.php' );
 $arch_hd  = file_get_contents( $theme_dir . 'ntn-journal/template-parts/archive-head.php' );
 
@@ -2479,17 +2478,17 @@ assert_test(
 // --- TEST SUITE 37: Catalogo dei videogiochi v3.9.0 (fase 7) ---
 echo "\n--- 37. CATALOGO DEI VIDEOGIOCHI V3.9.0 ---\n";
 
-$cat_child  = file_get_contents( $theme_dir . 'ntn-journal-reloaded/archive-videogioco.php' );
+$cat_child  = file_get_contents( $theme_dir . 'ntn-journal/archive-videogioco.php' ); // v4.10.0: il catalogo con i filtri è nel parent
 $cat_parent = file_get_contents( $theme_dir . 'ntn-journal/archive-videogioco.php' );
-$cat_card   = file_get_contents( $theme_dir . 'ntn-journal-reloaded/template-parts/content-game-card.php' );
+$cat_card   = file_get_contents( $theme_dir . 'ntn-journal/template-parts/content-game-card.php' );
 $cat_css    = file_get_contents( $theme_dir . 'ntn-journal/build/input.css' );
-$cat_js     = file_get_contents( $theme_dir . 'ntn-journal-reloaded/assets/js/catalog-filters.js' );
+$cat_js     = file_get_contents( $theme_dir . 'ntn-journal/assets/js/catalog-filters.js' );
 
 // 37.1: il catalogo del child usa l'intestazione comune con il totale dei giochi e la griglia a linee condivise
 assert_test(
 	strpos( $cat_child, "'template-parts/archive-head'" ) !== false && strpos( $cat_child, "'Giochi in catalogo'" ) !== false &&
 	strpos( $cat_child, 'class="site-main ntn-main"' ) !== false && strpos( $cat_child, '<div id="ntn-catalog-grid" class="ntn-games">' ) !== false,
-	'37.1: Child catalog uses the shared band header (games total) and the shared-line games grid'
+	'37.1: Catalog uses the shared band header (games total) and the shared-line games grid'
 );
 
 // 37.2: tutti gli ID usati da catalog-filters.js restano nel markup
@@ -2508,11 +2507,11 @@ assert_test(
 	'37.3: Game card shows the cover in a frame with title and year below (no dark overlay band)'
 );
 
-// 37.4: il catalogo del parent (ripiego) usa la stessa scheda e l'intestazione comune
+// 37.4 (aggiornato in 4.10.0): il catalogo del parent è quello con i filtri e disegna la scheda comune
 assert_test(
-	strpos( $cat_parent, "'template-parts/archive-head'" ) !== false && strpos( $cat_parent, "post_class( 'ntn-game-card group' )" ) !== false &&
-	strpos( $cat_parent, '<div class="ntn-games">' ) !== false && strpos( $cat_parent, 'bg-black/85' ) === false,
-	'37.4: Parent fallback catalog uses the shared header and the same game card'
+	strpos( $cat_parent, "'template-parts/archive-head'" ) !== false && strpos( $cat_parent, "get_template_part( 'template-parts/content', 'game-card' )" ) !== false &&
+	strpos( $cat_parent, '<div id="ntn-catalog-grid" class="ntn-games">' ) !== false && strpos( $cat_parent, 'bg-black/85' ) === false,
+	'37.4: Parent catalog uses the shared header and the shared game card template'
 );
 
 // 37.5: il contatore dell'intestazione accetta un'unità propria (giochi, non articoli)
@@ -2614,9 +2613,9 @@ assert_test(
 // 39.6: testo visibile nella Hub, "Tutti gli articoli" come H2 (parent e child), alt nelle immagini delle schede
 assert_test(
 	strpos( $hs_head, "ntn_get_hub_auto_summary( (int) \$args['id'] )" ) !== false && strpos( $hs_head, '<p class="ntn-specs-p">' ) !== false && strpos( $hs_head, '<span class="ntn-specs-k">In breve</span>' ) !== false &&
-	strpos( file_get_contents( $theme_dir . 'ntn-journal/single-videogioco.php' ), '<h2 id="ntn-h-all"' ) !== false && strpos( file_get_contents( $theme_dir . 'ntn-journal-reloaded/single-videogioco.php' ), '<h2 id="ntn-h-all"' ) !== false &&
+	strpos( file_get_contents( $theme_dir . 'ntn-journal/single-videogioco.php' ), '<h2 id="ntn-h-all"' ) !== false &&
 	strpos( file_get_contents( $theme_dir . 'ntn-journal/template-parts/content.php' ), "'alt' => ntn_get_image_alt( get_the_ID() )" ) !== false,
-	'39.6: Hub shows the auto summary as the "In breve" spec cell, "Tutti gli articoli" is an H2 in parent and child, card images always have alt text'
+	'39.6: Hub shows the auto summary as the "In breve" spec cell, "Tutti gli articoli" is an H2, card images always have alt text'
 );
 
 // 39.7: titolo per Google (senza plugin SEO e con The SEO Framework v5) e descrizione automatica collegata a TSF
@@ -2646,7 +2645,7 @@ $mock_posts[132] = new WP_Post( array( 'ID' => 132, 'post_title' => 'Hub Con Tes
 $hs_saved_post   = $GLOBALS['post'] ?? null;
 $hs_saved_query  = $queried_object ?? null;
 $hs_intro_ok     = true;
-foreach ( array( 'ntn-journal', 'ntn-journal-reloaded' ) as $hs_theme ) {
+foreach ( array( 'ntn-journal' ) as $hs_theme ) { // v4.10.0: la Hub è solo nel parent
 	$GLOBALS['post'] = $mock_posts[132];
 	$queried_object  = $mock_posts[132];
 	ob_start();
@@ -2660,7 +2659,7 @@ $GLOBALS['post'] = $hs_saved_post;
 $queried_object  = $hs_saved_query;
 assert_test(
 	$hs_intro_ok && strpos( $hs_head, "empty( \$args['has_intro'] )" ) !== false,
-	'39.9: Hub editor text renders as "// Panoramica" in parent and child, and replaces the "In breve" cell'
+	'39.9: Hub editor text renders as "// Panoramica", and replaces the "In breve" cell'
 );
 
 // --- TEST SUITE 40: Etichette senza trattino basso v3.11.1 ---
@@ -3182,7 +3181,7 @@ $rs_rest  = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-co
 $rs_head  = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/header.php' );
 $rs_css   = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/build/input.css' );
 $rs_main  = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/assets/js/main.js' );
-$rs_js    = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/assets/js/live-search.js' );
+$rs_js    = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/assets/js/live-search.js' );
 $rs_igdb  = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/admin/views/tab-igdb.php' );
 
 // 50.1: i suggerimenti cercano anche negli articoli pubblicati (4) oltre ai giochi (3), con i totali
@@ -4890,6 +4889,60 @@ assert_test(
 
 // 71.4: il PHP che esegue la suite rispetta il minimo dichiarato
 assert_test( version_compare( PHP_VERSION, '8.0', '>=' ), '71.4: Test suite runs on PHP 8.0 or newer (running ' . PHP_VERSION . ')' );
+
+// =====================================================================
+// 72. Il tema figlio contiene solo personalizzazioni (v4.10.0)
+// =====================================================================
+echo "\n--- 72. Child theme holds only customizations ---\n";
+$fx_parent = ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/';
+$fx_child  = ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/';
+
+// 72.1: catalogo, scheda del gioco e script sono nel parent; il child non ne ha più copie
+$fx_moved = array( 'archive-videogioco.php', 'template-parts/content-game-card.php', 'assets/js/live-search.js', 'assets/js/catalog-filters.js' );
+$fx_ok    = true;
+foreach ( $fx_moved as $fx_file ) {
+	if ( ! file_exists( $fx_parent . $fx_file ) || file_exists( $fx_child . $fx_file ) ) {
+		$fx_ok = false;
+	}
+}
+assert_test( $fx_ok && ! file_exists( $fx_child . 'single-videogioco.php' ), '72.1: Catalog, game card and search scripts live in the parent only; the child has no template or script copies' );
+
+// 72.2: il parent carica ricerca e filtri dal proprio percorso, con la sua versione e le stesse regole di prima
+$fx_enq = file_get_contents( $fx_parent . 'inc/enqueue.php' );
+assert_test(
+	false !== strpos( $fx_enq, "wp_enqueue_script( 'ntn-live-search', get_template_directory_uri() . '/assets/js/live-search.js'" ) &&
+	false !== strpos( $fx_enq, "wp_enqueue_script( 'ntn-catalog-filters', get_template_directory_uri() . '/assets/js/catalog-filters.js', array( 'ntn-live-search' )" ) &&
+	false !== strpos( $fx_enq, "wp_localize_script( 'ntn-live-search', 'ntn_catalog_vars'" ) &&
+	false !== strpos( $fx_enq, "is_post_type_archive( 'videogioco' ) || is_tax( 'game_engine' ) || is_tax( 'game_franchise' ) || is_tax( 'game_developer' ) || is_tax( 'game_publisher' )" ) &&
+	false !== strpos( $fx_enq, '$ver = wp_get_theme( get_template() )->get( \'Version\' );' ) &&
+	false === strpos( $fx_enq, 'get_stylesheet_directory' ),
+	'72.2: Parent enqueues live search everywhere and catalog filters on catalog pages, from its own folder and with its own version'
+);
+
+// 72.3: il child carica solo il suo style.css, dopo il CSS compilato del parent, e nessuno script
+$fx_cenq = file_get_contents( $fx_child . 'inc/enqueue.php' );
+assert_test(
+	false !== strpos( $fx_cenq, "array( 'ntn-journal-tailwind' )" ) && false === strpos( $fx_cenq, 'wp_enqueue_script(' ) && false === strpos( $fx_cenq, 'wp_localize_script' ),
+	'72.3: Child loads only its style.css, after the parent compiled CSS, and no scripts'
+);
+
+// 72.4: gli stili di catalogo, immagini e gallerie sono nel CSS del parent; lo style.css del child ha solo l'intestazione
+$fx_ccss  = file_get_contents( $fx_child . 'style.css' );
+$fx_input = file_get_contents( $fx_parent . 'build/input.css' );
+$fx_built = file_get_contents( $fx_parent . 'style-tailwind-output.css' );
+assert_test(
+	false === strpos( $fx_ccss, 'wp-block-gallery' ) && false === strpos( $fx_ccss, 'ntn-catalog-filters' ) && false !== strpos( $fx_ccss, 'Template:     ntn-journal' ) &&
+	false !== strpos( $fx_input, 'body .wp-block-gallery.has-nested-images figure.wp-block-image:only-child' ) && false !== strpos( $fx_input, '#ntn-mobile-filter-toggle.is-open .ntn-filter-icon-v' ) &&
+	false !== strpos( $fx_built, '.ntn-catalog-filters input[type=number]' ) && false !== strpos( $fx_built, '.wp-block-gallery.has-nested-images figure.wp-block-image:only-child' ) &&
+	strrpos( $fx_input, 'body .wp-block-gallery' ) > strrpos( $fx_input, '@layer components' ),
+	'72.4: Catalog, image and gallery styles moved from the child style.css to the parent CSS (outside the layers, at the end) and are compiled'
+);
+
+// 72.5: l'endpoint REST del plugin trova la scheda del gioco nel parent
+assert_test(
+	false !== strpos( file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/rest-catalog.php' ), "get_template_part( 'template-parts/content', 'game-card' )" ) && file_exists( $fx_parent . 'template-parts/content-game-card.php' ),
+	'72.5: The plugin REST catalog renders the game card that now ships with the parent theme'
+);
 
 $GLOBALS['post'] = null;
 unset( $GLOBALS['mock_wp_query_handler'] );
