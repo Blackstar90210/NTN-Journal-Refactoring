@@ -716,6 +716,7 @@ require_once ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/inc/helpers.php';
 require_once ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/seo-extras.php';
 require_once ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/hub-seo.php';
 require_once ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/category-hub.php';
+require_once ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/category-hub-stats.php';
 require_once ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/team-page.php';
 require_once ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/rating-labels.php';
 require_once ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/inc/content-format.php';
@@ -1617,24 +1618,24 @@ echo "\n--- 24. SEMVER SIMULTANEOUS 4-HEADER SYNCHRONIZATION ---\n";
 $parent_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $parent_css, $m_parent );
 $parent_ver = isset( $m_parent[1] ) ? trim( $m_parent[1] ) : '';
-assert_test( $parent_ver === '4.0.0', "24.1: Parent Theme style.css declares Version: 4.0.0 (found: {$parent_ver})" );
+assert_test( $parent_ver === '4.1.0', "24.1: Parent Theme style.css declares Version: 4.1.0 (found: {$parent_ver})" );
 
 $child_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $child_css, $m_child );
 $child_ver = isset( $m_child[1] ) ? trim( $m_child[1] ) : '';
-assert_test( $child_ver === '4.0.0', "24.2: Child Theme style.css declares Version: 4.0.0 (found: {$child_ver})" );
+assert_test( $child_ver === '4.1.0', "24.2: Child Theme style.css declares Version: 4.1.0 (found: {$child_ver})" );
 
 $core_php = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' );
 preg_match( '/\*\s*Version:\s*([0-9\.]+)/', $core_php, $m_core_hdr );
 $core_hdr_ver = isset( $m_core_hdr[1] ) ? trim( $m_core_hdr[1] ) : '';
-assert_test( $core_hdr_ver === '4.0.0', "24.3: Core Plugin header declares Version: 4.0.0 (found: {$core_hdr_ver})" );
+assert_test( $core_hdr_ver === '4.1.0', "24.3: Core Plugin header declares Version: 4.1.0 (found: {$core_hdr_ver})" );
 
 preg_match( "/define\(\s*'NTN_JOURNAL_CORE_VERSION',\s*'([^']+)'\s*\);/", $core_php, $m_core_const );
 $core_const_ver = isset( $m_core_const[1] ) ? trim( $m_core_const[1] ) : '';
-assert_test( $core_const_ver === '4.0.0', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.0.0 (found: {$core_const_ver})" );
+assert_test( $core_const_ver === '4.1.0', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.1.0 (found: {$core_const_ver})" );
 
 assert_test(
-	$parent_ver === '4.0.0' && $child_ver === '4.0.0' && $core_hdr_ver === '4.0.0' && $core_const_ver === '4.0.0',
+	$parent_ver === '4.1.0' && $child_ver === '4.1.0' && $core_hdr_ver === '4.1.0' && $core_const_ver === '4.1.0',
 	'24.5: All 4 version headers are 100% synchronized and atomic according to Rule 2 of GEMINI.md'
 );
 
@@ -1861,7 +1862,7 @@ $parent_style_ver = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( AB
 $child_style_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' ), $m2 ) ? $m2[1] : '';
 $core_plugin_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m3 ) ? $m3[1] : '';
 $core_const_ver   = preg_match( '/define\(\s*[\'"]NTN_JOURNAL_CORE_VERSION[\'"]\s*,\s*[\'"]([0-9\.]+)[\'"]\s*\)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m4 ) ? $m4[1] : '';
-assert_test( $parent_style_ver === '4.0.0' && $child_style_ver === '4.0.0' && $core_plugin_ver === '4.0.0' && $core_const_ver === '4.0.0', '29.1: All 4 version headers are synchronized to 4.0.0' );
+assert_test( $parent_style_ver === '4.1.0' && $child_style_ver === '4.1.0' && $core_plugin_ver === '4.1.0' && $core_const_ver === '4.1.0', '29.1: All 4 version headers are synchronized to 4.1.0' );
 
 // 29.2: single.php sequence is Google Feed -> Social CTA -> Bottom Related Posts
 $single_php = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/single.php' );
@@ -3714,6 +3715,229 @@ assert_test(
 	'62.10: Article thresholds are restored as numbers (capped at 100), non-numbers leave the current value'
 );
 unset( $mock_options['ntn_seo_min_posts_terms'], $mock_options['ntn_seo_min_posts_games'] );
+
+// --- TEST SUITE 63: Statistiche dell'Hub di categoria v4.1.0 (solo dati) ---
+echo "\n--- 63. STATISTICHE HUB DI CATEGORIA V4.1.0 ---\n";
+
+if ( ! function_exists( 'get_term_children' ) ) {
+	function get_term_children( $term_id, $taxonomy ) {
+		return $GLOBALS['hs_children'][ (int) $term_id ] ?? array();
+	}
+}
+if ( ! function_exists( 'mysql2date' ) ) {
+	function mysql2date( $format, $date ) {
+		return gmdate( $format, strtotime( $date ) );
+	}
+}
+
+/**
+ * Database finto: legge dalla query vera le categorie, l'anno e i filtri su stato e tipo, quindi
+ * se il codice togliesse uno di questi filtri bozze e pagine finirebbero nei conteggi e i test fallirebbero.
+ */
+class NTN_Stats_Mock_Wpdb {
+	public $posts = 'wp_posts';
+	public $term_relationships = 'wp_term_relationships';
+	public $term_taxonomy = 'wp_term_taxonomy';
+	public $termmeta = 'wp_termmeta';
+	public $rows = array();
+	public $tag_meta = array();
+	public function prepare( $sql, ...$args ) {
+		foreach ( $args as $arg ) {
+			$sql = preg_replace( '/%s/', "'" . $arg . "'", $sql, 1 );
+		}
+		return $sql;
+	}
+	private function matching( $sql ) {
+		preg_match( '/tt\.term_id IN \(([\d,]+)\)/', $sql, $in );
+		$cats   = array_map( 'intval', explode( ',', $in[1] ) );
+		$status = false !== strpos( $sql, "p.post_status = 'publish'" );
+		$type   = false !== strpos( $sql, "p.post_type = 'post'" );
+		return array_filter( $this->rows, static function ( $row ) use ( $cats, $status, $type ) {
+			return array_intersect( $row['cats'], $cats ) && ( ! $status || 'publish' === $row['status'] ) && ( ! $type || 'post' === $row['type'] );
+		} );
+	}
+	private function in_range( $rows, $sql ) {
+		preg_match_all( "/'(\d{4}-01-01 00:00:00)'/", $sql, $range );
+		return array_filter( $rows, static function ( $row ) use ( $range ) {
+			return $row['date'] >= $range[1][0] && $row['date'] < $range[1][1];
+		} );
+	}
+	public function get_row( $sql ) {
+		$rows = $this->matching( $sql );
+		if ( false !== strpos( $sql, 'GROUP BY p.post_author' ) ) {
+			$by_author = array();
+			foreach ( $this->in_range( $rows, $sql ) as $row ) {
+				$by_author[ $row['author'] ]['posts']  = ( $by_author[ $row['author'] ]['posts'] ?? 0 ) + 1;
+				$by_author[ $row['author'] ]['latest'] = max( $by_author[ $row['author'] ]['latest'] ?? '', $row['date'] );
+			}
+			uasort( $by_author, static function ( $a, $b ) {
+				return array( $b['posts'], $b['latest'] ) <=> array( $a['posts'], $a['latest'] );
+			} );
+			return $by_author ? (object) array( 'author_id' => (string) array_key_first( $by_author ), 'posts' => (string) reset( $by_author )['posts'] ) : null;
+		}
+		return (object) array(
+			'total'   => (string) count( $rows ),
+			'in_year' => (string) count( $this->in_range( $rows, $sql ) ),
+			'latest'  => $rows ? max( array_column( $rows, 'date' ) ) : null,
+		);
+	}
+	public function get_var( $sql ) {
+		$games = array();
+		foreach ( $this->matching( $sql ) as $row ) {
+			foreach ( $row['tags'] as $tag ) {
+				$meta = $this->tag_meta[ $tag ] ?? array();
+				if ( ! empty( $meta['_ntn_igdb_game_id'] ) ) {
+					$games[ 'id:' . $meta['_ntn_igdb_game_id'] ] = true;
+				} elseif ( ! empty( $meta['_ntn_game_title'] ) ) {
+					$games[ 'title:' . $meta['_ntn_game_title'] ] = true;
+				}
+			}
+		}
+		return (string) count( $games );
+	}
+}
+
+$hs_src  = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/category-hub-stats.php' );
+$hs_year = (int) gmdate( 'Y' );
+$hs_old  = $hs_year - 1;
+foreach ( array( 9601 => 'Console', 9602 => 'Sony', 9603 => 'PS5', 9610 => 'Altra', 9620 => 'Vuota', 9630 => 'Vecchia' ) as $hs_id => $hs_name ) {
+	$mock_terms[ $hs_id ] = new WP_Term( array( 'term_id' => $hs_id, 'name' => $hs_name, 'slug' => strtolower( $hs_name ), 'taxonomy' => 'category' ) );
+}
+foreach ( array( 9601, 9620, 9630 ) as $hs_id ) {
+	$mock_termmeta[ $hs_id ] = array( '_ntn_hub_enabled' => '1', '_ntn_hub_type' => 'console' );
+}
+$GLOBALS['hs_children'] = array( 9601 => array( 9602, 9603 ) );
+$hs_author_backup = $GLOBALS['mock_author_meta'] ?? null;
+$GLOBALS['mock_author_meta'] = array( 'display_name' => 'Luca Maiolini' );
+$hs_row = static function ( $id, $date, $author, $cats, $tags = array(), $status = 'publish', $type = 'post' ) {
+	return compact( 'id', 'date', 'author', 'cats', 'tags', 'status', 'type' );
+};
+
+$hs_db = new NTN_Stats_Mock_Wpdb();
+$hs_db->tag_meta = array(
+	701 => array( '_ntn_igdb_game_id' => '100' ),
+	702 => array( '_ntn_igdb_game_id' => '100', '_ntn_game_title' => 'Stesso gioco, altro tag' ),
+	703 => array( '_ntn_game_title' => 'Gioco senza ID' ),
+	704 => array( '_ntn_game_title' => 'Gioco senza ID' ),
+	705 => array(),
+	706 => array( '_ntn_igdb_game_id' => '200' ),
+	707 => array( '_ntn_igdb_game_id' => '300' ),
+);
+$hs_db->rows = array(
+	$hs_row( 1, "{$hs_year}-01-01 00:00:00", 7, array( 9601 ), array( 701 ) ),
+	$hs_row( 2, "{$hs_year}-03-10 10:00:00", 7, array( 9602 ), array( 701, 702 ) ),
+	$hs_row( 3, "{$hs_year}-04-10 10:00:00", 7, array( 9602, 9603 ), array( 703, 705 ) ),
+	$hs_row( 4, "{$hs_year}-05-10 10:00:00", 8, array( 9603 ), array( 704 ) ),
+	$hs_row( 5, "{$hs_old}-12-31 23:59:59", 8, array( 9601 ), array( 706 ) ),
+	$hs_row( 6, "{$hs_old}-06-01 10:00:00", 8, array( 9601 ) ),
+	$hs_row( 7, "{$hs_old}-06-02 10:00:00", 8, array( 9601 ) ),
+	$hs_row( 10, "{$hs_year}-12-01 10:00:00", 9, array( 9601 ), array( 707 ), 'draft' ),
+	$hs_row( 11, "{$hs_year}-12-02 10:00:00", 9, array( 9603 ), array( 707 ), 'private' ),
+	$hs_row( 12, "{$hs_year}-12-03 10:00:00", 9, array( 9601 ), array( 707 ), 'future' ),
+	$hs_row( 13, "{$hs_year}-12-04 10:00:00", 9, array( 9601 ), array( 707 ), 'trash' ),
+	$hs_row( 14, "{$hs_year}-12-05 10:00:00", 9, array( 9601 ), array( 707 ), 'publish', 'page' ),
+	$hs_row( 20, "{$hs_year}-12-06 10:00:00", 9, array( 9610 ), array( 707 ) ),
+	$hs_row( 30, "{$hs_old}-02-01 10:00:00", 9, array( 9630 ), array( 706 ) ),
+);
+$GLOBALS['wpdb'] = $hs_db;
+$hs_stats = ntn_core_get_category_hub_stats( 9601 );
+
+// 63.1: il modulo è caricato e usa la cache delle Hub, senza scorrere gli articoli né toccare category-hub.php
+assert_test(
+	false !== strpos( file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), "inc/category-hub-stats.php" ) &&
+	false !== strpos( $hs_src, "get_option( 'ntn_cat_hub_version', '0' )" ) && false !== strpos( $hs_src, 'set_transient( $cache_key, $data, DAY_IN_SECONDS )' ) &&
+	false !== strpos( $hs_src, "\$focus->term_id . '|' . \$year . '|'" ) &&
+	false === strpos( $hs_src, 'foreach' ) && false === strpos( $hs_src, 'WP_Query' ) && false === strpos( $hs_src, 'get_the_terms' ),
+	'63.1: Stats module is loaded, shares the Hub cache version for 24 hours, renews with the year and never loops over posts'
+);
+
+// 63.2: sottocategorie comprese, un articolo in due sottocategorie conta una volta, le altre categorie restano fuori
+assert_test(
+	is_array( $hs_stats ) && 7 === $hs_stats['articles_total'] && 7 === ntn_core_category_hub_stats_query( array( 9601, 9602, 9603, 9603 ), $hs_year )['total'],
+	'63.2: Total includes subcategories, counts a post in two subcategories once and ignores other categories'
+);
+
+// 63.3: anno corrente, compresi il primo istante dell'anno e senza l'ultimo secondo dell'anno prima
+assert_test(
+	$hs_year === $hs_stats['year'] && 4 === $hs_stats['articles_year'],
+	'63.3: Yearly count covers the current calendar year only, from its first second'
+);
+
+// 63.4: autore più prolifico dell'anno (nome, conteggio, link), anche se un altro ha più articoli in assoluto
+assert_test(
+	is_array( $hs_stats['top_author'] ) && 7 === $hs_stats['top_author']['id'] && 3 === $hs_stats['top_author']['count'] &&
+	'Luca Maiolini' === $hs_stats['top_author']['name'] && 'https://example.com/author/7/' === $hs_stats['top_author']['url'],
+	'63.4: Top author is the most prolific of the current year, with name, count and link'
+);
+
+// 63.5: data dell'ultimo articolo pubblicato, non di bozze o programmati
+assert_test(
+	'10.05.' . $hs_year === $hs_stats['latest_date'],
+	'63.5: Latest date comes from the newest published post, formatted d.m.Y'
+);
+
+// 63.6: anno senza articoli: autore null e zero nell'anno, ma totale e ultima data restano
+$hs_stats_old = ntn_core_get_category_hub_stats( 9630 );
+assert_test(
+	1 === $hs_stats_old['articles_total'] && 0 === $hs_stats_old['articles_year'] && null === $hs_stats_old['top_author'] &&
+	'01.02.' . $hs_old === $hs_stats_old['latest_date'] && 1 === $hs_stats_old['games_total'],
+	'63.6: A year without articles gives zero and a null author, keeping total, latest date and games'
+);
+
+// 63.7: categoria vuota
+$hs_stats_empty = ntn_core_get_category_hub_stats( 9620 );
+assert_test(
+	array( 'year' => $hs_year, 'articles_total' => 0, 'articles_year' => 0, 'top_author' => null, 'latest_date' => '', 'games_total' => 0 ) === $hs_stats_empty,
+	'63.7: An empty category returns zeros, a null author and an empty date without notices'
+);
+
+// 63.8: bozze, privati, programmati, cestinati e altri tipi di contenuto restano fuori da ogni dato
+$hs_only_hidden = new NTN_Stats_Mock_Wpdb();
+$hs_only_hidden->tag_meta = $hs_db->tag_meta;
+$hs_only_hidden->rows = array_values( array_filter( $hs_db->rows, static function ( $row ) {
+	return $row['id'] >= 10 && $row['id'] <= 14;
+} ) );
+$GLOBALS['wpdb'] = $hs_only_hidden;
+$hs_hidden_stats = ntn_core_category_hub_stats_query( array( 9601, 9602, 9603 ), $hs_year );
+$GLOBALS['wpdb'] = $hs_db;
+assert_test(
+	0 === $hs_hidden_stats['total'] && 0 === $hs_hidden_stats['in_year'] && 0 === $hs_hidden_stats['author_id'] && '' === $hs_hidden_stats['latest'] && 0 === $hs_hidden_stats['games'],
+	'63.8: Drafts, private, scheduled and trashed posts and other post types are excluded from every figure'
+);
+
+// 63.9: giochi distinti: stesso tag su più articoli, due tag con lo stesso ID IGDB, due tag con lo stesso titolo. Il tag normale non conta.
+assert_test(
+	3 === $hs_stats['games_total'] && false !== strpos( $hs_src, "COUNT(DISTINCT CASE WHEN gid.meta_value NOT IN ('', '0')" ) && false !== strpos( $hs_src, "'_ntn_igdb_game_id',\n\t\t\t'_ntn_game_title'" ),
+	'63.9: Games are distinct: repeated tags and tags sharing an IGDB ID or title count once, plain tags do not count'
+);
+
+// 63.10: una categoria che non è una Hub, o che non esiste, non ha statistiche
+$mock_terms[9640] = new WP_Term( array( 'term_id' => 9640, 'name' => 'Tag', 'slug' => 'tag', 'taxonomy' => 'post_tag' ) );
+assert_test(
+	null === ntn_core_get_category_hub_stats( 999999 ) && null === ntn_core_get_category_hub_stats( 9640 ),
+	'63.10: Anything that is not a Hub category returns null'
+);
+
+// 63.11: la cache si svuota quando cambia il collegamento a IGDB, non per gli altri meta del tag
+$mock_options['ntn_cat_hub_version'] = 'prima';
+ntn_core_category_hub_stats_flush_on_meta( 1, 701, '_ntn_game_cover' );
+$hs_after_other = $mock_options['ntn_cat_hub_version'];
+ntn_core_category_hub_stats_flush_on_meta( 1, 701, '_ntn_igdb_game_id' );
+$hs_after_id = $mock_options['ntn_cat_hub_version'];
+$mock_options['ntn_cat_hub_version'] = 'prima';
+ntn_core_category_hub_stats_flush_on_meta( array( 1 ), 701, '_ntn_game_title' );
+$hs_after_title = $mock_options['ntn_cat_hub_version'];
+assert_test(
+	'prima' === $hs_after_other && 'prima' !== $hs_after_id && 'prima' !== $hs_after_title &&
+	false !== strpos( $hs_src, "add_action( 'added_term_meta'" ) && false !== strpos( $hs_src, "add_action( 'updated_term_meta'" ) && false !== strpos( $hs_src, "add_action( 'deleted_term_meta'" ),
+	'63.11: Saving IGDB link data clears the Hub cache, other tag data does not'
+);
+
+unset( $GLOBALS['wpdb'], $GLOBALS['hs_children'], $mock_options['ntn_cat_hub_version'] );
+foreach ( array( 9601, 9602, 9603, 9610, 9620, 9630, 9640 ) as $hs_id ) {
+	unset( $mock_terms[ $hs_id ], $mock_termmeta[ $hs_id ] );
+}
+$GLOBALS['mock_author_meta'] = $hs_author_backup;
 
 echo "\n=======================================================================\n";
 echo " AUDIT SUMMARY: {$passed} PASSED, {$failed} FAILED\n";
