@@ -1648,24 +1648,24 @@ echo "\n--- 24. SEMVER SIMULTANEOUS 4-HEADER SYNCHRONIZATION ---\n";
 $parent_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $parent_css, $m_parent );
 $parent_ver = isset( $m_parent[1] ) ? trim( $m_parent[1] ) : '';
-assert_test( $parent_ver === '4.9.0', "24.1: Parent Theme style.css declares Version: 4.9.0 (found: {$parent_ver})" );
+assert_test( $parent_ver === '4.9.1', "24.1: Parent Theme style.css declares Version: 4.9.1 (found: {$parent_ver})" );
 
 $child_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $child_css, $m_child );
 $child_ver = isset( $m_child[1] ) ? trim( $m_child[1] ) : '';
-assert_test( $child_ver === '4.9.0', "24.2: Child Theme style.css declares Version: 4.9.0 (found: {$child_ver})" );
+assert_test( $child_ver === '4.9.1', "24.2: Child Theme style.css declares Version: 4.9.1 (found: {$child_ver})" );
 
 $core_php = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' );
 preg_match( '/\*\s*Version:\s*([0-9\.]+)/', $core_php, $m_core_hdr );
 $core_hdr_ver = isset( $m_core_hdr[1] ) ? trim( $m_core_hdr[1] ) : '';
-assert_test( $core_hdr_ver === '4.9.0', "24.3: Core Plugin header declares Version: 4.9.0 (found: {$core_hdr_ver})" );
+assert_test( $core_hdr_ver === '4.9.1', "24.3: Core Plugin header declares Version: 4.9.1 (found: {$core_hdr_ver})" );
 
 preg_match( "/define\(\s*'NTN_JOURNAL_CORE_VERSION',\s*'([^']+)'\s*\);/", $core_php, $m_core_const );
 $core_const_ver = isset( $m_core_const[1] ) ? trim( $m_core_const[1] ) : '';
-assert_test( $core_const_ver === '4.9.0', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.9.0 (found: {$core_const_ver})" );
+assert_test( $core_const_ver === '4.9.1', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.9.1 (found: {$core_const_ver})" );
 
 assert_test(
-	$parent_ver === '4.9.0' && $child_ver === '4.9.0' && $core_hdr_ver === '4.9.0' && $core_const_ver === '4.9.0',
+	$parent_ver === '4.9.1' && $child_ver === '4.9.1' && $core_hdr_ver === '4.9.1' && $core_const_ver === '4.9.1',
 	'24.5: All 4 version headers are 100% synchronized and atomic according to Rule 2 of GEMINI.md'
 );
 
@@ -1892,7 +1892,7 @@ $parent_style_ver = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( AB
 $child_style_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' ), $m2 ) ? $m2[1] : '';
 $core_plugin_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m3 ) ? $m3[1] : '';
 $core_const_ver   = preg_match( '/define\(\s*[\'"]NTN_JOURNAL_CORE_VERSION[\'"]\s*,\s*[\'"]([0-9\.]+)[\'"]\s*\)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m4 ) ? $m4[1] : '';
-assert_test( $parent_style_ver === '4.9.0' && $child_style_ver === '4.9.0' && $core_plugin_ver === '4.9.0' && $core_const_ver === '4.9.0', '29.1: All 4 version headers are synchronized to 4.9.0' );
+assert_test( $parent_style_ver === '4.9.1' && $child_style_ver === '4.9.1' && $core_plugin_ver === '4.9.1' && $core_const_ver === '4.9.1', '29.1: All 4 version headers are synchronized to 4.9.1' );
 
 // 29.2: single.php sequence is Google Feed -> Social CTA -> Bottom Related Posts
 $single_php = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/single.php' );
@@ -4851,6 +4851,45 @@ assert_test(
 	false !== strpos( file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/single.php' ), "|| ! empty( ntn_get_post_games( get_the_ID() ) );" ),
 	'70.10: Mobile card styles are compiled without the old tabs, main.js drives arrows and swipe, and single.php counts games from the helper'
 );
+
+// =====================================================================
+// 71. Requisiti dichiarati (v4.9.1): PHP 8.0 e WordPress 6.0 in tutti e tre i componenti
+// =====================================================================
+echo "\n--- 71. Declared requirements ---\n";
+$rq_files = array(
+	'parent' => file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/style.css' ),
+	'child'  => file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' ),
+	'core'   => file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ),
+);
+$rq_php = array();
+$rq_wp  = array();
+foreach ( $rq_files as $rq_key => $rq_src ) {
+	$rq_head          = substr( (string) $rq_src, 0, 2000 );
+	$rq_php[ $rq_key ] = preg_match( '/Requires PHP:\s*([0-9.]+)/', $rq_head, $rq_m ) ? $rq_m[1] : '';
+	$rq_wp[ $rq_key ]  = preg_match( '/Requires at least:\s*([0-9.]+)/', $rq_head, $rq_m ) ? $rq_m[1] : '';
+}
+
+// 71.1: i tre header dichiarano PHP 8.0
+assert_test(
+	'8.0' === $rq_php['parent'] && '8.0' === $rq_php['child'] && '8.0' === $rq_php['core'],
+	'71.1: Parent, child and plugin headers all declare Requires PHP: 8.0 (found: ' . implode( ', ', $rq_php ) . ')'
+);
+
+// 71.2: i tre header dichiarano WordPress 6.0
+assert_test(
+	'6.0' === $rq_wp['parent'] && '6.0' === $rq_wp['child'] && '6.0' === $rq_wp['core'],
+	'71.2: Parent, child and plugin headers all declare Requires at least: 6.0 (found: ' . implode( ', ', $rq_wp ) . ')'
+);
+
+// 71.3: il README non promette più PHP 7.4
+$rq_readme = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/README.md' );
+assert_test(
+	false === strpos( $rq_readme, '7.4' ) && 2 === substr_count( $rq_readme, '**PHP**: 8.0' ),
+	'71.3: README states PHP 8.0 as the minimum in both languages'
+);
+
+// 71.4: il PHP che esegue la suite rispetta il minimo dichiarato
+assert_test( version_compare( PHP_VERSION, '8.0', '>=' ), '71.4: Test suite runs on PHP 8.0 or newer (running ' . PHP_VERSION . ')' );
 
 $GLOBALS['post'] = null;
 unset( $GLOBALS['mock_wp_query_handler'] );

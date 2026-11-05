@@ -15,7 +15,7 @@ Il progetto **NTN Journal** è un ecosistema editoriale WordPress di livello ent
 
 ### Stack Tecnologico
 - **CMS Target:** WordPress 6.0+ (piena compatibilità con l'editor a blocchi Gutenberg e Site Editor)
-- **Runtime Backend:** PHP 7.4 - PHP 8.2+ (strict typing, null-safety, defensive programming)
+- **Runtime Backend:** PHP 8.0+ (strict typing, null-safety, defensive programming)
 - **Frontend / Styling:** Tailwind CSS v4 CLI + CSS personalizzato Nothing OS
 - **Architettura Modulare:** 
   1. Parent Theme (`ntn-journal`): Framework di base e template core
