@@ -1620,24 +1620,24 @@ echo "\n--- 24. SEMVER SIMULTANEOUS 4-HEADER SYNCHRONIZATION ---\n";
 $parent_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $parent_css, $m_parent );
 $parent_ver = isset( $m_parent[1] ) ? trim( $m_parent[1] ) : '';
-assert_test( $parent_ver === '4.3.0', "24.1: Parent Theme style.css declares Version: 4.3.0 (found: {$parent_ver})" );
+assert_test( $parent_ver === '4.4.0', "24.1: Parent Theme style.css declares Version: 4.4.0 (found: {$parent_ver})" );
 
 $child_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $child_css, $m_child );
 $child_ver = isset( $m_child[1] ) ? trim( $m_child[1] ) : '';
-assert_test( $child_ver === '4.3.0', "24.2: Child Theme style.css declares Version: 4.3.0 (found: {$child_ver})" );
+assert_test( $child_ver === '4.4.0', "24.2: Child Theme style.css declares Version: 4.4.0 (found: {$child_ver})" );
 
 $core_php = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' );
 preg_match( '/\*\s*Version:\s*([0-9\.]+)/', $core_php, $m_core_hdr );
 $core_hdr_ver = isset( $m_core_hdr[1] ) ? trim( $m_core_hdr[1] ) : '';
-assert_test( $core_hdr_ver === '4.3.0', "24.3: Core Plugin header declares Version: 4.3.0 (found: {$core_hdr_ver})" );
+assert_test( $core_hdr_ver === '4.4.0', "24.3: Core Plugin header declares Version: 4.4.0 (found: {$core_hdr_ver})" );
 
 preg_match( "/define\(\s*'NTN_JOURNAL_CORE_VERSION',\s*'([^']+)'\s*\);/", $core_php, $m_core_const );
 $core_const_ver = isset( $m_core_const[1] ) ? trim( $m_core_const[1] ) : '';
-assert_test( $core_const_ver === '4.3.0', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.3.0 (found: {$core_const_ver})" );
+assert_test( $core_const_ver === '4.4.0', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.4.0 (found: {$core_const_ver})" );
 
 assert_test(
-	$parent_ver === '4.3.0' && $child_ver === '4.3.0' && $core_hdr_ver === '4.3.0' && $core_const_ver === '4.3.0',
+	$parent_ver === '4.4.0' && $child_ver === '4.4.0' && $core_hdr_ver === '4.4.0' && $core_const_ver === '4.4.0',
 	'24.5: All 4 version headers are 100% synchronized and atomic according to Rule 2 of GEMINI.md'
 );
 
@@ -1864,7 +1864,7 @@ $parent_style_ver = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( AB
 $child_style_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' ), $m2 ) ? $m2[1] : '';
 $core_plugin_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m3 ) ? $m3[1] : '';
 $core_const_ver   = preg_match( '/define\(\s*[\'"]NTN_JOURNAL_CORE_VERSION[\'"]\s*,\s*[\'"]([0-9\.]+)[\'"]\s*\)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m4 ) ? $m4[1] : '';
-assert_test( $parent_style_ver === '4.3.0' && $child_style_ver === '4.3.0' && $core_plugin_ver === '4.3.0' && $core_const_ver === '4.3.0', '29.1: All 4 version headers are synchronized to 4.3.0' );
+assert_test( $parent_style_ver === '4.4.0' && $child_style_ver === '4.4.0' && $core_plugin_ver === '4.4.0' && $core_const_ver === '4.4.0', '29.1: All 4 version headers are synchronized to 4.4.0' );
 
 // 29.2: single.php sequence is Google Feed -> Social CTA -> Bottom Related Posts
 $single_php = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/single.php' );
@@ -4167,6 +4167,101 @@ foreach ( range( 9801, 9807 ) as $pg_id ) {
 }
 $GLOBALS['mock_author_meta'] = $pg_author_backup;
 $GLOBALS['queried_object']   = $pg_queried_backup;
+
+// --- TEST SUITE 66: SEO dell'Hub Statistiche v4.4.0 ---
+echo "\n--- 66. SEO HUB STATISTICHE V4.4.0 ---\n";
+
+$se_src = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/category-hub-stats.php' );
+$se_hub = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/category-hub.php' );
+$se_stat = new WP_Term( array( 'term_id' => 9901, 'name' => 'Numeri', 'slug' => 'numeri', 'taxonomy' => 'category' ) );
+$se_cons = new WP_Term( array( 'term_id' => 9902, 'name' => 'Console', 'slug' => 'console', 'taxonomy' => 'category' ) );
+$se_stud = new WP_Term( array( 'term_id' => 9903, 'name' => 'Studi', 'slug' => 'studi', 'taxonomy' => 'category' ) );
+$mock_termmeta[9901] = array( '_ntn_hub_enabled' => '1', '_ntn_hub_type' => 'statistiche' );
+$mock_termmeta[9902] = array( '_ntn_hub_enabled' => '1', '_ntn_hub_type' => 'console' );
+$mock_termmeta[9903] = array( '_ntn_hub_enabled' => '1', '_ntn_hub_type' => 'studi' );
+$se_backup_q     = $GLOBALS['queried_object'];
+$se_backup_paged = $mock_query_vars['paged'] ?? null;
+$se_at = static function ( $term, $paged ) {
+	$GLOBALS['queried_object']           = $term;
+	$GLOBALS['mock_query_vars']['paged'] = $paged;
+};
+
+// 66.1: dalla pagina 2 in poi noindex con "segui i collegamenti", sia con The SEO Framework sia senza
+$se_at( $se_stat, 2 );
+$se_tsf_p2 = ntn_core_category_hub_stats_tsf_robots( array( 'max_snippet' => 'max-snippet:-1' ) );
+$se_wp_p2  = ntn_core_category_hub_stats_wp_robots( array( 'max-snippet' => '-1' ) );
+assert_test(
+	'noindex' === ( $se_tsf_p2['noindex'] ?? '' ) && ! isset( $se_tsf_p2['nofollow'] ) && 'max-snippet:-1' === $se_tsf_p2['max_snippet'] &&
+	true === ( $se_wp_p2['noindex'] ?? false ) && true === ( $se_wp_p2['follow'] ?? false ),
+	'66.1: Page 2 and beyond of a Statistiche Hub are noindex, follow with and without the SEO plugin'
+);
+
+// 66.2: la prima pagina resta indicizzabile
+$se_at( $se_stat, 0 );
+$se_tsf_p1 = ntn_core_category_hub_stats_tsf_robots( array() );
+$se_wp_p1  = ntn_core_category_hub_stats_wp_robots( array() );
+$se_at( $se_stat, 1 );
+$se_tsf_p1b = ntn_core_category_hub_stats_tsf_robots( array() );
+assert_test(
+	array() === $se_tsf_p1 && array() === $se_wp_p1 && array() === $se_tsf_p1b,
+	'66.2: The first page of a Statistiche Hub stays indexable'
+);
+
+// 66.3: le altre Hub e le altre pagine non cambiano, anche alla pagina 2; TSF che chiede di un'altra pagina non viene toccato
+$se_at( $se_cons, 2 );
+$se_cons_tsf = ntn_core_category_hub_stats_tsf_robots( array() );
+$se_cons_wp  = ntn_core_category_hub_stats_wp_robots( array() );
+$se_cons_tag = ntn_core_category_hub_stats_tsf_tags( array( 'next' => 'n', 'prev' => 'p' ) );
+$se_at( $se_stud, 3 );
+$se_stud_wp = ntn_core_category_hub_stats_wp_robots( array() );
+$se_at( null, 2 );
+$se_none_wp = ntn_core_category_hub_stats_wp_robots( array() );
+$se_at( $se_stat, 2 );
+$se_other = ntn_core_category_hub_stats_tsf_robots( array(), array( 'id' => 5, 'tax' => 'category' ) );
+assert_test(
+	array() === $se_cons_tsf && array() === $se_cons_wp && array( 'next' => 'n', 'prev' => 'p' ) === $se_cons_tag && array() === $se_stud_wp && array() === $se_none_wp && array() === $se_other,
+	'66.3: Platform and studio Hubs, other pages and TSF queries about other items are untouched'
+);
+
+// 66.4: niente rel prev e next, perché non c'è paginazione visibile; canonical e altri tag restano
+$se_tags = ntn_core_category_hub_stats_tsf_tags( array( 'prev' => 'p', 'next' => 'n', 'canonical' => 'c', 'og:image' => 'i' ) );
+assert_test(
+	array( 'canonical' => 'c', 'og:image' => 'i' ) === $se_tags,
+	'66.4: Prev and next links are removed on a Statistiche Hub, canonical and social tags stay'
+);
+
+// 66.5: la soglia delle pagine sottili vale anche per questo tipo: sotto la soglia noindex, regola spenta nessun effetto
+$se_at( $se_stat, 0 );
+$se_thin = ntn_core_seo_is_thin_term( $se_stat );
+$se_thin_robots = ntn_core_seo_thin_wp_robots( array() );
+$mock_options['ntn_seo_min_posts_terms'] = 0;
+$se_thin_off = ntn_core_seo_is_thin_term( $se_stat );
+unset( $mock_options['ntn_seo_min_posts_terms'] );
+assert_test(
+	true === $se_thin && true === ( $se_thin_robots['noindex'] ?? false ) && true === ( $se_thin_robots['follow'] ?? false ) && false === $se_thin_off &&
+	false !== strpos( $se_hub, "ntn_core_seo_is_thin_term( \$term )" ),
+	'66.5: Thin page threshold applies to Statistiche Hubs, in robots and sitemap, and can be turned off'
+);
+
+// 66.6: nessun elenco di piattaforme o studi nei dati strutturati, sitemap aperta a ogni tipo e registrazione dei filtri
+assert_test(
+	false !== strpos( $se_hub, "if ( empty( \$items ) ) {\n\t\treturn;" ) && false !== strpos( $se_hub, "foreach ( \$data['studios'] as \$i => \$studio )" ) &&
+	false !== strpos( $se_src, "add_filter( 'the_seo_framework_robots_meta_array', 'ntn_core_category_hub_stats_tsf_robots', 10, 2 )" ) &&
+	false !== strpos( $se_src, "add_filter( 'wp_robots', 'ntn_core_category_hub_stats_wp_robots' )" ) &&
+	false !== strpos( $se_src, "add_filter( 'the_seo_framework_meta_render_data', 'ntn_core_category_hub_stats_tsf_tags' )" ),
+	'66.6: No platform or studio ItemList for this type (it has neither), and all SEO filters are registered'
+);
+
+$GLOBALS['queried_object'] = $se_backup_q;
+if ( null === $se_backup_paged ) {
+	unset( $GLOBALS['mock_query_vars']['paged'] );
+} else {
+	$GLOBALS['mock_query_vars']['paged'] = $se_backup_paged;
+}
+foreach ( array( 9901, 9902, 9903 ) as $se_id ) {
+	unset( $mock_termmeta[ $se_id ] );
+}
+unset( $mock_options['ntn_cat_hub_version'] );
 
 echo "\n=======================================================================\n";
 echo " AUDIT SUMMARY: {$passed} PASSED, {$failed} FAILED\n";
