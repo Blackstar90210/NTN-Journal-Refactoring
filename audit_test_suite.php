@@ -517,6 +517,23 @@ function get_post_type_archive_link( $post_type ) {
 	return 'https://example.com/' . $post_type . '/';
 }
 
+if ( ! function_exists( 'remove_accents' ) ) {
+	function remove_accents( $text ) {
+		return strtr( (string) $text, array( 'à' => 'a', 'À' => 'A', 'è' => 'e', 'é' => 'e', 'È' => 'E', 'É' => 'E', 'ì' => 'i', 'ò' => 'o', 'ù' => 'u' ) ); // solo gli accenti usati dal banco di prova
+	}
+}
+if ( ! function_exists( 'has_category' ) ) {
+	function has_category( $category, $post = null ) {
+		global $mock_post_categories;
+		$post_id = $post instanceof WP_Post ? $post->ID : (int) $post;
+		foreach ( (array) ( $mock_post_categories[ $post_id ] ?? array() ) as $cat ) {
+			if ( in_array( $cat->slug, (array) $category, true ) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+}
 function is_admin() { return false; }
 function get_option( $opt, $default = false ) {
 	global $mock_options;
@@ -3370,11 +3387,6 @@ assert_test(
 
 // --- TEST SUITE 54: Hub dello studio v3.21.0 ---
 echo "\n--- 54. HUB DELLO STUDIO V3.21.0 ---\n";
-if ( ! function_exists( 'remove_accents' ) ) {
-	function remove_accents( $text ) {
-		return strtr( (string) $text, array( 'à' => 'a', 'À' => 'A', 'è' => 'e', 'é' => 'e', 'È' => 'E', 'É' => 'E', 'ì' => 'i', 'ò' => 'o', 'ù' => 'u' ) ); // solo gli accenti usati dal banco di prova
-	}
-}
 if ( ! function_exists( 'ntn_core_studio_key' ) ) {
 	require_once ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/studio-hub.php';
 }
@@ -3416,7 +3428,7 @@ assert_test(
 	'2028' === ntn_journal_release_label( '2028-12-31', '' ) && '10/12/2020' === ntn_journal_release_label( '2020-12-10', '' ) &&
 	'23.10.2026' === ntn_journal_release_label( '2026-10-23', 'day', 'd.m.Y' ) && '2024' === ntn_journal_release_label( '2024', '' ) &&
 	strpos( file_get_contents( $rl_dir . 'template-parts/hub-header.php' ), "ntn_journal_release_label( \$igdb_info['release'], \$igdb_info['release_precision'] ?? '' )" ) !== false &&
-	strpos( file_get_contents( $rl_dir . 'template-parts/review-sidebar-desktop.php' ), "ntn_journal_release_label( \$release, ntn_get_igdb_data( \$post_id, '_ntn_game_release_precision' ) )" ) !== false &&
+	strpos( file_get_contents( $rl_dir . 'template-parts/review-sidebar-desktop.php' ), "ntn_journal_release_label( \$release, \$game['release_precision'] )" ) !== false &&
 	strpos( file_get_contents( $rl_dir . 'template-parts/review-header-mobile.php' ), "ntn_journal_release_label( \$release, ntn_get_igdb_data( \$post_id, '_ntn_game_release_precision' ) )" ) !== false &&
 	strpos( file_get_contents( $rl_dir . 'inc/front-page-data.php' ), "'date'      => \$label," ) !== false,
 	'54.4: Game sheets and upcoming releases show only the known parts of the release date'
@@ -4445,19 +4457,6 @@ unset( $mock_termmeta[9951], $mock_termmeta[9952] );
 
 // --- TEST SUITE 68: Elenco dei giochi di un articolo (scheda multigioco, fase 1) ---
 echo "\n--- 68. ELENCO GIOCHI DI UN ARTICOLO ---\n";
-if ( ! function_exists( 'has_category' ) ) {
-	function has_category( $category, $post = null ) {
-		global $mock_post_categories;
-		$post_id = $post instanceof WP_Post ? $post->ID : (int) $post;
-		foreach ( (array) ( $mock_post_categories[ $post_id ] ?? array() ) as $cat ) {
-			if ( in_array( $cat->slug, (array) $category, true ) ) {
-				return true;
-			}
-		}
-		return false;
-	}
-}
-
 // Finta ricerca: tag e categoria come la query vera, dalla più recente, e registro delle query fatte.
 $mg_query_log = array();
 $GLOBALS['mock_wp_query_handler'] = static function ( $args ) use ( &$mg_query_log ) {
@@ -4634,6 +4633,114 @@ assert_test(
 	'68.10: The review search asks for one post without counting rows, and runs once per game in a request'
 );
 
+// --- TEST SUITE 69: Scheda del gioco nella colonna su PC (scheda multigioco, fase 2) ---
+echo "\n--- 69. SCHEDA DEL GIOCO SU PC ---\n";
+$mg_render = static function ( $id ) {
+	global $mock_posts;
+	$GLOBALS['post'] = $mock_posts[ $id ];
+	ob_start();
+	require ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/template-parts/review-sidebar-desktop.php';
+	return ob_get_clean();
+};
+
+// 69.1: nessun gioco: la scheda di sempre, con il titolo dell'articolo e il voto, senza riga recensione né carosello
+$mg_post( 10000, 'post', 'publish', 'mg-solo-voto', '2026-01-01', array(), array( 'recensioni' ) );
+$mock_postmeta[10000] = array( 'rating' => '3' );
+$mg_out = $mg_render( 10000 );
+assert_test(
+	false !== strpos( $mg_out, '<span>// Scheda del videogioco</span>' ) && false !== strpos( $mg_out, 'mg-solo-voto' ) && false !== strpos( $mg_out, '// Valutazione finale' ) && false !== strpos( $mg_out, 'aria-label="Voto 3 su 5"' ) &&
+	false === strpos( $mg_out, 'ntn-greview-mini' ) && false === strpos( $mg_out, 'data-ntn-gcarousel' ),
+	'69.1: Without games the classic card stays, with the article title and rating, no review row and no carousel'
+);
+
+// 69.2: un gioco: scheda di sempre, i dati scritti sull'articolo vincono, riga con recensione e LED
+$mg_one = $mg_term( 10000, 'Mg Uno', 'mg-uno', array( '_ntn_igdb_game_id' => 600, '_ntn_game_title' => 'Mg Uno', '_ntn_game_developer' => 'Studio Tag', '_ntn_game_publisher' => 'Editore Tag', '_ntn_game_url' => 'https://www.igdb.com/games/mg-uno' ) );
+$mg_post( 10001, 'post', 'publish', 'mg-uno-recensione', '2025-01-01', array( $mg_one ), array( 'recensioni' ) );
+$mock_postmeta[10001] = array( 'rating' => '4' );
+$mg_post( 10002, 'post', 'publish', 'mg-uno-notizia', '2026-01-01', array( $mg_one ), array( 'notizie' ) );
+$mock_postmeta[10002] = array( '_ntn_game_developer' => 'Studio Articolo' );
+$mg_out = $mg_render( 10002 );
+assert_test(
+	false !== strpos( $mg_out, '<span>// Scheda del videogioco</span>' ) && false === strpos( $mg_out, 'data-ntn-gcarousel' ) &&
+	false !== strpos( $mg_out, 'Studio Articolo' ) && false === strpos( $mg_out, 'Studio Tag' ) && false !== strpos( $mg_out, 'Editore Tag' ) &&
+	false !== strpos( $mg_out, 'aria-label="Leggi la recensione di Mg Uno"' ) && false !== strpos( $mg_out, 'href="' . get_permalink( 10001 ) . '"' ) && 4 === substr_count( $mg_out, 'ntn-led is-on' ) &&
+	strpos( $mg_out, 'ntn-greview-mini' ) < strpos( $mg_out, 'class="ntn-igdb-btn"' ) && false === strpos( $mg_out, '// Valutazione finale' ),
+	'69.2: One game keeps the classic card, article meta wins per field, and the review row links the review with its LEDs above the IGDB button'
+);
+
+// 69.3: la recensione del gioco aperta: valutazione finale e nessuna riga
+$mg_out = $mg_render( 10001 );
+assert_test(
+	false !== strpos( $mg_out, '// Valutazione finale' ) && false !== strpos( $mg_out, 'aria-label="Voto 4 su 5"' ) && false === strpos( $mg_out, 'ntn-greview-mini' ),
+	'69.3: The review of the single game shows the final score instead of the review row'
+);
+
+// 69.4: un gioco senza recensioni: non recensito con cinque LED vuoti
+$mg_none = $mg_term( 10001, 'Mg Mai Recensito', 'mg-mai-recensito', array( '_ntn_igdb_game_id' => 601, '_ntn_game_title' => 'Mg Mai Recensito' ) );
+$mg_post( 10003, 'post', 'publish', 'mg-mai-notizia', '2026-01-01', array( $mg_none ), array( 'notizie' ) );
+$mg_out = $mg_render( 10003 );
+assert_test(
+	false !== strpos( $mg_out, 'ntn-greview-mini is-none' ) && false !== strpos( $mg_out, '// Non recensito' ) && 5 === substr_count( $mg_out, 'ntn-led is-off' ),
+	'69.4: A game without reviews shows Non recensito with five empty LEDs'
+);
+
+// 69.5: più giochi: carosello in ordine alfabetico, una pagina per gioco, nessun dato mescolato
+$mg_multi_a = $mg_term( 10002, 'Mg Zeta', 'mg-zeta', array( '_ntn_igdb_game_id' => 610, '_ntn_game_title' => 'Mg Zeta', '_ntn_game_cover' => 'cozeta', '_ntn_game_developer' => 'Studio Zeta', '_ntn_game_url' => 'https://www.igdb.com/games/mg-zeta' ) );
+$mg_multi_b = $mg_term( 10003, 'Mg Èrcole', 'mg-ercole', array( '_ntn_igdb_game_id' => 611, '_ntn_game_title' => 'Mg Èrcole', '_ntn_game_cover' => 'coercole', '_ntn_game_developer' => 'Studio Ercole' ) );
+$mg_multi_c = $mg_term( 10004, 'Mg Alba', 'mg-alba', array( '_ntn_igdb_game_id' => 612, '_ntn_game_title' => 'Mg Alba', '_ntn_game_cover' => 'coalba', '_ntn_game_developer' => 'Studio Alba', '_ntn_game_url' => 'https://www.igdb.com/games/mg-alba' ) );
+$mg_post( 10004, 'post', 'publish', 'mg-multi-recensione-alba', '2024-01-01', array( $mg_multi_c ), array( 'recensioni' ) );
+$mg_post( 10005, 'post', 'publish', 'mg-multi-recensione-ercole', '2024-01-01', array( $mg_multi_b ), array( 'recensioni' ) );
+$mock_postmeta[10005] = array( 'rating' => '2' );
+$mg_post( 10006, 'post', 'publish', 'mg-multi-recensione-zeta', '2026-02-01', array( $mg_multi_a ), array( 'recensioni' ) );
+$mock_postmeta[10006] = array( 'rating' => '4', 'ntn_review_source' => 'Copia per la prova' );
+$mg_post( 10007, 'post', 'publish', 'mg-multi-notizia', '2026-03-01', array( $mg_multi_a, $mg_multi_b, $mg_multi_c ), array( 'notizie' ) );
+$mg_out = $mg_render( 10007 );
+$mg_slides = explode( '<div class="ntn-gslide"', $mg_out );
+assert_test(
+	false !== strpos( $mg_out, 'ntn-gcard--multi pointer-events-auto" data-ntn-gcarousel aria-roledescription="carosello"' ) && false !== strpos( $mg_out, '<span class="ntn-gcard-count">01 / 03</span>' ) &&
+	false === strpos( $mg_out, '// Scheda del videogioco' ) && 4 === count( $mg_slides ) && 9 === substr_count( $mg_out, 'data-i="' ) && 3 === substr_count( $mg_out, 'aria-current="true"' ) &&
+	false !== strpos( $mg_slides[1], 'aria-label="1 di 3: Mg Alba"' ) && false !== strpos( $mg_slides[2], 'aria-label="2 di 3: Mg Èrcole"' ) && false !== strpos( $mg_slides[3], 'aria-label="3 di 3: Mg Zeta"' ) &&
+	false !== strpos( $mg_slides[1], 'href="' . get_term_link( $mg_multi_c ) . '"' ) && false !== strpos( $mg_slides[3], 'href="' . get_term_link( $mg_multi_a ) . '"' ) &&
+	false === strpos( $mg_slides[1], 'loading="lazy"' ) && false !== strpos( $mg_slides[2], 'loading="lazy"' ) && false !== strpos( $mg_slides[3], 'loading="lazy"' ) &&
+	false !== strpos( $mg_slides[1], 'coalba' ) && false !== strpos( $mg_slides[1], 'Studio Alba' ) && false === strpos( $mg_slides[1], 'Studio Ercole' ) && false === strpos( $mg_slides[1], 'Studio Zeta' ) && false === strpos( $mg_slides[1], 'cozeta' ) &&
+	false !== strpos( $mg_slides[2], 'Studio Ercole' ) && false === strpos( $mg_slides[2], 'Studio Alba' ) && false === strpos( $mg_slides[2], 'Studio Zeta' ) && false === strpos( $mg_slides[2], 'ntn-igdb-btn' ) &&
+	false !== strpos( $mg_slides[3], 'href="https://www.igdb.com/games/mg-zeta"' ) && false === strpos( $mg_slides[3], 'mg-alba"' ),
+	'69.5: Several games make an alphabetical carousel with one page per game, each with its own cover, data, page link and IGDB button'
+);
+
+// 69.6: ogni pagina ha la sua riga recensione; un voto mancante lascia il link senza LED
+assert_test(
+	false !== strpos( $mg_slides[1], 'aria-label="Leggi la recensione di Mg Alba"' ) && false === strpos( $mg_slides[1], 'ntn-led is-on' ) &&
+	false !== strpos( $mg_slides[2], 'href="' . get_permalink( 10005 ) . '"' ) && 2 === substr_count( $mg_slides[2], 'ntn-led is-on' ) &&
+	false !== strpos( $mg_slides[3], 'href="' . get_permalink( 10006 ) . '"' ) && 4 === substr_count( $mg_slides[3], 'ntn-led is-on' ) &&
+	false === strpos( $mg_out, '// Valutazione finale' ) && false === strpos( $mg_out, 'Origine' ),
+	'69.6: Each page links its own review with its own LEDs, a review without rating shows no LEDs, and a news article has no final score'
+);
+
+// 69.7: se l'articolo aperto è la recensione di un gioco, solo la sua pagina ha valutazione finale e origine
+$mg_multi_d = $mg_term( 10005, 'Mg Delta', 'mg-delta', array( '_ntn_igdb_game_id' => 613, '_ntn_game_title' => 'Mg Delta', '_ntn_game_developer' => 'Studio Delta' ) );
+$mg_multi_e = $mg_term( 10006, 'Mg Epsilon', 'mg-epsilon', array( '_ntn_igdb_game_id' => 614, '_ntn_game_title' => 'Mg Epsilon', '_ntn_game_developer' => 'Studio Epsilon', '_ntn_featured_review_id' => 10004 ) );
+$mg_post( 10008, 'post', 'publish', 'mg-multi-recensione-delta', '2026-04-01', array( $mg_multi_d, $mg_multi_e ), array( 'recensioni' ) );
+$mock_postmeta[10008] = array( 'rating' => '5', 'ntn_review_source' => 'Copia per la prova' );
+$mg_slides = explode( '<div class="ntn-gslide"', $mg_render( 10008 ) );
+assert_test(
+	false !== strpos( $mg_slides[1], '// Valutazione finale' ) && false !== strpos( $mg_slides[1], 'aria-label="Voto 5 su 5"' ) && false !== strpos( $mg_slides[1], 'Origine' ) && false === strpos( $mg_slides[1], 'ntn-greview-mini' ) &&
+	false === strpos( $mg_slides[2], '// Valutazione finale' ) && false === strpos( $mg_slides[2], 'Origine' ) && false !== strpos( $mg_slides[2], 'aria-label="Leggi la recensione di Mg Epsilon"' ),
+	'69.7: On a review only the reviewed game shows the final score and source, the other games show their review row'
+);
+
+// 69.8: stili compilati e carosello nel file JavaScript
+$mg_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/build/input.css' );
+$mg_built = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/style-tailwind-output.css' );
+$mg_js = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/assets/js/main.js' );
+assert_test(
+	strpos( $mg_css, '.ntn-igdb-btn:hover' ) < strpos( $mg_css, '.ntn-gcard--multi .ntn-gcard-h' ) && false !== strpos( $mg_css, '.ntn-greview-mini .ntn-led { width: 8px; height: 8px; }' ) &&
+	false !== strpos( $mg_built, '.ntn-gtrack{' ) && false !== strpos( $mg_built, '.ntn-gslide{' ) && false !== strpos( $mg_built, '.ntn-greview-mini' ) && false !== strpos( $mg_built, '.ntn-led.is-off' ) &&
+	false !== strpos( $mg_js, "'[data-ntn-gcarousel]'" ) && false !== strpos( $mg_js, 'prefers-reduced-motion' ) && false !== strpos( $mg_js, "new Event('resize')" ) && false !== strpos( $mg_js, "card.classList.add('is-ready')" ),
+	'69.8: Carousel styles are compiled and main.js drives the carousel, respecting reduced motion and refreshing the sticky column'
+);
+
+$GLOBALS['post'] = null;
 unset( $GLOBALS['mock_wp_query_handler'] );
 
 echo "\n=======================================================================\n";

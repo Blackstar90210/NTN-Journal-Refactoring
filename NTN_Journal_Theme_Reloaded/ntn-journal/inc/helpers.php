@@ -871,6 +871,44 @@ function ntn_format_post_game( array $info, array $extra ) {
 }
 
 /**
+ * Applica a un gioco i dati scritti sull'articolo: ogni post_meta non vuoto vince sul dato del tag.
+ * Serve agli articoli con un gioco solo, dove questi dati hanno sempre avuto la precedenza.
+ *
+ * @param array $game    Dati del gioco nel formato di ntn_get_post_games().
+ * @param int   $post_id ID dell'articolo.
+ * @return array Dati del gioco aggiornati.
+ */
+function ntn_apply_post_meta_to_game( array $game, $post_id ) {
+	$fields = array(
+		'title'             => '_ntn_game_title',
+		'cover'             => '_ntn_game_cover',
+		'release'           => '_ntn_game_release',
+		'release_precision' => '_ntn_game_release_precision',
+		'developer'         => '_ntn_game_developer',
+		'publisher'         => '_ntn_game_publisher',
+		'platforms'         => '_ntn_game_platforms',
+		'genres'            => '_ntn_game_genres',
+		'engine'            => '_ntn_game_engine',
+		'igdb_url'          => '_ntn_game_url',
+	);
+
+	foreach ( $fields as $field => $meta_key ) {
+		$value = get_post_meta( $post_id, $meta_key, true );
+		if ( empty( $value ) ) {
+			continue;
+		}
+		if ( 'cover' === $field && function_exists( 'ntn_normalize_game_cover_url' ) ) {
+			$value = ntn_normalize_game_cover_url( $value );
+		} elseif ( 'genres' === $field ) {
+			$value = ntn_translate_igdb_genres( $value );
+		}
+		$game[ $field ] = $value;
+	}
+
+	return $game;
+}
+
+/**
  * Prepara un titolo per l'ordinamento e il confronto: senza entità HTML e senza accenti.
  *
  * @param mixed $title Titolo del gioco.

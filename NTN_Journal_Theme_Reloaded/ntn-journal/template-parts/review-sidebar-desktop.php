@@ -6,6 +6,9 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  * Fase 5 del restyling (v3.7.0): scheda del gioco in cornice da 1 pixel, copertina senza velo,
  * dati tecnici a celle, valutazione con i cinque LED e pulsante IGDB.
  * Riferimento visivo: docs/mockup/ntn-mockup-completo.html (pagina Recensione, colonna di destra).
+ *
+ * Con due o più giochi la scheda diventa un carosello, una pagina per gioco in ordine alfabetico.
+ * Con un gioco solo o senza giochi resta la scheda classica.
  */
 
 $post_id = get_the_ID();
@@ -20,26 +23,10 @@ if ( ! empty( $rating ) ) {
 	$rating_label = function_exists( 'get_rating_label' ) ? get_rating_label( $final_rating ) : (string) $final_rating;
 }
 
-// Dati IGDB
-$game_title = ntn_get_igdb_data( $post_id, '_ntn_game_title' );
-$cover      = ntn_get_igdb_data( $post_id, '_ntn_game_cover' );
-$developer  = ntn_get_igdb_data( $post_id, '_ntn_game_developer' );
-$publisher  = ntn_get_igdb_data( $post_id, '_ntn_game_publisher' );
-$platforms  = ntn_get_igdb_data( $post_id, '_ntn_game_platforms' );
-$release    = ntn_get_igdb_data( $post_id, '_ntn_game_release' );
-$genres     = ntn_get_igdb_data( $post_id, '_ntn_game_genres' );
-$engine     = ntn_get_igdb_data( $post_id, '_ntn_game_engine' );
-$igdb_url   = ntn_get_igdb_data( $post_id, '_ntn_game_url' );
-$video      = ntn_get_igdb_data( $post_id, '_ntn_game_video' );
-$screenshots= ntn_get_igdb_data( $post_id, '_ntn_game_screenshots' );
-$hub_url    = ntn_get_game_hub_url( $post_id );
+$games      = ntn_get_post_games( $post_id );
+$game_count = count( $games );
 
 $review_source_meta = get_post_meta( $post_id, 'ntn_review_source', true );
-
-$display_title = $game_title ? $game_title : get_the_title();
-
-// Data di uscita: solo le parti note (v3.21.0), es. "23/10/2026", "Q3 2027", "2028"
-$release_text = $release ? ntn_journal_release_label( $release, ntn_get_igdb_data( $post_id, '_ntn_game_release_precision' ) ) : '';
 
 // Link del giudizio al suo tag
 $rating_link = '';
@@ -55,31 +42,49 @@ if ( $rating_label ) {
 		}
 	}
 }
-?>
 
-<div class="ntn-gcard pointer-events-auto">
-
-	<div class="ntn-gcard-h">
-		<span>// Scheda del videogioco</span>
-		<span class="ntn-gcard-src">IGDB</span>
+// Copertina del gioco
+$render_cover = static function ( $game, $lazy = true ) {
+	if ( ! $game['cover'] ) {
+		return;
+	}
+	?>
+	<div class="ntn-gcard-cover">
+		<img src="<?php echo esc_url( $game['cover'] ); ?>" alt="<?php echo esc_attr( $game['title'] ); ?>" class="w-full h-full object-cover" width="1280" height="720"<?php echo $lazy ? ' loading="lazy"' : ''; ?> />
 	</div>
+	<?php
+};
 
-	<?php if ( $cover ) : ?>
-		<div class="ntn-gcard-cover">
-			<img src="<?php echo esc_url( $cover ); ?>" alt="<?php echo esc_attr( $game_title ); ?>" class="w-full h-full object-cover" width="1280" height="720" loading="lazy" />
-		</div>
-	<?php endif; ?>
-
+// Nome del gioco, con il link alla sua pagina
+$render_name = static function ( $game ) {
+	$display_title = $game['title'] ? $game['title'] : get_the_title();
+	?>
 	<h3 class="ntn-gcard-name">
-		<?php if ( $hub_url ) : ?>
-			<a href="<?php echo esc_url( $hub_url ); ?>"><?php echo esc_html( $display_title ); ?></a>
+		<?php if ( $game['hub_url'] ) : ?>
+			<a href="<?php echo esc_url( $game['hub_url'] ); ?>"><?php echo esc_html( $display_title ); ?></a>
 		<?php else : ?>
 			<?php echo esc_html( $display_title ); ?>
 		<?php endif; ?>
 	</h3>
+	<?php
+};
 
-	<!-- Dati IGDB -->
-	<?php if ( $developer || $publisher || $platforms || $release || $genres || $engine || ! empty( $review_source_meta ) ) : ?>
+// Dati IGDB
+$render_kv = static function ( $game, $review_source ) {
+	$developer = $game['developer'];
+	$publisher = $game['publisher'];
+	$platforms = $game['platforms'];
+	$release   = $game['release'];
+	$genres    = $game['genres'];
+	$engine    = $game['engine'];
+
+	// Data di uscita: solo le parti note (v3.21.0), es. "23/10/2026", "Q3 2027", "2028"
+	$release_text = $release ? ntn_journal_release_label( $release, $game['release_precision'] ) : '';
+
+	if ( ! ( $developer || $publisher || $platforms || $release || $genres || $engine || ! empty( $review_source ) ) ) {
+		return;
+	}
+	?>
 	<dl class="ntn-gcard-kv">
 		<?php if ( $developer ) : ?>
 			<div><dt>Sviluppatore</dt><dd class="is-link"><?php echo ntn_link_companies_to_tags( $developer ); // phpcs:ignore WordPress.Security.EscapeOutput -- link già sanificati dalla funzione. ?></dd></div>
@@ -99,13 +104,19 @@ if ( $rating_label ) {
 		<?php if ( $platforms ) : ?>
 			<div class="is-wide"><dt>Piattaforme</dt><dd><?php echo esc_html( is_array( $platforms ) ? implode( ', ', array_filter( array_map( 'trim', $platforms ) ) ) : (string) $platforms ); ?></dd></div>
 		<?php endif; ?>
-		<?php if ( ! empty( $review_source_meta ) ) : ?>
-			<div class="is-wide"><dt>Origine</dt><dd><?php echo esc_html( is_scalar( $review_source_meta ) ? (string) $review_source_meta : '' ); ?></dd></div>
+		<?php if ( ! empty( $review_source ) ) : ?>
+			<div class="is-wide"><dt>Origine</dt><dd><?php echo esc_html( is_scalar( $review_source ) ? (string) $review_source : '' ); ?></dd></div>
 		<?php endif; ?>
 	</dl>
-	<?php endif; ?>
+	<?php
+};
 
-	<?php if ( ! empty( $rating ) ) : ?>
+// Valutazione finale dell'articolo
+$render_score = static function () use ( $rating, $rating_link, $rating_label, $final_rating ) {
+	if ( empty( $rating ) ) {
+		return;
+	}
+	?>
 	<!-- Valutazione finale -->
 	<div class="ntn-gcard-score">
 		<span class="ntn-rbox-k">// Valutazione finale</span>
@@ -132,10 +143,146 @@ if ( $rating_label ) {
 			?>
 		</div>
 	</div>
-	<?php endif; ?>
+	<?php
+};
 
-	<?php if ( ! empty( $igdb_url ) && is_scalar( $igdb_url ) ) : ?>
+// Riga con il link alla recensione del gioco, o l'avviso che non è stato recensito
+$render_review_row = static function ( $game ) {
+	if ( ! $game['review'] ) {
+		?>
+		<div class="ntn-greview-mini is-none">
+			<span>// Non recensito</span>
+			<span class="ntn-leds" aria-hidden="true"><?php echo str_repeat( '<i class="ntn-led is-off"></i>', 5 ); ?></span>
+		</div>
+		<?php
+		return;
+	}
+	$review_rating = (int) $game['review_rating'];
+	?>
+	<a href="<?php echo esc_url( get_permalink( $game['review'] ) ); ?>" class="ntn-greview-mini" aria-label="<?php echo esc_attr( sprintf( 'Leggi la recensione di %s', $game['title'] ) ); ?>">
+		<span>Leggi la recensione →</span>
+		<?php if ( $review_rating > 0 ) : ?>
+			<span class="ntn-leds" aria-hidden="true">
+				<?php
+				for ( $i = 1; $i <= 5; $i++ ) {
+					$led_class = 'ntn-led';
+					if ( $i <= $review_rating ) {
+						$led_class .= ' is-on';
+					}
+					if ( $i === $review_rating ) {
+						$led_class .= ' is-last';
+					}
+					echo '<i class="' . esc_attr( $led_class ) . '"></i>';
+				}
+				?>
+			</span>
+		<?php endif; ?>
+	</a>
+	<?php
+};
+
+// Pulsante verso la pagina del gioco su IGDB
+$render_igdb_button = static function ( $game ) {
+	$igdb_url = $game['igdb_url'];
+	if ( ! empty( $igdb_url ) && is_scalar( $igdb_url ) ) :
+		?>
 		<a href="<?php echo esc_url( (string) $igdb_url ); ?>" target="_blank" rel="noopener noreferrer nofollow" class="ntn-igdb-btn">Vedi su IGDB.com</a>
-	<?php endif; ?>
+		<?php
+	endif;
+};
+
+if ( $game_count > 1 ) :
+	?>
+
+<div class="ntn-gcard ntn-gcard--multi pointer-events-auto" data-ntn-gcarousel aria-roledescription="carosello" aria-label="Giochi dell'articolo">
+
+	<div class="ntn-gcard-h">
+		<span>// Scheda gioco <span class="ntn-gcard-src">· IGDB</span></span>
+		<span class="ntn-gcard-head-r">
+			<span class="ntn-gcard-count"><?php echo esc_html( sprintf( '01 / %02d', $game_count ) ); ?></span>
+			<span class="ntn-gnav">
+				<button type="button" data-step="-1" aria-label="Gioco precedente" disabled>←</button>
+				<button type="button" data-step="1" aria-label="Gioco successivo">→</button>
+			</span>
+		</span>
+	</div>
+
+	<div class="ntn-gtrack">
+		<?php foreach ( $games as $slide_index => $game ) : ?>
+			<?php $is_reviewed = ! empty( $game['is_current_review'] ); ?>
+			<div class="ntn-gslide" role="group" aria-roledescription="gioco" aria-label="<?php echo esc_attr( sprintf( '%d di %d: %s', $slide_index + 1, $game_count, $game['title'] ) ); ?>">
+
+				<?php $render_cover( $game, $slide_index > 0 ); ?>
+
+				<div class="ntn-gpager">
+					<span class="dots">
+						<?php foreach ( $games as $dot_index => $dot_game ) : ?>
+							<button type="button" data-i="<?php echo esc_attr( (string) $dot_index ); ?>" aria-label="<?php echo esc_attr( $dot_game['title'] ); ?>" aria-current="<?php echo $dot_index === $slide_index ? 'true' : 'false'; ?>"></button>
+						<?php endforeach; ?>
+					</span>
+					<span class="lbl">Scorri</span>
+				</div>
+
+				<?php
+				$render_name( $game );
+				$render_kv( $game, $is_reviewed ? $review_source_meta : '' );
+				if ( $is_reviewed ) {
+					$render_score();
+				} else {
+					$render_review_row( $game );
+				}
+				$render_igdb_button( $game );
+				?>
+
+			</div>
+		<?php endforeach; ?>
+	</div>
 
 </div>
+
+	<?php
+else :
+	if ( 1 === $game_count ) {
+		// Un gioco solo: i dati scritti sull'articolo restano prioritari, come sempre
+		$game = ntn_apply_post_meta_to_game( $games[0], $post_id );
+	} else {
+		// Nessun gioco: vecchi articoli e recensioni con il solo voto
+		$game = array(
+			'title'             => ntn_get_igdb_data( $post_id, '_ntn_game_title' ),
+			'cover'             => ntn_get_igdb_data( $post_id, '_ntn_game_cover' ),
+			'developer'         => ntn_get_igdb_data( $post_id, '_ntn_game_developer' ),
+			'publisher'         => ntn_get_igdb_data( $post_id, '_ntn_game_publisher' ),
+			'platforms'         => ntn_get_igdb_data( $post_id, '_ntn_game_platforms' ),
+			'release'           => ntn_get_igdb_data( $post_id, '_ntn_game_release' ),
+			'release_precision' => ntn_get_igdb_data( $post_id, '_ntn_game_release_precision' ),
+			'genres'            => ntn_get_igdb_data( $post_id, '_ntn_game_genres' ),
+			'engine'            => ntn_get_igdb_data( $post_id, '_ntn_game_engine' ),
+			'igdb_url'          => ntn_get_igdb_data( $post_id, '_ntn_game_url' ),
+			'hub_url'           => ntn_get_game_hub_url( $post_id ),
+		);
+	}
+	?>
+
+<div class="ntn-gcard pointer-events-auto">
+
+	<div class="ntn-gcard-h">
+		<span>// Scheda del videogioco</span>
+		<span class="ntn-gcard-src">IGDB</span>
+	</div>
+
+	<?php
+	$render_cover( $game );
+	$render_name( $game );
+	$render_kv( $game, $review_source_meta );
+	$render_score();
+	// Se l'articolo ha un voto è già lui la recensione del gioco: la riga servirebbe solo a smentirlo
+	if ( 1 === $game_count && empty( $rating ) && empty( $game['is_current_review'] ) ) {
+		$render_review_row( $game );
+	}
+	$render_igdb_button( $game );
+	?>
+
+</div>
+
+	<?php
+endif;

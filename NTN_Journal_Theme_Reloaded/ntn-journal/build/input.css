@@ -1306,6 +1306,34 @@
   }
   .ntn-igdb-btn:hover { background-color: #b91c1c; }
 
+  /* Scheda con più giochi: carosello a una pagina per gioco */
+  .ntn-gcard--multi .ntn-gcard-h { align-items: center; padding-block: 0; padding-right: 0; }
+  .ntn-gcard--multi .ntn-gcard-h > span:first-child { padding-block: 10px; white-space: nowrap; }
+  .ntn-gcard-head-r { display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+  .ntn-gcard-count { color: var(--ntn-fg); font-variant-numeric: tabular-nums; }
+  .ntn-gnav { display: none; }
+  .ntn-gcard--multi.is-ready .ntn-gnav { display: flex; }
+  .ntn-gnav button { width: 30px; height: 30px; display: grid; place-items: center; border-left: 1px solid var(--ntn-line-strong); font-family: var(--font-mono); font-size: 12px; font-weight: 700; color: var(--ntn-fg); }
+  .ntn-gnav button:hover:not(:disabled) { color: var(--ntn-accent); }
+  .ntn-gnav button:disabled { color: var(--ntn-line-strong); cursor: default; }
+  .ntn-gtrack { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain; }
+  .ntn-gtrack::-webkit-scrollbar { display: none; }
+  .ntn-gslide { flex: 0 0 100%; min-width: 0; scroll-snap-align: start; display: flex; flex-direction: column; }
+  .ntn-gslide > .ntn-igdb-btn { margin-top: auto; }
+  .ntn-gpager { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-bottom: 1px solid var(--ntn-line-strong); }
+  .ntn-gpager .dots { display: inline-flex; gap: 6px; }
+  .ntn-gpager .dots button { width: 12px; height: 12px; background-color: var(--ntn-band-line); }
+  .ntn-gpager .dots button[aria-current="true"] { background-color: var(--ntn-accent); box-shadow: 0 0 10px color-mix(in srgb, var(--ntn-accent) 55%, transparent); }
+  .ntn-gpager .lbl { font-family: var(--font-mono); font-size: 9px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ntn-faint); }
+  .ntn-greview-mini { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px; border-top: 1px solid var(--ntn-line-strong); font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
+  a.ntn-greview-mini { color: var(--ntn-accent); }
+  a.ntn-greview-mini:hover { background-color: var(--ntn-band); }
+  .ntn-greview-mini.is-none { color: var(--ntn-faint); }
+  .ntn-greview-mini .ntn-leds { gap: 4px; }
+  .ntn-greview-mini .ntn-led { width: 8px; height: 8px; }
+  .ntn-led.is-off { background-color: transparent; border: 1px dashed var(--ntn-line-strong); }
+  .ntn-gnav button:focus-visible, .ntn-gpager .dots button:focus-visible { outline: 2px solid var(--ntn-accent); outline-offset: 2px; }
+
   /* Scheda rapida da telefono */
   .ntn-rmob { display: grid; grid-template-columns: 104px minmax(0, 1fr); margin-bottom: 32px; border: 1px solid var(--ntn-line-strong); }
   .ntn-rmob:not(:has(.ntn-rmob-cover)) { grid-template-columns: minmax(0, 1fr); }

@@ -292,6 +292,73 @@
 		place();
 	});
 
+	// Scheda con più giochi: frecce, pallini e tasti portano alla pagina del gioco;
+	// contatore, pallini e frecce seguono anche lo scorrimento fatto a mano.
+	document.addEventListener('DOMContentLoaded', function() {
+		var cards = document.querySelectorAll('[data-ntn-gcarousel]');
+		var reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		Array.prototype.forEach.call(cards, function(card) {
+			var track = card.querySelector('.ntn-gtrack');
+			var total = track ? track.querySelectorAll('.ntn-gslide').length : 0;
+			if (total < 2) return;
+			var counter = card.querySelector('.ntn-gcard-count');
+			var arrows = card.querySelectorAll('.ntn-gnav button');
+			var dots = track.querySelectorAll('.dots button');
+			var current = 0;
+			var timer = null;
+			var pad = function(n) { return (n < 10 ? '0' : '') + n; };
+
+			var show = function(index) {
+				var changed = index !== current;
+				current = index;
+				if (counter) counter.textContent = pad(index + 1) + ' / ' + pad(total);
+				Array.prototype.forEach.call(arrows, function(arrow, position) {
+					var off = position === 0 ? index === 0 : index === total - 1;
+					// Il tasto che si spegne non può tenere il focus: passa all'altra freccia
+					if (off && arrow === document.activeElement && arrows[1 - position]) arrows[1 - position].focus();
+					arrow.disabled = off;
+				});
+				Array.prototype.forEach.call(dots, function(dot) {
+					dot.setAttribute('aria-current', parseInt(dot.getAttribute('data-i'), 10) === index ? 'true' : 'false');
+				});
+				// La colonna intelligente ricalcola la sua altezza
+				if (changed) window.dispatchEvent(new Event('resize'));
+			};
+
+			var goTo = function(index) {
+				index = Math.max(0, Math.min(total - 1, index));
+				track.scrollTo({ left: index * track.clientWidth, behavior: reducedMotion ? 'auto' : 'smooth' });
+				show(index);
+			};
+
+			card.addEventListener('click', function(e) {
+				var button = e.target.closest ? e.target.closest('button') : null;
+				if (!button) return;
+				if (button.hasAttribute('data-step')) {
+					goTo(current + parseInt(button.getAttribute('data-step'), 10));
+				} else if (button.hasAttribute('data-i')) {
+					goTo(parseInt(button.getAttribute('data-i'), 10));
+				}
+			});
+
+			card.addEventListener('keydown', function(e) {
+				if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+				e.preventDefault();
+				goTo(current + (e.key === 'ArrowLeft' ? -1 : 1));
+			});
+
+			track.addEventListener('scroll', function() {
+				clearTimeout(timer);
+				timer = setTimeout(function() {
+					if (!track.clientWidth) return;
+					show(Math.max(0, Math.min(total - 1, Math.round(track.scrollLeft / track.clientWidth))));
+				}, 80);
+			}, { passive: true });
+
+			card.classList.add('is-ready');
+		});
+	});
+
 	// v3.16.0: nell'indice la sezione che si sta leggendo diventa rossa
 	document.addEventListener('DOMContentLoaded', function() {
 		var links = document.querySelectorAll('.ntn-toc .ntn-toc-item a[href^="#"]');
