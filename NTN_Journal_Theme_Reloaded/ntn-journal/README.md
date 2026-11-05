@@ -1,83 +1,125 @@
 # NTN Journal - WordPress Theme
 
-**NTN Journal** is a modern, brutalist WordPress theme heavily inspired by the design language of Nothing OS. Co-authored by Luca Maiolini and Antigravity IDE AI, it combines high-contrast aesthetics, monospaced typography, and cutting-edge features like built-in AI summaries.
+**NTN Journal** is a brutalist WordPress theme inspired by the design language of Nothing OS, built for the video game news site **q-gin.info**. It is made of three parts that share the same version number: the parent theme, the child theme **NTN Journal Reloaded** and the **NTN Journal Core** plugin.
 
 *Read this document in: [English](#english) | [Italiano](#italiano)*
+
+**Version:** 4.9.0 · **Authors:** Luca Maiolini & Divisione_WP
 
 ---
 
 <a name="english"></a>
 ## 🇬🇧 English
 
+### 🧩 The three parts
+
+| Part | Folder | Role |
+|---|---|---|
+| Parent theme | `ntn-journal` | Page templates, Tailwind CSS v4 styles, front-end scripts |
+| Child theme | `ntn-journal-reloaded` | Video game catalog, game Hub page, live search, style tweaks |
+| Core plugin | `ntn-journal-core` | All data and logic: post types, taxonomies, IGDB, SEO, redirects, backup, Hubs, admin panel |
+
+The theme displays the data, the plugin manages it. The theme keeps working if the plugin is disabled, but most features need it.
+
 ### 🌟 Key Features
 
-*   **Nothing OS Aesthetics**: A brutalist design featuring high contrast (black, white, and red accents), dot-grid backgrounds, pulsating LED-like indicators, and smooth animations.
-*   **AI-Powered Summaries**: Native integration with **Google Gemini** and **Groq** APIs. Automatically generates smart, concise excerpts and summaries for your articles.
-*   **Advanced Review System**: Built-in support for game/tech reviews. Features a custom evaluation card with Final Ratings (e.g., Must-play, Recommended), dynamic Pros & Cons lists, and a final verdict box.
-*   **Dynamic Homepage Widgets**: Custom widget areas specifically designed for live-streaming and video content, including a "Twitch Live" and "YouTube Hub" section directly on the front page.
-*   **Tailwind CSS v4**: Styled using the latest Tailwind CSS engine for maximum performance, responsiveness, and easy future customization.
-*   **Premium Typography**: Utilizes **Inter** for exceptional readability on body text and **JetBrains Mono** for that techy, monospaced look.
-*   **Dark Mode Ready**: Fully responsive and supports system-level Dark/Light mode switching.
-*   **Performance Optimized**: Built-in performance tweaks to keep the theme lightning fast.
-*   **SEO Extras & Sitemap**: Includes a native sitemap generator and SEO enhancements without relying on bloated plugins.
-*   **Social & Engagement**: Built-in Social CTA, share buttons, and custom related posts functionality.
-*   **GitHub Releases Updater**: Native compatibility with GitHub Releases for seamless theme updates.
+*   **Nothing OS Aesthetics**: black, white and red, dot-matrix bands and illustrations, 1 px lines, sharp corners, no shadows, gradients or photo zoom. **Inter** for reading, **JetBrains Mono** for labels, dates and numbers, both served locally.
+*   **Light and Dark Mode**: a single toggle button that remembers the reader's choice.
+*   **Home Page**: one large and three small lead stories, latest news, reviews, editorials, upcoming releases, a Hub band with the dot-matrix map of Italy, Twitch and YouTube widget areas.
+*   **Articles**: large header, author byline, reading time, numbered subheadings, table of contents, "Recommended" boxes placed by text length, tags, share buttons, "Follow us" panel, Google preferred sources box, "Read also".
+*   **Reviews**: rating box with five LEDs, Pros & Cons (one per line), verdict, game card in the sidebar and a quick card on mobile.
+*   **Multi-game Card**: an article about two or more games shows one page per game, in alphabetical order: a carousel in the sidebar on desktop, arrows and swipe on mobile. Each game keeps its own data and has a review row, "Leggi la recensione" or "Non recensito". The rating appears only on the game the open review is about, and stays hidden if the review matches none of them.
+*   **Video Game Catalog**: filters without page reload, infinite scroll, release dates shown with the precision known from IGDB.
+*   **Hubs**: video game Hub, category Hubs (Consoles, Mobile, PC Gaming, Italian developers), studio Hub on the studio tag, Team page with authors in groups.
+*   **IGDB Integration**: covers, trailers, screenshots, developers, publishers, platforms, genres and engines.
+*   **Press Releases**: dedicated post type, list and page.
+*   **SEO**: Schema.org structured data, The SEO Framework integration, sitemaps, Google News sitemap, thin pages kept out of Google, Google Discover-ready preview image.
+*   **Redirects**: single and folder redirects, out-of-range page numbers, option to stop WordPress from guessing URLs.
+*   **AI Summaries**: one-click excerpt in the block editor with **Google Gemini**, with **Groq** as fallback.
+*   **Breaking News bar**, **backup and restore**, **API key check**.
+*   **Performance**: uploaded images resized to 1920 px and converted to JPEG when not transparent, deferred scripts, preloads, data caching.
+*   **Accessibility**: labels for screen readers, keyboard navigation, checked contrasts.
 
-### ⚙️ Minimum Requirements
-*   **WordPress**: 6.0 or higher
-*   **PHP**: 7.4 or higher
+### ⚙️ Requirements
+*   **WordPress**: 6.0 or higher (tested up to 7.x)
+*   **PHP**: 7.4 or higher (tested up to 8.5)
+*   **Optional**: The SEO Framework 5.x
 
 ### 🚀 Installation
-1. Download the repository as a `.zip` file or clone it.
-2. Upload the `ntn-journal` folder to your WordPress `wp-content/themes/` directory.
-3. Go to **Appearance > Themes** in your WordPress dashboard and activate "NTN Journal".
+1. Upload and activate the plugin `ntn-journal-core-X.Y.Z.zip` from **Plugins > Add New**.
+2. Upload the parent theme `ntn-journal-parent-X.Y.Z.zip` from **Appearance > Themes > Add New**. Do not activate it.
+3. Upload the child theme `ntn-journal-child-reloaded-X.Y.Z.zip` and **activate NTN Journal Reloaded**. It must always stay active.
+
+### 🛠️ Configuration
+*   **Appearance > Customize**: top bar text, logo, site name, recommended and related posts, watermark, Home Hub band, share buttons, Google box, social profiles.
+*   **Appearance > Menus**: four locations (Primary, Content, Platforms, Footer).
+*   **Appearance > Widgets**: Main Sidebar, Twitch Live and YouTube Hub for the Home page.
+*   **NTN Journal** (admin menu): Dashboard, Hub, Team, Reviews, Press Releases, IGDB Scanner, Breaking News, Redirects, API Services, SEO, Extra, Backup.
 
 ### 🤖 AI Configuration
-To enable AI summaries, you must provide your API keys safely through the WordPress Dashboard:
-1. Go to **Appearance > Customize** in your WordPress dashboard.
-2. Select the **Intelligenza Artificiale** section.
-3. Paste your Gemini API Key and Groq API Key in the respective fields.
-4. Click **Publish** to save.
+1. Go to **NTN Journal > API Services** in your WordPress dashboard.
+2. Paste your Gemini API key and Groq API key. Saved keys are never shown again on the page.
+3. Click **Verify** to run a free test request.
+4. In the block editor, use the **AI Generation (Summary)** panel to create the excerpt.
 
 ---
 
 <a name="italiano"></a>
 ## 🇮🇹 Italiano
 
-**NTN Journal** è un tema WordPress moderno e brutalista, ispirato fedelmente al design language di Nothing OS. Co-creato da Luca Maiolini e dall'Intelligenza Artificiale (Antigravity IDE), combina un'estetica ad alto contrasto, tipografia monospazio e funzionalità all'avanguardia come i riassunti generati dall'AI.
+### 🧩 I tre pezzi
+
+| Pezzo | Cartella | Ruolo |
+|---|---|---|
+| Tema parent | `ntn-journal` | Modelli delle pagine, stile con Tailwind CSS v4, script del sito |
+| Tema child | `ntn-journal-reloaded` | Catalogo dei videogiochi, Hub del gioco, ricerca dal vivo, ritocchi grafici |
+| Plugin | `ntn-journal-core` | Tutti i dati e la logica: tipi di contenuto, tassonomie, IGDB, SEO, redirect, backup, Hub, pannello di gestione |
+
+Il tema mostra i dati, il plugin li gestisce. Il tema funziona anche con il plugin spento, ma gran parte delle funzioni ha bisogno del plugin.
 
 ### 🌟 Caratteristiche Principali
 
-*   **Estetica Nothing OS**: Un design brutalista caratterizzato da alto contrasto (bianco, nero e accenti rossi), sfondi dot-grid, indicatori LED pulsanti e animazioni fluide.
-*   **Riassunti potenziati dall'AI**: Integrazione nativa con le API di **Google Gemini** e **Groq**. Genera automaticamente estratti e riassunti intelligenti per i tuoi articoli.
-*   **Sistema di Recensioni Avanzato**: Supporto integrato per recensioni (videogiochi/tecnologia). Include una scheda di valutazione personalizzata con Giudizio Finale (es. Must-play, Consigliato), liste dinamiche di Pro & Contro e un box per il verdetto.
-*   **Homepage Dinamica a Widget**: Aree widget personalizzate per contenuti video e live-streaming, con sezioni dedicate per "Twitch Live" e "YouTube Hub" direttamente in prima pagina.
-*   **Tailwind CSS v4**: Sviluppato con l'ultimo motore di Tailwind CSS per garantire massime prestazioni, responsività e facilità di personalizzazione.
-*   **Tipografia Premium**: Utilizza **Inter** per una leggibilità eccezionale del testo e **JetBrains Mono** per un look tecnico e monospazio.
-*   **Supporto Dark Mode**: Completamente responsivo e supporta lo switch nativo di sistema tra modalità Chiara e Scura.
-*   **Prestazioni Ottimizzate**: Modifiche prestazionali integrate per mantenere il tema sempre fulmineo.
-*   **SEO Extras & Sitemap**: Include un generatore di sitemap nativo e miglioramenti SEO senza dipendere da plugin pesanti.
-*   **Social & Engagement**: Social CTA integrata, pulsanti di condivisione e funzionalità per i post correlati.
-*   **Compatibilità GitHub Releases**: Piena compatibilità nativa con GitHub Releases per aggiornare il tema in modo facile e veloce.
+*   **Estetica Nothing OS**: nero, bianco e rosso, fasce e disegni a matrice di punti, linee da 1 pixel, angoli vivi, niente ombre, sfumature o zoom sulle foto. **Inter** per leggere, **JetBrains Mono** per etichette, date e numeri, entrambi caricati dal sito.
+*   **Tema chiaro e scuro**: un solo pulsante che ricorda la scelta del lettore.
+*   **Home**: una notizia grande e tre piccole in apertura, ultime notizie, recensioni, editoriali, prossime uscite, fascia Hub con la cartina dell'Italia a punti, aree widget per Twitch e YouTube.
+*   **Articoli**: testata grande, firma dell'autore, tempo di lettura, sottotitoli numerati, indice, box "Consigliati" inseriti in base alla lunghezza del testo, tag, condivisione, pannello "Seguici", box "Fonti preferite su Google", "Leggi anche".
+*   **Recensioni**: box del voto con cinque LED, pro e contro (uno per riga), verdetto, scheda del gioco nella colonna laterale e scheda rapida da telefono.
+*   **Scheda multigioco**: un articolo su due o più giochi mostra una pagina per gioco, in ordine alfabetico: carosello nella colonna laterale su PC, frecce e scorrimento col dito da telefono. Ogni gioco ha i suoi dati e una riga per la recensione, "Leggi la recensione" o "Non recensito". Il voto compare solo sul gioco di cui parla la recensione aperta e resta nascosto se la recensione non corrisponde a nessuno.
+*   **Catalogo dei videogiochi**: filtri senza ricaricare la pagina, scorrimento infinito, date di uscita con la precisione nota da IGDB.
+*   **Hub**: Hub del videogioco, Hub di categoria (Console, Mobile, PC Gaming, Sviluppatori italiani), Hub dello studio sul tag dello studio, pagina Redazione con gli autori a gruppi.
+*   **Integrazione IGDB**: copertine, trailer, screenshot, sviluppatori, editori, piattaforme, generi e motori grafici.
+*   **Comunicati stampa**: tipo di contenuto, elenco e pagina dedicati.
+*   **SEO**: dati strutturati Schema.org, integrazione con The SEO Framework, sitemap, sitemap Google News, pagine con pochi articoli fuori da Google, immagine di anteprima adatta a Google Discover.
+*   **Redirect**: singoli e per cartella, pagine numerate oltre la fine, opzione per impedire a WordPress di "tirare a indovinare" gli indirizzi.
+*   **Riassunti con l'IA**: estratto con un clic nell'editor a blocchi con **Google Gemini**, con **Groq** di riserva.
+*   **Barra Breaking News**, **backup e ripristino**, **verifica delle chiavi API**.
+*   **Prestazioni**: immagini caricate ridotte a 1920 px e convertite in JPEG se non trasparenti, script differiti, precaricamenti, dati in memoria.
+*   **Accessibilità**: etichette per i lettori di schermo, navigazione da tastiera, contrasti verificati.
 
-### ⚙️ Requisiti Minimi
-*   **WordPress**: 6.0 o superiore
-*   **PHP**: 7.4 o superiore
+### ⚙️ Requisiti
+*   **WordPress**: 6.0 o superiore (provato fino alla 7.x)
+*   **PHP**: 7.4 o superiore (provato fino alla 8.5)
+*   **Facoltativo**: The SEO Framework 5.x
 
 ### 🚀 Installazione
-1. Scarica la repository in formato `.zip` oppure clonala.
-2. Carica la cartella `ntn-journal` all'interno della directory `wp-content/themes/` del tuo WordPress.
-3. Vai su **Aspetto > Temi** nella tua bacheca WordPress e attiva "NTN Journal".
+1. Carica e attiva il plugin `ntn-journal-core-X.Y.Z.zip` da **Plugin > Aggiungi nuovo**.
+2. Carica il tema parent `ntn-journal-parent-X.Y.Z.zip` da **Aspetto > Temi > Aggiungi nuovo**. Non attivarlo.
+3. Carica il tema child `ntn-journal-child-reloaded-X.Y.Z.zip` e **attiva NTN Journal Reloaded**. Deve restare sempre attivo.
+
+### 🛠️ Configurazione
+*   **Aspetto > Personalizza**: testo della barra in alto, logo, nome del sito, articoli consigliati e correlati, filigrana, fascia Hub della Home, condivisione, box Google, profili social.
+*   **Aspetto > Menu**: quattro posizioni (Primary, Gestione Contenuti, Gestione Piattaforme, Footer).
+*   **Aspetto > Widget**: Sidebar Principale, Twitch Live e YouTube Hub per la Home.
+*   **NTN Journal** (menu della bacheca): Dashboard, Hub, Redazione, Recensioni, Comunicati, Scanner IGDB, Breaking News, Redirect, Servizi API, SEO, Extra, Backup.
 
 ### 🤖 Configurazione AI
-Per abilitare i riassunti automatici tramite intelligenza artificiale, devi inserire le tue chiavi API in modo sicuro tramite la bacheca di WordPress:
-1. Vai su **Aspetto > Personalizza** nella tua bacheca WordPress.
-2. Seleziona la sezione **Intelligenza Artificiale**.
-3. Incolla la tua API Key di Gemini e la API Key di Groq nei rispettivi campi.
-4. Clicca su **Pubblica** per salvare.
+1. Vai su **NTN Journal > Servizi API** nella bacheca di WordPress.
+2. Incolla la API Key di Gemini e quella di Groq. Le chiavi salvate non vengono più mostrate nella pagina.
+3. Premi **Verifica** per fare una richiesta di prova gratuita.
+4. Nell'editor a blocchi usa il riquadro **Generazione AI (Riassunto)** per creare l'estratto.
 
 ---
 
 ## 👨‍💻 Authors & License
-*   **Authors**: Luca Maiolini (@Blackstar90210) & Antigravity IDE AI
-*   **License**: GNU General Public License v2 or later
+*   **Authors**: Luca Maiolini (@Blackstar90210) & Divisione_WP
+*   **License**: NTN Journal parent theme under GNU General Public License v2 or later; NTN Journal Core plugin proprietary
