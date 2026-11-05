@@ -381,6 +381,11 @@ class WP_Query {
 	public $max_num_pages = 1;
 	public $posts = array();
 	public $found_posts = 0;
+	public function __construct( $args = array() ) {
+		if ( ! empty( $GLOBALS['mock_wp_query_handler'] ) ) {
+			$this->posts = call_user_func( $GLOBALS['mock_wp_query_handler'], $args );
+		}
+	}
 	public function have_posts() { return have_posts(); }
 	public function the_post() { return the_post(); }
 }
@@ -3367,7 +3372,7 @@ assert_test(
 echo "\n--- 54. HUB DELLO STUDIO V3.21.0 ---\n";
 if ( ! function_exists( 'remove_accents' ) ) {
 	function remove_accents( $text ) {
-		return (string) $text; // il banco di prova usa solo nomi senza accenti
+		return strtr( (string) $text, array( 'à' => 'a', 'À' => 'A', 'è' => 'e', 'é' => 'e', 'È' => 'E', 'É' => 'E', 'ì' => 'i', 'ò' => 'o', 'ù' => 'u' ) ); // solo gli accenti usati dal banco di prova
 	}
 }
 if ( ! function_exists( 'ntn_core_studio_key' ) ) {
@@ -4437,6 +4442,199 @@ assert_test(
 );
 
 unset( $mock_termmeta[9951], $mock_termmeta[9952] );
+
+// --- TEST SUITE 68: Elenco dei giochi di un articolo (scheda multigioco, fase 1) ---
+echo "\n--- 68. ELENCO GIOCHI DI UN ARTICOLO ---\n";
+if ( ! function_exists( 'has_category' ) ) {
+	function has_category( $category, $post = null ) {
+		global $mock_post_categories;
+		$post_id = $post instanceof WP_Post ? $post->ID : (int) $post;
+		foreach ( (array) ( $mock_post_categories[ $post_id ] ?? array() ) as $cat ) {
+			if ( in_array( $cat->slug, (array) $category, true ) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+}
+
+// Finta ricerca: tag e categoria come la query vera, dalla più recente, e registro delle query fatte.
+$mg_query_log = array();
+$GLOBALS['mock_wp_query_handler'] = static function ( $args ) use ( &$mg_query_log ) {
+	global $mock_posts, $mock_post_tags, $mock_post_categories;
+	$mg_query_log[] = $args;
+	$found = array();
+	foreach ( $mock_posts as $candidate ) {
+		if ( 'post' !== $candidate->post_type || 'publish' !== $candidate->post_status ) {
+			continue;
+		}
+		$has_tag = false;
+		foreach ( (array) ( $mock_post_tags[ $candidate->ID ] ?? array() ) as $candidate_tag ) {
+			$has_tag = $has_tag || (int) $candidate_tag->term_id === (int) $args['tax_query'][0]['terms'];
+		}
+		if ( $has_tag && has_category( $args['tax_query'][1]['terms'], $candidate ) ) {
+			$found[] = $candidate;
+		}
+	}
+	usort( $found, static function ( $a, $b ) { return strcmp( (string) $b->post_date, (string) $a->post_date ); } );
+	return array_slice( $found, 0, (int) $args['posts_per_page'] );
+};
+
+$mg_term = static function ( $id, $name, $slug, $meta = array() ) {
+	global $mock_terms, $mock_termmeta;
+	$mock_terms[ $id ] = new WP_Term( array( 'term_id' => $id, 'name' => $name, 'slug' => $slug, 'taxonomy' => 'post_tag' ) );
+	if ( $meta ) {
+		$mock_termmeta[ $id ] = $meta;
+	}
+	return $mock_terms[ $id ];
+};
+$mg_post = static function ( $id, $type, $status, $slug, $date, $tags = array(), $cats = array() ) {
+	global $mock_posts, $mock_post_tags, $mock_post_categories;
+	$mock_posts[ $id ] = new WP_Post( array( 'ID' => $id, 'post_type' => $type, 'post_status' => $status, 'post_name' => $slug, 'post_title' => $slug, 'post_date' => $date ) );
+	$mock_post_tags[ $id ] = $tags;
+	$mock_post_categories[ $id ] = array_map( static function ( $cat_slug ) { return new WP_Term( array( 'term_id' => crc32( $cat_slug ), 'name' => $cat_slug, 'slug' => $cat_slug, 'taxonomy' => 'category' ) ); }, $cats );
+	return $mock_posts[ $id ];
+};
+
+// 68.1: due tag gioco con dati diversi non si mescolano; un dato mancante resta vuoto; i tag normali non sono giochi
+$mg_a = $mg_term( 9960, 'Mg Alfa', 'mg-alfa', array( '_ntn_igdb_game_id' => 501, '_ntn_game_title' => 'Mg Alfa', '_ntn_game_cover' => 'coalfa', '_ntn_game_developer' => 'Studio Alfa', '_ntn_game_publisher' => 'Editore Alfa', '_ntn_game_release' => '2024-01-01', '_ntn_game_release_precision' => 'year', '_ntn_game_platforms' => 'PC', '_ntn_game_genres' => 'Shooter', '_ntn_game_engine' => 'Motore Alfa', '_ntn_game_url' => 'https://www.igdb.com/games/mg-alfa' ) );
+$mg_b = $mg_term( 9961, 'Mg Beta', 'mg-beta', array( '_ntn_igdb_game_id' => 502, '_ntn_game_title' => 'Mg Beta', '_ntn_game_cover' => 'cobeta', '_ntn_game_developer' => 'Studio Beta' ) );
+$mg_plain = $mg_term( 9962, 'Indie', 'indie' );
+$mg_post( 9960, 'post', 'publish', 'mg-articolo-doppio', '2026-01-01', array( $mg_b, $mg_plain, $mg_a ) );
+$mg_games = ntn_get_post_games( 9960 );
+assert_test(
+	2 === count( $mg_games ) &&
+	501 === $mg_games[0]['igdb_id'] && 'Mg Alfa' === $mg_games[0]['title'] && false !== strpos( $mg_games[0]['cover'], 'coalfa' ) && 'Studio Alfa' === $mg_games[0]['developer'] && 'Editore Alfa' === $mg_games[0]['publisher'] && 'Sparatutto' === $mg_games[0]['genres'] && 'year' === $mg_games[0]['release_precision'] && 'Motore Alfa' === $mg_games[0]['engine'] && 'https://www.igdb.com/games/mg-alfa' === $mg_games[0]['igdb_url'] && $mg_a === $mg_games[0]['term'] &&
+	502 === $mg_games[1]['igdb_id'] && 'Mg Beta' === $mg_games[1]['title'] && false !== strpos( $mg_games[1]['cover'], 'cobeta' ) && 'Studio Beta' === $mg_games[1]['developer'] && '' === $mg_games[1]['publisher'] && '' === $mg_games[1]['engine'] && '' === $mg_games[1]['release'] && $mg_b === $mg_games[1]['term'],
+	'68.1: Two game tags keep their own data, a missing value stays empty instead of borrowing the other game, plain tags are ignored'
+);
+
+// 68.2: ordine alfabetico senza badare a maiuscole e accenti; a parità di titolo resta l'ordine dei tag
+$mg_order_tags = array();
+foreach ( array( 'zelta', 'Èlite', 'alfa', 'Beta', 'Pari', 'pari' ) as $mg_i => $mg_title ) {
+	$mg_order_tags[] = $mg_term( 9970 + $mg_i, $mg_title, 'mg-ordine-' . $mg_i, array( '_ntn_igdb_game_id' => 510 + $mg_i, '_ntn_game_title' => $mg_title ) );
+}
+$mg_post( 9961, 'post', 'publish', 'mg-articolo-ordine', '2026-01-01', $mg_order_tags );
+assert_test(
+	array( 'alfa', 'Beta', 'Èlite', 'Pari', 'pari', 'zelta' ) === array_column( ntn_get_post_games( 9961 ), 'title' ),
+	'68.2: Games are sorted alphabetically ignoring case and accents, and equal titles keep their tag order'
+);
+
+// 68.3: doppioni per ID IGDB, per titolo se manca l'ID, e tolleranza su slug con suffisso e nome con entità
+$mg_dup_1 = $mg_term( 9980, 'Mg Doppio', 'mg-doppio', array( '_ntn_igdb_game_id' => 520, '_ntn_game_title' => 'Mg Doppio' ) );
+$mg_dup_2 = $mg_term( 9981, 'Mg Doppio Bis', 'mg-doppio-bis', array( '_ntn_igdb_game_id' => 520, '_ntn_game_title' => 'Mg Doppio Bis' ) );
+$mg_noid_1 = $mg_term( 9982, 'Mg Senza Id', 'mg-senza-id', array( '_ntn_game_title' => 'Mg Senza Id' ) );
+$mg_noid_2 = $mg_term( 9983, 'MG SENZA ID', 'mg-senza-id-altro', array( '_ntn_game_title' => 'MG SENZA ID' ) );
+$mg_post( 9962, 'post', 'publish', 'mg-articolo-doppioni', '2026-01-01', array( $mg_dup_1, $mg_dup_2, $mg_noid_1, $mg_noid_2 ) );
+$mg_variant_slug = $mg_term( 9984, 'Mg Doppio', 'mg-doppio-2' );
+$mg_real_name = $mg_term( 9985, "Mg L'Eroe", 'mg-eroe', array( '_ntn_igdb_game_id' => 521, '_ntn_game_title' => "Mg L'Eroe" ) );
+$mg_variant_name = $mg_term( 9986, 'Mg L&#039;Eroe', 'mg-eroe-entita' );
+$mg_post( 9963, 'post', 'publish', 'mg-articolo-varianti', '2026-01-01', array( $mg_variant_slug, $mg_variant_name ) );
+assert_test(
+	array( 'Mg Doppio', 'Mg Senza Id' ) === array_column( ntn_get_post_games( 9962 ), 'title' ) &&
+	array( 520, 521 ) === array_column( ntn_get_post_games( 9963 ), 'igdb_id' ),
+	'68.3: Duplicates collapse by IGDB id or by title without id, and tag variants resolve to the real game tag'
+);
+
+// 68.4: senza tag gioco si legge il post_meta dei vecchi articoli; senza nessun dato l'elenco è vuoto
+$mg_post( 9964, 'post', 'publish', 'mg-articolo-vecchio', '2026-01-01', array( $mg_plain ), array( 'recensioni' ) );
+$mock_postmeta[9964] = array( '_ntn_game_title' => 'Mg Vecchio', '_ntn_igdb_game_id' => '530', '_ntn_game_cover' => 'covecchio', '_ntn_game_developer' => 'Studio Vecchio', '_ntn_game_genres' => 'Shooter', '_ntn_igdb_url' => 'https://www.igdb.com/games/mg-vecchio', 'rating' => '4' );
+$mg_post( 9965, 'post', 'publish', 'mg-articolo-senza-giochi', '2026-01-01', array( $mg_plain ) );
+$mg_old = ntn_get_post_games( 9964 );
+assert_test(
+	1 === count( $mg_old ) && null === $mg_old[0]['term'] && 530 === $mg_old[0]['igdb_id'] && 'Mg Vecchio' === $mg_old[0]['title'] && false !== strpos( $mg_old[0]['cover'], 'covecchio' ) && 'Studio Vecchio' === $mg_old[0]['developer'] && 'Sparatutto' === $mg_old[0]['genres'] && 'https://www.igdb.com/games/mg-vecchio' === $mg_old[0]['igdb_url'] && '' === $mg_old[0]['engine'] &&
+	9964 === $mg_old[0]['review']->ID && true === $mg_old[0]['is_current_review'] && 4 === $mg_old[0]['review_rating'] &&
+	array() === ntn_get_post_games( 9965 ),
+	'68.4: Old articles without game tags get one game from post meta, and articles with no game data return an empty list'
+);
+
+// 68.5: ultima recensione pubblicata del gioco giusto; anteprime, notizie e bozze non contano; ogni gioco ha la sua
+$mg_rev_a = $mg_term( 9990, 'Mg Con Recensione', 'mg-con-recensione', array( '_ntn_igdb_game_id' => 540, '_ntn_game_title' => 'Mg Con Recensione' ) );
+$mg_rev_b = $mg_term( 9991, 'Mg Solo Anteprima', 'mg-solo-anteprima', array( '_ntn_igdb_game_id' => 541, '_ntn_game_title' => 'Mg Solo Anteprima' ) );
+$mg_post( 9970, 'post', 'publish', 'mg-rec-vecchia', '2025-01-01', array( $mg_rev_a ), array( 'recensioni' ) );
+$mg_post( 9971, 'post', 'publish', 'mg-rec-nuova', '2025-06-01', array( $mg_rev_a ), array( 'recensione' ) );
+$mg_post( 9972, 'post', 'draft', 'mg-rec-bozza', '2026-06-01', array( $mg_rev_a ), array( 'recensioni' ) );
+$mg_post( 9973, 'post', 'publish', 'mg-anteprima', '2026-07-01', array( $mg_rev_a, $mg_rev_b ), array( 'anteprime' ) );
+$mg_post( 9974, 'post', 'publish', 'mg-notizia', '2026-08-01', array( $mg_rev_a, $mg_rev_b ), array( 'notizie' ) );
+$mock_postmeta[9971] = array( 'rating' => '4' );
+$mg_review_games = ntn_get_post_games( 9974 );
+assert_test(
+	9971 === $mg_review_games[0]['review']->ID && 4 === $mg_review_games[0]['review_rating'] && false === $mg_review_games[0]['is_current_review'] &&
+	null === $mg_review_games[1]['review'] && 0 === $mg_review_games[1]['review_rating'] && false === $mg_review_games[1]['is_current_review'],
+	'68.5: Each game gets its latest published review, never a preview, news item or draft, and no review means null and rating 0'
+);
+
+// 68.6: se l'articolo aperto è la recensione del gioco, viene segnalato; per l'altro gioco no
+$mg_rev_c = $mg_term( 9992, 'Mg Altra Recensione', 'mg-altra-recensione', array( '_ntn_igdb_game_id' => 542, '_ntn_game_title' => 'Mg Altra Recensione' ) );
+$mg_post( 9975, 'post', 'publish', 'mg-rec-altra', '2026-09-01', array( $mg_rev_c ), array( 'recensioni' ) );
+$mg_rev_d = $mg_term( 9989, 'Mg Questa Recensione', 'mg-questa-recensione', array( '_ntn_igdb_game_id' => 547, '_ntn_game_title' => 'Mg Questa Recensione' ) );
+$mg_post( 9976, 'post', 'publish', 'mg-rec-doppia', '2026-10-01', array( $mg_rev_d, $mg_rev_c ), array( 'recensioni' ) );
+$mg_post( 9977, 'post', 'publish', 'mg-rec-c-nuova', '2026-11-01', array( $mg_rev_c ), array( 'recensioni' ) );
+$mock_postmeta[9976] = array( 'rating' => '5' );
+$mg_current = ntn_get_post_games( 9976 );
+assert_test(
+	'Mg Altra Recensione' === $mg_current[0]['title'] && 9977 === $mg_current[0]['review']->ID && false === $mg_current[0]['is_current_review'] &&
+	'Mg Questa Recensione' === $mg_current[1]['title'] && 9976 === $mg_current[1]['review']->ID && true === $mg_current[1]['is_current_review'] && 5 === $mg_current[1]['review_rating'],
+	'68.6: is_current_review is true only for the game whose review is the open article'
+);
+
+// 68.7: la recensione scelta a mano vince (prima la scheda, poi il tag), ma solo se pubblicata e in Recensioni
+$mg_post( 9978, 'post', 'publish', 'mg-manuale-tag', '2020-01-01', array(), array( 'recensioni' ) );
+$mg_post( 9979, 'post', 'publish', 'mg-manuale-cpt', '2020-02-01', array(), array( 'recensioni' ) );
+$mg_post( 9980, 'post', 'publish', 'mg-manuale-anteprima', '2020-03-01', array(), array( 'anteprime' ) );
+$mg_post( 9981, 'post', 'draft', 'mg-manuale-bozza', '2020-04-01', array(), array( 'recensioni' ) );
+$mg_man_tag = $mg_term( 9993, 'Mg Manuale Tag', 'mg-manuale-tag-gioco', array( '_ntn_igdb_game_id' => 543, '_ntn_game_title' => 'Mg Manuale Tag', '_ntn_featured_review_id' => 9978 ) );
+$mg_man_cpt = $mg_term( 9994, 'Mg Manuale Scheda', 'mg-manuale-scheda', array( '_ntn_igdb_game_id' => 544, '_ntn_game_title' => 'Mg Manuale Scheda', '_ntn_featured_review_id' => 9978 ) );
+$mg_post( 9982, 'videogioco', 'publish', 'mg-manuale-scheda', '2020-01-01' );
+$mock_postmeta[9982] = array( '_ntn_featured_review_id' => 9979 );
+$mg_man_bad = $mg_term( 9995, 'Mg Manuale Errato', 'mg-manuale-errato', array( '_ntn_igdb_game_id' => 545, '_ntn_game_title' => 'Mg Manuale Errato', '_ntn_featured_review_id' => 9980 ) );
+$mg_man_draft = $mg_term( 9996, 'Mg Manuale Bozza', 'mg-manuale-bozza-gioco', array( '_ntn_igdb_game_id' => 546, '_ntn_game_title' => 'Mg Manuale Bozza', '_ntn_featured_review_id' => 9981 ) );
+$mg_post( 9983, 'post', 'publish', 'mg-rec-automatica', '2021-01-01', array( $mg_man_draft ), array( 'recensioni' ) );
+$mg_post( 9984, 'post', 'publish', 'mg-articolo-manuali', '2026-01-01', array( $mg_man_tag, $mg_man_cpt, $mg_man_bad, $mg_man_draft ) );
+$mg_manual = array_column( ntn_get_post_games( 9984 ), 'review', 'title' );
+assert_test(
+	9978 === $mg_manual['Mg Manuale Tag']->ID && 9979 === $mg_manual['Mg Manuale Scheda']->ID && null === $mg_manual['Mg Manuale Errato'] && 9983 === $mg_manual['Mg Manuale Bozza']->ID,
+	'68.7: A manual review wins (game sheet first, then tag) only if published and in Reviews, otherwise the automatic search applies'
+);
+
+// 68.8: pagina del gioco: la scheda videogioco con lo stesso slug, altrimenti il tag; l'ID manca sul tag e c'è sulla scheda
+$mg_hub_cpt = $mg_term( 9997, 'Mg Con Scheda', 'mg-con-scheda', array( '_ntn_game_title' => 'Mg Con Scheda' ) );
+$mg_post( 9985, 'videogioco', 'publish', 'mg-con-scheda', '2020-01-01' );
+$mock_postmeta[9985] = array( '_ntn_igdb_game_id' => '550' );
+$mg_hub_tag = $mg_term( 9998, 'Mg Solo Tag', 'mg-solo-tag', array( '_ntn_igdb_game_id' => 551, '_ntn_game_title' => 'Mg Solo Tag' ) );
+$mg_post( 9986, 'post', 'publish', 'mg-articolo-hub', '2026-01-01', array( $mg_hub_cpt, $mg_hub_tag ) );
+$mg_hubs = ntn_get_post_games( 9986 );
+assert_test(
+	get_permalink( 9985 ) === $mg_hubs[0]['hub_url'] && 550 === $mg_hubs[0]['igdb_id'] && get_term_link( $mg_hub_tag ) === $mg_hubs[1]['hub_url'],
+	'68.8: The game page is the game sheet with the same slug, otherwise the tag page'
+);
+
+// 68.9: con lo scanner IGDB spento il sito non mostra giochi, nemmeno se l'elenco è già in memoria
+$mock_options['ntn_igdb_scanner_active'] = 'no';
+$mg_off_cached = ntn_get_post_games( 9960 );
+$mg_off_fresh  = ntn_get_post_games( 9987 );
+unset( $mock_options['ntn_igdb_scanner_active'] );
+assert_test(
+	array() === $mg_off_cached && array() === $mg_off_fresh && 2 === count( ntn_get_post_games( 9960 ) ),
+	'68.9: With the IGDB switch off the front end gets an empty list, and it comes back when the switch is on'
+);
+
+// 68.10: query leggera e fatta una sola volta per gioco nella stessa richiesta
+$mg_rev_query = end( $mg_query_log );
+$mg_query_count = count( $mg_query_log );
+ntn_get_post_games( 9976 );
+$mg_light_term = $mg_term( 9999, 'Mg Riuso', 'mg-riuso', array( '_ntn_igdb_game_id' => 560, '_ntn_game_title' => 'Mg Riuso' ) );
+$mg_post( 9988, 'post', 'publish', 'mg-riuso-uno', '2026-01-01', array( $mg_light_term ) );
+$mg_post( 9989, 'post', 'publish', 'mg-riuso-due', '2026-01-01', array( $mg_light_term ) );
+ntn_get_post_games( 9988 );
+ntn_get_post_games( 9989 );
+assert_test(
+	1 === $mg_rev_query['posts_per_page'] && true === $mg_rev_query['no_found_rows'] && 'publish' === $mg_rev_query['post_status'] && array( 'recensioni', 'recensione' ) === $mg_rev_query['tax_query'][1]['terms'] &&
+	$mg_query_count + 1 === count( $mg_query_log ),
+	'68.10: The review search asks for one post without counting rows, and runs once per game in a request'
+);
+
+unset( $GLOBALS['mock_wp_query_handler'] );
 
 echo "\n=======================================================================\n";
 echo " AUDIT SUMMARY: {$passed} PASSED, {$failed} FAILED\n";

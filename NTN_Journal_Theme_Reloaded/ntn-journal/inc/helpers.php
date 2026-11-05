@@ -588,6 +588,299 @@ function ntn_get_tag_igdb_info( $term_id = null ) {
 
 
 /**
+ * Elenca i videogiochi di un articolo, uno per ogni tag gioco, senza mescolare i dati tra un gioco e l'altro.
+ *
+ * L'elenco è senza doppioni e in ordine alfabetico (ignora maiuscole e accenti). Se l'articolo non ha tag
+ * gioco ma ha il post_meta _ntn_game_title (vecchi articoli), restituisce un solo gioco letto dai post_meta.
+ * I valori non sono ancora sottoposti a escape: lo fanno i template.
+ *
+ * @param int $post_id ID dell'articolo.
+ * @return array[] Ogni gioco ha: term, igdb_id, title, cover, release, release_precision, developer, publisher,
+ *                 platforms, genres, engine, igdb_url, hub_url, review, review_rating, is_current_review.
+ */
+function ntn_get_post_games( $post_id ) {
+	static $cache = array();
+
+	$post_id = (int) $post_id;
+	if ( ! $post_id ) {
+		return array();
+	}
+
+	// Se l'intero sistema IGDB è disattivato, nascondi i dati nel frontend.
+	if ( ! is_admin() && get_option( 'ntn_igdb_scanner_active', 'yes' ) !== 'yes' ) {
+		return array();
+	}
+
+	if ( isset( $cache[ $post_id ] ) ) {
+		return $cache[ $post_id ];
+	}
+
+	$games = array();
+	$seen  = array();
+	$tags  = get_the_tags( $post_id );
+
+	if ( $tags && ! is_wp_error( $tags ) ) {
+		foreach ( $tags as $tag ) {
+			$term = ntn_resolve_game_term( $tag );
+			if ( ! $term ) {
+				continue;
+			}
+
+			$game = ntn_get_term_game( $term );
+			$key  = $game['igdb_id'] ? 'id:' . $game['igdb_id'] : 'title:' . strtolower( ntn_game_sort_key( $game['title'] ) );
+			if ( isset( $seen[ $key ] ) ) {
+				continue;
+			}
+			$seen[ $key ] = true;
+			$games[]      = $game;
+		}
+	}
+
+	if ( empty( $games ) ) {
+		$fallback = ntn_get_post_meta_game( $post_id );
+		if ( $fallback ) {
+			$games[] = $fallback;
+		}
+	}
+
+	foreach ( $games as $index => $game ) {
+		$games[ $index ]['is_current_review'] = $game['review'] && (int) $game['review']->ID === $post_id;
+	}
+
+	// A parità di titolo resta l'ordine di partenza, anche con PHP 7.4 dove usort non lo garantisce.
+	$sort_keys = array_map(
+		static function ( $game ) {
+			return ntn_game_sort_key( $game['title'] );
+		},
+		$games
+	);
+	uksort(
+		$games,
+		static function ( $a, $b ) use ( $sort_keys ) {
+			$order = strcasecmp( $sort_keys[ $a ], $sort_keys[ $b ] );
+			return 0 !== $order ? $order : $a - $b;
+		}
+	);
+	$games = array_values( $games );
+
+	$cache[ $post_id ] = $games;
+	return $games;
+}
+
+/**
+ * Trova il tag gioco che corrisponde a un tag dell'articolo: il tag stesso oppure la sua variante con il
+ * nome decodificato o con lo slug senza suffisso numerico. Gli altri tag non sono giochi.
+ *
+ * @param mixed $tag Tag dell'articolo.
+ * @return WP_Term|null Il tag con i dati del gioco, o null.
+ */
+function ntn_resolve_game_term( $tag ) {
+	if ( ! ( $tag instanceof WP_Term ) ) {
+		return null;
+	}
+
+	$is_game = static function ( $term ) {
+		return $term instanceof WP_Term && ( get_term_meta( $term->term_id, '_ntn_igdb_game_id', true ) || get_term_meta( $term->term_id, '_ntn_game_title', true ) );
+	};
+
+	if ( $is_game( $tag ) ) {
+		return $tag;
+	}
+
+	$decoded_name = html_entity_decode( $tag->name, ENT_QUOTES, 'UTF-8' );
+	if ( $decoded_name !== $tag->name ) {
+		$alt_tag = get_term_by( 'name', $decoded_name, 'post_tag' );
+		if ( $is_game( $alt_tag ) ) {
+			return $alt_tag;
+		}
+	}
+
+	$clean_slug = preg_replace( '/-\d+$/', '', $tag->slug );
+	if ( $clean_slug !== $tag->slug ) {
+		$alt_tag = get_term_by( 'slug', $clean_slug, 'post_tag' );
+		if ( $is_game( $alt_tag ) ) {
+			return $alt_tag;
+		}
+	}
+
+	return null;
+}
+
+/**
+ * Raccoglie i dati di un solo gioco a partire dal suo tag. Il risultato vale per tutta la richiesta.
+ *
+ * @param WP_Term $term Tag del gioco.
+ * @return array Dati del gioco nel formato di ntn_get_post_games().
+ */
+function ntn_get_term_game( WP_Term $term ) {
+	static $cache = array();
+	if ( isset( $cache[ $term->term_id ] ) ) {
+		return $cache[ $term->term_id ];
+	}
+
+	$cpt = get_posts( array(
+		'name'        => $term->slug,
+		'post_type'   => 'videogioco',
+		'post_status' => 'publish',
+		'numberposts' => 1,
+	) );
+	$cpt = ( ! empty( $cpt ) && $cpt[0] instanceof WP_Post ) ? $cpt[0] : null;
+
+	$igdb_id = (int) get_term_meta( $term->term_id, '_ntn_igdb_game_id', true );
+	if ( ! $igdb_id && $cpt ) {
+		$igdb_id = (int) get_post_meta( $cpt->ID, '_ntn_igdb_game_id', true );
+	}
+
+	$hub_url = $cpt ? get_permalink( $cpt->ID ) : get_term_link( $term );
+	$review  = ntn_get_game_review( $term, $cpt );
+
+	$cache[ $term->term_id ] = ntn_format_post_game(
+		ntn_get_hub_igdb_info( $term ),
+		array(
+			'term'    => $term,
+			'igdb_id' => $igdb_id,
+			'hub_url' => is_string( $hub_url ) ? $hub_url : '',
+			'review'  => $review,
+		)
+	);
+	return $cache[ $term->term_id ];
+}
+
+/**
+ * Costruisce un gioco dai post_meta dell'articolo, per i vecchi articoli senza tag gioco.
+ *
+ * @param int $post_id ID dell'articolo.
+ * @return array|null Dati del gioco nel formato di ntn_get_post_games(), o null se manca il titolo.
+ */
+function ntn_get_post_meta_game( $post_id ) {
+	$title = get_post_meta( $post_id, '_ntn_game_title', true );
+	if ( empty( $title ) || ! is_string( $title ) ) {
+		return null;
+	}
+
+	$term = get_term_by( 'name', $title, 'post_tag' );
+	if ( ! ( $term instanceof WP_Term ) ) {
+		$term = get_term_by( 'slug', sanitize_title( $title ), 'post_tag' );
+	}
+	$term = ( $term instanceof WP_Term ) ? $term : null;
+
+	$review = $term ? ntn_get_game_review( $term ) : null;
+	if ( ! $review && has_category( array( 'recensioni', 'recensione' ), $post_id ) ) {
+		$review = get_post( $post_id );
+	}
+
+	$cover    = get_post_meta( $post_id, '_ntn_game_cover', true );
+	$genres   = get_post_meta( $post_id, '_ntn_game_genres', true );
+	$igdb_url = get_post_meta( $post_id, '_ntn_game_url', true );
+	if ( empty( $igdb_url ) ) {
+		$igdb_url = get_post_meta( $post_id, '_ntn_igdb_url', true );
+	}
+
+	return ntn_format_post_game(
+		array(
+			'title'             => $title,
+			'cover'             => ( ! empty( $cover ) && function_exists( 'ntn_normalize_game_cover_url' ) ) ? ntn_normalize_game_cover_url( $cover ) : $cover,
+			'release'           => get_post_meta( $post_id, '_ntn_game_release', true ),
+			'release_precision' => get_post_meta( $post_id, '_ntn_game_release_precision', true ),
+			'developer'         => get_post_meta( $post_id, '_ntn_game_developer', true ),
+			'publisher'         => get_post_meta( $post_id, '_ntn_game_publisher', true ),
+			'platforms'         => get_post_meta( $post_id, '_ntn_game_platforms', true ),
+			'genres'            => ntn_translate_igdb_genres( $genres ),
+			'engine'            => get_post_meta( $post_id, '_ntn_game_engine', true ),
+			'igdb_url'          => $igdb_url,
+		),
+		array(
+			'term'    => $term,
+			'igdb_id' => (int) get_post_meta( $post_id, '_ntn_igdb_game_id', true ),
+			'hub_url' => ntn_get_game_hub_url( $post_id ),
+			'review'  => $review,
+		)
+	);
+}
+
+/**
+ * Trova la recensione di un gioco: quella scelta a mano, se è pubblicata e in categoria Recensioni,
+ * altrimenti l'ultima pubblicata con il tag del gioco. Mai anteprime o notizie.
+ *
+ * @param WP_Term      $term Tag del gioco.
+ * @param WP_Post|null $cpt  Scheda videogioco collegata al tag, se esiste.
+ * @return WP_Post|null La recensione, o null.
+ */
+function ntn_get_game_review( WP_Term $term, $cpt = null ) {
+	$review_categories = array( 'recensioni', 'recensione' );
+
+	$manual_ids = array( get_term_meta( $term->term_id, '_ntn_featured_review_id', true ) );
+	if ( $cpt instanceof WP_Post ) {
+		array_unshift( $manual_ids, get_post_meta( $cpt->ID, '_ntn_featured_review_id', true ) );
+	}
+
+	foreach ( $manual_ids as $manual_id ) {
+		$manual = $manual_id ? get_post( (int) $manual_id ) : null;
+		if ( $manual instanceof WP_Post && 'publish' === $manual->post_status && has_category( $review_categories, $manual ) ) {
+			return $manual;
+		}
+	}
+
+	$query = new WP_Query( array(
+		'post_type'              => 'post',
+		'post_status'            => 'publish',
+		'posts_per_page'         => 1,
+		'ignore_sticky_posts'    => true,
+		'no_found_rows'          => true,
+		'update_post_term_cache' => false,
+		'tax_query'              => array(
+			'relation' => 'AND',
+			array(
+				'taxonomy' => 'post_tag',
+				'field'    => 'term_id',
+				'terms'    => $term->term_id,
+			),
+			array(
+				'taxonomy' => 'category',
+				'field'    => 'slug',
+				'terms'    => $review_categories,
+			),
+		),
+	) );
+
+	return ! empty( $query->posts ) ? $query->posts[0] : null;
+}
+
+/**
+ * Porta i dati di un gioco al formato di ntn_get_post_games(), con ogni campo sempre presente.
+ *
+ * @param array $info  Dati del gioco letti dai meta.
+ * @param array $extra Valori term, igdb_id, hub_url e review.
+ * @return array Dati del gioco.
+ */
+function ntn_format_post_game( array $info, array $extra ) {
+	$game = array(
+		'term'              => $extra['term'],
+		'igdb_id'           => $extra['igdb_id'],
+		'hub_url'           => $extra['hub_url'],
+		'review'            => $extra['review'],
+		'review_rating'     => $extra['review'] ? max( 0, min( 5, (int) round( (float) get_post_rating( $extra['review']->ID ) ) ) ) : 0,
+		'is_current_review' => false,
+	);
+
+	foreach ( array( 'title', 'cover', 'release', 'release_precision', 'developer', 'publisher', 'platforms', 'genres', 'engine', 'igdb_url' ) as $field ) {
+		$game[ $field ] = isset( $info[ $field ] ) ? $info[ $field ] : '';
+	}
+
+	return $game;
+}
+
+/**
+ * Prepara un titolo per l'ordinamento e il confronto: senza entità HTML e senza accenti.
+ *
+ * @param mixed $title Titolo del gioco.
+ * @return string Titolo normalizzato.
+ */
+function ntn_game_sort_key( $title ) {
+	return remove_accents( html_entity_decode( (string) $title, ENT_QUOTES, 'UTF-8' ) );
+}
+
+/**
  * Cerca l'articolo in evidenza associato a un Videogioco (CPT o Tag).
  * Priorità: Manuale (_ntn_featured_review_id) > Recensioni > Anteprime > Editoriali > Notizie.
  *
