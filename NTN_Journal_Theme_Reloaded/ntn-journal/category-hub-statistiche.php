@@ -4,6 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  * Hub di categoria di tipo "Statistiche" (v4.3.0): la fascia con il nome della sezione e quattro numeri.
  * v4.6.0: sotto la fascia, tutti gli articoli (variante scelta dal CEO): l'ultimo in grande nella prima pagina,
  * poi le schede degli archivi del sito. Dalla pagina 2 in poi solo le schede.
+ * v4.7.0: testata, contatori, spazi e schede con le misure del catalogo Videogiochi e della Hub del gioco.
  *
  * I dati arrivano dal plugin; se mancano, si torna all'archivio normale.
  *
@@ -38,7 +39,7 @@ $stats_ago    = ( '' !== $stats_latest && function_exists( 'ntn_core_category_hu
 				<div class="ntn-art-crumbs"><?php ntn_journal_breadcrumb(); ?></div>
 			<?php endif; ?>
 
-			<div class="ntn-chub-head">
+			<div class="ntn-arch-head">
 				<div class="flex flex-wrap gap-2">
 					<span class="ntn-chip">Hub di sezione</span>
 					<span class="ntn-chip ntn-chip--red">Statistiche</span>
@@ -50,49 +51,29 @@ $stats_ago    = ( '' !== $stats_latest && function_exists( 'ntn_core_category_hu
 					<p class="ntn-arch-desc"><?php echo esc_html( $hub['intro'] ); ?></p>
 				<?php endif; ?>
 
-				<dl class="ntn-chub-stats is-numbers">
-					<div>
-						<dt class="ntn-stat-k">Articoli</dt>
-						<dd class="ntn-stat-v"><?php echo esc_html( number_format_i18n( $stats['articles_total'] ) ); ?></dd>
-						<dd class="ntn-stat-sub"><b><?php echo esc_html( number_format_i18n( $stats['articles_year'] ) ); ?></b> nel <?php echo esc_html( $stats_year ); ?></dd>
-					</div>
-					<div>
-						<dt class="ntn-stat-k">Autore più prolifico</dt>
-						<?php if ( $stats_author ) : ?>
-							<dd class="ntn-stat-v"><a href="<?php echo esc_url( $stats_author['url'] ); ?>"><?php echo esc_html( $stats_author['name'] ); ?></a></dd>
-							<dd class="ntn-stat-sub"><?php echo esc_html( number_format_i18n( $stats_author['count'] ) . ( 1 === $stats_author['count'] ? ' articolo' : ' articoli' ) . ' nel ' . $stats_year ); ?></dd>
-						<?php else : ?>
-							<dd class="ntn-stat-v is-muted">—</dd>
-							<dd class="ntn-stat-sub"><?php echo esc_html( 0 === $stats['articles_year'] ? 'nessun articolo nel ' . $stats_year : 'autore non disponibile' ); ?></dd>
-						<?php endif; ?>
-					</div>
-					<div>
-						<dt class="ntn-stat-k">Ultimo articolo</dt>
-						<?php if ( '' !== $stats_latest ) : ?>
-							<dd class="ntn-stat-v is-small"><?php echo esc_html( $stats_latest ); ?></dd>
-							<?php if ( '' !== $stats_ago ) : ?>
-								<dd class="ntn-stat-sub"><?php echo esc_html( $stats_ago ); ?></dd>
-							<?php endif; ?>
-						<?php else : ?>
-							<dd class="ntn-stat-v is-muted">—</dd>
-							<dd class="ntn-stat-sub">nessun articolo</dd>
-						<?php endif; ?>
-					</div>
-					<div>
-						<dt class="ntn-stat-k">Videogiochi trattati</dt>
-						<dd class="ntn-stat-v"><?php echo esc_html( number_format_i18n( $stats['games_total'] ) ); ?></dd>
-						<dd class="ntn-stat-sub">collegati a IGDB</dd>
-					</div>
-				</dl>
-			</div>
+				<div class="ntn-gcounts">
+					<span><b><?php echo esc_html( number_format_i18n( $stats['articles_total'] ) ); ?></b>Articoli</span>
+					<span><b><?php echo esc_html( number_format_i18n( $stats['articles_year'] ) ); ?></b>Nel <?php echo esc_html( $stats_year ); ?></span>
+					<?php if ( $stats_author ) : ?>
+						<span><b><a href="<?php echo esc_url( $stats_author['url'] ); ?>"><?php echo esc_html( $stats_author['name'] ); ?></a></b>Autore dell'anno · <?php echo esc_html( number_format_i18n( $stats_author['count'] ) . ( 1 === $stats_author['count'] ? ' articolo' : ' articoli' ) ); ?></span>
+					<?php else : ?>
+						<span><b>—</b><?php echo esc_html( 0 === $stats['articles_year'] ? 'Nessun articolo nel ' . $stats_year : 'Autore non disponibile' ); ?></span>
+					<?php endif; ?>
+					<?php if ( '' !== $stats_latest ) : ?>
+						<span><b><?php echo esc_html( $stats_latest ); ?></b>Ultimo articolo<?php echo '' !== $stats_ago ? esc_html( ' · ' . $stats_ago ) : ''; ?></span>
+					<?php else : ?>
+						<span><b>—</b>Nessun articolo</span>
+					<?php endif; ?>
+					<span><b><?php echo esc_html( number_format_i18n( $stats['games_total'] ) ); ?></b>Videogiochi su IGDB</span>
+				</div>			</div>
 
 		</div>
 	</header>
 
-	<div class="ntn-wrap ntn-chub-body">
+	<div class="ntn-wrap ntn-hub-body">
 
 		<!-- ==================== TUTTI GLI ARTICOLI ==================== -->
-		<section class="ntn-home-block" aria-labelledby="ntn-h-cfeed">
+		<section aria-labelledby="ntn-h-cfeed">
 			<div class="ntn-sec-head">
 				<h2 id="ntn-h-cfeed" class="ntn-sec-title">// Tutti gli articoli</h2>
 				<span class="ntn-sec-aside">Dal più recente</span>

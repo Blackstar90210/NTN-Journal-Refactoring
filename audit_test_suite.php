@@ -1626,24 +1626,24 @@ echo "\n--- 24. SEMVER SIMULTANEOUS 4-HEADER SYNCHRONIZATION ---\n";
 $parent_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $parent_css, $m_parent );
 $parent_ver = isset( $m_parent[1] ) ? trim( $m_parent[1] ) : '';
-assert_test( $parent_ver === '4.6.0', "24.1: Parent Theme style.css declares Version: 4.6.0 (found: {$parent_ver})" );
+assert_test( $parent_ver === '4.7.0', "24.1: Parent Theme style.css declares Version: 4.7.0 (found: {$parent_ver})" );
 
 $child_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $child_css, $m_child );
 $child_ver = isset( $m_child[1] ) ? trim( $m_child[1] ) : '';
-assert_test( $child_ver === '4.6.0', "24.2: Child Theme style.css declares Version: 4.6.0 (found: {$child_ver})" );
+assert_test( $child_ver === '4.7.0', "24.2: Child Theme style.css declares Version: 4.7.0 (found: {$child_ver})" );
 
 $core_php = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' );
 preg_match( '/\*\s*Version:\s*([0-9\.]+)/', $core_php, $m_core_hdr );
 $core_hdr_ver = isset( $m_core_hdr[1] ) ? trim( $m_core_hdr[1] ) : '';
-assert_test( $core_hdr_ver === '4.6.0', "24.3: Core Plugin header declares Version: 4.6.0 (found: {$core_hdr_ver})" );
+assert_test( $core_hdr_ver === '4.7.0', "24.3: Core Plugin header declares Version: 4.7.0 (found: {$core_hdr_ver})" );
 
 preg_match( "/define\(\s*'NTN_JOURNAL_CORE_VERSION',\s*'([^']+)'\s*\);/", $core_php, $m_core_const );
 $core_const_ver = isset( $m_core_const[1] ) ? trim( $m_core_const[1] ) : '';
-assert_test( $core_const_ver === '4.6.0', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.6.0 (found: {$core_const_ver})" );
+assert_test( $core_const_ver === '4.7.0', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.7.0 (found: {$core_const_ver})" );
 
 assert_test(
-	$parent_ver === '4.6.0' && $child_ver === '4.6.0' && $core_hdr_ver === '4.6.0' && $core_const_ver === '4.6.0',
+	$parent_ver === '4.7.0' && $child_ver === '4.7.0' && $core_hdr_ver === '4.7.0' && $core_const_ver === '4.7.0',
 	'24.5: All 4 version headers are 100% synchronized and atomic according to Rule 2 of GEMINI.md'
 );
 
@@ -1870,7 +1870,7 @@ $parent_style_ver = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( AB
 $child_style_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' ), $m2 ) ? $m2[1] : '';
 $core_plugin_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m3 ) ? $m3[1] : '';
 $core_const_ver   = preg_match( '/define\(\s*[\'"]NTN_JOURNAL_CORE_VERSION[\'"]\s*,\s*[\'"]([0-9\.]+)[\'"]\s*\)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m4 ) ? $m4[1] : '';
-assert_test( $parent_style_ver === '4.6.0' && $child_style_ver === '4.6.0' && $core_plugin_ver === '4.6.0' && $core_const_ver === '4.6.0', '29.1: All 4 version headers are synchronized to 4.6.0' );
+assert_test( $parent_style_ver === '4.7.0' && $child_style_ver === '4.7.0' && $core_plugin_ver === '4.7.0' && $core_const_ver === '4.7.0', '29.1: All 4 version headers are synchronized to 4.7.0' );
 
 // 29.2: single.php sequence is Google Feed -> Social CTA -> Bottom Related Posts
 $single_php = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/single.php' );
@@ -4113,12 +4113,12 @@ $pg_html = $pg_render( $pg_full );
 assert_test(
 	false !== strpos( $pg_html, '<span class="ntn-chip">Hub di sezione</span>' ) && false !== strpos( $pg_html, '<span class="ntn-chip ntn-chip--red">Statistiche</span>' ) &&
 	1 === substr_count( $pg_html, '<h1 class="ntn-arch-title">Guide</h1>' ) && false !== strpos( $pg_html, '<p class="ntn-arch-desc">Testo della redazione</p>' ) &&
-	1 === substr_count( $pg_html, '<dl class="ntn-chub-stats is-numbers">' ) && 4 === substr_count( $pg_html, '<dt class="ntn-stat-k">' ) &&
-	false !== strpos( $pg_html, '<dd class="ntn-stat-v">3</dd>' ) && false !== strpos( $pg_html, "<b>2</b> nel {$pg_year}" ) &&
-	false !== strpos( $pg_html, '<a href="https://example.com/author/7/">Marco Ferri</a>' ) && false !== strpos( $pg_html, "2 articoli nel {$pg_year}" ) &&
-	false !== strpos( $pg_html, '<dd class="ntn-stat-v is-small">' . $pg_day . '</dd>' ) && false !== strpos( $pg_html, '<dd class="ntn-stat-sub">oggi</dd>' ) &&
-	false !== strpos( $pg_html, '<dd class="ntn-stat-v">2</dd>' ) && false !== strpos( $pg_html, 'collegati a IGDB' ),
-	'65.2: The page shows chips, title, introduction and the four figures with their notes and a link to the author'
+	1 === substr_count( $pg_html, '<div class="ntn-arch-head">' ) && 1 === substr_count( $pg_html, '<div class="ntn-gcounts">' ) && false === strpos( $pg_html, 'ntn-chub-stats' ) && false === strpos( $pg_html, 'ntn-chub-head' ) &&
+	false !== strpos( $pg_html, '<span><b>3</b>Articoli</span>' ) && false !== strpos( $pg_html, "<span><b>2</b>Nel {$pg_year}</span>" ) &&
+	false !== strpos( $pg_html, '<a href="https://example.com/author/7/">Marco Ferri</a>' ) && false !== strpos( $pg_html, "Autore dell'anno · 2 articoli" ) &&
+	false !== strpos( $pg_html, '<b>' . $pg_day . '</b>Ultimo articolo · oggi' ) &&
+	false !== strpos( $pg_html, '<span><b>2</b>Videogiochi su IGDB</span>' ),
+	'65.2: The page shows chips, title, introduction and the counters in the catalog row, with a link to the author'
 );
 
 // 65.3: il disegno a punti compare solo se l'illustrazione è impostata; "In evidenza" e schede non ci sono
@@ -4132,17 +4132,17 @@ assert_test(
 // 65.4: anno senza articoli: autore "—", nessuna introduzione, gli altri numeri restano
 $pg_idle_html = $pg_render( $pg_idle );
 assert_test(
-	false !== strpos( $pg_idle_html, '<dd class="ntn-stat-v is-muted">—</dd>' ) && false !== strpos( $pg_idle_html, "nessun articolo nel {$pg_year}" ) &&
-	false !== strpos( $pg_idle_html, "<b>0</b> nel {$pg_year}" ) && false !== strpos( $pg_idle_html, '<dd class="ntn-stat-v is-small">01.05.' . $pg_old . '</dd>' ) &&
+	false !== strpos( $pg_idle_html, "<span><b>—</b>Nessun articolo nel {$pg_year}</span>" ) &&
+	false !== strpos( $pg_idle_html, "<span><b>0</b>Nel {$pg_year}</span>" ) && false !== strpos( $pg_idle_html, '<b>01.05.' . $pg_old . '</b>Ultimo articolo' ) &&
 	false === strpos( $pg_idle_html, 'ntn-arch-desc' ) && false === strpos( $pg_idle_html, '/author/' ),
-	'65.4: Without articles this year the author cell shows a dash and its note, and the other figures stay'
+	'65.4: Without articles this year the author shows a dash and its note, and the other figures stay'
 );
 
 // 65.5: categoria vuota: nessuna data e nessun errore
 $pg_empty_html = $pg_render( $pg_empty );
 assert_test(
-	2 === substr_count( $pg_empty_html, '<dd class="ntn-stat-v is-muted">—</dd>' ) && false !== strpos( $pg_empty_html, '<dd class="ntn-stat-sub">nessun articolo</dd>' ) &&
-	false === strpos( $pg_empty_html, 'is-small' ) && false === strpos( $pg_empty_html, 'giorni fa' ) &&
+	2 === substr_count( $pg_empty_html, '<b>—</b>' ) && false !== strpos( $pg_empty_html, '<span><b>—</b>Nessun articolo</span>' ) &&
+	false === strpos( $pg_empty_html, 'Ultimo articolo' ) && false === strpos( $pg_empty_html, 'giorni fa' ) &&
 	false !== strpos( $pg_empty_html, '<div class="ntn-empty">' ) && false !== strpos( $pg_empty_html, 'Non ci sono ancora articoli in questa sezione.' ) &&
 	false === strpos( $pg_empty_html, 'ntn-chub-feed' ) && false === strpos( $pg_empty_html, 'ntn-pager-wrap' ),
 	'65.5: An empty category shows dashes for author and date and the empty state instead of the article list'
@@ -4275,9 +4275,9 @@ $pg_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/b
 $pg_out = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/style-tailwind-output.css' );
 $pg_src = file_get_contents( $pg_file );
 assert_test(
-	false !== strpos( $pg_css, '.ntn-chub-stats dd.ntn-stat-sub { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ntn-band-muted); }' ) &&
-	false !== strpos( $pg_css, '.ntn-chub-stats dd.is-muted { color: var(--ntn-band-muted); }' ) && false !== strpos( $pg_css, '.ntn-stat-sub b { font-weight: 700; color: var(--ntn-band-accent); }' ) &&
-	false !== strpos( $pg_out, '.ntn-stat-sub' ) && false !== strpos( $pg_out, '.is-numbers' ) &&
+	false === strpos( $pg_css, '.is-numbers' ) && false === strpos( $pg_css, '.ntn-stat-sub' ) && false !== strpos( $pg_css, '.ntn-stats-cards { grid-template-columns: repeat(5, minmax(0, 1fr)); }' ) &&
+	false !== strpos( $pg_css, '.ntn-stats-cards .ntn-cell { padding: 12px; }' ) &&
+	false !== strpos( $pg_out, '.ntn-stats-cards' ) && false === strpos( $pg_out, '.is-numbers' ) &&
 	false !== strpos( $pg_src, "locate_template( 'archive.php', true, false )" ) && false !== strpos( $pg_src, "function_exists( 'ntn_core_get_category_hub_stats' )" ),
 	'65.8: Styles use the band colors for light and dark and are compiled; the page falls back to the archive without the plugin'
 );
