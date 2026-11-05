@@ -379,6 +379,8 @@ function the_posts_pagination( $args = array() ) {}
 function ntn_get_catalog_query_args( $params ) { return array(); }
 class WP_Query {
 	public $max_num_pages = 1;
+	public $posts = array();
+	public $found_posts = 0;
 	public function have_posts() { return have_posts(); }
 	public function the_post() { return the_post(); }
 }
@@ -1618,24 +1620,24 @@ echo "\n--- 24. SEMVER SIMULTANEOUS 4-HEADER SYNCHRONIZATION ---\n";
 $parent_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $parent_css, $m_parent );
 $parent_ver = isset( $m_parent[1] ) ? trim( $m_parent[1] ) : '';
-assert_test( $parent_ver === '4.2.0', "24.1: Parent Theme style.css declares Version: 4.2.0 (found: {$parent_ver})" );
+assert_test( $parent_ver === '4.3.0', "24.1: Parent Theme style.css declares Version: 4.3.0 (found: {$parent_ver})" );
 
 $child_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $child_css, $m_child );
 $child_ver = isset( $m_child[1] ) ? trim( $m_child[1] ) : '';
-assert_test( $child_ver === '4.2.0', "24.2: Child Theme style.css declares Version: 4.2.0 (found: {$child_ver})" );
+assert_test( $child_ver === '4.3.0', "24.2: Child Theme style.css declares Version: 4.3.0 (found: {$child_ver})" );
 
 $core_php = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' );
 preg_match( '/\*\s*Version:\s*([0-9\.]+)/', $core_php, $m_core_hdr );
 $core_hdr_ver = isset( $m_core_hdr[1] ) ? trim( $m_core_hdr[1] ) : '';
-assert_test( $core_hdr_ver === '4.2.0', "24.3: Core Plugin header declares Version: 4.2.0 (found: {$core_hdr_ver})" );
+assert_test( $core_hdr_ver === '4.3.0', "24.3: Core Plugin header declares Version: 4.3.0 (found: {$core_hdr_ver})" );
 
 preg_match( "/define\(\s*'NTN_JOURNAL_CORE_VERSION',\s*'([^']+)'\s*\);/", $core_php, $m_core_const );
 $core_const_ver = isset( $m_core_const[1] ) ? trim( $m_core_const[1] ) : '';
-assert_test( $core_const_ver === '4.2.0', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.2.0 (found: {$core_const_ver})" );
+assert_test( $core_const_ver === '4.3.0', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.3.0 (found: {$core_const_ver})" );
 
 assert_test(
-	$parent_ver === '4.2.0' && $child_ver === '4.2.0' && $core_hdr_ver === '4.2.0' && $core_const_ver === '4.2.0',
+	$parent_ver === '4.3.0' && $child_ver === '4.3.0' && $core_hdr_ver === '4.3.0' && $core_const_ver === '4.3.0',
 	'24.5: All 4 version headers are 100% synchronized and atomic according to Rule 2 of GEMINI.md'
 );
 
@@ -1862,7 +1864,7 @@ $parent_style_ver = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( AB
 $child_style_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' ), $m2 ) ? $m2[1] : '';
 $core_plugin_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m3 ) ? $m3[1] : '';
 $core_const_ver   = preg_match( '/define\(\s*[\'"]NTN_JOURNAL_CORE_VERSION[\'"]\s*,\s*[\'"]([0-9\.]+)[\'"]\s*\)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m4 ) ? $m4[1] : '';
-assert_test( $parent_style_ver === '4.2.0' && $child_style_ver === '4.2.0' && $core_plugin_ver === '4.2.0' && $core_const_ver === '4.2.0', '29.1: All 4 version headers are synchronized to 4.2.0' );
+assert_test( $parent_style_ver === '4.3.0' && $child_style_ver === '4.3.0' && $core_plugin_ver === '4.3.0' && $core_const_ver === '4.3.0', '29.1: All 4 version headers are synchronized to 4.3.0' );
 
 // 29.2: single.php sequence is Google Feed -> Social CTA -> Bottom Related Posts
 $single_php = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/single.php' );
@@ -4002,7 +4004,6 @@ assert_test(
 // 64.6: il tema riconosce il tipo: modello dedicato appena esiste, altrimenti quello comune; le altre Hub non cambiano
 assert_test(
 	false !== strpos( $st_rt, "array( 'category-hub-statistiche.php', 'category-hub.php' ) : array( 'category-hub.php' )" ) &&
-	! file_exists( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/category-hub-statistiche.php' ) &&
 	false !== strpos( $st_tpl, "<?php elseif ( 'studi' === \$hub['type'] ) : ?>" ),
 	'64.6: Theme routes the type to its own template when it exists, otherwise to the shared one, with Made in Italy only on Studi'
 );
@@ -4025,6 +4026,147 @@ foreach ( range( 9701, 9708 ) as $st_id ) {
 	unset( $mock_termmeta[ $st_id ] );
 }
 unset( $mock_options['ntn_cat_hub_version'] );
+
+// --- TEST SUITE 65: Pagina dell'Hub Statistiche v4.3.0 ---
+echo "\n--- 65. PAGINA HUB STATISTICHE V4.3.0 ---\n";
+
+require_once ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/inc/category-hub-template.php';
+if ( ! function_exists( 'locate_template' ) ) {
+	function locate_template( $names, $load = false, $once = true ) {
+		foreach ( (array) $names as $name ) {
+			if ( file_exists( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/' . $name ) ) {
+				return $name;
+			}
+		}
+		return '';
+	}
+}
+$pg_file = ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/category-hub-statistiche.php';
+$pg_year = (int) gmdate( 'Y' );
+$pg_old  = $pg_year - 1;
+$pg_now  = gmdate( 'Y-m-d H:i:s' );
+$pg_day  = gmdate( 'd.m.Y' );
+
+$pg_term = static function ( $id, $name, $type, $extra = array() ) {
+	$GLOBALS['mock_terms'][ $id ]    = new WP_Term( array( 'term_id' => $id, 'name' => $name, 'slug' => 'pg-' . $id, 'taxonomy' => 'category' ) );
+	$GLOBALS['mock_termmeta'][ $id ] = array_merge( array( '_ntn_hub_enabled' => '1', '_ntn_hub_type' => $type, '_ntn_hub_illustration' => 'none' ), $extra );
+	return $GLOBALS['mock_terms'][ $id ];
+};
+$pg_render = static function ( $term ) use ( $pg_file ) {
+	$GLOBALS['queried_object'] = $term;
+	ob_start();
+	require $pg_file;
+	return (string) ob_get_clean();
+};
+
+$pg_full    = $pg_term( 9801, 'Guide', 'statistiche', array( '_ntn_hub_intro' => 'Testo della redazione' ) );
+$pg_console = $pg_term( 9802, 'Console', 'console' );
+$pg_studi   = $pg_term( 9803, 'Studi', 'studi' );
+$pg_idle    = $pg_term( 9804, 'Multiplayer', 'statistiche' );
+$pg_evil    = $pg_term( 9805, '<script>alert(1)</script>Guide', 'statistiche', array( '_ntn_hub_intro' => '<img src=x onerror=alert(2)>' ) );
+$pg_empty   = $pg_term( 9806, 'Vuota', 'statistiche' );
+$pg_art     = $pg_term( 9807, 'Disegno', 'statistiche', array( '_ntn_hub_illustration' => 'joycon' ) );
+
+$pg_db = new NTN_Stats_Mock_Wpdb();
+$pg_db->tag_meta = array( 801 => array( '_ntn_igdb_game_id' => '1' ), 802 => array( '_ntn_igdb_game_id' => '2' ) );
+$pg_db->rows = array(
+	$hs_row( 1, $pg_now, 7, array( 9801 ), array( 801 ) ),
+	$hs_row( 2, $pg_now, 7, array( 9801 ), array( 802 ) ),
+	$hs_row( 3, "{$pg_old}-05-01 10:00:00", 8, array( 9801 ), array( 801 ) ),
+	$hs_row( 4, "{$pg_old}-05-01 10:00:00", 8, array( 9804 ) ),
+	$hs_row( 5, $pg_now, 7, array( 9805 ) ),
+	$hs_row( 6, $pg_now, 7, array( 9807 ) ),
+);
+$GLOBALS['wpdb'] = $pg_db;
+$pg_author_backup = $GLOBALS['mock_author_meta'];
+$pg_queried_backup = $GLOBALS['queried_object'] ?? null;
+$GLOBALS['mock_author_meta'] = array( 'display_name' => 'Marco Ferri' );
+
+// 65.1: il tipo Statistiche ha il suo modello, le altre Hub restano sul modello attuale, le altre categorie non cambiano
+$pg_route = static function ( $term ) {
+	$GLOBALS['queried_object'] = $term;
+	return ntn_journal_category_hub_template( 'category.php' );
+};
+$pg_plain = new WP_Term( array( 'term_id' => 9810, 'name' => 'Normale', 'slug' => 'normale', 'taxonomy' => 'post_tag' ) );
+assert_test(
+	'category-hub-statistiche.php' === $pg_route( $pg_full ) && 'category-hub.php' === $pg_route( $pg_console ) && 'category-hub.php' === $pg_route( $pg_studi ) && 'category.php' === $pg_route( $pg_plain ),
+	'65.1: Statistiche Hubs use their own template, platform and studio Hubs keep the current one, other pages are untouched'
+);
+
+// 65.2: la pagina: etichette, titolo, introduzione, quattro contatori con le note, link all'autore; nessun corpo
+$pg_html = $pg_render( $pg_full );
+assert_test(
+	false !== strpos( $pg_html, '<span class="ntn-chip">Hub di sezione</span>' ) && false !== strpos( $pg_html, '<span class="ntn-chip ntn-chip--red">Statistiche</span>' ) &&
+	1 === substr_count( $pg_html, '<h1 class="ntn-arch-title">Guide</h1>' ) && false !== strpos( $pg_html, '<p class="ntn-arch-desc">Testo della redazione</p>' ) &&
+	1 === substr_count( $pg_html, '<dl class="ntn-chub-stats is-numbers">' ) && 4 === substr_count( $pg_html, '<dt class="ntn-stat-k">' ) &&
+	false !== strpos( $pg_html, '<dd class="ntn-stat-v">3</dd>' ) && false !== strpos( $pg_html, "<b>2</b> nel {$pg_year}" ) &&
+	false !== strpos( $pg_html, '<a href="https://example.com/author/7/">Marco Ferri</a>' ) && false !== strpos( $pg_html, "2 articoli nel {$pg_year}" ) &&
+	false !== strpos( $pg_html, '<dd class="ntn-stat-v is-small">' . $pg_day . '</dd>' ) && false !== strpos( $pg_html, '<dd class="ntn-stat-sub">oggi</dd>' ) &&
+	false !== strpos( $pg_html, '<dd class="ntn-stat-v">2</dd>' ) && false !== strpos( $pg_html, 'collegati a IGDB' ),
+	'65.2: The page shows chips, title, introduction and the four figures with their notes and a link to the author'
+);
+
+// 65.3: niente elenco, paginazione, In evidenza o disegno se l'illustrazione non è impostata
+$pg_art_html = $pg_render( $pg_art );
+assert_test(
+	false === strpos( $pg_html, 'ntn-chub-body' ) && false === strpos( $pg_html, 'ntn-chub-feed' ) && false === strpos( $pg_html, 'ntn-pager-wrap' ) && false === strpos( $pg_html, 'ntn-home-block' ) &&
+	false === strpos( $pg_html, '<canvas' ) && false !== strpos( $pg_art_html, '<canvas class="ntn-chub-art" data-ntn-dots="joycon" aria-hidden="true"></canvas>' ),
+	'65.3: The page body stays empty and the dot drawing appears only when an illustration is set'
+);
+
+// 65.4: anno senza articoli: autore "—", nessuna introduzione, gli altri numeri restano
+$pg_idle_html = $pg_render( $pg_idle );
+assert_test(
+	false !== strpos( $pg_idle_html, '<dd class="ntn-stat-v is-muted">—</dd>' ) && false !== strpos( $pg_idle_html, "nessun articolo nel {$pg_year}" ) &&
+	false !== strpos( $pg_idle_html, "<b>0</b> nel {$pg_year}" ) && false !== strpos( $pg_idle_html, '<dd class="ntn-stat-v is-small">01.05.' . $pg_old . '</dd>' ) &&
+	false === strpos( $pg_idle_html, 'ntn-arch-desc' ) && false === strpos( $pg_idle_html, '/author/' ),
+	'65.4: Without articles this year the author cell shows a dash and its note, and the other figures stay'
+);
+
+// 65.5: categoria vuota: nessuna data e nessun errore
+$pg_empty_html = $pg_render( $pg_empty );
+assert_test(
+	2 === substr_count( $pg_empty_html, '<dd class="ntn-stat-v is-muted">—</dd>' ) && false !== strpos( $pg_empty_html, '<dd class="ntn-stat-sub">nessun articolo</dd>' ) &&
+	false === strpos( $pg_empty_html, 'is-small' ) && false === strpos( $pg_empty_html, 'giorni fa' ),
+	'65.5: An empty category shows dashes for author and date, without a relative date'
+);
+
+// 65.6: tutto escaped: nome della sezione, introduzione e nome dell'autore
+$GLOBALS['mock_author_meta'] = array( 'display_name' => '<b onclick=x>Autore</b>' );
+$pg_evil_html = $pg_render( $pg_evil );
+$GLOBALS['mock_author_meta'] = array( 'display_name' => 'Marco Ferri' );
+assert_test(
+	false === strpos( $pg_evil_html, '<script>alert(1)' ) && false === strpos( $pg_evil_html, '<img src=x' ) && false === strpos( $pg_evil_html, '<b onclick' ) &&
+	false !== strpos( $pg_evil_html, '&lt;script&gt;alert(1)&lt;/script&gt;Guide' ) && false !== strpos( $pg_evil_html, '&lt;img src=x onerror=alert(2)&gt;' ) && false !== strpos( $pg_evil_html, '&lt;b onclick=x&gt;Autore&lt;/b&gt;' ),
+	'65.6: Section name, introduction and author name are escaped'
+);
+
+// 65.7: "X giorni fa" si calcola alla visita e non si inventa nulla per le date strane
+assert_test(
+	'oggi' === ntn_core_category_hub_days_ago( gmdate( 'd.m.Y' ) ) && 'ieri' === ntn_core_category_hub_days_ago( gmdate( 'd.m.Y', time() - DAY_IN_SECONDS ) ) &&
+	'17 giorni fa' === ntn_core_category_hub_days_ago( gmdate( 'd.m.Y', time() - 17 * DAY_IN_SECONDS ) ) &&
+	'' === ntn_core_category_hub_days_ago( gmdate( 'd.m.Y', time() + 2 * DAY_IN_SECONDS ) ) && '' === ntn_core_category_hub_days_ago( 'non una data' ),
+	'65.7: Relative date says today, yesterday or N days ago, and stays empty for future or invalid dates'
+);
+
+// 65.8: CSS solo nelle variabili della fascia (chiaro e scuro), compilato; senza plugin si torna all'archivio
+$pg_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/build/input.css' );
+$pg_out = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/style-tailwind-output.css' );
+$pg_src = file_get_contents( $pg_file );
+assert_test(
+	false !== strpos( $pg_css, '.ntn-chub-stats dd.ntn-stat-sub { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ntn-band-muted); }' ) &&
+	false !== strpos( $pg_css, '.ntn-chub-stats dd.is-muted { color: var(--ntn-band-muted); }' ) && false !== strpos( $pg_css, '.ntn-stat-sub b { font-weight: 700; color: var(--ntn-band-accent); }' ) &&
+	false !== strpos( $pg_out, '.ntn-stat-sub' ) && false !== strpos( $pg_out, '.is-numbers' ) &&
+	false !== strpos( $pg_src, "locate_template( 'archive.php', true, false )" ) && false !== strpos( $pg_src, "function_exists( 'ntn_core_get_category_hub_stats' )" ),
+	'65.8: Styles use the band colors for light and dark and are compiled; the page falls back to the archive without the plugin'
+);
+
+unset( $GLOBALS['wpdb'], $mock_options['ntn_cat_hub_version'] );
+foreach ( range( 9801, 9807 ) as $pg_id ) {
+	unset( $mock_terms[ $pg_id ], $mock_termmeta[ $pg_id ] );
+}
+$GLOBALS['mock_author_meta'] = $pg_author_backup;
+$GLOBALS['queried_object']   = $pg_queried_backup;
 
 echo "\n=======================================================================\n";
 echo " AUDIT SUMMARY: {$passed} PASSED, {$failed} FAILED\n";

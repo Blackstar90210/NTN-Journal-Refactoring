@@ -151,7 +151,7 @@ $ntn_enabled = wp_list_pluck( $ntn_hubs, 'term_id' );
 				<div class="nadm-field is-wide"><span class="nadm-fl">I tipi possibili</span>
 					<span class="nadm-help"><b>Console</b>: un selettore con i marchi (le sottocategorie) e una scheda per ogni piattaforma, come la Hub Console.</span>
 					<span class="nadm-help"><b>Studi</b>: l'indice A–Z degli sviluppatori, ricavato dai giochi del catalogo IGDB, come la Hub Sviluppatori italiani.</span>
-						<span class="nadm-help"><b>Statistiche</b>: i numeri della sezione, sottocategorie comprese. Per ora la pagina usa ancora l'impaginazione delle altre Hub.</span>
+					<span class="nadm-help"><b>Statistiche</b>: il nome della sezione e quattro numeri: articoli, autore più prolifico dell'anno, ultimo articolo e videogiochi. Sottocategorie comprese, senza elenco degli articoli.</span>
 				</div>
 			</div>
 			<div class="nadm-actions"><button type="submit" class="nadm-btn is-solid">Accendi la Hub</button><span class="nadm-help">Poi la trovi qui sopra, tra le Hub accese, per completarla.</span></div>

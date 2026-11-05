@@ -145,6 +145,25 @@ function ntn_core_get_category_hub_stats( $term = null ): ?array {
 }
 
 /**
+ * Distanza di una data da oggi, da calcolare a ogni visita perché le statistiche restano in cache per un giorno.
+ *
+ * @param string $date Data nel formato d.m.Y.
+ * @return string "oggi", "ieri", "N giorni fa"; vuota se la data non è valida o è nel futuro.
+ */
+function ntn_core_category_hub_days_ago( string $date ): string {
+	$then  = DateTimeImmutable::createFromFormat( '!d.m.Y', $date );
+	$today = DateTimeImmutable::createFromFormat( '!d.m.Y', (string) wp_date( 'd.m.Y' ) );
+	if ( ! $then || ! $today || $then > $today ) {
+		return '';
+	}
+	$days = (int) $then->diff( $today )->days;
+	if ( 0 === $days ) {
+		return 'oggi';
+	}
+	return 1 === $days ? 'ieri' : $days . ' giorni fa';
+}
+
+/**
  * Collegare o scollegare un gioco IGDB cambia i meta del tag, non il tag né l'articolo:
  * le cache delle Hub vanno invalidate anche in questo caso.
  *
