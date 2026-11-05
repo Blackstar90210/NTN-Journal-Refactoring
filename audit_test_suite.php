@@ -2348,7 +2348,7 @@ assert_test(
 // 34.8 (aggiornato in 3.16.0): colonna laterale su tutti gli articoli, ferma e scorrevole se più alta dello schermo
 assert_test(
 	strpos( $sg_code, '<div class="ntn-wrap ntn-art-layout has-sidebar">' ) !== false &&
-	strpos( $sg_code, "if ( \$has_sidebar ) {\n\t\t\t\t\t\t\tget_template_part( 'template-parts/review-sidebar-desktop' );" ) !== false &&
+	strpos( str_replace( "\r\n", "\n", $sg_code ), "if ( \$has_sidebar ) {\n\t\t\t\t\t\t\tget_template_part( 'template-parts/review-sidebar-desktop' );" ) !== false &&
 	strpos( $input_css, '.ntn-art-aside-sticky { position: sticky; top: 24px; }' ) !== false &&
 	strpos( $input_css, '.ntn-art-aside-sticky.is-smart { position: relative; top: 0; }' ) !== false && strpos( $input_css, 'overflow-y: auto; scrollbar-width' ) === false &&
 	strpos( file_get_contents( $theme_dir . 'ntn-journal/assets/js/main.js' ), 'var low = Math.min(gapTop, window.innerHeight - h - gapBottom);' ) !== false && strpos( $input_css, 'ntn-author-panel' ) === false,
@@ -3199,7 +3199,7 @@ assert_test(
 	strpos( $rs_head, 'class="ntn-search-line"' ) !== false && strpos( $rs_head, 'class="ntn-search-go">Cerca</button>' ) !== false &&
 	strpos( $rs_head, 'class="ntn-ic-x"' ) !== false && strpos( $rs_head, 'autocomplete="off"' ) !== false &&
 	strpos( $rs_css, '@keyframes ntn-sdraw' ) !== false && strpos( $rs_css, '.ntn-search-input::-webkit-search-cancel-button' ) !== false &&
-	strpos( $rs_css, ".ntn-search-panel *,\n  .ntn-search-toggle svg { transition: none !important; animation: none !important; }" ) !== false &&
+	strpos( str_replace( "\r\n", "\n", $rs_css ), ".ntn-search-panel *,\n  .ntn-search-toggle svg { transition: none !important; animation: none !important; }" ) !== false &&
 	strpos( $rs_main, "p.panel.classList.add('is-done');" ) !== false && strpos( $rs_main, "'ntn:search-ready'" ) !== false,
 	'50.2: Search bar spans the content width with Cerca and Cancella; it slides down unless reduced motion is requested'
 );
