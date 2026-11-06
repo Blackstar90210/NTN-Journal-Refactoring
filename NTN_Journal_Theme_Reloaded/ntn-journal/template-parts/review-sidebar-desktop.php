@@ -74,6 +74,10 @@ $render_kv = static function ( $game, $review_source ) {
 	$developer = $game['developer'];
 	$publisher = $game['publisher'];
 	$platforms = $game['platforms'];
+	// v4.14.0: "PC (Microsoft Windows)" si legge "PC", come nelle recensioni e negli Hub
+	if ( $platforms && function_exists( 'ntn_core_schema_platform_names' ) ) {
+		$platforms = ntn_core_schema_platform_names( array_filter( is_array( $platforms ) ? $platforms : explode( ',', (string) $platforms ), 'is_scalar' ) );
+	}
 	$release   = $game['release'];
 	$genres    = $game['genres'];
 	$engine    = $game['engine'];

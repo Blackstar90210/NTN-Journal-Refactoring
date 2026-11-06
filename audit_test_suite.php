@@ -5172,6 +5172,14 @@ assert_test(
 	'77.5: Game Hubs and game tags show and send "PC" instead of "PC (Microsoft Windows)", like the reviews'
 );
 
+// 77.6: la scheda del gioco (colonna laterale e testata da telefono) scrive "PC" come le Hub
+$vm_card_ok = true;
+foreach ( array( 'review-sidebar-desktop.php', 'review-header-mobile.php' ) as $vm_card ) {
+	$vm_card_src = file_get_contents( $pd_theme . 'template-parts/' . $vm_card );
+	$vm_card_ok  = $vm_card_ok && false !== strpos( $vm_card_src, "if ( \$platforms && function_exists( 'ntn_core_schema_platform_names' ) ) {" );
+}
+assert_test( $vm_card_ok, '77.6: The game card (desktop sidebar and mobile header) shows PC instead of PC (Microsoft Windows)' );
+
 $GLOBALS['post'] = null;
 unset( $GLOBALS['mock_wp_query_handler'] );
 
