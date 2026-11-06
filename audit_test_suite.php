@@ -1650,24 +1650,24 @@ echo "\n--- 24. SEMVER SIMULTANEOUS 4-HEADER SYNCHRONIZATION ---\n";
 $parent_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $parent_css, $m_parent );
 $parent_ver = isset( $m_parent[1] ) ? trim( $m_parent[1] ) : '';
-assert_test( $parent_ver === '4.15.0', "24.1: Parent Theme style.css declares Version: 4.15.0(found: {$parent_ver})" );
+assert_test( $parent_ver === '4.15.1', "24.1: Parent Theme style.css declares Version: 4.15.1(found: {$parent_ver})" );
 
 $child_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $child_css, $m_child );
 $child_ver = isset( $m_child[1] ) ? trim( $m_child[1] ) : '';
-assert_test( $child_ver === '4.15.0', "24.2: Child Theme style.css declares Version: 4.15.0(found: {$child_ver})" );
+assert_test( $child_ver === '4.15.1', "24.2: Child Theme style.css declares Version: 4.15.1(found: {$child_ver})" );
 
 $core_php = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' );
 preg_match( '/\*\s*Version:\s*([0-9\.]+)/', $core_php, $m_core_hdr );
 $core_hdr_ver = isset( $m_core_hdr[1] ) ? trim( $m_core_hdr[1] ) : '';
-assert_test( $core_hdr_ver === '4.15.0', "24.3: Core Plugin header declares Version: 4.15.0(found: {$core_hdr_ver})" );
+assert_test( $core_hdr_ver === '4.15.1', "24.3: Core Plugin header declares Version: 4.15.1(found: {$core_hdr_ver})" );
 
 preg_match( "/define\(\s*'NTN_JOURNAL_CORE_VERSION',\s*'([^']+)'\s*\);/", $core_php, $m_core_const );
 $core_const_ver = isset( $m_core_const[1] ) ? trim( $m_core_const[1] ) : '';
-assert_test( $core_const_ver === '4.15.0', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.15.0(found: {$core_const_ver})" );
+assert_test( $core_const_ver === '4.15.1', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.15.1(found: {$core_const_ver})" );
 
 assert_test(
-	$parent_ver === '4.15.0' && $child_ver === '4.15.0' && $core_hdr_ver === '4.15.0' && $core_const_ver === '4.15.0',
+	$parent_ver === '4.15.1' && $child_ver === '4.15.1' && $core_hdr_ver === '4.15.1' && $core_const_ver === '4.15.1',
 	'24.5: All 4 version headers are 100% synchronized and atomic according to Rule 2 of GEMINI.md'
 );
 
@@ -1896,7 +1896,7 @@ $parent_style_ver = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( AB
 $child_style_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' ), $m2 ) ? $m2[1] : '';
 $core_plugin_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m3 ) ? $m3[1] : '';
 $core_const_ver   = preg_match( '/define\(\s*[\'"]NTN_JOURNAL_CORE_VERSION[\'"]\s*,\s*[\'"]([0-9\.]+)[\'"]\s*\)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m4 ) ? $m4[1] : '';
-assert_test( $parent_style_ver === '4.15.0' && $child_style_ver === '4.15.0' && $core_plugin_ver === '4.15.0' && $core_const_ver === '4.15.0', '29.1: All 4 version headers are synchronized to 4.15.0' );
+assert_test( $parent_style_ver === '4.15.1' && $child_style_ver === '4.15.1' && $core_plugin_ver === '4.15.1' && $core_const_ver === '4.15.1', '29.1: All 4 version headers are synchronized to 4.15.1' );
 
 // 29.2: single.php sequence is Google Feed -> Social CTA -> Bottom Related Posts
 $single_php = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/single.php' );
@@ -3325,7 +3325,7 @@ $rs_sm  = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core
 $rs_sx  = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/seo-extras.php' );
 assert_test(
 	substr_count( $rs_hub, "get_post_meta( \$post_id, '_ntn_game_release_precision', true )" ) === 2 &&
-	substr_count( $rs_sm, 'ntn_release_schema_date( $raw_release,' ) === 2 && substr_count( $rs_sx, 'ntn_release_schema_date( $raw_release,' ) === 1 &&
+	substr_count( $rs_sm, 'ntn_release_schema_date( $raw_release,' ) === 2 && substr_count( $rs_sx, 'ntn_release_schema_date( $raw_release,' ) === 2 &&
 	strpos( $rs_hub, "'il ' . wp_date( 'd/m/Y', \$release )" ) === false,
 	'52.3: Game hubs and article game schemas use the saved release precision'
 );
@@ -5344,6 +5344,122 @@ assert_test(
 	false !== strpos( $sc_view, 'Conferma selezionati' ) && false !== strpos( $sc_view, 'Non è un gioco' ) && false !== strpos( $sc_view, 'Salta' ) && false !== strpos( $sc_view, "'ntn_search_igdb'" ),
 	'80.8: The panel loads the scanner; its list has Confirm, Skip, Not a game, mass confirm and a search, and writes names only as text'
 );
+
+// =======================================================================
+// 81. Dati per Google con più giochi nell'articolo: il gioco giusto, mai uno a caso (v4.15.1)
+// =======================================================================
+echo "\n--- 81. GIOCHI GIUSTI PER GOOGLE ---\n";
+foreach ( array( 'get_the_time', 'get_the_modified_time', 'wp_get_attachment_image_url', 'get_author_posts_url' ) as $gg_fn ) {
+	if ( ! function_exists( $gg_fn ) ) {
+		eval( "function {$gg_fn}( \$a = '', \$b = null ) { return '2026-01-01T10:00:00+00:00'; }" );
+	}
+}
+$gg_game = static function ( $id, $title ) use ( $mg_term ) {
+	return $mg_term( $id, $title, sanitize_title( $title ) . '-gg', array( '_ntn_igdb_game_id' => $id, '_ntn_game_title' => $title, '_ntn_game_cover' => 'co' . $id, '_ntn_game_developer' => 'Studio ' . $title ) );
+};
+$gg_saros     = $gg_game( 9101, 'Saros' );
+$gg_returnal  = $gg_game( 9102, 'Returnal' );
+$gg_haven     = $gg_game( 9103, 'Haven' );
+$gg_pokemon   = $gg_game( 9104, 'Pokémon Scarlatto' );
+$gg_other     = $gg_game( 9105, 'Zelda' );
+
+// 81.1: l'articolo nomina un gioco solo (titolo): vale quello, non il primo in ordine alfabetico
+$mg_post( 9110, 'post', 'publish', 'gg-saros', '2026-01-01', array( $gg_returnal, $gg_saros, $gg_haven ) );
+$mock_posts[9110]->post_title = 'Saros: la recensione';
+$gg_pick = ntn_core_schema_pick_games( 9110 );
+assert_test(
+	1 === count( $gg_pick ) && 'Saros' === $gg_pick[0]['title'],
+	'81.1: With several game tags, the game named in the article title is the one described (not the first alphabetically)'
+);
+
+// 81.2: il campo "Gioco recensito" vale più del titolo
+$mg_post( 9111, 'post', 'publish', 'gg-reviewed', '2026-01-01', array( $gg_saros, $gg_returnal ) );
+$mock_posts[9111]->post_title = 'Saros e Returnal a confronto';
+$mock_postmeta[9111]['reviewed_item'] = 'Returnal';
+$gg_pick = ntn_core_schema_pick_games( 9111 );
+assert_test(
+	1 === count( $gg_pick ) && 'Returnal' === $gg_pick[0]['title'],
+	'81.2: The "Gioco recensito" field decides first, even when the title names two games'
+);
+
+// 81.3: nessun nome nel titolo: tutti i giochi collegati, non uno a caso
+$mg_post( 9112, 'post', 'publish', 'gg-direct', '2026-01-01', array( $gg_returnal, $gg_haven, $gg_saros ) );
+$mock_posts[9112]->post_title = 'Il Nintendo Direct di giugno';
+$gg_pick = ntn_core_schema_pick_games( 9112 );
+assert_test(
+	array( 'Haven', 'Returnal', 'Saros' ) === array_column( $gg_pick, 'title' ),
+	'81.3: When no game name is in the title and no reviewed game is set, every linked game is described'
+);
+
+// 81.4: confronto senza accenti, maiuscole, simboli; un nome corto non vale dentro un'altra parola
+$mg_post( 9113, 'post', 'publish', 'gg-accent', '2026-01-01', array( $gg_pokemon, $gg_haven ) );
+$mock_posts[9113]->post_title = 'POKEMON scarlatto: novità, e Haven? No';
+$mock_posts[9113]->post_title = 'POKEMON scarlatto, novità';
+$gg_pick = ntn_core_schema_pick_games( 9113 );
+$mg_post( 9114, 'post', 'publish', 'gg-word', '2026-01-01', array( $gg_haven, $gg_saros ) );
+$mock_posts[9114]->post_title = 'Un rifugio sicuro (Havenly)';
+$gg_pick_word = ntn_core_schema_pick_games( 9114 );
+assert_test(
+	1 === count( $gg_pick ) && 'Pokémon Scarlatto' === $gg_pick[0]['title'] && 2 === count( $gg_pick_word ),
+	'81.4: Matching ignores accents, capitals and symbols, and a short name does not match inside another word'
+);
+
+// 81.5: un gioco solo (o nessuno) resta com'è, i tag non gioco non contano
+$mg_post( 9115, 'post', 'publish', 'gg-solo', '2026-01-01', array( $gg_saros, $mg_term( 9199, 'Notizie', 'notizie-gg' ) ) );
+$mg_post( 9116, 'post', 'publish', 'gg-zero', '2026-01-01', array( $mg_term( 9198, 'Indie Gg', 'indie-gg' ) ) );
+assert_test(
+	1 === count( ntn_core_schema_pick_games( 9115 ) ) && array() === ntn_core_schema_pick_games( 9116 ) && array() === ntn_core_schema_pick_games( 9999 ),
+	'81.5: One game stays as it is; plain tags and articles without games give no game'
+);
+
+// 81.6: nel grafo di Google, più giochi = più VideoGame, ognuno con i propri dati, collegati con "about"
+$GLOBALS['queried_object'] = $mock_posts[9112];
+$GLOBALS['post']           = $mock_posts[9112];
+$mock_post_categories[9112] = array();
+$gg_graph = array( array( '@type' => 'WebPage', '@id' => 'https://example.com/#webpage' ) );
+$gg_out   = ntn_tsf_add_videogame_schema( $gg_graph, array() );
+$gg_games = array_values( array_filter( $gg_out, static function ( $e ) { return isset( $e['@type'] ) && 'VideoGame' === $e['@type']; } ) );
+$gg_names = array_column( $gg_games, 'name' );
+sort( $gg_names );
+$gg_by    = array_column( $gg_games, null, 'name' );
+$gg_about = array_column( $gg_out[0]['about'] ?? array(), '@id' );
+$gg_ids   = array_column( $gg_games, '@id' );
+sort( $gg_about );
+sort( $gg_ids );
+assert_test(
+	array( 'Haven', 'Returnal', 'Saros' ) === $gg_names &&
+	false !== strpos( $gg_by['Haven']['image'], 'co9103' ) && 'Studio Haven' === $gg_by['Haven']['author']['name'] &&
+	false !== strpos( $gg_by['Saros']['image'], 'co9101' ) && 'Studio Saros' === $gg_by['Saros']['author']['name'] &&
+	3 === count( $gg_about ) && $gg_about === $gg_ids,
+	'81.6: The Google graph gets one VideoGame per described game, each with its own image and developer, all linked from the article'
+);
+
+// 81.7: recensione con "Gioco recensito": un solo VideoGame, e itemReviewed lo indica
+$GLOBALS['queried_object'] = $mock_posts[9111];
+$GLOBALS['post']           = $mock_posts[9111];
+$mock_postmeta[9111]['rating'] = 4;
+$gg_graph = array( array( '@type' => array( 'WebPage', 'NewsArticle' ), '@id' => 'https://example.com/#webpage' ) );
+$gg_out   = ntn_tsf_add_videogame_schema( $gg_graph, array() );
+$gg_games = array_values( array_filter( $gg_out, static function ( $e ) { return isset( $e['@type'] ) && 'VideoGame' === $e['@type']; } ) );
+assert_test(
+	1 === count( $gg_games ) && 'Returnal' === $gg_games[0]['name'] && ( $gg_out[0]['itemReviewed']['@id'] ?? '' ) === $gg_games[0]['@id'],
+	'81.7: A review with its reviewed game set describes that game only and points itemReviewed at it'
+);
+
+// 81.8: recensione con più giochi e nessuno scelto: niente itemReviewed a caso, l'articolo parla di tutti
+$mock_postmeta[9112]['rating'] = 4;
+$GLOBALS['queried_object'] = $mock_posts[9112];
+$GLOBALS['post']           = $mock_posts[9112];
+$gg_graph = array( array( '@type' => array( 'WebPage', 'NewsArticle' ), '@id' => 'https://example.com/#webpage' ) );
+$gg_out   = ntn_tsf_add_videogame_schema( $gg_graph, array() );
+assert_test(
+	! isset( $gg_out[0]['itemReviewed'] ) && 3 === count( $gg_out[0]['about'] ?? array() ),
+	'81.8: A rated article with several games and no reviewed game names none as the reviewed item and is about all of them'
+);
+
+unset( $mock_postmeta[9111]['rating'], $mock_postmeta[9112]['rating'] );
+$GLOBALS['queried_object'] = null;
+$GLOBALS['post']           = null;
 
 $GLOBALS['post'] = null;
 unset( $GLOBALS['mock_wp_query_handler'] );

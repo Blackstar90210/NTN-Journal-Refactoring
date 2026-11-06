@@ -884,18 +884,165 @@ function ntn_journal_cleanup_third_party_og() {
 add_action( 'template_redirect', 'ntn_journal_cleanup_third_party_og' );
 
 /**
- * Inietta l'entità VideoGame e la collega tramite 'about' nel Graph JSON-LD di The SEO Framework.
+ * Identificatore (@id) dell'entità VideoGame nel grafo, uguale per lo stesso nome di gioco (v4.15.1).
+ *
+ * @param string $game_title Nome del gioco.
+ * @return string
  */
-function ntn_tsf_add_videogame_schema( $data, $context = array() ) {
-	if ( ! is_single() || ! ntn_core_schema_enabled() ) {
-		return $data;
+function ntn_core_schema_game_id( $game_title ) {
+	return home_url( '/#videogame-' . sanitize_title( $game_title ) );
+}
+
+/**
+ * Normalizza un titolo per confrontarlo con un altro: minuscolo, senza accenti né simboli (v4.15.1).
+ *
+ * @param mixed $text Titolo.
+ * @return string
+ */
+function ntn_core_schema_norm( $text ) {
+	$text = remove_accents( html_entity_decode( wp_strip_all_tags( (string) $text ), ENT_QUOTES, 'UTF-8' ) );
+	$text = strtolower( preg_replace( '/[^a-z0-9]+/i', ' ', $text ) );
+	return trim( $text );
+}
+
+/**
+ * Sceglie i giochi di cui parla un articolo, per i dati strutturati (v4.15.1).
+ *
+ * Con un solo gioco collegato, o nessuno, restituisce l'elenco com'è. Con più giochi:
+ * 1. se l'articolo ha il campo "Gioco recensito", vale solo il gioco che corrisponde;
+ * 2. altrimenti valgono i giochi il cui nome compare nel titolo dell'articolo;
+ * 3. altrimenti valgono tutti i giochi collegati (mai uno scelto a caso).
+ *
+ * @param int $post_id ID dell'articolo.
+ * @return array[] Giochi nel formato di ntn_get_post_games(), al massimo 12.
+ */
+function ntn_core_schema_pick_games( $post_id ) {
+	if ( ! function_exists( 'ntn_get_post_games' ) ) {
+		return array();
 	}
 
-	$post_id = get_the_ID();
-	if ( ! $post_id ) {
-		return $data;
+	$games = array_values( array_filter(
+		ntn_get_post_games( (int) $post_id ),
+		static function ( $game ) {
+			return ! empty( $game['title'] ) && is_string( $game['title'] );
+		}
+	) );
+
+	if ( count( $games ) > 1 ) {
+		$contains = static function ( $haystack, $needle ) {
+			return '' !== $needle && false !== strpos( ' ' . $haystack . ' ', ' ' . $needle . ' ' );
+		};
+
+		$reviewed = ntn_core_schema_norm( get_post_meta( (int) $post_id, 'reviewed_item', true ) );
+		$matched  = array();
+		if ( '' !== $reviewed ) {
+			foreach ( $games as $game ) {
+				$name = ntn_core_schema_norm( $game['title'] );
+				if ( $name === $reviewed || $contains( $reviewed, $name ) || $contains( $name, $reviewed ) ) {
+					$matched[] = $game;
+				}
+			}
+		}
+
+		if ( empty( $matched ) ) {
+			$article_title = ntn_core_schema_norm( get_the_title( (int) $post_id ) );
+			foreach ( $games as $game ) {
+				if ( $contains( $article_title, ntn_core_schema_norm( $game['title'] ) ) ) {
+					$matched[] = $game;
+				}
+			}
+		}
+
+		if ( ! empty( $matched ) ) {
+			$games = $matched;
+		}
 	}
 
+	return array_slice( $games, 0, 12 );
+}
+
+/**
+ * Costruisce l'entità VideoGame di un gioco di un articolo con più giochi (v4.15.1).
+ * Ogni gioco usa solo i propri dati: niente copertina o sviluppatore di un altro gioco.
+ *
+ * @param array $game    Gioco nel formato di ntn_get_post_games().
+ * @param int   $post_id ID dell'articolo.
+ * @return array
+ */
+function ntn_core_schema_multi_game_entity( array $game, $post_id ) {
+	$title  = wp_strip_all_tags( wp_specialchars_decode( (string) $game['title'], ENT_QUOTES ) );
+	$entity = array(
+		'@type'               => 'VideoGame',
+		'@id'                 => ntn_core_schema_game_id( $game['title'] ),
+		'name'                => $title,
+		'applicationCategory' => 'Game',
+	);
+
+	$url = ! empty( $game['igdb_url'] ) ? $game['igdb_url'] : ( ! empty( $game['hub_url'] ) ? $game['hub_url'] : '' );
+	if ( ! empty( $url ) ) {
+		$entity['url'] = esc_url( $url );
+	}
+	if ( ! empty( $game['cover'] ) ) {
+		$cover = function_exists( 'ntn_normalize_game_cover_url' ) ? ntn_normalize_game_cover_url( $game['cover'] ) : $game['cover'];
+		$entity['image'] = esc_url( $cover );
+	}
+
+	$term       = ( isset( $game['term'] ) && $game['term'] instanceof WP_Term ) ? $game['term'] : null;
+	$view_model = ( $term && function_exists( 'ntn_get_game_view_model' ) ) ? ntn_get_game_view_model( $term ) : null;
+
+	if ( ! empty( $game['developer'] ) ) {
+		$developer = is_array( $game['developer'] ) ? implode( ', ', $game['developer'] ) : $game['developer'];
+		$entity['author'] = array(
+			'@type' => 'Organization',
+			'name'  => wp_strip_all_tags( wp_specialchars_decode( $developer, ENT_QUOTES ) ),
+		);
+	}
+
+	$publisher = $view_model && ! empty( $view_model['publisher'] ) ? $view_model['publisher'][0] : '';
+	if ( '' === $publisher && ! empty( $game['publisher'] ) ) {
+		$publisher = is_array( $game['publisher'] ) ? reset( $game['publisher'] ) : trim( explode( ',', (string) $game['publisher'] )[0] );
+	}
+	if ( $publisher ) {
+		$entity['publisher'] = array(
+			'@type' => 'Organization',
+			'name'  => wp_strip_all_tags( wp_specialchars_decode( (string) $publisher, ENT_QUOTES ) ),
+		);
+	}
+
+	$genres = $view_model && ! empty( $view_model['genres'] ) ? $view_model['genres'] : array();
+	if ( empty( $genres ) && ! empty( $game['genres'] ) ) {
+		$genres = is_array( $game['genres'] ) ? $game['genres'] : array_filter( array_map( 'trim', explode( ',', (string) $game['genres'] ) ) );
+	}
+	if ( ! empty( $genres ) ) {
+		$entity['genre'] = array_values( array_map( 'wp_strip_all_tags', $genres ) );
+	}
+
+	$raw_release   = $view_model && ! empty( $view_model['release_raw'] ) ? $view_model['release_raw'] : $game['release'];
+	$raw_precision = $view_model && ! empty( $view_model['release_raw'] ) ? $view_model['release_precision'] : $game['release_precision'];
+	if ( $raw_release ) {
+		$entity['datePublished'] = function_exists( 'ntn_release_schema_date' ) ? ntn_release_schema_date( $raw_release, (string) $raw_precision ) : $raw_release;
+	}
+
+	// Piattaforme: le categorie del sito valgono per l'articolo, quelle di IGDB sono del singolo gioco.
+	$igdb_platforms = $view_model ? (array) $view_model['platforms'] : array();
+	if ( empty( $igdb_platforms ) && ! empty( $game['platforms'] ) ) {
+		$igdb_platforms = ntn_core_schema_platform_names( is_array( $game['platforms'] ) ? $game['platforms'] : array_map( 'trim', explode( ',', (string) $game['platforms'] ) ) );
+	}
+	$platforms = ntn_core_post_platform_names( $post_id, $igdb_platforms );
+	if ( ! empty( $platforms ) ) {
+		$entity['gamePlatform'] = $platforms;
+	}
+
+	return $entity;
+}
+
+/**
+ * Entità VideoGame di un articolo con un solo gioco (o nessuno), come prima della 4.15.1.
+ *
+ * @param int $post_id ID dell'articolo.
+ * @return array|null L'entità, o null se l'articolo non ha un gioco.
+ */
+function ntn_core_schema_single_game_entity( $post_id ) {
 	// 1. Troviamo le informazioni sul gioco (Hub IGDB o meta)
 	$game_title = '';
 	$game_url = '';
@@ -931,10 +1078,10 @@ function ntn_tsf_add_videogame_schema( $data, $context = array() ) {
 	}
 
 	if ( empty( $game_title ) ) {
-		return $data; // Nessun gioco associato
+		return null; // Nessun gioco associato
 	}
 
-	$game_schema_id = home_url( '/#videogame-' . sanitize_title( $game_title ) );
+	$game_schema_id = ntn_core_schema_game_id( $game_title );
 
 	// 2. Costruiamo l'entità VideoGame tramite API Helper (se disponibile)
 	$target_object = $found_tag ? $found_tag : $post_id;
@@ -1026,6 +1173,40 @@ function ntn_tsf_add_videogame_schema( $data, $context = array() ) {
 			$videogame_entity['gamePlatform'] = $platforms;
 		}
 	}
+
+	return $videogame_entity;
+}
+
+/**
+ * Inietta l'entità VideoGame e la collega tramite 'about' nel Graph JSON-LD di The SEO Framework.
+ */
+function ntn_tsf_add_videogame_schema( $data, $context = array() ) {
+	if ( ! is_single() || ! ntn_core_schema_enabled() ) {
+		return $data;
+	}
+
+	$post_id = get_the_ID();
+	if ( ! $post_id ) {
+		return $data;
+	}
+
+	// 1. Giochi dell'articolo (v4.15.1): con più giochi collegati si sceglie quello giusto, mai il primo a caso
+	$videogame_entities = array();
+	$picked_games       = is_singular( 'videogioco' ) ? array() : ntn_core_schema_pick_games( $post_id );
+	// Anche un solo gioco scelto tra più collegati passa di qui: il percorso classico prenderebbe il primo tag.
+	$linked_games_count = function_exists( 'ntn_get_post_games' ) && ! empty( $picked_games ) ? count( ntn_get_post_games( $post_id ) ) : 0;
+	if ( count( $picked_games ) > 1 || ( ! empty( $picked_games ) && $linked_games_count > 1 ) ) {
+		foreach ( $picked_games as $picked_game ) {
+			$videogame_entities[] = ntn_core_schema_multi_game_entity( $picked_game, $post_id );
+		}
+	} else {
+		$single_entity = ntn_core_schema_single_game_entity( $post_id );
+		if ( null === $single_entity ) {
+			return $data; // Nessun gioco associato
+		}
+		$videogame_entities[] = $single_entity;
+	}
+	$game_schema_ids = array_values( array_unique( array_column( $videogame_entities, '@id' ) ) );
 
 	// 2b. Hub del videogioco (v3.11.0): non è un articolo ma una pagina di raccolta che parla del gioco
 	if ( is_singular( 'videogioco' ) && function_exists( 'ntn_get_hub_videogame_entity' ) && is_array( $data ) ) {
@@ -1138,7 +1319,12 @@ function ntn_tsf_add_videogame_schema( $data, $context = array() ) {
 						}
 						
 						// Link to VideoGame via itemReviewed
-						$data[$key]['itemReviewed'] = array( '@id' => $game_schema_id );
+						if ( 1 === count( $game_schema_ids ) ) {
+							$data[$key]['itemReviewed'] = array( '@id' => $game_schema_ids[0] );
+						} else {
+							// Più giochi e nessuna recensione di uno solo: l'articolo parla di tutti, non ne recensisce uno a caso
+							$data[$key]['about'] = array_map( static function ( $id ) { return array( '@id' => $id ); }, $game_schema_ids );
+						}
 					} else {
 						// Normal Article -> about -> VideoGame
 						if ( ! isset( $data[$key]['about'] ) ) {
@@ -1164,10 +1350,15 @@ function ntn_tsf_add_videogame_schema( $data, $context = array() ) {
 							if ( count( $data[$key]['about'] ) === 1 && empty( $data[$key]['about'][0] ) ) {
 								$data[$key]['about'] = array();
 							}
-							$data[$key]['about'][] = array( '@id' => $game_schema_id );
+							foreach ( $game_schema_ids as $game_schema_id ) {
+								$data[$key]['about'][] = array( '@id' => $game_schema_id );
+							}
 						} else {
 							$existing_about = $data[$key]['about'];
-							$data[$key]['about'] = array( $existing_about, array( '@id' => $game_schema_id ) );
+							$data[$key]['about'] = array( $existing_about );
+							foreach ( $game_schema_ids as $game_schema_id ) {
+								$data[$key]['about'][] = array( '@id' => $game_schema_id );
+							}
 						}
 					}
 					
@@ -1182,7 +1373,9 @@ function ntn_tsf_add_videogame_schema( $data, $context = array() ) {
 	if ( $article_found ) {
 		// IMPORTANT: Usa l'append array [] (numerico) e non una chiave stringa come 'ntn_videogame'
 		// per evitare che l'intero @graph diventi un Oggetto invece che un Array in JSON.
-		$data[] = $videogame_entity;
+		foreach ( $videogame_entities as $videogame_entity ) {
+			$data[] = $videogame_entity;
+		}
 	}
 
 	return $data;
