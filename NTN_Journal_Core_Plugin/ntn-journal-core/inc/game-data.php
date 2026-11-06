@@ -995,3 +995,204 @@ function ntn_game_sort_key( $title ) {
 	return remove_accents( html_entity_decode( (string) $title, ENT_QUOTES, 'UTF-8' ) );
 }
 endif;
+
+if ( ! function_exists( 'ntn_get_game_featured_content' ) ) :
+/**
+ * Cerca l'articolo in evidenza associato a un Videogioco (CPT o Tag).
+ * Priorità: Manuale (_ntn_featured_review_id) > Recensioni > Anteprime > Editoriali > Notizie.
+ *
+ * @param mixed $object ID del post, ID del term, WP_Post, WP_Term o null per rilevamento automatico.
+ * @return array|false Array con 'post' e 'type' ('review'|'preview'|'editorial'|'news'|'article'), o false.
+ */
+function ntn_get_game_featured_content( $object = null ) {
+	$cache_enabled = get_option( 'ntn_journal_enable_hub_cache', 'yes' );
+	
+	$post = null;
+	$term = null;
+
+	if ( is_null( $object ) || empty( $object ) ) {
+		$queried = get_queried_object();
+		if ( $queried instanceof WP_Post ) {
+			$post = $queried;
+		} elseif ( $queried instanceof WP_Term ) {
+			$term = $queried;
+		} elseif ( is_singular() ) {
+			$post = get_post();
+		}
+	} elseif ( $object instanceof WP_Post ) {
+		$post = $object;
+	} elseif ( $object instanceof WP_Term ) {
+		$term = $object;
+	} elseif ( is_numeric( $object ) ) {
+		$obj_id = intval( $object );
+		$check_post = get_post( $obj_id );
+		if ( $check_post && $check_post->post_type === 'videogioco' ) {
+			$post = $check_post;
+		} else {
+			$check_term = get_term( $obj_id, 'post_tag' );
+			if ( $check_term && ! is_wp_error( $check_term ) ) {
+				$term = $check_term;
+			} elseif ( $check_post ) {
+				$post = $check_post;
+			}
+		}
+	}
+
+	// Trova l'entità corrispondente per fallback bidirezionale
+	if ( $post && ! $term ) {
+		// A. Controlla prima i tag associati al post
+		$post_tags = get_the_tags( $post->ID );
+		if ( $post_tags ) {
+			foreach ( $post_tags as $ptag ) {
+				if ( get_term_meta( $ptag->term_id, '_ntn_game_cover', true ) || get_term_meta( $ptag->term_id, '_ntn_igdb_game_id', true ) || get_term_meta( $ptag->term_id, '_ntn_game_title', true ) ) {
+					$term = $ptag;
+					break;
+				}
+			}
+		}
+
+		// B. Se non trovato nei tag associati, cerca per slug, titolo o game_title
+		if ( ! $term ) {
+			$term = get_term_by( 'slug', $post->post_name, 'post_tag' );
+			if ( ! $term || is_wp_error( $term ) ) {
+				$term = get_term_by( 'name', $post->post_title, 'post_tag' );
+				if ( ! $term || is_wp_error( $term ) ) {
+					$game_title_meta = get_post_meta( $post->ID, '_ntn_game_title', true );
+					if ( ! empty( $game_title_meta ) ) {
+						$term = get_term_by( 'name', $game_title_meta, 'post_tag' );
+						if ( ! $term || is_wp_error( $term ) ) {
+							$term = get_term_by( 'slug', sanitize_title( $game_title_meta ), 'post_tag' );
+						}
+					}
+				}
+				if ( is_wp_error( $term ) ) {
+					$term = null;
+				}
+			}
+		}
+	} elseif ( $term && ! $post ) {
+		$cpt_posts = get_posts( array(
+			'name'        => $term->slug,
+			'post_type'   => 'videogioco',
+			'post_status' => 'any',
+			'numberposts' => 1,
+		) );
+		if ( ! empty( $cpt_posts ) ) {
+			$post = $cpt_posts[0];
+		} else {
+			$cpt_posts = get_posts( array(
+				'title'       => $term->name,
+				'post_type'   => 'videogioco',
+				'post_status' => 'any',
+				'numberposts' => 1,
+			) );
+			if ( ! empty( $cpt_posts ) ) {
+				$post = $cpt_posts[0];
+			}
+		}
+	}
+
+	$transient_key = '';
+	if ( $post ) {
+		$transient_key = ntn_core_featured_cache_key( 'post', $post->ID );
+	} elseif ( $term ) {
+		$transient_key = ntn_core_featured_cache_key( 'term', $term->term_id );
+	}
+	
+	if ( 'yes' === $cache_enabled && ! empty( $transient_key ) ) {
+		$cached_result = get_transient( $transient_key );
+		if ( false !== $cached_result ) {
+			return $cached_result;
+		}
+	}
+
+	$result = false;
+
+	// 1. Controllo selezione manuale (_ntn_featured_review_id) con fallback bidirezionale
+	$manual_id = 0;
+	if ( $post ) {
+		$manual_id = get_post_meta( $post->ID, '_ntn_featured_review_id', true );
+	}
+	if ( empty( $manual_id ) && $term ) {
+		$manual_id = get_term_meta( $term->term_id, '_ntn_featured_review_id', true );
+	}
+
+	if ( ! empty( $manual_id ) ) {
+		$featured_post = get_post( intval( $manual_id ) );
+		if ( $featured_post && $featured_post->post_status === 'publish' ) {
+			$type = 'article';
+			if ( has_category( 'recensioni', $featured_post ) || has_category( 'recensione', $featured_post ) ) {
+				$type = 'review';
+			} elseif ( has_category( 'anteprime', $featured_post ) || has_category( 'anteprima', $featured_post ) ) {
+				$type = 'preview';
+			} elseif ( has_category( 'editoriali', $featured_post ) || has_category( 'editoriale', $featured_post ) ) {
+				$type = 'editorial';
+			} elseif ( has_category( 'notizie', $featured_post ) || has_category( 'news', $featured_post ) ) {
+				$type = 'news';
+			}
+			$result = array( 'post' => $featured_post, 'type' => $type );
+		}
+	}
+
+	// 2. Ricerca automatica con ordine di priorità tassativo
+	if ( ! $result ) {
+		$tag_slug = '';
+		$tag_id = 0;
+		if ( $term ) {
+			$tag_slug = $term->slug;
+			$tag_id = $term->term_id;
+		} elseif ( $post ) {
+			$tag_slug = $post->post_name;
+		}
+
+		if ( ! empty( $tag_slug ) || ! empty( $tag_id ) ) {
+			$tax_term_field = $tag_id ? 'term_id' : 'slug';
+			$tax_term_value = $tag_id ? $tag_id : $tag_slug;
+
+			$priority_types = array(
+				'review'    => array( 'recensioni', 'recensione' ),
+				'preview'   => array( 'anteprime', 'anteprima' ),
+				'editorial' => array( 'editoriali', 'editoriale' ),
+				'news'      => array( 'notizie', 'news' ),
+			);
+
+			foreach ( $priority_types as $type_key => $category_slugs ) {
+				$query = new WP_Query( array(
+					'post_type'           => 'post',
+					'post_status'         => 'publish',
+					'posts_per_page'      => 1,
+					'ignore_sticky_posts' => true,
+					'no_found_rows'       => true,
+					'tax_query'           => array(
+						'relation' => 'AND',
+						array(
+							'taxonomy' => 'post_tag',
+							'field'    => $tax_term_field,
+							'terms'    => $tax_term_value,
+						),
+						array(
+							'taxonomy' => 'category',
+							'field'    => 'slug',
+							'terms'    => $category_slugs,
+						),
+					),
+				) );
+
+				if ( $query->have_posts() ) {
+					$result = array(
+						'post' => $query->posts[0],
+						'type' => $type_key,
+					);
+					break;
+				}
+			}
+		}
+	}
+
+	if ( 'yes' === $cache_enabled && ! empty( $transient_key ) ) {
+		set_transient( $transient_key, $result, DAY_IN_SECONDS );
+	}
+
+	return $result;
+}
+endif;

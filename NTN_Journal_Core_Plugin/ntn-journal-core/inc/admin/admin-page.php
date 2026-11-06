@@ -102,7 +102,7 @@ add_filter( 'admin_title', 'ntn_journal_core_admin_title', 10, 2 );
  */
 function ntn_core_flush_all_caches() {
 	global $wpdb;
-	$prefixes = array( 'ntn_hub_featured_', 'ntn_hub_counts_', 'ntn_cat_hub_', 'ntn_team_', 'ntn_front_data_', 'ntn_author_stats_', 'ntn_author_reading_' );
+	$prefixes = array( NTN_CORE_FEATURED_CACHE_PREFIX, 'ntn_hub_counts_', 'ntn_cat_hub_', 'ntn_team_', 'ntn_front_data_', 'ntn_author_stats_', 'ntn_author_reading_' );
 	foreach ( $prefixes as $prefix ) {
 		$like  = $wpdb->esc_like( '_transient_' . $prefix ) . '%';
 		$names = $wpdb->get_col( $wpdb->prepare( "SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s", $like ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- pulizia manuale richiesta dall'amministratore.
@@ -341,8 +341,8 @@ function ntn_core_clear_igdb_count_cache( $meta_id, $object_id, $meta_key, $_met
 		delete_transient( 'ntn_igdb_tag_count' );
 	}
 	if ( $meta_key === '_ntn_featured_review_id' ) {
-		delete_transient( 'ntn_hub_featured_post_' . $object_id );
-		delete_transient( 'ntn_hub_featured_term_' . $object_id );
+		delete_transient( ntn_core_featured_cache_key( 'post', $object_id ) );
+		delete_transient( ntn_core_featured_cache_key( 'term', $object_id ) );
 	}
 }
 add_action( 'added_post_meta', 'ntn_core_clear_igdb_count_cache', 10, 4 );
@@ -354,17 +354,17 @@ add_action( 'deleted_term_meta', 'ntn_core_clear_igdb_count_cache', 10, 4 );
 
 // Cancellazione cache featured hub page al salvataggio articoli
 function ntn_core_clear_hub_cache_on_save( $post_id ) {
-	delete_transient( 'ntn_hub_featured_post_' . $post_id );
+	delete_transient( ntn_core_featured_cache_key( 'post', $post_id ) );
 	$tags = get_the_tags( $post_id );
 	if ( $tags ) {
 		foreach ( $tags as $tag ) {
-			delete_transient( 'ntn_hub_featured_term_' . $tag->term_id );
+			delete_transient( ntn_core_featured_cache_key( 'term', $tag->term_id ) );
 			
 			// Invalida anche il CPT videogioco corrispondente al tag usando i transienti o cache_key basata sullo slug
 			$cache_key = 'ntn_vg_link_' . md5( $tag->slug );
 			$cpt_id = get_transient( $cache_key );
 			if ( $cpt_id ) {
-				delete_transient( 'ntn_hub_featured_post_' . $cpt_id );
+				delete_transient( ntn_core_featured_cache_key( 'post', $cpt_id ) );
 			}
 		}
 	}

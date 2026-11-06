@@ -77,3 +77,10 @@ if ( ! function_exists( 'ntn_apply_post_meta_to_game' ) ) {
 		return $game;
 	}
 }
+
+// v4.13.0: articoli in evidenza dell'Hub del gioco.
+if ( ! function_exists( 'ntn_get_game_featured_content' ) ) {
+	function ntn_get_game_featured_content( $object = null ) {
+		return false;
+	}
+}
