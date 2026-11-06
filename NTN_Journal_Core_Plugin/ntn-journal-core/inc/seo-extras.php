@@ -894,6 +894,25 @@ function ntn_core_schema_game_id( $game_title ) {
 }
 
 /**
+ * Testo semplice per i dati strutturati: senza tag e con le entità HTML decodificate, anche quando sono
+ * scritte due volte nel database ("Pok&amp;#233;mon" diventa "Pokémon") (v4.15.2).
+ *
+ * @param mixed $text Testo.
+ * @return string
+ */
+function ntn_core_schema_plain_text( $text ) {
+	$text = wp_strip_all_tags( (string) $text );
+	for ( $i = 0; $i < 3; $i++ ) {
+		$decoded = html_entity_decode( $text, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+		if ( $decoded === $text ) {
+			break;
+		}
+		$text = $decoded;
+	}
+	return wp_strip_all_tags( $text );
+}
+
+/**
  * Normalizza un titolo per confrontarlo con un altro: minuscolo, senza accenti né simboli (v4.15.1).
  *
  * @param mixed $text Titolo.
@@ -949,14 +968,51 @@ function ntn_core_schema_pick_games( $post_id ) {
 			return $list;
 		};
 
+		// Vince il nome più lungo: via i nomi contenuti in un altro o seguiti da un altro gioco dentro $text.
+		$prune = static function ( array $candidates, $text ) use ( $keys, $contains ) {
+			$kept = array();
+			foreach ( $candidates as $game ) {
+				$name    = ntn_core_schema_norm( $game['title'] );
+				$dropped = false;
+				foreach ( $candidates as $other ) {
+					if ( $other === $game ) {
+						continue;
+					}
+					foreach ( $keys( $other['title'] ) as $other_key ) {
+						if ( strlen( $other_key ) > strlen( $name ) && $contains( $other_key, $name ) ) {
+							$dropped = true;
+						}
+					}
+					if ( $contains( $text, $name . ' ' . ntn_core_schema_norm( $other['title'] ) ) ) {
+						$dropped = true;
+					}
+				}
+				if ( ! $dropped ) {
+					$kept[] = $game;
+				}
+			}
+			return $kept;
+		};
+
 		$reviewed = ntn_core_schema_norm( get_post_meta( $post_id, 'reviewed_item', true ) );
 		$matched  = array();
 		if ( '' !== $reviewed ) {
+			$in_field = array();
 			foreach ( $games as $game ) {
 				$name = ntn_core_schema_norm( $game['title'] );
 				if ( $name === $reviewed || $contains( $reviewed, $name ) || $contains( $name, $reviewed ) ) {
-					$matched[] = $game;
+					$in_field[] = $game;
 				}
+			}
+			// Il nome scritto uguale nel campo vince su tutti; altrimenti il più lungo.
+			foreach ( $in_field as $game ) {
+				if ( ntn_core_schema_norm( $game['title'] ) === $reviewed ) {
+					$matched = array( $game );
+					break;
+				}
+			}
+			if ( empty( $matched ) ) {
+				$matched = $prune( $in_field, $reviewed );
 			}
 		}
 
@@ -973,27 +1029,7 @@ function ntn_core_schema_pick_games( $post_id ) {
 				}
 			}
 
-			// Vince il nome più lungo: via i nomi contenuti in un altro o seguiti nel titolo da un altro gioco.
-			foreach ( $in_title as $game ) {
-				$name    = ntn_core_schema_norm( $game['title'] );
-				$dropped = false;
-				foreach ( $in_title as $other ) {
-					if ( $other === $game ) {
-						continue;
-					}
-					foreach ( $keys( $other['title'] ) as $other_key ) {
-						if ( strlen( $other_key ) > strlen( $name ) && $contains( $other_key, $name ) ) {
-							$dropped = true;
-						}
-					}
-					if ( $contains( $article_title, $name . ' ' . ntn_core_schema_norm( $other['title'] ) ) ) {
-						$dropped = true;
-					}
-				}
-				if ( ! $dropped ) {
-					$matched[] = $game;
-				}
-			}
+			$matched = $prune( $in_title, $article_title );
 
 			if ( ! empty( $matched ) ) {
 				$is_review = function_exists( 'has_category' ) && has_category( array( 'recensioni', 'recensione' ), $post_id );
@@ -1027,7 +1063,7 @@ function ntn_core_schema_pick_games( $post_id ) {
  * @return array
  */
 function ntn_core_schema_multi_game_entity( array $game, $post_id ) {
-	$title  = wp_strip_all_tags( wp_specialchars_decode( (string) $game['title'], ENT_QUOTES ) );
+	$title  = ntn_core_schema_plain_text( (string) $game['title'] );
 	$entity = array(
 		'@type'               => 'VideoGame',
 		'@id'                 => ntn_core_schema_game_id( $game['title'] ),
@@ -1051,7 +1087,7 @@ function ntn_core_schema_multi_game_entity( array $game, $post_id ) {
 		$developer = is_array( $game['developer'] ) ? implode( ', ', $game['developer'] ) : $game['developer'];
 		$entity['author'] = array(
 			'@type' => 'Organization',
-			'name'  => wp_strip_all_tags( wp_specialchars_decode( $developer, ENT_QUOTES ) ),
+			'name'  => ntn_core_schema_plain_text( $developer ),
 		);
 	}
 
@@ -1062,7 +1098,7 @@ function ntn_core_schema_multi_game_entity( array $game, $post_id ) {
 	if ( $publisher ) {
 		$entity['publisher'] = array(
 			'@type' => 'Organization',
-			'name'  => wp_strip_all_tags( wp_specialchars_decode( (string) $publisher, ENT_QUOTES ) ),
+			'name'  => ntn_core_schema_plain_text( (string) $publisher ),
 		);
 	}
 
@@ -1147,7 +1183,7 @@ function ntn_core_schema_single_game_entity( $post_id ) {
 	$videogame_entity = array(
 		'@type'               => 'VideoGame',
 		'@id'                 => $game_schema_id,
-		'name'                => wp_strip_all_tags( wp_specialchars_decode( $game_title ?? '', ENT_QUOTES ) ),
+		'name'                => ntn_core_schema_plain_text( $game_title ?? '' ),
 		'applicationCategory' => 'Game',
 	);
 
@@ -1165,7 +1201,7 @@ function ntn_core_schema_single_game_entity( $post_id ) {
 	if ( ! empty( $game_developer ) ) {
 		$videogame_entity['author'] = array(
 			'@type' => 'Organization',
-			'name'  => wp_strip_all_tags( wp_specialchars_decode( $game_developer ?? '', ENT_QUOTES ) )
+			'name'  => ntn_core_schema_plain_text( $game_developer ?? '' )
 		);
 	}
 
@@ -1174,7 +1210,7 @@ function ntn_core_schema_single_game_entity( $post_id ) {
 		if ( ! empty( $view_model['publisher'] ) ) {
 			$videogame_entity['publisher'] = array(
 				'@type' => 'Organization',
-				'name'  => wp_strip_all_tags( wp_specialchars_decode( $view_model['publisher'][0] ?? '', ENT_QUOTES ) )
+				'name'  => ntn_core_schema_plain_text( $view_model['publisher'][0] ?? '' )
 			);
 		}
 
@@ -1205,8 +1241,8 @@ function ntn_core_schema_single_game_entity( $post_id ) {
 			$video_id = str_replace( 'https://www.youtube.com/watch?v=', '', $view_model['video_url'] );
 			$videogame_entity['trailer'] = array(
 				'@type'        => 'VideoObject',
-				'name'         => 'Trailer di ' . wp_strip_all_tags( wp_specialchars_decode( $game_title ?? '', ENT_QUOTES ) ),
-				'description'  => 'Guarda il trailer ufficiale di ' . wp_strip_all_tags( wp_specialchars_decode( $game_title ?? '', ENT_QUOTES ) ),
+				'name'         => 'Trailer di ' . ntn_core_schema_plain_text( $game_title ?? '' ),
+				'description'  => 'Guarda il trailer ufficiale di ' . ntn_core_schema_plain_text( $game_title ?? '' ),
 				'thumbnailUrl' => 'https://img.youtube.com/vi/' . $video_id . '/hqdefault.jpg',
 				'embedUrl'     => 'https://www.youtube.com/embed/' . $video_id,
 				'uploadDate'   => get_the_date( 'c', $post_id )
@@ -1300,7 +1336,7 @@ function ntn_tsf_add_videogame_schema( $data, $context = array() ) {
 					$current_types = (array) $data[$key]['@type'];
 					if ( count( array_intersect( array( 'Article', 'NewsArticle', 'BlogPosting', 'Review' ), $current_types ) ) > 0 ) {
 						if ( empty( $data[$key]['headline'] ) ) {
-							$data[$key]['headline'] = wp_strip_all_tags( wp_specialchars_decode( get_the_title( $post_id ), ENT_QUOTES ) );
+							$data[$key]['headline'] = ntn_core_schema_plain_text( get_the_title( $post_id ) );
 						}
 						
 						if ( empty( $data[$key]['image'] ) ) {
