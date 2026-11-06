@@ -3331,7 +3331,7 @@ assert_test(
 
 // --- TEST SUITE 53: Google e condivisioni delle Hub di categoria e dei tag v3.20.0 ---
 echo "\n--- 53. SEO DI HUB DI CATEGORIA E TAG V3.20.0 ---\n";
-$sh_cat = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/category-hub.php' );
+$sh_cat = ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/category-hub.php' );
 $sh_hub = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/hub-seo.php' );
 
 // 53.1: descrizione automatica della Hub di categoria (introduzione o dati), mai sopra una scritta a mano
@@ -3462,7 +3462,7 @@ assert_test(
 // --- TEST SUITE 56: Hub Mobile e PC Gaming, disegni su griglia, tendina Piattaforme v3.22.0 ---
 echo "\n--- 56. PIATTAFORME V3.22.0 ---\n";
 $pf_dot = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/assets/js/dot-art.js' );
-$pf_hub = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/category-hub.php' );
+$pf_hub = ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/category-hub.php' );
 $pf_mf  = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/inc/menu-filters.php' );
 
 // 56.1: disegni a punti su griglia fissa (forme agganciate, tasti rossi come punti), con postazione PC e telefoni
@@ -3488,7 +3488,7 @@ assert_test(
 assert_test(
 	strpos( $hm_tool, 'class="ntn-submenu ntn-nav-drop-panel ntn-pdrop" id="ntn-pdrop"' ) !== false && strpos( $hm_tool, 'ntn-pdrop-icon is-mini' ) !== false &&
 	strpos( $hm_tool, '<span class="ntn-tools-sep" aria-hidden="true"></span>' ) !== false &&
-	strpos( file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/header.php' ), "<div class=\"ntn-header-tools\">\n\t\t\t\t<?php if ( function_exists( 'ntn_journal_header_platform_drop' ) )" ) !== false &&
+	strpos( ntn_t_read( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/header.php' ), "<div class=\"ntn-header-tools\">\n\t\t\t\t<?php if ( function_exists( 'ntn_journal_header_platform_drop' ) )" ) !== false &&
 	strpos( $pf_mf, "set_transient( \$cache_key, \$html, HOUR_IN_SECONDS );" ) !== false && strpos( $pf_mf, "'<span class=\"ntn-pdrop-plats\">'" ) !== false &&
 	strpos( file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/assets/js/main.js' ), "drop.classList.contains('is-mega')" ) !== false,
 	'56.3: Piattaforme dropdown is a wide panel built from the menu, with dot icons, counts and brands with their consoles'
@@ -3626,7 +3626,7 @@ if ( ! function_exists( 'wp_parse_url' ) ) {
 	}
 }
 require_once ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/redirect-manager.php';
-$fr_src = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/redirect-manager.php' );
+$fr_src = ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/redirect-manager.php' );
 
 // 62.1: le cartelle scritte a mano diventano /cartella/; indirizzi di altri siti e percorsi strani sono scartati
 assert_test(
@@ -3826,7 +3826,7 @@ class NTN_Stats_Mock_Wpdb {
 	}
 }
 
-$hs_src  = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/category-hub-stats.php' );
+$hs_src  = ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/category-hub-stats.php' );
 $hs_year = (int) gmdate( 'Y' );
 $hs_old  = $hs_year - 1;
 foreach ( array( 9601 => 'Console', 9602 => 'Sony', 9603 => 'PS5', 9610 => 'Altra', 9620 => 'Vuota', 9630 => 'Vecchia' ) as $hs_id => $hs_name ) {
@@ -4312,7 +4312,7 @@ $GLOBALS['queried_object']   = $pg_queried_backup;
 echo "\n--- 66. SEO HUB STATISTICHE ---\n";
 
 $se_src = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/category-hub-stats.php' );
-$se_hub = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/category-hub.php' );
+$se_hub = ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/category-hub.php' );
 $se_stat = new WP_Term( array( 'term_id' => 9901, 'name' => 'Numeri', 'slug' => 'numeri', 'taxonomy' => 'category' ) );
 $mock_termmeta[9901] = array( '_ntn_hub_enabled' => '1', '_ntn_hub_type' => 'statistiche' );
 $se_backup_q     = $GLOBALS['queried_object'];
