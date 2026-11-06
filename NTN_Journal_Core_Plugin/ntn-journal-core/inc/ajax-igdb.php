@@ -421,29 +421,25 @@ function ntn_ajax_search_wp_tags() {
 add_action( 'wp_ajax_ntn_search_wp_tags', 'ntn_ajax_search_wp_tags' );
 
 /**
- * Ajax endpoint per salvare l'associazione Tag -> IGDB
+ * Collega un tag a un gioco IGDB: salva i dati sul tag e crea o aggiorna la sua Hub (v4.15.0: funzione unica
+ * per il pannello e per lo scanner dei tag).
+ *
+ * @param int $tag_id  ID del tag.
+ * @param int $igdb_id ID del gioco su IGDB.
+ * @return int|WP_Error ID della Hub, o l'errore.
  */
-function ntn_ajax_save_tag_igdb_assoc() {
-	check_ajax_referer( 'ntn_igdb_nonce', '_ajax_nonce' );
-	if ( ! current_user_can( 'manage_options' ) ) {
-		wp_send_json_error( 'Non autorizzato' );
-	}
-	
-	$tag_id = isset( $_POST['tag_id'] ) ? intval( $_POST['tag_id'] ) : 0;
-	$igdb_id = isset( $_POST['igdb_id'] ) ? intval( $_POST['igdb_id'] ) : 0;
-	
-	if ( ! $tag_id || ! $igdb_id ) {
-		wp_send_json_error( 'Dati mancanti' );
-	}
-	
+function ntn_igdb_link_tag_to_game( $tag_id, $igdb_id ) {
+	$tag_id  = (int) $tag_id;
+	$igdb_id = (int) $igdb_id;
+
 	$details = ntn_get_igdb_game_details( $igdb_id );
 	if ( is_wp_error( $details ) ) {
-		wp_send_json_error( $details->get_error_message() );
+		return $details;
 	}
-	
+
 	$tag = get_term( $tag_id, 'post_tag' );
 	if ( is_wp_error( $tag ) || ! $tag ) {
-		wp_send_json_error( 'Tag non trovato' );
+		return new WP_Error( 'ntn_igdb_tag_missing', 'Tag non trovato' );
 	}
 	$tag_slug = $tag->slug;
 
@@ -559,7 +555,31 @@ function ntn_ajax_save_tag_igdb_assoc() {
 			wp_set_object_terms( $post_id, $publishers, 'game_publisher', false );
 		}
 	}
-	
+
+	return $post_id;
+}
+
+/**
+ * Ajax endpoint per salvare l'associazione Tag -> IGDB
+ */
+function ntn_ajax_save_tag_igdb_assoc() {
+	check_ajax_referer( 'ntn_igdb_nonce', '_ajax_nonce' );
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_send_json_error( 'Non autorizzato' );
+	}
+
+	$tag_id = isset( $_POST['tag_id'] ) ? intval( $_POST['tag_id'] ) : 0;
+	$igdb_id = isset( $_POST['igdb_id'] ) ? intval( $_POST['igdb_id'] ) : 0;
+
+	if ( ! $tag_id || ! $igdb_id ) {
+		wp_send_json_error( 'Dati mancanti' );
+	}
+
+	$post_id = ntn_igdb_link_tag_to_game( $tag_id, $igdb_id );
+	if ( is_wp_error( $post_id ) ) {
+		wp_send_json_error( $post_id->get_error_message() );
+	}
+
 	if ( ! empty( $_POST['review_url'] ) && is_string( $_POST['review_url'] ) ) {
 		$input_val = trim( sanitize_text_field( wp_unslash( $_POST['review_url'] ) ) );
 		$review_id = 0;

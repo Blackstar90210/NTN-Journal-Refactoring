@@ -84,6 +84,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</div>
 	</div>
 
+	<?php require __DIR__ . '/igdb-tag-scanner.php'; // v4.15.0: lista dei tag da confermare ?>
+
 	<!-- Container per gli articoli collegati -->
 	<div id="ntn-connections-container" style="display:none; margin-bottom: 30px;">
 		<h3 style="margin-top: 0; display:flex; align-items:center; justify-content:space-between;">
