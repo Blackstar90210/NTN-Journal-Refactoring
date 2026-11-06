@@ -17,6 +17,7 @@ Ultimo passo della fase 2 della revisione di coerenza tra plugin e temi. I dati 
 - La data di uscita del gioco (`datePublished`) arriva anche dal tag del gioco, con la sua precisione (giorno, mese, trimestre o anno). Prima si leggeva solo dall'articolo.
 - I generi sono in italiano, come nella pagina.
 - Le piattaforme IGDB del PC ("PC (Microsoft Windows)", "Windows") diventano "PC", come la categoria del sito: niente più "PC" e "PC (Microsoft Windows)" insieme.
+- Lo stesso nome vale per Hub e tag del gioco, sia nei dati per Google (`hub-seo.php`) sia nel testo che vede il lettore nella testata (`template-parts/hub-header.php`): ora si legge "PC" ovunque. Con un plugin più vecchio la testata resta com'era.
 
 ### 📋 2. Chi usa questi dati
 

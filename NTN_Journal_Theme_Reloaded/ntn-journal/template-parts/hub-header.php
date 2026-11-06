@@ -151,6 +151,9 @@ $release_text = ! empty( $igdb_info['release'] ) ? ntn_journal_release_label( $i
 								<?php
 								$platforms_raw = $igdb_info['platforms'];
 								$platforms = is_array( $platforms_raw ) ? $platforms_raw : ( is_scalar( $platforms_raw ) ? explode( ',', (string) $platforms_raw ) : array() );
+								if ( function_exists( 'ntn_core_schema_platform_names' ) ) {
+									$platforms = ntn_core_schema_platform_names( array_filter( $platforms, 'is_scalar' ) ); // v4.14.0: "PC (Microsoft Windows)" diventa "PC"
+								}
 								foreach ( array_slice( $platforms, 0, 8 ) as $platform ) {
 									if ( is_scalar( $platform ) ) {
 										echo '<span class="ntn-plat">' . esc_html( trim( (string) $platform ) ) . '</span>';

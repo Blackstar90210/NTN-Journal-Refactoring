@@ -246,7 +246,7 @@ function ntn_get_hub_videogame_entity( int $post_id ): array {
 	if ( $genres ) {
 		$entity['genre'] = $genres;
 	}
-	$platforms = ntn_hub_names( $info['platforms'] ?? array() );
+	$platforms = ntn_core_schema_platform_names( ntn_hub_names( $info['platforms'] ?? array() ) ); // v4.14.0: "PC (Microsoft Windows)" diventa "PC", come nelle recensioni
 	if ( $platforms ) {
 		$entity['gamePlatform'] = $platforms;
 	}

@@ -740,6 +740,7 @@ if ( ! function_exists( 'has_block' ) ) {
 
 // Load target project files
 require_once ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/cache-keys.php';
+require_once ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/api-helpers.php';
 require_once ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/game-data.php'; // come WordPress: prima il plugin
 require_once ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/inc/helpers.php';
 require_once ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/inc/plugin-fallbacks.php';
@@ -5114,7 +5115,6 @@ assert_test(
 // =========================================================================
 // 77. I dati per Google usano gli stessi dati della pagina (v4.14.0)
 // =========================================================================
-require_once $pd_core . 'inc/api-helpers.php';
 $vm_src = file_get_contents( $pd_core . 'inc/api-helpers.php' );
 $vm_empty = array( 'title' => '', 'cover' => '', 'release' => '', 'release_raw' => '', 'release_precision' => '', 'developer' => array(), 'publisher' => array(), 'platforms' => array(), 'genres' => array(), 'engine' => array(), 'franchise' => array(), 'url' => '', 'video_url' => '', 'screenshots' => array() );
 
@@ -5160,6 +5160,16 @@ assert_test(
 	false !== strpos( file_get_contents( $pd_core . 'inc/schema-markup.php' ), "\$raw_release = \$view_model['release_raw'];" ) &&
 	2 === substr_count( file_get_contents( $pd_core . 'inc/schema-markup.php' ) . file_get_contents( $pd_core . 'inc/seo-extras.php' ), "\$view_model['release_raw'] ? \$view_model['release_raw'] : get_post_meta(" ),
 	'77.4: Genres are translated as on the page; schema and SEO callers keep calling ntn_get_game_view_model() and take the release date from it'
+);
+
+// 77.5: Hub e tag del gioco scrivono "PC" come le recensioni, nei dati per Google e nel testo visibile
+$vm_hubseo = file_get_contents( $pd_core . 'inc/hub-seo.php' );
+$vm_hubhdr = file_get_contents( $pd_theme . 'template-parts/hub-header.php' );
+assert_test(
+	false !== strpos( $vm_hubseo, "\$platforms = ntn_core_schema_platform_names( ntn_hub_names( \$info['platforms'] ?? array() ) );" ) &&
+	false !== strpos( $vm_hubhdr, "if ( function_exists( 'ntn_core_schema_platform_names' ) ) {" ) && false !== strpos( $vm_hubhdr, 'ntn_core_schema_platform_names( array_filter( $platforms,' ) &&
+	array( 'PC', 'PlayStation 5' ) === ntn_core_schema_platform_names( array( 'PC (Microsoft Windows)', 'PlayStation 5', 'PC' ) ),
+	'77.5: Game Hubs and game tags show and send "PC" instead of "PC (Microsoft Windows)", like the reviews'
 );
 
 $GLOBALS['post'] = null;
