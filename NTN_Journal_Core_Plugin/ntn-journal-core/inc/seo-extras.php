@@ -1336,7 +1336,8 @@ function ntn_tsf_add_videogame_schema( $data, $context = array() ) {
 					}
 					
 					$rating = get_post_meta( $post_id, 'rating', true );
-					if ( ! empty( $rating ) && get_option( 'ntn_seo_enable_review_schema', 'yes' ) === 'yes' ) {
+					// v4.15.1: una Review dice quale gioco recensisce; con più giochi e nessuno scelto resta un articolo normale (about), senza voto
+					if ( ! empty( $rating ) && 1 === count( $game_schema_ids ) && get_option( 'ntn_seo_enable_review_schema', 'yes' ) === 'yes' ) {
 						// Upgrade Article to Review
 						$data[$key]['@type'] = array( 'WebPage', 'Review' );
 						$data[$key]['reviewRating'] = array(
@@ -1376,12 +1377,7 @@ function ntn_tsf_add_videogame_schema( $data, $context = array() ) {
 						}
 						
 						// Link to VideoGame via itemReviewed
-						if ( 1 === count( $game_schema_ids ) ) {
-							$data[$key]['itemReviewed'] = array( '@id' => $game_schema_ids[0] );
-						} else {
-							// Più giochi e nessuna recensione di uno solo: l'articolo parla di tutti, non ne recensisce uno a caso
-							$data[$key]['about'] = array_map( static function ( $id ) { return array( '@id' => $id ); }, $game_schema_ids );
-						}
+						$data[$key]['itemReviewed'] = array( '@id' => $game_schema_ids[0] );
 					} else {
 						// Normal Article -> about -> VideoGame
 						if ( ! isset( $data[$key]['about'] ) ) {

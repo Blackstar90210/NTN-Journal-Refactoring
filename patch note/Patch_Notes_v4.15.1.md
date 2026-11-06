@@ -20,7 +20,7 @@ Quando un articolo ha più giochi collegati, il plugin sceglie così:
 
 - Un `VideoGame` per ogni gioco descritto, collegato all'articolo con `about`.
 - Recensione con un gioco solo: `itemReviewed` indica quel gioco.
-- Recensione con più giochi e nessun "Gioco recensito": niente `itemReviewed` a caso, l'articolo parla di tutti.
+- Articolo con voto, più giochi e nessun gioco indicato (né nel titolo né in "Gioco recensito"): non diventa una Review (Google richiede il gioco recensito), resta un articolo che parla di tutti i giochi, senza voto.
 - Piattaforme: valgono le categorie dell'articolo, a cui si aggiungono quelle IGDB del singolo gioco.
 - Articoli con un gioco solo, o nessuno: nessun cambiamento.
 

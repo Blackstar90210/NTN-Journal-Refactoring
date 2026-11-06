@@ -5490,8 +5490,8 @@ $GLOBALS['post']           = $mock_posts[9112];
 $gg_graph = array( array( '@type' => array( 'WebPage', 'NewsArticle' ), '@id' => 'https://example.com/#webpage' ) );
 $gg_out   = ntn_tsf_add_videogame_schema( $gg_graph, array() );
 assert_test(
-	! isset( $gg_out[0]['itemReviewed'] ) && 3 === count( $gg_out[0]['about'] ?? array() ),
-	'81.8: A rated article with several games and no reviewed game names none as the reviewed item and is about all of them'
+	! isset( $gg_out[0]['itemReviewed'] ) && ! isset( $gg_out[0]['reviewRating'] ) && ! in_array( 'Review', (array) $gg_out[0]['@type'], true ) && 3 === count( $gg_out[0]['about'] ?? array() ),
+	'81.8: A rated article with several games and no reviewed game is a plain article about all of them: no Review, no rating, no random reviewed item'
 );
 
 unset( $mock_postmeta[9111]['rating'], $mock_postmeta[9112]['rating'] );
