@@ -34,21 +34,8 @@ function ntn_clean_json_ld_text( $text ) {
  * Extracts game platforms for Schema markup.
  */
 function ntn_get_game_platforms_for_schema() {
-	$platforms = array();
-	$categories = get_the_category();
-	if ( ! empty( $categories ) ) {
-		foreach ( $categories as $cat ) {
-			$excluded_cats = array( 'recensioni', 'speciali', 'notizie', 'editoriali', 'videogame', 'console', 'microsoft', 'sony' );
-			if ( ! in_array( strtolower( $cat->slug ), $excluded_cats ) ) {
-				$platform_name = ntn_clean_json_ld_text( $cat->name );
-				if ( strtolower( $platform_name ) === 'pc gaming' || strtolower( $platform_name ) === 'pc' ) {
-					$platform_name = 'PC';
-				}
-				$platforms[] = $platform_name;
-			}
-		}
-	}
-	return empty( $platforms ) ? array( 'PC', 'Console' ) : array_values( array_unique( $platforms ) );
+	// v4.14.3: solo le categorie piattaforma dell'articolo (vuoto se non ce ne sono)
+	return array_map( 'ntn_clean_json_ld_text', ntn_core_post_platform_names( get_the_ID() ) );
 }
 
 /**
@@ -242,9 +229,11 @@ function ntn_journal_review_article_schema() {
 				'@type'               => 'VideoGame', 
 				'name'                => $ntn_schema_item,
 				'applicationCategory' => 'Game',
-				'gamePlatform'        => $game_platform
 			),
 		);
+		if ( ! empty( $game_platform ) ) {
+			$ntn_schema_data['itemReviewed']['gamePlatform'] = $game_platform; // v4.14.3: solo le categorie piattaforma
+		}
 
 		// Enhanced IGDB Meta via API Helper
 		if ( function_exists( 'ntn_get_game_view_model' ) ) {
@@ -263,9 +252,11 @@ function ntn_journal_review_article_schema() {
 				if ( $raw_release ) {
 					$ntn_schema_data['itemReviewed']['datePublished'] = function_exists( 'ntn_release_schema_date' ) ? ntn_release_schema_date( $raw_release, (string) $view_model['release_precision'] ) : $raw_release; // v3.19.2: solo le parti note
 				}
-				if ( ! empty( $view_model['platforms'] ) ) {
-					$combined_platforms = array_values( array_unique( array_merge( $game_platform, $view_model['platforms'] ) ) );
-					$ntn_schema_data['itemReviewed']['gamePlatform'] = array_map( 'ntn_clean_json_ld_text', $combined_platforms );
+				if ( ! empty( $view_model['platforms'] ) ) { // v4.14.3: le categorie comandano, IGDB aggiunge quelle che mancano
+					$combined_platforms = ntn_core_post_platform_names( get_the_ID(), (array) $view_model['platforms'] );
+					if ( ! empty( $combined_platforms ) ) {
+						$ntn_schema_data['itemReviewed']['gamePlatform'] = array_map( 'ntn_clean_json_ld_text', $combined_platforms );
+					}
 				}
 				if ( ! empty( $view_model['video_url'] ) ) {
 					$video_id = str_replace( 'https://www.youtube.com/watch?v=', '', $view_model['video_url'] );
@@ -488,7 +479,9 @@ function ntn_journal_review_article_schema() {
 				}
 				
 				$platforms = ntn_get_game_platforms_for_schema();
-				$game_entity['gamePlatform'] = $platforms;
+				if ( ! empty( $platforms ) ) {
+					$game_entity['gamePlatform'] = $platforms; // v4.14.3: solo le categorie piattaforma
+				}
 				
 				// Enhanced IGDB Meta via API Helper
 				if ( function_exists( 'ntn_get_game_view_model' ) ) {
@@ -509,9 +502,11 @@ function ntn_journal_review_article_schema() {
 						if ( $raw_release ) {
 							$game_entity['datePublished'] = function_exists( 'ntn_release_schema_date' ) ? ntn_release_schema_date( $raw_release, (string) $raw_precision ) : $raw_release; // v3.19.2: solo le parti note
 						}
-						if ( ! empty( $view_model['platforms'] ) ) {
-							$combined_platforms = array_values( array_unique( array_merge( $platforms, $view_model['platforms'] ) ) );
-							$game_entity['gamePlatform'] = array_map( 'ntn_clean_json_ld_text', $combined_platforms );
+						if ( ! empty( $view_model['platforms'] ) ) { // v4.14.3
+							$combined_platforms = ntn_core_post_platform_names( get_the_ID(), (array) $view_model['platforms'] );
+							if ( ! empty( $combined_platforms ) ) {
+								$game_entity['gamePlatform'] = array_map( 'ntn_clean_json_ld_text', $combined_platforms );
+							}
 						}
 						if ( ! empty( $view_model['video_url'] ) ) {
 							$video_id = str_replace( 'https://www.youtube.com/watch?v=', '', $view_model['video_url'] );

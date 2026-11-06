@@ -746,6 +746,7 @@ require_once ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/inc/helpers.php';
 require_once ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/inc/plugin-fallbacks.php';
 require_once ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/seo-extras.php';
 require_once ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/hub-seo.php';
+require_once ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/schema-flags.php';
 require_once ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/category-hub.php';
 require_once ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/category-hub-stats.php';
 require_once ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/team-page.php';
@@ -1649,24 +1650,24 @@ echo "\n--- 24. SEMVER SIMULTANEOUS 4-HEADER SYNCHRONIZATION ---\n";
 $parent_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $parent_css, $m_parent );
 $parent_ver = isset( $m_parent[1] ) ? trim( $m_parent[1] ) : '';
-assert_test( $parent_ver === '4.14.2', "24.1: Parent Theme style.css declares Version: 4.14.2 (found: {$parent_ver})" );
+assert_test( $parent_ver === '4.15.0', "24.1: Parent Theme style.css declares Version: 4.15.0(found: {$parent_ver})" );
 
 $child_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $child_css, $m_child );
 $child_ver = isset( $m_child[1] ) ? trim( $m_child[1] ) : '';
-assert_test( $child_ver === '4.14.2', "24.2: Child Theme style.css declares Version: 4.14.2 (found: {$child_ver})" );
+assert_test( $child_ver === '4.15.0', "24.2: Child Theme style.css declares Version: 4.15.0(found: {$child_ver})" );
 
 $core_php = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' );
 preg_match( '/\*\s*Version:\s*([0-9\.]+)/', $core_php, $m_core_hdr );
 $core_hdr_ver = isset( $m_core_hdr[1] ) ? trim( $m_core_hdr[1] ) : '';
-assert_test( $core_hdr_ver === '4.14.2', "24.3: Core Plugin header declares Version: 4.14.2 (found: {$core_hdr_ver})" );
+assert_test( $core_hdr_ver === '4.15.0', "24.3: Core Plugin header declares Version: 4.15.0(found: {$core_hdr_ver})" );
 
 preg_match( "/define\(\s*'NTN_JOURNAL_CORE_VERSION',\s*'([^']+)'\s*\);/", $core_php, $m_core_const );
 $core_const_ver = isset( $m_core_const[1] ) ? trim( $m_core_const[1] ) : '';
-assert_test( $core_const_ver === '4.14.2', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.14.2 (found: {$core_const_ver})" );
+assert_test( $core_const_ver === '4.15.0', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.15.0(found: {$core_const_ver})" );
 
 assert_test(
-	$parent_ver === '4.14.2' && $child_ver === '4.14.2' && $core_hdr_ver === '4.14.2' && $core_const_ver === '4.14.2',
+	$parent_ver === '4.15.0' && $child_ver === '4.15.0' && $core_hdr_ver === '4.15.0' && $core_const_ver === '4.15.0',
 	'24.5: All 4 version headers are 100% synchronized and atomic according to Rule 2 of GEMINI.md'
 );
 
@@ -1895,7 +1896,7 @@ $parent_style_ver = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( AB
 $child_style_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' ), $m2 ) ? $m2[1] : '';
 $core_plugin_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m3 ) ? $m3[1] : '';
 $core_const_ver   = preg_match( '/define\(\s*[\'"]NTN_JOURNAL_CORE_VERSION[\'"]\s*,\s*[\'"]([0-9\.]+)[\'"]\s*\)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m4 ) ? $m4[1] : '';
-assert_test( $parent_style_ver === '4.14.2' && $child_style_ver === '4.14.2' && $core_plugin_ver === '4.14.2' && $core_const_ver === '4.14.2', '29.1: All 4 version headers are synchronized to 4.14.2' );
+assert_test( $parent_style_ver === '4.15.0' && $child_style_ver === '4.15.0' && $core_plugin_ver === '4.15.0' && $core_const_ver === '4.15.0', '29.1: All 4 version headers are synchronized to 4.15.0' );
 
 // 29.2: single.php sequence is Google Feed -> Social CTA -> Bottom Related Posts
 $single_php = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/single.php' );
@@ -5213,6 +5214,135 @@ assert_test(
 assert_test(
 	1 === preg_match( '/\\.ntn-art-aside-sticky\\{[^}]*grid-template-columns:minmax\\(0,1fr\\)/', $sc_out ) && 1 === preg_match( '/\.ntn-gcard\{[^}]*min-width:0/', $sc_out ),
 	'78.2: The compiled CSS contains the sidebar column fix'
+);
+
+// =========================================================================
+// 79. Dati per Google: piattaforme dalle categorie e nome del gioco senza titolo d'articolo (v4.14.3)
+// =========================================================================
+if ( ! function_exists( 'get_ancestors' ) ) {
+	function get_ancestors( $object_id, $object_type = '', $resource_type = '' ) {
+		$out = array();
+		$cur = (int) $object_id;
+		while ( isset( $GLOBALS['gd_parent'][ $cur ] ) && $GLOBALS['gd_parent'][ $cur ] ) {
+			$cur   = (int) $GLOBALS['gd_parent'][ $cur ];
+			$out[] = $cur;
+		}
+		return $out;
+	}
+}
+// Console (hub 7001) > Sony (7002) > PlayStation 5 (7003); PC Gaming (7004, hub senza figli); Indie (7005), Nintendo (7006) con figlio Switch 2 (7007)
+$GLOBALS['gd_parent']   = array( 7002 => 7001, 7003 => 7002, 7007 => 7006 );
+$GLOBALS['hs_children'] = array( 7001 => array( 7002, 7003 ), 7002 => array( 7003 ), 7006 => array( 7007 ) );
+foreach ( array( 7001, 7004 ) as $gd_hub_id ) {
+	$mock_termmeta[ $gd_hub_id ] = array( '_ntn_hub_enabled' => '1', '_ntn_hub_type' => 'console' );
+}
+$gd_cat = static function ( $id, $name, $slug ) {
+	return new WP_Term( array( 'term_id' => $id, 'name' => $name, 'slug' => $slug, 'taxonomy' => 'category' ) );
+};
+$mock_post_categories[7100] = array(
+	$gd_cat( 7003, 'PlayStation 5', 'playstation-5' ), $gd_cat( 7002, 'Sony', 'sony' ), $gd_cat( 7004, 'PC Gaming', 'pc-gaming' ),
+	$gd_cat( 7005, 'Indie', 'indie' ), $gd_cat( 7006, 'Nintendo', 'nintendo' ), $gd_cat( 7003, 'PlayStation 5', 'playstation-5' ),
+);
+$mock_post_categories[7101] = array( $gd_cat( 7005, 'Indie', 'indie' ), $gd_cat( 7001, 'Console', 'console' ) );
+assert_test(
+	array( 'PlayStation 5', 'PC' ) === ntn_core_post_platform_names( 7100 ),
+	'79.1: Platforms come only from the article categories that are devices inside a Platform Hub, PC Gaming is written PC, Indie and brands are left out'
+);
+assert_test(
+	array() === ntn_core_post_platform_names( 7101 ) && array() === ntn_core_post_platform_names( 7999 ),
+	'79.2: An article without platform categories has no platforms (no PC, Console fallback)'
+);
+$gd_seo = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/seo-extras.php' );
+$gd_sch = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/schema-markup.php' );
+assert_test(
+	false !== strpos( $gd_seo, '$platforms = ntn_core_post_platform_names( $post_id );' ) && false === strpos( $gd_seo, "array( 'PC', 'Console' )" ) &&
+	false === strpos( $gd_sch, "array( 'PC', 'Console' )" ) && false === strpos( $gd_sch, "array_merge( \$platforms, \$view_model['platforms'] )" ),
+	'79.3: The Google schemas take platforms from the categories (IGDB only completes) and have no fixed PC, Console fallback'
+);
+// Mac con la casella "È una piattaforma", IGDB completa senza doppioni
+$mock_termmeta[7008] = array( '_ntn_is_platform' => '1' );
+$mock_post_categories[7102] = array( $gd_cat( 7008, 'Mac', 'mac' ), $gd_cat( 7003, 'PlayStation 5', 'playstation-5' ), $gd_cat( 7005, 'Indie', 'indie' ) );
+assert_test(
+	array( 'Mac', 'PlayStation 5', 'Xbox Series X|S', 'Nintendo Switch' ) === ntn_core_post_platform_names( 7102, array( 'PlayStation 5', 'Xbox Series X|S', 'XBOX Series X|S', 'Nintendo Switch' ) ),
+	'79.5: A category marked as platform counts (Mac), IGDB platforms only add what is missing, with no duplicates even with different capitals'
+);
+assert_test(
+	array( 'PlayStation 5', 'PC' ) === ntn_core_post_platform_names( 7100, array( 'PlayStation 5', 'PC (Microsoft Windows)' ) ) &&
+	array( 'Xbox One' ) === ntn_core_post_platform_names( 7101, array( 'Xbox One' ) ),
+	'79.6: IGDB platforms are added to the category ones (PC naming normalized) and also stand when the article has no platform category'
+);
+$gd_flags_src = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/schema-flags.php' );
+assert_test(
+	false !== strpos( $gd_flags_src, "wp_verify_nonce( sanitize_text_field( wp_unslash( \$_POST['ntn_schema_flag_nonce'] ) ), 'ntn_schema_flag_' . (int) \$term_id )" ) &&
+	false !== strpos( $gd_flags_src, "! current_user_can( 'manage_categories' )" ) && false !== strpos( $gd_flags_src, "'category_edit_form_fields'" ) && false === strpos( $gd_flags_src, 'post_tag' ),
+	'79.7: The platform checkbox is on the category only and is saved only with the capability and a valid nonce; there is no checkbox on tags'
+);
+
+// Nome del gioco: il titolo di un articolo non lo è, quello di una scheda videogioco sì
+$mock_posts[7200] = new WP_Post( array( 'ID' => 7200, 'post_title' => 'Hillthorn esce il 10 novembre su PC', 'post_name' => 'hillthorn-esce', 'post_type' => 'post', 'post_status' => 'publish' ) );
+$mock_posts[7201] = new WP_Post( array( 'ID' => 7201, 'post_title' => 'Hillthorn', 'post_name' => 'hillthorn', 'post_type' => 'videogioco', 'post_status' => 'publish' ) );
+$gd_art_info = ntn_get_hub_igdb_info( 7200 );
+$gd_cpt_info = ntn_get_hub_igdb_info( 7201 );
+assert_test(
+	empty( $gd_art_info['title'] ) && 'Hillthorn' === ( $gd_cpt_info['title'] ?? '' ),
+	'79.4: An article with no saved game name has no game title, a Videogame page still uses its own title'
+);
+
+// =======================================================================
+// 80. Scanner dei tag IGDB: lista da confermare, la conferma riusa il salvataggio del pannello (v4.15.0)
+// =======================================================================
+echo "\n--- 80. SCANNER DEI TAG IGDB ---\n";
+require_once ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/igdb-tag-scanner.php';
+$sc_src  = ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/igdb-tag-scanner.php' );
+$sc_ajax = ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/ajax-igdb.php' );
+$sc_view = ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/admin/views/igdb-tag-scanner.php' );
+$sc_tab  = ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/admin/views/tab-igdb.php' );
+$sc_main = ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' );
+
+assert_test(
+	'safe' === ntn_igdb_scan_group( 1, true, false ) && 'choose' === ntn_igdb_scan_group( 3, true, false ) && 'choose' === ntn_igdb_scan_group( 1, false, false ) &&
+	'choose' === ntn_igdb_scan_group( 1, true, true ) && 'none' === ntn_igdb_scan_group( 0, true, false ),
+	'80.1: A row is safe only with one game, the tag in the title and no more precise tag beside it; otherwise it must be chosen, or has no result'
+);
+assert_test(
+	'fields id,name,first_release_date,version_parent,cover.url; where name ~ "Say \\"Hi\\" \\\\ x"; limit 10;' === ntn_igdb_scan_query( "Say \"Hi\" \\\nx" ),
+	'80.2: The IGDB search asks for the exact name and escapes quotes, backslashes and line breaks'
+);
+$sc_games = ntn_igdb_scan_format_games(
+	array(
+		array( 'id' => 1, 'name' => 'Marathon', 'first_release_date' => 775699200, 'cover' => array( 'url' => '//images.igdb.com/a.jpg' ) ),
+		array( 'id' => 2, 'name' => 'Marathon', 'first_release_date' => 1772323200 ),
+		array( 'id' => 3, 'name' => 'Marathon Edition', 'version_parent' => 2 ),
+		'not a game',
+	)
+);
+assert_test(
+	2 === count( $sc_games ) && 2 === $sc_games[0]['id'] && '2026' === $sc_games[0]['year'] && '1994' === $sc_games[1]['year'] && 'https://images.igdb.com/a.jpg' === $sc_games[1]['cover'],
+	'80.3: Same-name games are listed with their year, newest first, without editions of another game'
+);
+assert_test(
+	in_array( 'steam', ntn_igdb_scan_default_excluded(), true ) && false !== strpos( $sc_src, "meta_key = '_ntn_not_game'" ) && false !== strpos( $sc_src, "update_term_meta( \$tag_id, '_ntn_not_game', '1' )" ),
+	'80.4: Steam is never proposed and "Not a game" is remembered, so the tag does not come back'
+);
+$sc_handlers = preg_match_all( '/function ntn_ajax_igdb_scan_\w+\(\) \{\s*ntn_igdb_scan_guard\(\);/', $sc_src );
+assert_test(
+	4 === $sc_handlers && false !== strpos( $sc_src, "check_ajax_referer( 'ntn_igdb_scan', '_ajax_nonce' )" ) && false !== strpos( $sc_src, "current_user_can( 'manage_options' )" ) && false === strpos( $sc_src, 'wp_ajax_nopriv' ),
+	'80.5: All four scanner requests check nonce and manage_options, none is open to visitors'
+);
+assert_test(
+	false !== strpos( $sc_src, 'ntn_igdb_link_tag_to_game( $tag_id, $igdb_id )' ) && false === strpos( $sc_src, 'wp_insert_post' ) && false === strpos( $sc_src, "'_ntn_igdb_game_id', " ) &&
+	false !== strpos( $sc_ajax, '$post_id = ntn_igdb_link_tag_to_game( $tag_id, $igdb_id );' ) && 1 === substr_count( $sc_ajax, "'post_type'   => 'videogioco',\n\t\t\t'post_status' => 'publish'" ),
+	'80.6: Confirming reuses the panel save (tag data and Hub): the scanner writes neither by itself and the panel calls the same function'
+);
+preg_match( '/function ntn_ajax_igdb_scan_tags\(\) \{.*?\n\}/s', $sc_src, $sc_scan );
+assert_test(
+	! empty( $sc_scan[0] ) && false === strpos( $sc_scan[0], 'update_' ) && false === strpos( $sc_scan[0], 'ntn_igdb_link_tag_to_game' ) && false !== strpos( $sc_scan[0], 'NTN_IGDB_SCAN_BATCH' ),
+	'80.7: The scan writes no game data and works in small batches'
+);
+assert_test(
+	false !== strpos( $sc_main, "inc/igdb-tag-scanner.php" ) && false !== strpos( $sc_tab, "igdb-tag-scanner.php" ) && false === strpos( $sc_view, 'innerHTML' ) &&
+	false !== strpos( $sc_view, 'Conferma selezionati' ) && false !== strpos( $sc_view, 'Non è un gioco' ) && false !== strpos( $sc_view, 'Salta' ) && false !== strpos( $sc_view, "'ntn_search_igdb'" ),
+	'80.8: The panel loads the scanner; its list has Confirm, Skip, Not a game, mass confirm and a search, and writes names only as text'
 );
 
 $GLOBALS['post'] = null;

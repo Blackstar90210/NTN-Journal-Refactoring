@@ -193,6 +193,72 @@ function ntn_core_fill_view_model( array $data, $info ) {
 }
 
 /**
+ * Piattaforme di un articolo, prese solo dalle sue categorie (v4.14.3).
+ *
+ * Una categoria è una piattaforma se è marcata "È una piattaforma", oppure se non ha sottocategorie e sta dentro
+ * (o è) una Hub di tipo "Piattaforme" (Console, Mobile, PC Gaming...). Marchi come Nintendo, Sony e Microsoft, e
+ * categorie come Indie, Guide, Hardware, Notizie o Recensioni, non sono piattaforme. Vince il sito: le piattaforme
+ * IGDB già salvate (se ci sono) si aggiungono, senza doppioni anche se scritte con le maiuscole diverse.
+ *
+ * @param int   $post_id        Articolo.
+ * @param array $igdb_platforms Piattaforme IGDB già salvate: completano l'elenco, non lo sostituiscono.
+ * @return array Nomi delle piattaforme, senza doppioni. Vuoto se l'articolo non ne ha.
+ */
+function ntn_core_post_platform_names( $post_id, array $igdb_platforms = array() ) {
+	$categories = get_the_category( (int) $post_id );
+	if ( empty( $categories ) || is_wp_error( $categories ) ) {
+		$categories = array();
+	}
+	$is_platform_hub = static function ( $term_id ) {
+		return function_exists( 'ntn_core_category_hub_meta' ) && ntn_core_category_hub_meta( (int) $term_id, 'enabled' ) && 'console' === ntn_core_category_hub_meta( (int) $term_id, 'type' );
+	};
+	$names = array();
+	foreach ( $categories as $cat ) {
+		$marked = function_exists( 'ntn_core_category_is_platform' ) && ntn_core_category_is_platform( $cat->term_id );
+		$children = $marked ? array() : get_term_children( (int) $cat->term_id, 'category' );
+		if ( ! empty( $children ) && ! is_wp_error( $children ) ) {
+			continue; // un marchio o una Hub con sottocategorie: lo sono le sottocategorie
+		}
+		$inside = $marked || $is_platform_hub( $cat->term_id );
+		if ( ! $inside ) {
+			foreach ( get_ancestors( (int) $cat->term_id, 'category', 'taxonomy' ) as $ancestor_id ) {
+				if ( $is_platform_hub( $ancestor_id ) ) {
+					$inside = true;
+					break;
+				}
+			}
+		}
+		if ( ! $inside ) {
+			continue;
+		}
+		$name = trim( wp_strip_all_tags( wp_specialchars_decode( $cat->name, ENT_QUOTES ) ) );
+		if ( 'pc gaming' === strtolower( $name ) ) {
+			$name = 'PC';
+		}
+		if ( '' !== $name ) {
+			$names[] = $name;
+		}
+	}
+	foreach ( $igdb_platforms as $igdb_platform ) {
+		$igdb_platform = trim( wp_strip_all_tags( (string) $igdb_platform ) );
+		if ( '' !== $igdb_platform ) {
+			$names[] = $igdb_platform;
+		}
+	}
+	// Senza doppioni anche con maiuscole diverse ("Xbox Series X|S" e "XBOX Series X|S"): resta la prima scritta
+	$out  = array();
+	$seen = array();
+	foreach ( ntn_core_schema_platform_names( $names ) as $name ) {
+		$key = strtolower( $name );
+		if ( ! isset( $seen[ $key ] ) ) {
+			$seen[ $key ] = true;
+			$out[]        = $name;
+		}
+	}
+	return $out;
+}
+
+/**
  * Nomi delle piattaforme IGDB come le categorie del sito (v4.14.0).
  *
  * I dati strutturati uniscono le piattaforme del gioco a quelle prese dalle categorie, dove il PC si

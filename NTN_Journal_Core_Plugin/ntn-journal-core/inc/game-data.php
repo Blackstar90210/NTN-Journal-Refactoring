@@ -588,7 +588,9 @@ function ntn_get_hub_igdb_info( $object = null ) {
 
 	$title = $get_meta_value( '_ntn_game_title' );
 	if ( empty( $title ) ) {
-		if ( $post && isset( $post->post_title ) ) {
+		// v4.14.3: il titolo di un articolo non è il nome di un gioco. Se non c'è un nome salvato si usa il nome del
+		// tag del gioco, e il titolo del post solo per la scheda videogioco (dove titolo e gioco coincidono).
+		if ( $post && isset( $post->post_title ) && 'videogioco' === $post->post_type ) {
 			$title = $post->post_title;
 		} elseif ( $term && isset( $term->name ) ) {
 			$title = $term->name;
