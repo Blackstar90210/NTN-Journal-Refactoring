@@ -747,6 +747,7 @@ require_once ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/inc/plugin-fallba
 require_once ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/seo-extras.php';
 require_once ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/hub-seo.php';
 require_once ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/schema-flags.php';
+require_once ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/iubenda-compat.php';
 require_once ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/category-hub.php';
 require_once ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/category-hub-stats.php';
 require_once ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/team-page.php';
@@ -1650,24 +1651,24 @@ echo "\n--- 24. SEMVER SIMULTANEOUS 4-HEADER SYNCHRONIZATION ---\n";
 $parent_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $parent_css, $m_parent );
 $parent_ver = isset( $m_parent[1] ) ? trim( $m_parent[1] ) : '';
-assert_test( $parent_ver === '4.15.3', "24.1: Parent Theme style.css declares Version: 4.15.3(found: {$parent_ver})" );
+assert_test( $parent_ver === '4.15.4', "24.1: Parent Theme style.css declares Version: 4.15.4(found: {$parent_ver})" );
 
 $child_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $child_css, $m_child );
 $child_ver = isset( $m_child[1] ) ? trim( $m_child[1] ) : '';
-assert_test( $child_ver === '4.15.3', "24.2: Child Theme style.css declares Version: 4.15.3(found: {$child_ver})" );
+assert_test( $child_ver === '4.15.4', "24.2: Child Theme style.css declares Version: 4.15.4(found: {$child_ver})" );
 
 $core_php = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' );
 preg_match( '/\*\s*Version:\s*([0-9\.]+)/', $core_php, $m_core_hdr );
 $core_hdr_ver = isset( $m_core_hdr[1] ) ? trim( $m_core_hdr[1] ) : '';
-assert_test( $core_hdr_ver === '4.15.3', "24.3: Core Plugin header declares Version: 4.15.3(found: {$core_hdr_ver})" );
+assert_test( $core_hdr_ver === '4.15.4', "24.3: Core Plugin header declares Version: 4.15.4(found: {$core_hdr_ver})" );
 
 preg_match( "/define\(\s*'NTN_JOURNAL_CORE_VERSION',\s*'([^']+)'\s*\);/", $core_php, $m_core_const );
 $core_const_ver = isset( $m_core_const[1] ) ? trim( $m_core_const[1] ) : '';
-assert_test( $core_const_ver === '4.15.3', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.15.3(found: {$core_const_ver})" );
+assert_test( $core_const_ver === '4.15.4', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.15.4(found: {$core_const_ver})" );
 
 assert_test(
-	$parent_ver === '4.15.3' && $child_ver === '4.15.3' && $core_hdr_ver === '4.15.3' && $core_const_ver === '4.15.3',
+	$parent_ver === '4.15.4' && $child_ver === '4.15.4' && $core_hdr_ver === '4.15.4' && $core_const_ver === '4.15.4',
 	'24.5: All 4 version headers are 100% synchronized and atomic according to Rule 2 of GEMINI.md'
 );
 
@@ -1896,7 +1897,7 @@ $parent_style_ver = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( AB
 $child_style_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' ), $m2 ) ? $m2[1] : '';
 $core_plugin_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m3 ) ? $m3[1] : '';
 $core_const_ver   = preg_match( '/define\(\s*[\'"]NTN_JOURNAL_CORE_VERSION[\'"]\s*,\s*[\'"]([0-9\.]+)[\'"]\s*\)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m4 ) ? $m4[1] : '';
-assert_test( $parent_style_ver === '4.15.3' && $child_style_ver === '4.15.3' && $core_plugin_ver === '4.15.3' && $core_const_ver === '4.15.3', '29.1: All 4 version headers are synchronized to 4.15.3' );
+assert_test( $parent_style_ver === '4.15.4' && $child_style_ver === '4.15.4' && $core_plugin_ver === '4.15.4' && $core_const_ver === '4.15.4', '29.1: All 4 version headers are synchronized to 4.15.4' );
 
 // 29.2: single.php sequence is Google Feed -> Social CTA -> Bottom Related Posts
 $single_php = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/single.php' );
@@ -5523,7 +5524,7 @@ assert_test(
 );
 unset( $mock_postmeta[9124]['rating'] );
 
-// 81.11: anche la Hub del gioco e il testo automatico scrivono le lettere vere (v4.15.3)
+// 81.11: anche la Hub del gioco e il testo automatico scrivono le lettere vere (v4.15.4)
 $mock_posts[9141] = new WP_Post( array( 'ID' => 9141, 'post_title' => 'God of War Ragnar&amp;#246;k', 'post_name' => 'god-of-war-ragnarok-gg', 'post_type' => 'videogioco', 'post_status' => 'publish' ) );
 $mock_postmeta[9141]['_ntn_game_title'] = 'God of War Ragnar&amp;#246;k';
 $mock_postmeta[9141]['_ntn_game_developer'] = 'Santa Monica Studio';
@@ -5531,6 +5532,24 @@ $gg_hub = ntn_get_hub_videogame_entity( 9141 );
 assert_test(
 	'God of War Ragnarök' === ( $gg_hub['name'] ?? '' ) && 0 === strpos( ntn_get_hub_auto_summary( 9141 ), 'God of War Ragnarök è un videogioco' ),
 	'81.11: The Hub VideoGame name and its automatic text show real accented letters even when the saved name has doubled entities'
+);
+
+// 81.12: con iubenda i codici numerici dentro i JSON-LD tornano lettere vere, il resto della pagina non cambia (v4.15.4)
+$ib_page = '<html><head><title>Pok&amp;eacute;mon</title><meta property="og:title" content="Pok&amp;#233;mon">'
+	. '<script type="application/ld+json">{"name":"Pok&amp;#233;mon Scarlatto","headline":"non c&amp;#8217;&amp;#232; fine","a":"Tom &amp;amp; Jerry","q":"dice &amp;#34;ciao&amp;#34;","x":"&amp;#x1F3AE;"}</script>'
+	. '<script>var a = "Pok&amp;#233;mon";</script><p>c&amp;#233;</p></html>';
+$ib_out = ntn_core_restore_jsonld_entities( $ib_page );
+$ib_json = '';
+if ( preg_match( '#<script type="application/ld\+json">(.*?)</script>#s', $ib_out, $ib_m ) ) {
+	$ib_json = $ib_m[1];
+}
+assert_test(
+	'' !== $ib_json && null !== json_decode( $ib_json, true ) &&
+	false !== strpos( $ib_json, '"name":"Pokémon Scarlatto"' ) && false !== strpos( $ib_json, 'non c’è fine' ) && false !== strpos( $ib_json, '🎮' ) && false !== strpos( $ib_json, 'Tom &amp; Jerry' ) && false !== strpos( $ib_json, '&#34;ciao&#34;' ) &&
+	false !== strpos( $ib_out, '<title>Pok&amp;eacute;mon</title>' ) && false !== strpos( $ib_out, 'var a = "Pok&amp;#233;mon";' ) && false !== strpos( $ib_out, '<p>c&amp;#233;</p>' ) &&
+	'plain' === ntn_core_restore_jsonld_entities( 'plain' ) && array( 1 ) === ntn_core_restore_jsonld_entities( array( 1 ) ) &&
+	has_filter( 'iubenda_final_output', 'ntn_core_restore_jsonld_entities' ),
+	'81.12: With iubenda, numeric codes inside JSON-LD become real letters (ASCII codes untouched so the JSON stays valid) while the rest of the page is not changed'
 );
 
 unset( $mock_postmeta[9111]['rating'], $mock_postmeta[9112]['rating'] );
