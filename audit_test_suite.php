@@ -1650,24 +1650,24 @@ echo "\n--- 24. SEMVER SIMULTANEOUS 4-HEADER SYNCHRONIZATION ---\n";
 $parent_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $parent_css, $m_parent );
 $parent_ver = isset( $m_parent[1] ) ? trim( $m_parent[1] ) : '';
-assert_test( $parent_ver === '4.15.1', "24.1: Parent Theme style.css declares Version: 4.15.1(found: {$parent_ver})" );
+assert_test( $parent_ver === '4.15.2', "24.1: Parent Theme style.css declares Version: 4.15.2(found: {$parent_ver})" );
 
 $child_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $child_css, $m_child );
 $child_ver = isset( $m_child[1] ) ? trim( $m_child[1] ) : '';
-assert_test( $child_ver === '4.15.1', "24.2: Child Theme style.css declares Version: 4.15.1(found: {$child_ver})" );
+assert_test( $child_ver === '4.15.2', "24.2: Child Theme style.css declares Version: 4.15.2(found: {$child_ver})" );
 
 $core_php = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' );
 preg_match( '/\*\s*Version:\s*([0-9\.]+)/', $core_php, $m_core_hdr );
 $core_hdr_ver = isset( $m_core_hdr[1] ) ? trim( $m_core_hdr[1] ) : '';
-assert_test( $core_hdr_ver === '4.15.1', "24.3: Core Plugin header declares Version: 4.15.1(found: {$core_hdr_ver})" );
+assert_test( $core_hdr_ver === '4.15.2', "24.3: Core Plugin header declares Version: 4.15.2(found: {$core_hdr_ver})" );
 
 preg_match( "/define\(\s*'NTN_JOURNAL_CORE_VERSION',\s*'([^']+)'\s*\);/", $core_php, $m_core_const );
 $core_const_ver = isset( $m_core_const[1] ) ? trim( $m_core_const[1] ) : '';
-assert_test( $core_const_ver === '4.15.1', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.15.1(found: {$core_const_ver})" );
+assert_test( $core_const_ver === '4.15.2', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.15.2(found: {$core_const_ver})" );
 
 assert_test(
-	$parent_ver === '4.15.1' && $child_ver === '4.15.1' && $core_hdr_ver === '4.15.1' && $core_const_ver === '4.15.1',
+	$parent_ver === '4.15.2' && $child_ver === '4.15.2' && $core_hdr_ver === '4.15.2' && $core_const_ver === '4.15.2',
 	'24.5: All 4 version headers are 100% synchronized and atomic according to Rule 2 of GEMINI.md'
 );
 
@@ -1896,7 +1896,7 @@ $parent_style_ver = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( AB
 $child_style_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' ), $m2 ) ? $m2[1] : '';
 $core_plugin_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m3 ) ? $m3[1] : '';
 $core_const_ver   = preg_match( '/define\(\s*[\'"]NTN_JOURNAL_CORE_VERSION[\'"]\s*,\s*[\'"]([0-9\.]+)[\'"]\s*\)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m4 ) ? $m4[1] : '';
-assert_test( $parent_style_ver === '4.15.1' && $child_style_ver === '4.15.1' && $core_plugin_ver === '4.15.1' && $core_const_ver === '4.15.1', '29.1: All 4 version headers are synchronized to 4.15.1' );
+assert_test( $parent_style_ver === '4.15.2' && $child_style_ver === '4.15.2' && $core_plugin_ver === '4.15.2' && $core_const_ver === '4.15.2', '29.1: All 4 version headers are synchronized to 4.15.2' );
 
 // 29.2: single.php sequence is Google Feed -> Social CTA -> Bottom Related Posts
 $single_php = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/single.php' );
@@ -5493,6 +5493,35 @@ assert_test(
 	! isset( $gg_out[0]['itemReviewed'] ) && ! isset( $gg_out[0]['reviewRating'] ) && ! in_array( 'Review', (array) $gg_out[0]['@type'], true ) && 3 === count( $gg_out[0]['about'] ?? array() ),
 	'81.8: A rated article with several games and no reviewed game is a plain article about all of them: no Review, no rating, no random reviewed item'
 );
+
+// 81.9: "Gioco recensito" con il nome del gioco lungo e il nome corto (serie) tra i tag: vince il gioco lungo e il voto resta
+$mg_post( 9124, 'post', 'publish', 'gg-ac-rev', '2026-01-01', array( $gg_ac, $gg_bf ), array( 'recensioni' ) );
+$mock_posts[9124]->post_title = 'Recensione di un ritorno al mare';
+$mock_postmeta[9124]['reviewed_item'] = "Assassin's Creed Black Flag Resynced";
+$mock_postmeta[9124]['rating'] = 4;
+$GLOBALS['queried_object'] = $mock_posts[9124];
+$GLOBALS['post']           = $mock_posts[9124];
+$gg_pick  = ntn_core_schema_pick_games( 9124 );
+$gg_out   = ntn_tsf_add_videogame_schema( array( array( '@type' => array( 'WebPage', 'NewsArticle' ), '@id' => 'https://example.com/#webpage' ) ), array() );
+$gg_games = array_values( array_filter( $gg_out, static function ( $e ) { return isset( $e['@type'] ) && 'VideoGame' === $e['@type']; } ) );
+assert_test(
+	1 === count( $gg_pick ) && 'Black Flag Resynced' === $gg_pick[0]['title'] && 1 === count( $gg_games ) && 4 === ( $gg_out[0]['reviewRating']['ratingValue'] ?? 0 ) && ( $gg_out[0]['itemReviewed']['@id'] ?? '' ) === ( $gg_games[0]['@id'] ?? 'x' ),
+	'81.9: The reviewed-game field naming the long game wins over the short series tag, so the review keeps its rating and itemReviewed'
+);
+
+// 81.10: nomi scritti due volte nel database ("Pok&amp;#233;mon") escono con le lettere vere
+$gg_pk = $mg_term( 9127, 'Pokémon Violetto', 'pokemon-violetto-gg', array( '_ntn_igdb_game_id' => 9127, '_ntn_game_title' => 'Pok&amp;#233;mon Violetto', '_ntn_game_developer' => 'Game Freak &amp; Co' ) );
+$mg_post( 9140, 'post', 'publish', 'gg-pk', '2026-01-01', array( $gg_pk ) );
+$mock_posts[9140]->post_title = 'Pokemon Violetto';
+$GLOBALS['queried_object'] = $mock_posts[9140];
+$GLOBALS['post']           = $mock_posts[9140];
+$gg_out   = ntn_tsf_add_videogame_schema( array( array( '@type' => array( 'WebPage', 'NewsArticle' ), '@id' => 'https://example.com/#webpage' ) ), array() );
+$gg_games = array_values( array_filter( $gg_out, static function ( $e ) { return isset( $e['@type'] ) && 'VideoGame' === $e['@type']; } ) );
+assert_test(
+	'Pokémon Violetto' === ( $gg_games[0]['name'] ?? '' ) && 'Game Freak & Co' === ( $gg_games[0]['author']['name'] ?? '' ) && 'Pokémon Violetto' === ntn_core_schema_plain_text( '<b>Pok&amp;#233;mon Violetto</b>' ),
+	'81.10: Names stored with doubled HTML entities reach Google as real characters'
+);
+unset( $mock_postmeta[9124]['rating'] );
 
 unset( $mock_postmeta[9111]['rating'], $mock_postmeta[9112]['rating'] );
 $GLOBALS['queried_object'] = null;
