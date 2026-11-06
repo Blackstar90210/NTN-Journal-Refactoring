@@ -124,7 +124,7 @@ function ntn_hub_names( $value ): array {
 	$names = array();
 	foreach ( $list as $item ) {
 		if ( is_scalar( $item ) ) {
-			$name = trim( wp_strip_all_tags( wp_specialchars_decode( (string) $item, ENT_QUOTES ) ) );
+			$name = trim( ntn_core_schema_plain_text( (string) $item ) );
 			if ( '' !== $name ) {
 				$names[] = $name;
 			}
@@ -171,7 +171,7 @@ function ntn_hub_seo_info( int $post_id ): array {
 function ntn_get_hub_auto_summary( int $post_id ): string {
 	$info  = ntn_hub_seo_info( $post_id );
 	$title = ! empty( $info['title'] ) && is_scalar( $info['title'] ) ? (string) $info['title'] : get_the_title( $post_id );
-	$title = trim( wp_strip_all_tags( wp_specialchars_decode( $title, ENT_QUOTES ) ) );
+	$title = trim( ntn_core_schema_plain_text( $title ) );
 	if ( '' === $title ) {
 		return '';
 	}
@@ -216,7 +216,7 @@ function ntn_get_hub_videogame_entity( int $post_id ): array {
 	$entity = array(
 		'@type'               => 'VideoGame',
 		'@id'                 => get_permalink( $post_id ) . '#videogame',
-		'name'                => trim( wp_strip_all_tags( wp_specialchars_decode( $title, ENT_QUOTES ) ) ),
+		'name'                => trim( ntn_core_schema_plain_text( $title ) ),
 		'url'                 => get_permalink( $post_id ),
 		'applicationCategory' => 'Game',
 	);
@@ -420,7 +420,7 @@ function ntn_hub_has_review( int $post_id ): bool {
  * @return string
  */
 function ntn_get_hub_seo_title( int $post_id ): string {
-	$title = trim( wp_strip_all_tags( wp_specialchars_decode( get_the_title( $post_id ), ENT_QUOTES ) ) );
+	$title = trim( ntn_core_schema_plain_text( get_the_title( $post_id ) ) );
 	if ( '' === $title ) {
 		return '';
 	}
@@ -538,7 +538,7 @@ function ntn_hub_studio_games( string $studio, int $limit = 3 ): array {
 			// Lo studio deve essere uno degli sviluppatori, non solo una parte del nome (es. "Clouds" in "3DClouds")
 			foreach ( ntn_hub_names( get_term_meta( $tag->term_id, '_ntn_game_developer', true ) ) as $dev ) {
 				if ( strtolower( preg_replace( '/[^a-z0-9]/i', '', $dev ) ) === $key ) {
-					$games[] = trim( wp_strip_all_tags( wp_specialchars_decode( $tag->name, ENT_QUOTES ) ) );
+					$games[] = trim( ntn_core_schema_plain_text( $tag->name ) );
 					break;
 				}
 			}
@@ -559,7 +559,7 @@ function ntn_hub_studio_games( string $studio, int $limit = 3 ): array {
  * @return string
  */
 function ntn_hub_tag_seo_description( WP_Term $tag ): string {
-	$name = trim( wp_strip_all_tags( wp_specialchars_decode( $tag->name, ENT_QUOTES ) ) );
+	$name = trim( ntn_core_schema_plain_text( $tag->name ) );
 	$site = trim( wp_strip_all_tags( (string) get_bloginfo( 'name' ) ) );
 	$of   = '' !== $site ? ' di ' . $site : '';
 	if ( '' === $name ) {

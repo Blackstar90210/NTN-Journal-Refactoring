@@ -143,7 +143,7 @@ function ntn_core_get_studio_hub_data( $tag = null ): ?array {
 		}
 		$url     = $hub_id ? get_permalink( $hub_id ) : get_term_link( $game_tag );
 		$games[] = array(
-			'title'     => trim( wp_strip_all_tags( wp_specialchars_decode( $game_tag->name, ENT_QUOTES ) ) ),
+			'title'     => trim( ntn_core_schema_plain_text( $game_tag->name ) ),
 			'url'       => is_string( $url ) ? $url : '',
 			'hub_id'    => $hub_id,
 			'cover'     => $cover,
@@ -167,7 +167,7 @@ function ntn_core_get_studio_hub_data( $tag = null ): ?array {
 	} );
 
 	$latest = get_posts( array( 'tag_id' => $tag->term_id, 'post_status' => 'publish', 'numberposts' => 1, 'fields' => 'ids' ) );
-	$name   = trim( wp_strip_all_tags( wp_specialchars_decode( $tag->name, ENT_QUOTES ) ) );
+	$name   = trim( ntn_core_schema_plain_text( $tag->name ) );
 	$data   = array(
 		'name'        => $name,
 		'url'         => (string) get_term_link( $tag ),
