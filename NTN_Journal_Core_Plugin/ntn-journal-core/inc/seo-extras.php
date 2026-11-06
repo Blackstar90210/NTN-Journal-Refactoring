@@ -989,25 +989,11 @@ function ntn_tsf_add_videogame_schema( $data, $context = array() ) {
 			}
 		}
 
-		// Platforms: Combine IGDB platforms with Post Categories
-		$platforms = $view_model['platforms'];
-		$categories = get_the_category( $post_id );
-		if ( ! empty( $categories ) ) {
-			$excluded_cats = array( 'recensioni', 'speciali', 'notizie', 'editoriali', 'videogame', 'console', 'microsoft', 'sony' );
-			foreach ( $categories as $cat ) {
-				if ( ! in_array( strtolower( $cat->slug ), $excluded_cats ) ) {
-					$platform_name = wp_strip_all_tags( $cat->name );
-					if ( strtolower( $platform_name ) === 'pc gaming' || strtolower( $platform_name ) === 'pc' ) {
-						$platform_name = 'PC';
-					}
-					$platforms[] = $platform_name;
-				}
-			}
-		}
+		// Platforms (v4.14.3): solo le categorie piattaforma dell'articolo, scelte dalla redazione. Niente IGDB
+		// e niente riserva "PC, Console": senza piattaforme il campo non c'è.
+		$platforms = ntn_core_post_platform_names( $post_id );
 		if ( ! empty( $platforms ) ) {
-			$videogame_entity['gamePlatform'] = array_values( array_unique( $platforms ) );
-		} else {
-			$videogame_entity['gamePlatform'] = array( 'PC', 'Console' );
+			$videogame_entity['gamePlatform'] = $platforms;
 		}
 
 		// Trailer
@@ -1034,25 +1020,10 @@ function ntn_tsf_add_videogame_schema( $data, $context = array() ) {
 			}
 		}
 	} else {
-		// Fallback for Platforms if View Model is not available
-		$platforms = array();
-		$categories = get_the_category( $post_id );
-		if ( ! empty( $categories ) ) {
-			$excluded_cats = array( 'recensioni', 'speciali', 'notizie', 'editoriali', 'videogame', 'console', 'microsoft', 'sony' );
-			foreach ( $categories as $cat ) {
-				if ( ! in_array( strtolower( $cat->slug ), $excluded_cats ) ) {
-					$platform_name = wp_strip_all_tags( $cat->name );
-					if ( strtolower( $platform_name ) === 'pc gaming' || strtolower( $platform_name ) === 'pc' ) {
-						$platform_name = 'PC';
-					}
-					$platforms[] = $platform_name;
-				}
-			}
-		}
+		// Senza view model: stesse piattaforme, solo dalle categorie (v4.14.3)
+		$platforms = ntn_core_post_platform_names( $post_id );
 		if ( ! empty( $platforms ) ) {
-			$videogame_entity['gamePlatform'] = array_values( array_unique( $platforms ) );
-		} else {
-			$videogame_entity['gamePlatform'] = array( 'PC', 'Console' );
+			$videogame_entity['gamePlatform'] = $platforms;
 		}
 	}
 

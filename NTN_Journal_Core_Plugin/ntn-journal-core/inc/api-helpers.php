@@ -193,6 +193,57 @@ function ntn_core_fill_view_model( array $data, $info ) {
 }
 
 /**
+ * Piattaforme di un articolo, prese solo dalle sue categorie (v4.14.3).
+ *
+ * Una categoria è una piattaforma se non ha sottocategorie e sta dentro (o è) una Hub di tipo "Piattaforme"
+ * (Console, Mobile, PC Gaming...). Marchi come Nintendo, Sony e Microsoft, e categorie come Indie, Guide,
+ * Hardware, Notizie o Recensioni, non sono piattaforme. IGDB non entra in questo elenco: le piattaforme
+ * dei dati strutturati sono quelle scelte dalla redazione.
+ *
+ * @param int $post_id Articolo.
+ * @return array Nomi delle piattaforme, senza doppioni. Vuoto se l'articolo non ne ha.
+ */
+function ntn_core_post_platform_names( $post_id ) {
+	if ( ! function_exists( 'ntn_core_category_hub_meta' ) ) {
+		return array();
+	}
+	$categories = get_the_category( (int) $post_id );
+	if ( empty( $categories ) || is_wp_error( $categories ) ) {
+		return array();
+	}
+	$is_platform_hub = static function ( $term_id ) {
+		return ntn_core_category_hub_meta( (int) $term_id, 'enabled' ) && 'console' === ntn_core_category_hub_meta( (int) $term_id, 'type' );
+	};
+	$names = array();
+	foreach ( $categories as $cat ) {
+		$children = get_term_children( (int) $cat->term_id, 'category' );
+		if ( ! empty( $children ) && ! is_wp_error( $children ) ) {
+			continue; // un marchio o una Hub con sottocategorie: lo sono le sottocategorie
+		}
+		$inside = $is_platform_hub( $cat->term_id );
+		if ( ! $inside ) {
+			foreach ( get_ancestors( (int) $cat->term_id, 'category', 'taxonomy' ) as $ancestor_id ) {
+				if ( $is_platform_hub( $ancestor_id ) ) {
+					$inside = true;
+					break;
+				}
+			}
+		}
+		if ( ! $inside ) {
+			continue;
+		}
+		$name = trim( wp_strip_all_tags( wp_specialchars_decode( $cat->name, ENT_QUOTES ) ) );
+		if ( 'pc gaming' === strtolower( $name ) ) {
+			$name = 'PC';
+		}
+		if ( '' !== $name ) {
+			$names[] = $name;
+		}
+	}
+	return ntn_core_schema_platform_names( $names );
+}
+
+/**
  * Nomi delle piattaforme IGDB come le categorie del sito (v4.14.0).
  *
  * I dati strutturati uniscono le piattaforme del gioco a quelle prese dalle categorie, dove il PC si
