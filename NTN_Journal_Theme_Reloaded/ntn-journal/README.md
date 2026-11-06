@@ -4,7 +4,7 @@
 
 *Read this document in: [English](#english) | [Italiano](#italiano)*
 
-**Version:** 4.10.1 · **Authors:** Luca Maiolini & Divisione_WP
+**Version:** 4.14.0 · **Authors:** Luca Maiolini & Divisione_WP
 
 ---
 
@@ -49,6 +49,8 @@ The theme displays the data, the plugin manages it. The theme keeps working if t
 1. Upload and activate the plugin `ntn-journal-core-X.Y.Z.zip` from **Plugins > Add New**.
 2. Upload the parent theme `ntn-journal-parent-X.Y.Z.zip` from **Appearance > Themes > Add New**. Do not activate it.
 3. Upload the child theme `ntn-journal-child-reloaded-X.Y.Z.zip` and **activate NTN Journal Reloaded**. It must always stay active.
+
+To update, upload the plugin first, then the parent theme, then the child theme. From 4.11.0 the game data functions live in the plugin; with an older plugin, game pages show no game data until the plugin is updated.
 
 ### 🛠️ Configuration
 *   **Appearance > Customize**: top bar text, logo, site name, recommended and related posts, watermark, Home Hub band, share buttons, Google box, social profiles.
@@ -105,6 +107,8 @@ Il tema mostra i dati, il plugin li gestisce. Il tema funziona anche con il plug
 1. Carica e attiva il plugin `ntn-journal-core-X.Y.Z.zip` da **Plugin > Aggiungi nuovo**.
 2. Carica il tema parent `ntn-journal-parent-X.Y.Z.zip` da **Aspetto > Temi > Aggiungi nuovo**. Non attivarlo.
 3. Carica il tema child `ntn-journal-child-reloaded-X.Y.Z.zip` e **attiva NTN Journal Reloaded**. Deve restare sempre attivo.
+
+Per aggiornare carica prima il plugin, poi il tema parent, poi il tema child. Dalla 4.11.0 le funzioni dei dati dei giochi sono nel plugin: con un plugin più vecchio le pagine dei giochi restano senza dati finché non aggiorni il plugin.
 
 ### 🛠️ Configurazione
 *   **Aspetto > Personalizza**: testo della barra in alto, logo, nome del sito, articoli consigliati e correlati, filigrana, fascia Hub della Home, condivisione, box Google, profili social.

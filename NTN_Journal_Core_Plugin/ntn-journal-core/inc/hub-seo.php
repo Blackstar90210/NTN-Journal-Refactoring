@@ -154,7 +154,7 @@ function ntn_hub_join_names( array $names ): string {
  * @return array<string, mixed>
  */
 function ntn_hub_seo_info( int $post_id ): array {
-	$info = function_exists( 'ntn_get_hub_igdb_info' ) ? ntn_get_hub_igdb_info( $post_id ) : array();
+	$info = ntn_get_hub_igdb_info( $post_id );
 	return is_array( $info ) ? $info : array();
 }
 
@@ -193,7 +193,7 @@ function ntn_get_hub_auto_summary( int $post_id ): string {
 		$sentence .= ', ' . $release;
 	}
 
-	$platforms = array_slice( ntn_hub_names( $info['platforms'] ?? array() ), 0, 4 );
+	$platforms = array_slice( ntn_core_schema_platform_names( ntn_hub_names( $info['platforms'] ?? array() ) ), 0, 4 ); // v4.14.0: solo il nome del PC cambia, la frase resta quella di prima
 	if ( $platforms ) {
 		$sentence .= ' su ' . ntn_hub_join_names( $platforms );
 	}
@@ -246,7 +246,7 @@ function ntn_get_hub_videogame_entity( int $post_id ): array {
 	if ( $genres ) {
 		$entity['genre'] = $genres;
 	}
-	$platforms = ntn_hub_names( $info['platforms'] ?? array() );
+	$platforms = ntn_core_schema_platform_names( ntn_hub_names( $info['platforms'] ?? array() ) ); // v4.14.0: "PC (Microsoft Windows)" diventa "PC", come nelle recensioni
 	if ( $platforms ) {
 		$entity['gamePlatform'] = $platforms;
 	}

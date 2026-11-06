@@ -259,9 +259,9 @@ function ntn_journal_review_article_schema() {
 				if ( ! empty( $view_model['genres'] ) ) {
 					$ntn_schema_data['itemReviewed']['genre'] = array_map( 'ntn_clean_json_ld_text', $view_model['genres'] );
 				}
-				$raw_release = get_post_meta( get_the_ID(), '_ntn_game_release', true );
+				$raw_release = $view_model['release_raw']; // v4.14.0: dati dell'articolo o, se mancano, del gioco
 				if ( $raw_release ) {
-					$ntn_schema_data['itemReviewed']['datePublished'] = function_exists( 'ntn_release_schema_date' ) ? ntn_release_schema_date( $raw_release, (string) get_post_meta( get_the_ID(), '_ntn_game_release_precision', true ) ) : $raw_release; // v3.19.2: solo le parti note
+					$ntn_schema_data['itemReviewed']['datePublished'] = function_exists( 'ntn_release_schema_date' ) ? ntn_release_schema_date( $raw_release, (string) $view_model['release_precision'] ) : $raw_release; // v3.19.2: solo le parti note
 				}
 				if ( ! empty( $view_model['platforms'] ) ) {
 					$combined_platforms = array_values( array_unique( array_merge( $game_platform, $view_model['platforms'] ) ) );
@@ -431,7 +431,7 @@ function ntn_journal_review_article_schema() {
 			}
 
 			// Integrazione VideoGame per l'Articolo nativo
-			$hub_info = function_exists( 'ntn_get_hub_igdb_info' ) ? ntn_get_hub_igdb_info( get_the_ID() ) : array();
+			$hub_info = ntn_get_hub_igdb_info( get_the_ID() );
 			if ( ! is_array( $hub_info ) ) {
 				$hub_info = array();
 			}
@@ -445,7 +445,7 @@ function ntn_journal_review_article_schema() {
 						if ( ! empty( $tag_game_title ) ) {
 							$game_title = $tag_game_title;
 							$found_tag = $tag;
-							if ( empty( $hub_info ) && function_exists( 'ntn_get_hub_igdb_info' ) ) {
+							if ( empty( $hub_info ) ) {
 								$hub_info = ntn_get_hub_igdb_info( $tag );
 								if ( ! is_array( $hub_info ) ) {
 									$hub_info = array();
@@ -504,9 +504,10 @@ function ntn_journal_review_article_schema() {
 						if ( ! empty( $view_model['genres'] ) ) {
 							$game_entity['genre'] = array_map( 'ntn_clean_json_ld_text', $view_model['genres'] );
 						}
-						$raw_release = get_post_meta( get_the_ID(), '_ntn_game_release', true );
+						$raw_release = $view_model['release_raw'] ? $view_model['release_raw'] : get_post_meta( get_the_ID(), '_ntn_game_release', true ); // v4.14.0
+						$raw_precision = $view_model['release_raw'] ? $view_model['release_precision'] : get_post_meta( get_the_ID(), '_ntn_game_release_precision', true );
 						if ( $raw_release ) {
-							$game_entity['datePublished'] = function_exists( 'ntn_release_schema_date' ) ? ntn_release_schema_date( $raw_release, (string) get_post_meta( get_the_ID(), '_ntn_game_release_precision', true ) ) : $raw_release; // v3.19.2: solo le parti note
+							$game_entity['datePublished'] = function_exists( 'ntn_release_schema_date' ) ? ntn_release_schema_date( $raw_release, (string) $raw_precision ) : $raw_release; // v3.19.2: solo le parti note
 						}
 						if ( ! empty( $view_model['platforms'] ) ) {
 							$combined_platforms = array_values( array_unique( array_merge( $platforms, $view_model['platforms'] ) ) );

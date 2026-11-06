@@ -97,6 +97,7 @@ Rispettare scrupolosamente il principio di **Separation of Concerns** di WordPre
 
 - **Divieto:** NON registrare CPT, Tassonomie, Endpoints API o logica di business all'interno del tema (`functions.php`).
 - **Obbligo:** Tutta la logica di dati e backend appartiene unicamente a `ntn-journal-core`. Il tema si limita a consumare e visualizzare i dati.
+- **Dati dei giochi (dalla 4.11.0):** le funzioni che leggono i dati (voto, categoria principale, IGDB e, nelle versioni successive, giochi dell'articolo e contenuti dell'Hub) stanno in `ntn-journal-core/inc/game-data.php`, ognuna dentro `if ( ! function_exists() )`. Il tema tiene solo riserve vuote con lo stesso nome in `ntn-journal/inc/plugin-fallbacks.php`. Ordine di aggiornamento sul sito: plugin, poi tema parent, poi child.
 
 ---
 

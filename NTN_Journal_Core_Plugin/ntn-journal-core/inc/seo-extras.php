@@ -54,7 +54,7 @@ function ntn_journal_breadcrumb() {
 		global $post;
 		$queried = function_exists( 'get_queried_object' ) ? get_queried_object() : null;
 		$post_id = ( $post instanceof WP_Post ) ? $post->ID : ( ( $queried instanceof WP_Post ) ? $queried->ID : get_the_ID() );
-		$primary_category = function_exists( 'ntn_get_primary_category' ) ? ntn_get_primary_category( $post_id ) : null;
+		$primary_category = ntn_get_primary_category( $post_id );
 		$cat_name = $primary_category ? $primary_category->name : 'Article';
 		$cat_url = $primary_category ? get_category_link( $primary_category->term_id ) : '#';
 		if ( is_wp_error( $cat_url ) || ! is_string( $cat_url ) ) {
@@ -462,11 +462,9 @@ if ( ! function_exists( 'ntn_get_social_preview_image' ) ) {
 		}
 		// 1. Caso Array arg (es. array('id' => 201, 'taxonomy' => 'post_tag') o array('term_id' => 201))
 		if ( is_array( $post_or_term ) ) {
-			if ( function_exists( 'ntn_get_hub_igdb_info' ) ) {
-				$hub_info = ntn_get_hub_igdb_info( $post_or_term );
-				if ( ! empty( $hub_info['cover'] ) ) {
-					$image_url = $hub_info['cover'];
-				}
+			$hub_info = ntn_get_hub_igdb_info( $post_or_term );
+			if ( ! empty( $hub_info['cover'] ) ) {
+				$image_url = $hub_info['cover'];
 			}
 			if ( empty( $image_url ) ) {
 				$id = isset( $post_or_term['id'] ) ? $post_or_term['id'] : ( isset( $post_or_term['term_id'] ) ? $post_or_term['term_id'] : 0 );
@@ -487,11 +485,9 @@ if ( ! function_exists( 'ntn_get_social_preview_image' ) ) {
 
 			// B. Cover IGDB per Hub Page o post con metadati di gioco
 			if ( empty( $image_url ) ) {
-				if ( function_exists( 'ntn_get_hub_igdb_info' ) ) {
-					$hub_info = ntn_get_hub_igdb_info( $post_id );
-					if ( ! empty( $hub_info['cover'] ) ) {
-						$image_url = $hub_info['cover'];
-					}
+				$hub_info = ntn_get_hub_igdb_info( $post_id );
+				if ( ! empty( $hub_info['cover'] ) ) {
+					$image_url = $hub_info['cover'];
 				}
 				if ( empty( $image_url ) ) {
 					$game_cover = get_post_meta( $post_id, '_ntn_game_cover', true );
@@ -499,7 +495,7 @@ if ( ! function_exists( 'ntn_get_social_preview_image' ) ) {
 						$image_url = $game_cover;
 					}
 				}
-				if ( empty( $image_url ) && function_exists( 'ntn_get_igdb_data' ) ) {
+				if ( empty( $image_url ) ) {
 					$game_cover = ntn_get_igdb_data( $post_id, '_ntn_game_cover' );
 					if ( ! empty( $game_cover ) ) {
 						$image_url = $game_cover;
@@ -511,11 +507,9 @@ if ( ! function_exists( 'ntn_get_social_preview_image' ) ) {
 		elseif ( empty( $image_url ) && ( $post_or_term instanceof WP_Term || ( is_numeric( $post_or_term ) && get_term( $post_or_term ) ) ) ) {
 			$term = $post_or_term instanceof WP_Term ? $post_or_term : get_term( $post_or_term );
 			if ( $term && ! is_wp_error( $term ) ) {
-				if ( function_exists( 'ntn_get_hub_igdb_info' ) ) {
-					$hub_info = ntn_get_hub_igdb_info( $term );
-					if ( ! empty( $hub_info['cover'] ) ) {
-						$image_url = $hub_info['cover'];
-					}
+				$hub_info = ntn_get_hub_igdb_info( $term );
+				if ( ! empty( $hub_info['cover'] ) ) {
+					$image_url = $hub_info['cover'];
 				}
 				if ( empty( $image_url ) ) {
 					$term_cover = get_term_meta( $term->term_id, '_ntn_game_cover', true );
@@ -788,7 +782,7 @@ function ntn_journal_open_graph_tags() {
 		if ( ! empty( $term->description ) ) {
 			$ntn_og_description = wp_strip_all_tags( $term->description );
 		} else {
-			$hub_info = function_exists( 'ntn_get_hub_igdb_info' ) ? ntn_get_hub_igdb_info( $term ) : array();
+			$hub_info = ntn_get_hub_igdb_info( $term );
 			if ( ! empty( $hub_info['title'] ) ) {
 				$ntn_og_description = "Tutti gli articoli, recensioni, anteprime e notizie su {$hub_info['title']}.";
 			} else {
@@ -908,15 +902,13 @@ function ntn_tsf_add_videogame_schema( $data, $context = array() ) {
 	$game_image = '';
 	$game_developer = '';
 
-	if ( function_exists( 'ntn_get_hub_igdb_info' ) ) {
-		$hub_info = ntn_get_hub_igdb_info( $post_id );
-		if ( is_array( $hub_info ) && ! empty( $hub_info['title'] ) ) {
-			$game_title = $hub_info['title'];
-			$game_url = ! empty( $hub_info['url'] ) ? $hub_info['url'] : '';
-			$game_image = ! empty( $hub_info['cover'] ) ? $hub_info['cover'] : '';
-			if ( ! empty( $hub_info['developer'] ) ) {
-				$game_developer = is_array( $hub_info['developer'] ) ? implode( ', ', $hub_info['developer'] ) : $hub_info['developer'];
-			}
+	$hub_info = ntn_get_hub_igdb_info( $post_id );
+	if ( is_array( $hub_info ) && ! empty( $hub_info['title'] ) ) {
+		$game_title = $hub_info['title'];
+		$game_url = ! empty( $hub_info['url'] ) ? $hub_info['url'] : '';
+		$game_image = ! empty( $hub_info['cover'] ) ? $hub_info['cover'] : '';
+		if ( ! empty( $hub_info['developer'] ) ) {
+			$game_developer = is_array( $hub_info['developer'] ) ? implode( ', ', $hub_info['developer'] ) : $hub_info['developer'];
 		}
 	}
 
@@ -990,9 +982,10 @@ function ntn_tsf_add_videogame_schema( $data, $context = array() ) {
 		// Release Date
 		if ( ! empty( $view_model['release'] ) ) {
 			// Try to find raw release date from meta if the view model returned localized string
-			$raw_release = get_post_meta( $post_id, '_ntn_game_release', true );
+			$raw_release   = $view_model['release_raw'] ? $view_model['release_raw'] : get_post_meta( $post_id, '_ntn_game_release', true ); // v4.14.0
+			$raw_precision = $view_model['release_raw'] ? $view_model['release_precision'] : get_post_meta( $post_id, '_ntn_game_release_precision', true );
 			if ( $raw_release ) {
-				$videogame_entity['datePublished'] = function_exists( 'ntn_release_schema_date' ) ? ntn_release_schema_date( $raw_release, (string) get_post_meta( $post_id, '_ntn_game_release_precision', true ) ) : $raw_release; // v3.19.2: solo le parti note
+				$videogame_entity['datePublished'] = function_exists( 'ntn_release_schema_date' ) ? ntn_release_schema_date( $raw_release, (string) $raw_precision ) : $raw_release; // v3.19.2: solo le parti note
 			}
 		}
 

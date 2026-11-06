@@ -45,6 +45,10 @@ $rating_label = ( $final_rating && function_exists( 'get_rating_label' ) ) ? get
 $render_body = static function ( $game, $label, $show_verdict, $lazy = false ) use ( $final_rating, $rating_label ) {
 	$display_title = $game['title'] ? $game['title'] : get_the_title();
 	$platforms     = $game['platforms'];
+	// v4.14.0: "PC (Microsoft Windows)" si legge "PC", come nelle recensioni e negli Hub
+	if ( $platforms && function_exists( 'ntn_core_schema_platform_names' ) ) {
+		$platforms = ntn_core_schema_platform_names( array_filter( is_array( $platforms ) ? $platforms : explode( ',', (string) $platforms ), 'is_scalar' ) );
+	}
 	$release       = $game['release'];
 
 	// Data di uscita: solo le parti note (v3.21.0)

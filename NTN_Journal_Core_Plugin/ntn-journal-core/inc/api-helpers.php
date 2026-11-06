@@ -22,6 +22,8 @@ function ntn_get_game_view_model( $object ) {
 		'title'       => '',
 		'cover'       => '',
 		'release'     => '',
+		'release_raw' => '', // v4.14.0: data come salvata (AAAA-MM-GG), per datePublished
+		'release_precision' => '',
 		'developer'   => array(),
 		'publisher'   => array(),
 		'platforms'   => array(),
@@ -62,6 +64,8 @@ function ntn_get_game_view_model( $object ) {
 
 	// Release
 	$release_raw = $get_meta( '_ntn_game_release' );
+	$data['release_raw']       = $release_raw;
+	$data['release_precision'] = $get_meta( '_ntn_game_release_precision' );
 	if ( $release_raw ) {
 		$timestamp = strtotime( $release_raw );
 		if ( $timestamp ) {
@@ -75,11 +79,15 @@ function ntn_get_game_view_model( $object ) {
 	$fields_to_array = array( 'developer', 'publisher', 'platforms', 'genres', 'engine', 'franchise' );
 	foreach ( $fields_to_array as $field ) {
 		$raw = $get_meta( '_ntn_game_' . $field );
+		if ( $raw && 'genres' === $field && function_exists( 'ntn_translate_igdb_genres' ) ) {
+			$raw = ntn_translate_igdb_genres( $raw ); // v4.14.0: in italiano, come nella pagina
+		}
 		if ( $raw ) {
 			$arr = explode( ',', $raw );
 			$data[ $field ] = array_values( array_filter( array_map( 'trim', $arr ) ) );
 		}
 	}
+	$data['platforms'] = ntn_core_schema_platform_names( $data['platforms'] );
 
 	$data['url'] = $get_meta( '_ntn_game_url' );
 
@@ -100,5 +108,110 @@ function ntn_get_game_view_model( $object ) {
 		}
 	}
 
+	// v4.14.0: i campi vuoti si completano con i dati del gioco che mostra la pagina (tag del gioco,
+	// scheda videogioco), così i dati strutturati coincidono con quello che vede il lettore.
+	// Solo i campi della scheda: trailer e screenshot restano quelli scritti sull'oggetto.
+	$source = ntn_core_view_model_source( $is_term ? get_term( $id ) : get_post( $id ) );
+	if ( $source && function_exists( 'ntn_get_hub_igdb_info' ) ) {
+		$data = ntn_core_fill_view_model( $data, ntn_get_hub_igdb_info( $source ) );
+	}
+
 	return $data;
+}
+
+/**
+ * Trova il gioco da cui la pagina prende i dati (v4.14.0).
+ *
+ * Tag del gioco e scheda videogioco sono già il gioco: ntn_get_hub_igdb_info() li collega fra loro.
+ * Per un articolo vale il gioco della scheda nella colonna laterale: quello di cui l'articolo è la
+ * recensione, oppure l'unico gioco dell'articolo. Con più giochi e nessuna recensione, nessuno.
+ *
+ * @param WP_Post|WP_Term|null $object Oggetto di partenza.
+ * @return WP_Post|WP_Term|null
+ */
+function ntn_core_view_model_source( $object ) {
+	if ( $object instanceof WP_Term ) {
+		return $object;
+	}
+	if ( ! ( $object instanceof WP_Post ) ) {
+		return null;
+	}
+	if ( 'videogioco' === $object->post_type ) {
+		return $object;
+	}
+	if ( ! function_exists( 'ntn_get_post_games' ) ) {
+		return null;
+	}
+	$games = ntn_get_post_games( $object->ID );
+	foreach ( $games as $game ) {
+		if ( ! empty( $game['is_current_review'] ) ) {
+			return ( isset( $game['term'] ) && $game['term'] instanceof WP_Term ) ? $game['term'] : null;
+		}
+	}
+	if ( 1 === count( $games ) && isset( $games[0]['term'] ) && $games[0]['term'] instanceof WP_Term ) {
+		return $games[0]['term'];
+	}
+	return null;
+}
+
+/**
+ * Riempie i campi vuoti del view model con i dati di ntn_get_hub_igdb_info() (v4.14.0).
+ * I campi già pieni, letti dall'oggetto stesso, non cambiano. Si completano solo i campi che la scheda
+ * del gioco mostra al lettore (titolo, copertina, uscita, sviluppatore, editore, piattaforme, generi,
+ * motore): trailer e screenshot no, perché nella pagina di un articolo non si vedono.
+ *
+ * @param array $data View model di ntn_get_game_view_model().
+ * @param array $info Dati di ntn_get_hub_igdb_info().
+ * @return array
+ */
+function ntn_core_fill_view_model( array $data, $info ) {
+	if ( empty( $info ) || ! is_array( $info ) ) {
+		return $data;
+	}
+	$to_list = function ( $value ) {
+		return array_values( array_filter( array_map( 'trim', explode( ',', (string) $value ) ) ) );
+	};
+
+	foreach ( array( 'title', 'cover', 'url' ) as $field ) {
+		if ( '' === $data[ $field ] && ! empty( $info[ $field ] ) ) {
+			$data[ $field ] = (string) $info[ $field ];
+		}
+	}
+	if ( '' === $data['release'] && ! empty( $info['release'] ) ) {
+		$timestamp                 = strtotime( $info['release'] );
+		$data['release']           = $timestamp ? wp_date( get_option( 'date_format' ), $timestamp ) : $info['release'];
+		$data['release_raw']       = (string) $info['release'];
+		$data['release_precision'] = isset( $info['release_precision'] ) ? (string) $info['release_precision'] : '';
+	}
+	foreach ( array( 'developer', 'publisher', 'platforms', 'genres', 'engine' ) as $field ) {
+		if ( empty( $data[ $field ] ) && ! empty( $info[ $field ] ) ) {
+			$data[ $field ] = $to_list( $info[ $field ] );
+		}
+	}
+	$data['platforms'] = ntn_core_schema_platform_names( $data['platforms'] );
+	return $data;
+}
+
+/**
+ * Nomi delle piattaforme IGDB come le categorie del sito (v4.14.0).
+ *
+ * I dati strutturati uniscono le piattaforme del gioco a quelle prese dalle categorie, dove il PC si
+ * chiama "PC": senza questo passaggio comparirebbero sia "PC" sia "PC (Microsoft Windows)".
+ *
+ * @param array $platforms Piattaforme.
+ * @return array Piattaforme senza doppioni.
+ */
+function ntn_core_schema_platform_names( array $platforms ) {
+	$names = array(
+		'pc (microsoft windows)' => 'PC',
+		'pc (windows)'           => 'PC',
+		'windows'                => 'PC',
+		'microsoft windows'      => 'PC',
+	);
+	$out = array();
+	foreach ( $platforms as $platform ) {
+		$key   = strtolower( trim( (string) $platform ) );
+		$out[] = isset( $names[ $key ] ) ? $names[ $key ] : $platform;
+	}
+	return array_values( array_unique( $out ) );
 }
