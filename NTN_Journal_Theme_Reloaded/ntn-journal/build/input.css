@@ -1005,7 +1005,9 @@
      ========================================================================== */
   /* Colonna "intelligente" (scelta del CEO): ferma se ci sta nello schermo, altrimenti scorre con la
      pagina fino al suo fondo e poi si ferma; tornando su la segue. La posizione la calcola main.js. */
-  .ntn-art-aside-sticky { display: grid; gap: 28px; }
+  /* v4.14.2: colonna di larghezza fissa. Senza minmax(0, 1fr) la colonna implicita prende la larghezza della
+     scheda del gioco, e un carosello con immagini larghe (screenshot 1280px) allarga tutta la pagina. */
+  .ntn-art-aside-sticky { display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; }
   .ntn-art-aside-sticky.is-smart { position: relative; top: 0; }
 
   /* Pannello a linea sottile con intestazione in Mono (indice, condivisione, Google) */
@@ -1239,7 +1241,7 @@
   .ntn-rbox-verdict-text p:last-child { margin-bottom: 0; }
 
   /* Scheda del gioco nella colonna laterale */
-  .ntn-gcard { border: 1px solid var(--ntn-line-strong); background-color: var(--ntn-bg); }
+  .ntn-gcard { border: 1px solid var(--ntn-line-strong); background-color: var(--ntn-bg); min-width: 0; }
   .ntn-gcard-h {
     display: flex;
     justify-content: space-between;

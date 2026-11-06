@@ -1649,24 +1649,24 @@ echo "\n--- 24. SEMVER SIMULTANEOUS 4-HEADER SYNCHRONIZATION ---\n";
 $parent_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $parent_css, $m_parent );
 $parent_ver = isset( $m_parent[1] ) ? trim( $m_parent[1] ) : '';
-assert_test( $parent_ver === '4.14.1', "24.1: Parent Theme style.css declares Version: 4.14.1 (found: {$parent_ver})" );
+assert_test( $parent_ver === '4.14.2', "24.1: Parent Theme style.css declares Version: 4.14.2 (found: {$parent_ver})" );
 
 $child_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $child_css, $m_child );
 $child_ver = isset( $m_child[1] ) ? trim( $m_child[1] ) : '';
-assert_test( $child_ver === '4.14.1', "24.2: Child Theme style.css declares Version: 4.14.1 (found: {$child_ver})" );
+assert_test( $child_ver === '4.14.2', "24.2: Child Theme style.css declares Version: 4.14.2 (found: {$child_ver})" );
 
 $core_php = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' );
 preg_match( '/\*\s*Version:\s*([0-9\.]+)/', $core_php, $m_core_hdr );
 $core_hdr_ver = isset( $m_core_hdr[1] ) ? trim( $m_core_hdr[1] ) : '';
-assert_test( $core_hdr_ver === '4.14.1', "24.3: Core Plugin header declares Version: 4.14.1 (found: {$core_hdr_ver})" );
+assert_test( $core_hdr_ver === '4.14.2', "24.3: Core Plugin header declares Version: 4.14.2 (found: {$core_hdr_ver})" );
 
 preg_match( "/define\(\s*'NTN_JOURNAL_CORE_VERSION',\s*'([^']+)'\s*\);/", $core_php, $m_core_const );
 $core_const_ver = isset( $m_core_const[1] ) ? trim( $m_core_const[1] ) : '';
-assert_test( $core_const_ver === '4.14.1', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.14.1 (found: {$core_const_ver})" );
+assert_test( $core_const_ver === '4.14.2', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.14.2 (found: {$core_const_ver})" );
 
 assert_test(
-	$parent_ver === '4.14.1' && $child_ver === '4.14.1' && $core_hdr_ver === '4.14.1' && $core_const_ver === '4.14.1',
+	$parent_ver === '4.14.2' && $child_ver === '4.14.2' && $core_hdr_ver === '4.14.2' && $core_const_ver === '4.14.2',
 	'24.5: All 4 version headers are 100% synchronized and atomic according to Rule 2 of GEMINI.md'
 );
 
@@ -1895,7 +1895,7 @@ $parent_style_ver = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( AB
 $child_style_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' ), $m2 ) ? $m2[1] : '';
 $core_plugin_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m3 ) ? $m3[1] : '';
 $core_const_ver   = preg_match( '/define\(\s*[\'"]NTN_JOURNAL_CORE_VERSION[\'"]\s*,\s*[\'"]([0-9\.]+)[\'"]\s*\)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m4 ) ? $m4[1] : '';
-assert_test( $parent_style_ver === '4.14.1' && $child_style_ver === '4.14.1' && $core_plugin_ver === '4.14.1' && $core_const_ver === '4.14.1', '29.1: All 4 version headers are synchronized to 4.14.1' );
+assert_test( $parent_style_ver === '4.14.2' && $child_style_ver === '4.14.2' && $core_plugin_ver === '4.14.2' && $core_const_ver === '4.14.2', '29.1: All 4 version headers are synchronized to 4.14.2' );
 
 // 29.2: single.php sequence is Google Feed -> Social CTA -> Bottom Related Posts
 $single_php = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/single.php' );
@@ -5198,6 +5198,21 @@ assert_test(
 	false !== strpos( $vm_home, "'platforms' => \$platforms," ) &&
 	false === strpos( $vm_home, "'platforms' => (string) get_post_meta(" ),
 	'77.8: The home release table shows PC instead of PC (Microsoft Windows)'
+);
+
+// =========================================================================
+// 78. La colonna laterale ha larghezza fissa anche con la scheda a più giochi (v4.14.2)
+// =========================================================================
+$sc_css  = ntn_t_read( $pd_theme . 'build/input.css' );
+$sc_out  = file_get_contents( $pd_theme . 'style-tailwind-output.css' );
+assert_test(
+	false !== strpos( $sc_css, '.ntn-art-aside-sticky { display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; }' ) &&
+	false !== strpos( $sc_css, 'background-color: var(--ntn-bg); min-width: 0; }' ),
+	'78.1: The article sidebar column is a fixed-width grid and the game card can shrink, so wide covers cannot widen the page'
+);
+assert_test(
+	1 === preg_match( '/\\.ntn-art-aside-sticky\\{[^}]*grid-template-columns:minmax\\(0,1fr\\)/', $sc_out ) && 1 === preg_match( '/\.ntn-gcard\{[^}]*min-width:0/', $sc_out ),
+	'78.2: The compiled CSS contains the sidebar column fix'
 );
 
 $GLOBALS['post'] = null;
