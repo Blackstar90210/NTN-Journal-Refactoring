@@ -39,6 +39,7 @@ function ntn_journal_default_cover_url() {
 	return get_template_directory_uri() . '/assets/images/default-cover.png';
 }
 
+if ( ! function_exists( 'get_post_rating' ) ) :
 /**
  * Register custom fields / helper functions for theme attributes like ratings.
  */
@@ -50,6 +51,7 @@ function get_post_rating( $post_id ) {
 	
 	return null;
 }
+endif;
 
 /**
  * Helper function to calculate post reading time
@@ -62,6 +64,7 @@ if ( ! function_exists( 'ntn_calculate_reading_time' ) ) {
 	}
 }
 
+if ( ! function_exists( 'ntn_get_primary_category' ) ) :
 /**
  * Helper to retrieve the primary category of a post (Yoast, Rank Math, or first category)
  */
@@ -140,7 +143,9 @@ function ntn_get_primary_category( $post_id = null ) {
 	}
 	return $found_cat;
 }
+endif;
 
+if ( ! function_exists( 'ntn_get_image_alt' ) ) :
 /**
  * Ottiene il testo alternativo reale (ALT text) di un'immagine da Media Library.
  * Se vuoto, usa un testo di fallback (es. titolo articolo).
@@ -156,8 +161,10 @@ function ntn_get_image_alt( $post_id ) {
 	// Fallback al titolo dell'articolo
 	return get_the_title( $post_id );
 }
+endif;
 
 
+if ( ! function_exists( 'ntn_get_igdb_data' ) ) :
 /**
  * Ottiene un dato IGDB per un articolo o CPT Videogioco.
  * Cerca prima nei post_meta del post, poi nei term_meta dei tag associati o del tag con lo stesso slug.
@@ -264,7 +271,9 @@ function ntn_get_igdb_data( $post_id, $meta_key ) {
 	$cache[ $cache_key ] = $val;
 	return $val;
 }
+endif;
 
+if ( ! function_exists( 'ntn_get_game_hub_url' ) ) :
 /**
  * Funzione helper per ottenere rapidamente l'URL della hub page di un gioco.
  * Supporta sia il CPT "videogioco" che i Tag di WordPress.
@@ -364,7 +373,9 @@ function ntn_get_game_hub_url( $post_id ) {
 	$cache[ $post_id ] = $result;
 	return $result;
 }
+endif;
 
+if ( ! function_exists( 'ntn_get_hub_igdb_info' ) ) :
 /**
  * Ottiene tutti i metadati IGDB associati a un Videogioco (CPT "videogioco" o Tag archivio)
  * con fallback bidirezionale post_meta <-> term_meta.
@@ -572,7 +583,9 @@ function ntn_get_hub_igdb_info( $object = null ) {
 	}
 	return $result;
 }
+endif;
 
+if ( ! function_exists( 'ntn_get_tag_igdb_info' ) ) :
 /**
  * Ottiene tutti i metadati IGDB associati a un Tag (Retrocompatibilità).
  */
@@ -585,8 +598,10 @@ function ntn_get_tag_igdb_info( $term_id = null ) {
 	}
 	return ntn_get_hub_igdb_info( $term_id );
 }
+endif;
 
 
+if ( ! function_exists( 'ntn_get_post_games' ) ) :
 /**
  * Elenca i videogiochi di un articolo, uno per ogni tag gioco, senza mescolare i dati tra un gioco e l'altro.
  *
@@ -666,7 +681,9 @@ function ntn_get_post_games( $post_id ) {
 	$cache[ $post_id ] = $games;
 	return $games;
 }
+endif;
 
+if ( ! function_exists( 'ntn_resolve_game_term' ) ) :
 /**
  * Trova il tag gioco che corrisponde a un tag dell'articolo: il tag stesso oppure la sua variante con il
  * nome decodificato o con lo slug senza suffisso numerico. Gli altri tag non sono giochi.
@@ -705,7 +722,9 @@ function ntn_resolve_game_term( $tag ) {
 
 	return null;
 }
+endif;
 
+if ( ! function_exists( 'ntn_get_term_game' ) ) :
 /**
  * Raccoglie i dati di un solo gioco a partire dal suo tag. Il risultato vale per tutta la richiesta.
  *
@@ -745,7 +764,9 @@ function ntn_get_term_game( WP_Term $term ) {
 	);
 	return $cache[ $term->term_id ];
 }
+endif;
 
+if ( ! function_exists( 'ntn_get_post_meta_game' ) ) :
 /**
  * Costruisce un gioco dai post_meta dell'articolo, per i vecchi articoli senza tag gioco.
  *
@@ -797,7 +818,9 @@ function ntn_get_post_meta_game( $post_id ) {
 		)
 	);
 }
+endif;
 
+if ( ! function_exists( 'ntn_get_game_review' ) ) :
 /**
  * Trova la recensione di un gioco: quella scelta a mano, se è pubblicata e in categoria Recensioni,
  * altrimenti l'ultima pubblicata con il tag del gioco. Mai anteprime o notizie.
@@ -845,7 +868,9 @@ function ntn_get_game_review( WP_Term $term, $cpt = null ) {
 
 	return ! empty( $query->posts ) ? $query->posts[0] : null;
 }
+endif;
 
+if ( ! function_exists( 'ntn_format_post_game' ) ) :
 /**
  * Porta i dati di un gioco al formato di ntn_get_post_games(), con ogni campo sempre presente.
  *
@@ -869,7 +894,9 @@ function ntn_format_post_game( array $info, array $extra ) {
 
 	return $game;
 }
+endif;
 
+if ( ! function_exists( 'ntn_apply_post_meta_to_game' ) ) :
 /**
  * Applica a un gioco i dati scritti sull'articolo: ogni post_meta non vuoto vince sul dato del tag.
  * Serve agli articoli con un gioco solo, dove questi dati hanno sempre avuto la precedenza.
@@ -907,6 +934,7 @@ function ntn_apply_post_meta_to_game( array $game, $post_id ) {
 
 	return $game;
 }
+endif;
 
 /**
  * Stampa la riga con il link alla recensione di un gioco, o l'avviso che non è stato recensito.
@@ -955,6 +983,7 @@ function ntn_journal_game_review_row( array $game, $class, $panel_index = null )
 	<?php
 }
 
+if ( ! function_exists( 'ntn_game_sort_key' ) ) :
 /**
  * Prepara un titolo per l'ordinamento e il confronto: senza entità HTML e senza accenti.
  *
@@ -964,7 +993,9 @@ function ntn_journal_game_review_row( array $game, $class, $panel_index = null )
 function ntn_game_sort_key( $title ) {
 	return remove_accents( html_entity_decode( (string) $title, ENT_QUOTES, 'UTF-8' ) );
 }
+endif;
 
+if ( ! function_exists( 'ntn_get_game_featured_content' ) ) :
 /**
  * Cerca l'articolo in evidenza associato a un Videogioco (CPT o Tag).
  * Priorità: Manuale (_ntn_featured_review_id) > Recensioni > Anteprime > Editoriali > Notizie.
@@ -1165,7 +1196,9 @@ function ntn_get_game_featured_content( $object = null ) {
 
 	return $result;
 }
+endif;
 
+if ( ! function_exists( 'ntn_get_tag_featured_content' ) ) :
 /**
  * Cerca la recensione principale associata a un Tag (Retrocompatibilità per l'Hub Page).
  * Ritorna l'oggetto post o array se trovato, altrimenti false.
@@ -1179,7 +1212,9 @@ function ntn_get_tag_featured_content( $term_id ) {
 	}
 	return ntn_get_game_featured_content( $term_id );
 }
+endif;
 
+if ( ! function_exists( 'ntn_translate_igdb_genres' ) ) :
 /**
  * Traduce i generi IGDB dall'inglese all'italiano.
  */
@@ -1253,6 +1288,7 @@ function ntn_translate_igdb_genres( $genres_string ) {
 
 	return implode( ', ', $translated );
 }
+endif;
 
 /**
  * Trasforma una stringa di sviluppatori o publisher in link se esiste il tag corrispondente.
