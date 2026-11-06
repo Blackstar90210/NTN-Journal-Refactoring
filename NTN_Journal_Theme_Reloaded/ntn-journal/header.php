@@ -150,7 +150,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 		</div>
 
 		<!-- Ricerca (v3.19.0): scende dalla lente con una linea rossa; aperta sulla pagina dei risultati.
-		     I suggerimenti (articoli e giochi) li disegna live-search.js del tema figlio. -->
+		     I suggerimenti (articoli e giochi) li disegna assets/js/live-search.js. -->
 		<div id="ntn-search-panel" class="ntn-search-panel<?php echo get_search_query() ? ' is-open is-done' : ''; ?>"<?php echo get_search_query() ? '' : ' hidden'; ?>>
 			<span class="ntn-search-line" aria-hidden="true"></span>
 			<div class="ntn-search-clip">

@@ -2107,3 +2107,172 @@
 html {
 	font-size: 17px;
 }
+
+/* ============================================================
+ * Catalogo, immagini e gallerie (v4.10.0, prima nello style.css del tema figlio).
+ * Fuori dai layer e in fondo al file, come prima: vincono sulle utility a parità di specificità.
+ * ============================================================ */
+
+/* ── Catalog Filters: remove native spinner from number input ── */
+.ntn-catalog-filters input[type="number"]::-webkit-inner-spin-button,
+.ntn-catalog-filters input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+.ntn-catalog-filters input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+/* Mobile Filter Toggle Icon */
+#ntn-mobile-filter-toggle.is-open .ntn-filter-icon-v {
+    transform: scaleY(0);
+    opacity: 0;
+}
+
+/* ── Unified Spacing for Block Image and Block Gallery (Nothing OS) ── */
+body figure.wp-block-image,
+body .wp-block-image,
+body figure.wp-block-gallery,
+body .wp-block-gallery {
+    margin-top: 1.5rem !important;
+    margin-bottom: 1.5rem !important;
+}
+
+body .wp-block-image img,
+body figure.wp-block-image img {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    margin: 0 !important;
+}
+
+body .wp-block-image > a,
+body figure.wp-block-image > a {
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* ── Gutenberg Gallery: Responsive Flex Grid with Orphan Expansion & Strict 4px Gap ── */
+body .wp-block-gallery.has-nested-images,
+body .wp-block-gallery.is-layout-flex {
+    gap: 4px;
+    row-gap: 4px;
+    column-gap: 4px;
+    --wp--style--unstable-gallery-gap: 4px;
+    --wp--style--gallery-gap-default: 4px;
+    --wp--style--block-gap: 4px;
+}
+
+body .wp-block-gallery.has-nested-images figure.wp-block-image,
+body .wp-block-gallery figure.wp-block-image {
+    flex-grow: 1;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+body .wp-block-gallery.has-nested-images figure.wp-block-image img,
+body .wp-block-gallery figure.wp-block-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    margin: 0 !important;
+}
+
+body .wp-block-gallery.has-nested-images br,
+body .wp-block-gallery br {
+    display: none;
+}
+
+/* ── Didascalie per blocchi Immagine e miniature di galleria (Nothing OS brutalist style) ── */
+body .wp-block-image figcaption,
+body .wp-block-image .wp-element-caption,
+body figure.wp-block-image figcaption,
+body .wp-block-gallery.has-nested-images figure.wp-block-image figcaption,
+body .wp-block-gallery figure.wp-block-image figcaption {
+    display: block !important;
+    position: relative !important;
+    bottom: auto !important;
+    left: auto !important;
+    width: 100% !important;
+    max-height: none !important;
+    overflow: visible !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    margin-top: 0.75rem !important;
+    margin-bottom: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding: 0 0.5rem !important;
+    font-family: "JetBrains Mono", monospace !important;
+    font-size: 0.75rem !important;
+    line-height: 1.5 !important;
+    text-align: center !important;
+    text-transform: none !important;
+    color: #71717a !important;
+    box-sizing: border-box !important;
+}
+
+.dark body .wp-block-image figcaption,
+.dark body .wp-block-image .wp-element-caption,
+.dark body figure.wp-block-image figcaption,
+.dark body .wp-block-gallery.has-nested-images figure.wp-block-image figcaption,
+.dark body .wp-block-gallery figure.wp-block-image figcaption {
+    color: #a1a1aa !important;
+}
+
+/* Mostra e formatta la didascalia globale della galleria (Nothing OS brutalist style) */
+body .wp-block-gallery.has-nested-images > figcaption.blocks-gallery-caption,
+body .wp-block-gallery.has-nested-images > figcaption,
+body .wp-block-gallery > figcaption.blocks-gallery-caption,
+body .wp-block-gallery > figcaption {
+    display: block !important;
+    width: 100% !important;
+    flex-basis: 100% !important;
+    margin-top: 0.75rem !important;
+    margin-bottom: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding: 0 0.5rem !important;
+    font-family: "JetBrains Mono", monospace !important;
+    font-size: 0.75rem !important;
+    line-height: 1.5 !important;
+    text-align: center !important;
+    text-transform: none !important;
+    color: #71717a !important;
+    box-sizing: border-box !important;
+}
+
+.dark body .wp-block-gallery.has-nested-images > figcaption.blocks-gallery-caption,
+.dark body .wp-block-gallery.has-nested-images > figcaption,
+.dark body .wp-block-gallery > figcaption.blocks-gallery-caption,
+.dark body .wp-block-gallery > figcaption {
+    color: #a1a1aa !important;
+}
+
+@media (min-width: 600px) {
+    body .wp-block-gallery.has-nested-images figure.wp-block-image:only-child,
+    body .wp-block-gallery.has-nested-images figure.wp-block-image:first-child:last-child {
+        width: 100% !important;
+        flex-basis: 100% !important;
+    }
+
+    body .wp-block-gallery.has-nested-images.columns-3 figure.wp-block-image,
+    body .wp-block-gallery.has-nested-images.columns-default figure.wp-block-image {
+        width: auto;
+        flex-basis: calc(33.333% - 4px);
+    }
+
+    body .wp-block-gallery.has-nested-images.columns-4 figure.wp-block-image {
+        width: auto;
+        flex-basis: calc(25% - 4px);
+    }
+
+    body .wp-block-gallery.has-nested-images.columns-2 figure.wp-block-image {
+        width: auto;
+        flex-basis: calc(50% - 4px);
+    }
+}

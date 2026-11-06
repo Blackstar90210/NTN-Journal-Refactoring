@@ -5,7 +5,7 @@
  * Fase 7 del restyling (v3.9.0): copertina intera in cornice e titolo con anno sotto
  * l'immagine, al posto della banda scura sopra la foto. La logica delle copertine è invariata.
  *
- * @package NTN_Journal_Reloaded
+ * @package NTN_Journal
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

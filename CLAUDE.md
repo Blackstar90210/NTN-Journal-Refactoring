@@ -19,7 +19,7 @@ Il progetto **NTN Journal** è un ecosistema editoriale WordPress di livello ent
 - **Frontend / Styling:** Tailwind CSS v4 CLI + CSS personalizzato Nothing OS
 - **Architettura Modulare:** 
   1. Parent Theme (`ntn-journal`): Framework di base e template core
-  2. Child Theme (`ntn-journal-reloaded`): Personalizzazioni grafiche e template overrides
+  2. Child Theme (`ntn-journal-reloaded`): solo personalizzazioni (dalla 4.10.0 il sito funziona anche con il solo Parent)
   3. Core Plugin (`ntn-journal-core`): Logica applicativa, CPT, Tassonomie, REST API, Integrazione IGDB, AI Summaries, SEO Extras, Redirect & Backup
 
 ---
@@ -73,7 +73,7 @@ Rispettare scrupolosamente il principio di **Separation of Concerns** di WordPre
 │            (ntn-journal-reloaded / UI & CSS)           │
 │  - style.css (custom styling & overrides)              │
 │  - functions.php (solo enqueue & UI hooks)             │
-│  - template overrides (archive-*, single-*)            │
+│  - nessuna funzione essenziale: tutto è nel Parent     │
 └──────────────────────────┬─────────────────────────────┘
                            │ Presentazione / Styling
                            ▼
