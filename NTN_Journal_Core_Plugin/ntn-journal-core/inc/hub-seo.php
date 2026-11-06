@@ -154,7 +154,7 @@ function ntn_hub_join_names( array $names ): string {
  * @return array<string, mixed>
  */
 function ntn_hub_seo_info( int $post_id ): array {
-	$info = function_exists( 'ntn_get_hub_igdb_info' ) ? ntn_get_hub_igdb_info( $post_id ) : array();
+	$info = ntn_get_hub_igdb_info( $post_id );
 	return is_array( $info ) ? $info : array();
 }
 

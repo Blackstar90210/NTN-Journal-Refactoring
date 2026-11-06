@@ -431,7 +431,7 @@ function ntn_journal_review_article_schema() {
 			}
 
 			// Integrazione VideoGame per l'Articolo nativo
-			$hub_info = function_exists( 'ntn_get_hub_igdb_info' ) ? ntn_get_hub_igdb_info( get_the_ID() ) : array();
+			$hub_info = ntn_get_hub_igdb_info( get_the_ID() );
 			if ( ! is_array( $hub_info ) ) {
 				$hub_info = array();
 			}
@@ -445,7 +445,7 @@ function ntn_journal_review_article_schema() {
 						if ( ! empty( $tag_game_title ) ) {
 							$game_title = $tag_game_title;
 							$found_tag = $tag;
-							if ( empty( $hub_info ) && function_exists( 'ntn_get_hub_igdb_info' ) ) {
+							if ( empty( $hub_info ) ) {
 								$hub_info = ntn_get_hub_igdb_info( $tag );
 								if ( ! is_array( $hub_info ) ) {
 									$hub_info = array();

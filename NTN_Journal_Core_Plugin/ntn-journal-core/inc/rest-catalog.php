@@ -143,7 +143,7 @@ class NTN_Catalog_REST_Controller {
 				$kind = 'Recensione';
 			} else {
 				// La categoria principale, la stessa del percorso dell'articolo; altrimenti la prima
-				$primary = function_exists( 'ntn_get_primary_category' ) ? ntn_get_primary_category( $article->ID ) : null;
+				$primary = ntn_get_primary_category( $article->ID );
 				$cats    = $primary instanceof WP_Term ? array( $primary ) : get_the_category( $article->ID );
 				if ( ! empty( $cats ) && $cats[0] instanceof WP_Term ) {
 					$kind = $cats[0]->name;
@@ -178,7 +178,7 @@ class NTN_Catalog_REST_Controller {
 				$post_id = get_the_ID();
 				
 				$cover = get_post_meta( $post_id, '_ntn_game_cover', true );
-				if ( empty( $cover ) && function_exists( 'ntn_get_hub_igdb_info' ) ) {
+				if ( empty( $cover ) ) {
 					$igdb_info = ntn_get_hub_igdb_info( $post_id );
 					if ( ! empty( $igdb_info['cover'] ) ) {
 						$cover = $igdb_info['cover'];

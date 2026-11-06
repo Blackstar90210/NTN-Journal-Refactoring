@@ -19,6 +19,7 @@ require_once NTN_INC_DIR . 'setup.php';
 require_once NTN_INC_DIR . 'enqueue.php';
 require_once NTN_INC_DIR . 'widgets.php';
 require_once NTN_INC_DIR . 'helpers.php';
+require_once NTN_INC_DIR . 'plugin-fallbacks.php'; // Riserve vuote per le funzioni di dati del plugin (v4.11.0)
 require_once NTN_INC_DIR . 'menu-filters.php';
 require_once NTN_INC_DIR . 'date-social.php';
 require_once NTN_INC_DIR . 'related-posts.php';
