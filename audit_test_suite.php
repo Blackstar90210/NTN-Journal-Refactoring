@@ -5271,29 +5271,11 @@ assert_test(
 	array( 'Xbox One' ) === ntn_core_post_platform_names( 7101, array( 'Xbox One' ) ),
 	'79.6: IGDB platforms are added to the category ones (PC naming normalized) and also stand when the article has no platform category'
 );
-// Tag marcato "È un videogioco": senza dati IGDB il nome del tag è il nome del gioco; con il nome IGDB vince IGDB
-$mock_terms[7300] = new WP_Term( array( 'term_id' => 7300, 'name' => 'Marked Game', 'slug' => 'marked-game', 'taxonomy' => 'post_tag' ) );
-$mock_terms[7301] = new WP_Term( array( 'term_id' => 7301, 'name' => 'Raw Fury', 'slug' => 'raw-fury', 'taxonomy' => 'post_tag' ) );
-$mock_post_tags[7210] = array( $mock_terms[7301], $mock_terms[7300] );
-$mock_termmeta[7300] = array( '_ntn_is_game' => '1' );
-$gd_marked = ntn_get_hub_igdb_info( new WP_Post( array( 'ID' => 7210, 'post_title' => 'Hillthorn esce il 10 novembre su PC', 'post_name' => 'hillthorn-esce', 'post_type' => 'post', 'post_status' => 'publish' ) ) );
-assert_test(
-	'Marked Game' === ( $gd_marked['title'] ?? '' ),
-	'79.7: A tag marked as video game gives its name as the game name when it has no IGDB data, a plain tag next to it does not'
-);
-$mock_termmeta[7300]['_ntn_game_title'] = 'Marked Game: IGDB Edition';
-$mock_posts[7202] = new WP_Post( array( 'ID' => 7202, 'post_title' => 'Altro articolo', 'post_name' => 'altro-articolo', 'post_type' => 'post', 'post_status' => 'publish' ) );
-$mock_post_tags[7202] = array( $mock_terms[7300] );
-$gd_igdb = ntn_get_hub_igdb_info( $mock_posts[7202] );
-assert_test(
-	'Marked Game: IGDB Edition' === ( $gd_igdb['title'] ?? '' ),
-	'79.8: When the tag has a name saved from IGDB, that name wins over the tag name'
-);
 $gd_flags_src = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/schema-flags.php' );
 assert_test(
 	false !== strpos( $gd_flags_src, "wp_verify_nonce( sanitize_text_field( wp_unslash( \$_POST['ntn_schema_flag_nonce'] ) ), 'ntn_schema_flag_' . (int) \$term_id )" ) &&
-	false !== strpos( $gd_flags_src, "! current_user_can( 'manage_categories' )" ) && false !== strpos( $gd_flags_src, "'post_tag_edit_form_fields'" ),
-	'79.9: The tag and category checkboxes are saved only with the capability and a valid nonce'
+	false !== strpos( $gd_flags_src, "! current_user_can( 'manage_categories' )" ) && false !== strpos( $gd_flags_src, "'category_edit_form_fields'" ) && false === strpos( $gd_flags_src, 'post_tag' ),
+	'79.7: The platform checkbox is on the category only and is saved only with the capability and a valid nonce; there is no checkbox on tags'
 );
 
 // Nome del gioco: il titolo di un articolo non lo è, quello di una scheda videogioco sì

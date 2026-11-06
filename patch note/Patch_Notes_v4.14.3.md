@@ -10,8 +10,7 @@ Correzione dei dati strutturati dei videogiochi. Prima di questa versione Google
 
 - Se un articolo non aveva un nome del gioco salvato, il plugin usava il titolo dell'articolo, per esempio "Hillthorn esce il 10 novembre su PC, Switch e mobile".
 - Ora il titolo di un articolo non vale più come nome di gioco (resta valido solo per la scheda videogioco).
-- Ordine: vince il nome salvato nel tag (di solito da IGDB). Se manca, vale il nome del tag, ma solo se il tag ha la casella **"È un videogioco"**. Altrimenti l'articolo non invia nessun VideoGame.
-- Nuova casella "È un videogioco" nella pagina Modifica tag.
+- Il nome è quello salvato nel tag del gioco (di solito da IGDB). Se il tag non ha dati, l'articolo non invia nessun VideoGame. Nessuna casella sui tag.
 
 ### 🛠️ 2. Piattaforme
 
@@ -25,9 +24,8 @@ Correzione dei dati strutturati dei videogiochi. Prima di questa versione Google
 
 - Aggiorna il plugin. Il tema genitore e il figlio cambiano solo il numero di versione. Svuota la cache.
 - Per Mac, Linux e simili: spunta "È una piattaforma" nella loro categoria.
-- Per i giochi senza dati IGDB: spunta "È un videogioco" nel loro tag.
 - Non cambiano: le Hub dei giochi, gli articoli con più giochi e la data del trailer.
 
 ### ✅ 4. Test
 
-- Nuova sezione 79 (9 controlli). La suite passa al 100%.
+- Nuova sezione 79 (7 controlli). La suite passa al 100%.

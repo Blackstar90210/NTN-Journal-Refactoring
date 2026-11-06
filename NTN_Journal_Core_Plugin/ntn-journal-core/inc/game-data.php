@@ -502,8 +502,8 @@ function ntn_get_hub_igdb_info( $object = null ) {
 		$post_tags = get_the_tags( $post->ID );
 		if ( $post_tags && is_array( $post_tags ) ) {
 			foreach ( $post_tags as $ptag ) {
-				if ( $ptag instanceof WP_Term && ( get_term_meta( $ptag->term_id, '_ntn_game_cover', true ) || get_term_meta( $ptag->term_id, '_ntn_igdb_game_id', true ) || get_term_meta( $ptag->term_id, '_ntn_game_title', true ) || ( function_exists( 'ntn_core_tag_is_game' ) && ntn_core_tag_is_game( $ptag->term_id ) ) ) ) {
-					$term = $ptag; // v4.14.3: anche il tag marcato "È un videogioco"
+				if ( $ptag instanceof WP_Term && ( get_term_meta( $ptag->term_id, '_ntn_game_cover', true ) || get_term_meta( $ptag->term_id, '_ntn_igdb_game_id', true ) || get_term_meta( $ptag->term_id, '_ntn_game_title', true ) ) ) {
+					$term = $ptag;
 					break;
 				}
 			}
