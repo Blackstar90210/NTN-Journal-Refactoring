@@ -989,9 +989,9 @@ function ntn_tsf_add_videogame_schema( $data, $context = array() ) {
 			}
 		}
 
-		// Platforms (v4.14.3): solo le categorie piattaforma dell'articolo, scelte dalla redazione. Niente IGDB
-		// e niente riserva "PC, Console": senza piattaforme il campo non c'è.
-		$platforms = ntn_core_post_platform_names( $post_id );
+		// Platforms (v4.14.3): vincono le categorie piattaforma dell'articolo, IGDB aggiunge quelle che mancano.
+		// Niente riserva "PC, Console": senza piattaforme il campo non c'è.
+		$platforms = ntn_core_post_platform_names( $post_id, (array) $view_model['platforms'] );
 		if ( ! empty( $platforms ) ) {
 			$videogame_entity['gamePlatform'] = $platforms;
 		}

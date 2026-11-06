@@ -252,6 +252,12 @@ function ntn_journal_review_article_schema() {
 				if ( $raw_release ) {
 					$ntn_schema_data['itemReviewed']['datePublished'] = function_exists( 'ntn_release_schema_date' ) ? ntn_release_schema_date( $raw_release, (string) $view_model['release_precision'] ) : $raw_release; // v3.19.2: solo le parti note
 				}
+				if ( ! empty( $view_model['platforms'] ) ) { // v4.14.3: le categorie comandano, IGDB aggiunge quelle che mancano
+					$combined_platforms = ntn_core_post_platform_names( get_the_ID(), (array) $view_model['platforms'] );
+					if ( ! empty( $combined_platforms ) ) {
+						$ntn_schema_data['itemReviewed']['gamePlatform'] = array_map( 'ntn_clean_json_ld_text', $combined_platforms );
+					}
+				}
 				if ( ! empty( $view_model['video_url'] ) ) {
 					$video_id = str_replace( 'https://www.youtube.com/watch?v=', '', $view_model['video_url'] );
 					$ntn_schema_data['itemReviewed']['trailer'] = array(
@@ -495,6 +501,12 @@ function ntn_journal_review_article_schema() {
 						$raw_precision = $view_model['release_raw'] ? $view_model['release_precision'] : get_post_meta( get_the_ID(), '_ntn_game_release_precision', true );
 						if ( $raw_release ) {
 							$game_entity['datePublished'] = function_exists( 'ntn_release_schema_date' ) ? ntn_release_schema_date( $raw_release, (string) $raw_precision ) : $raw_release; // v3.19.2: solo le parti note
+						}
+						if ( ! empty( $view_model['platforms'] ) ) { // v4.14.3
+							$combined_platforms = ntn_core_post_platform_names( get_the_ID(), (array) $view_model['platforms'] );
+							if ( ! empty( $combined_platforms ) ) {
+								$game_entity['gamePlatform'] = array_map( 'ntn_clean_json_ld_text', $combined_platforms );
+							}
 						}
 						if ( ! empty( $view_model['video_url'] ) ) {
 							$video_id = str_replace( 'https://www.youtube.com/watch?v=', '', $view_model['video_url'] );

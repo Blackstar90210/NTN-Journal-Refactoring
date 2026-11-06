@@ -8,23 +8,26 @@ Correzione dei dati strutturati dei videogiochi. Prima di questa versione Google
 
 ### 🐞 1. Nome del gioco
 
-- Se un articolo non ha un nome del gioco salvato, il plugin usava il titolo dell'articolo, per esempio "Hillthorn esce il 10 novembre su PC, Switch e mobile".
-- Ora il titolo di un articolo non vale più come nome di gioco. Resta valido solo per la scheda videogioco. Un articolo senza gioco collegato non invia più nessun VideoGame.
-- Per riavere il gioco nei dati per Google basta compilare il tag del gioco (nome o ID IGDB).
+- Se un articolo non aveva un nome del gioco salvato, il plugin usava il titolo dell'articolo, per esempio "Hillthorn esce il 10 novembre su PC, Switch e mobile".
+- Ora il titolo di un articolo non vale più come nome di gioco (resta valido solo per la scheda videogioco).
+- Ordine: vince il nome salvato nel tag (di solito da IGDB). Se manca, vale il nome del tag, ma solo se il tag ha la casella **"È un videogioco"**. Altrimenti l'articolo non invia nessun VideoGame.
+- Nuova casella "È un videogioco" nella pagina Modifica tag.
 
 ### 🛠️ 2. Piattaforme
 
-- Le piattaforme dei dati strutturati vengono solo dalle categorie dell'articolo, senza dipendere da IGDB.
-- Una categoria è una piattaforma se non ha sottocategorie e sta dentro (o è) una Hub di tipo "Piattaforme", come Console, Mobile o PC Gaming. Marchi (Nintendo, Sony, Microsoft) e categorie come Indie, Guide, Hardware, Notizie non contano.
-- "PC Gaming" resta scritto "PC". Se l'articolo non ha piattaforme il campo non c'è più (prima compariva "PC, Console").
+- Vincono le categorie dell'articolo. Una categoria è una piattaforma se ha la nuova casella **"È una piattaforma"** (Modifica categoria), oppure se non ha sottocategorie e sta dentro (o è) una Hub di tipo "Piattaforme" (Console, Mobile, PC Gaming).
+- Marchi (Nintendo, Sony, Microsoft) e categorie come Indie, Guide, Hardware, Notizie non contano.
+- Le piattaforme IGDB già salvate si aggiungono, senza doppioni anche con maiuscole diverse ("Xbox Series X|S" e "XBOX Series X|S"). IGDB non viene interrogato a ogni visita.
+- "PC Gaming" resta "PC". Se non c'è nessuna piattaforma il campo non c'è più (prima compariva "PC, Console").
 - Valido sia per The SEO Framework sia per i dati propri del plugin.
 
-### ⚠️ 3. Ordine di aggiornamento
+### ⚠️ 3. Dopo l'aggiornamento
 
-- Aggiorna il plugin. Il tema genitore e il figlio cambiano solo il numero di versione.
-- Svuota la cache del sito dopo l'aggiornamento.
-- Non cambiano: le Hub dei giochi (le loro piattaforme restano quelle salvate), gli articoli con più giochi e la data del trailer.
+- Aggiorna il plugin. Il tema genitore e il figlio cambiano solo il numero di versione. Svuota la cache.
+- Per Mac, Linux e simili: spunta "È una piattaforma" nella loro categoria.
+- Per i giochi senza dati IGDB: spunta "È un videogioco" nel loro tag.
+- Non cambiano: le Hub dei giochi, gli articoli con più giochi e la data del trailer.
 
 ### ✅ 4. Test
 
-- Nuova sezione 79 (4 controlli). La suite passa al 100%.
+- Nuova sezione 79 (9 controlli). La suite passa al 100%.

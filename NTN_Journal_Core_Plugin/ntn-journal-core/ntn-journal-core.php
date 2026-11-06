@@ -69,6 +69,7 @@ require_once NTN_JOURNAL_CORE_DIR . 'inc/backup-restore.php';
 require_once NTN_JOURNAL_CORE_DIR . 'inc/seo-extras.php';
 require_once NTN_JOURNAL_CORE_DIR . 'inc/schema-markup.php';
 require_once NTN_JOURNAL_CORE_DIR . 'inc/hub-seo.php';
+require_once NTN_JOURNAL_CORE_DIR . 'inc/schema-flags.php';
 require_once NTN_JOURNAL_CORE_DIR . 'inc/category-hub.php';
 require_once NTN_JOURNAL_CORE_DIR . 'inc/category-hub-stats.php';
 require_once NTN_JOURNAL_CORE_DIR . 'inc/seo-thin-pages.php';

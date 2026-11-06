@@ -746,6 +746,7 @@ require_once ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/inc/helpers.php';
 require_once ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/inc/plugin-fallbacks.php';
 require_once ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/seo-extras.php';
 require_once ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/hub-seo.php';
+require_once ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/schema-flags.php';
 require_once ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/category-hub.php';
 require_once ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/category-hub-stats.php';
 require_once ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/team-page.php';
@@ -5256,8 +5257,45 @@ $gd_sch = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core
 assert_test(
 	false !== strpos( $gd_seo, '$platforms = ntn_core_post_platform_names( $post_id );' ) && false === strpos( $gd_seo, "array( 'PC', 'Console' )" ) &&
 	false === strpos( $gd_sch, "array( 'PC', 'Console' )" ) && false === strpos( $gd_sch, "array_merge( \$platforms, \$view_model['platforms'] )" ),
-	'79.3: The Google schemas take platforms only from the categories, without IGDB platforms and without the fixed fallback'
+	'79.3: The Google schemas take platforms from the categories (IGDB only completes) and have no fixed PC, Console fallback'
 );
+// Mac con la casella "È una piattaforma", IGDB completa senza doppioni
+$mock_termmeta[7008] = array( '_ntn_is_platform' => '1' );
+$mock_post_categories[7102] = array( $gd_cat( 7008, 'Mac', 'mac' ), $gd_cat( 7003, 'PlayStation 5', 'playstation-5' ), $gd_cat( 7005, 'Indie', 'indie' ) );
+assert_test(
+	array( 'Mac', 'PlayStation 5', 'Xbox Series X|S', 'Nintendo Switch' ) === ntn_core_post_platform_names( 7102, array( 'PlayStation 5', 'Xbox Series X|S', 'XBOX Series X|S', 'Nintendo Switch' ) ),
+	'79.5: A category marked as platform counts (Mac), IGDB platforms only add what is missing, with no duplicates even with different capitals'
+);
+assert_test(
+	array( 'PlayStation 5', 'PC' ) === ntn_core_post_platform_names( 7100, array( 'PlayStation 5', 'PC (Microsoft Windows)' ) ) &&
+	array( 'Xbox One' ) === ntn_core_post_platform_names( 7101, array( 'Xbox One' ) ),
+	'79.6: IGDB platforms are added to the category ones (PC naming normalized) and also stand when the article has no platform category'
+);
+// Tag marcato "È un videogioco": senza dati IGDB il nome del tag è il nome del gioco; con il nome IGDB vince IGDB
+$mock_terms[7300] = new WP_Term( array( 'term_id' => 7300, 'name' => 'Marked Game', 'slug' => 'marked-game', 'taxonomy' => 'post_tag' ) );
+$mock_terms[7301] = new WP_Term( array( 'term_id' => 7301, 'name' => 'Raw Fury', 'slug' => 'raw-fury', 'taxonomy' => 'post_tag' ) );
+$mock_post_tags[7210] = array( $mock_terms[7301], $mock_terms[7300] );
+$mock_termmeta[7300] = array( '_ntn_is_game' => '1' );
+$gd_marked = ntn_get_hub_igdb_info( new WP_Post( array( 'ID' => 7210, 'post_title' => 'Hillthorn esce il 10 novembre su PC', 'post_name' => 'hillthorn-esce', 'post_type' => 'post', 'post_status' => 'publish' ) ) );
+assert_test(
+	'Marked Game' === ( $gd_marked['title'] ?? '' ),
+	'79.7: A tag marked as video game gives its name as the game name when it has no IGDB data, a plain tag next to it does not'
+);
+$mock_termmeta[7300]['_ntn_game_title'] = 'Marked Game: IGDB Edition';
+$mock_posts[7202] = new WP_Post( array( 'ID' => 7202, 'post_title' => 'Altro articolo', 'post_name' => 'altro-articolo', 'post_type' => 'post', 'post_status' => 'publish' ) );
+$mock_post_tags[7202] = array( $mock_terms[7300] );
+$gd_igdb = ntn_get_hub_igdb_info( $mock_posts[7202] );
+assert_test(
+	'Marked Game: IGDB Edition' === ( $gd_igdb['title'] ?? '' ),
+	'79.8: When the tag has a name saved from IGDB, that name wins over the tag name'
+);
+$gd_flags_src = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/schema-flags.php' );
+assert_test(
+	false !== strpos( $gd_flags_src, "wp_verify_nonce( sanitize_text_field( wp_unslash( \$_POST['ntn_schema_flag_nonce'] ) ), 'ntn_schema_flag_' . (int) \$term_id )" ) &&
+	false !== strpos( $gd_flags_src, "! current_user_can( 'manage_categories' )" ) && false !== strpos( $gd_flags_src, "'post_tag_edit_form_fields'" ),
+	'79.9: The tag and category checkboxes are saved only with the capability and a valid nonce'
+);
+
 // Nome del gioco: il titolo di un articolo non lo è, quello di una scheda videogioco sì
 $mock_posts[7200] = new WP_Post( array( 'ID' => 7200, 'post_title' => 'Hillthorn esce il 10 novembre su PC', 'post_name' => 'hillthorn-esce', 'post_type' => 'post', 'post_status' => 'publish' ) );
 $mock_posts[7201] = new WP_Post( array( 'ID' => 7201, 'post_title' => 'Hillthorn', 'post_name' => 'hillthorn', 'post_type' => 'videogioco', 'post_status' => 'publish' ) );
