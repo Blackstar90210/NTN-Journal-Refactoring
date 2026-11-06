@@ -910,8 +910,13 @@ function ntn_core_schema_norm( $text ) {
  *
  * Con un solo gioco collegato, o nessuno, restituisce l'elenco com'è. Con più giochi:
  * 1. se l'articolo ha il campo "Gioco recensito", vale solo il gioco che corrisponde;
- * 2. altrimenti valgono i giochi il cui nome compare nel titolo dell'articolo;
- * 3. altrimenti valgono tutti i giochi collegati (mai uno scelto a caso).
+ * 2. altrimenti si cercano i giochi il cui nome (intero, o la parte prima dei due punti) compare nel titolo.
+ *    Se un nome è contenuto in uno più lungo ("Death Stranding" in "Death Stranding 2") o è solo l'inizio di un
+ *    altro nome presente nel titolo ("Assassin's Creed" davanti a "Black Flag Resynced"), vince quello più lungo;
+ * 3. con una recensione, con un titolo che comincia con il nome del gioco o dove un nome corto è stato scartato,
+ *    vale solo il gioco rimasto;
+ * 4. in tutti gli altri casi (raccolte, notizie su più giochi) valgono tutti i giochi collegati.
+ * Mai un gioco scelto a caso.
  *
  * @param int $post_id ID dell'articolo.
  * @return array[] Giochi nel formato di ntn_get_post_games(), al massimo 12.
@@ -921,8 +926,9 @@ function ntn_core_schema_pick_games( $post_id ) {
 		return array();
 	}
 
-	$games = array_values( array_filter(
-		ntn_get_post_games( (int) $post_id ),
+	$post_id = (int) $post_id;
+	$games   = array_values( array_filter(
+		ntn_get_post_games( $post_id ),
 		static function ( $game ) {
 			return ! empty( $game['title'] ) && is_string( $game['title'] );
 		}
@@ -932,8 +938,18 @@ function ntn_core_schema_pick_games( $post_id ) {
 		$contains = static function ( $haystack, $needle ) {
 			return '' !== $needle && false !== strpos( ' ' . $haystack . ' ', ' ' . $needle . ' ' );
 		};
+		// Nome intero e parte prima dei due punti o del trattino ("Death Stranding 2: On the Beach" -> "Death Stranding 2").
+		$keys = static function ( $title ) {
+			$full = ntn_core_schema_norm( $title );
+			$list = array( $full );
+			$base = ntn_core_schema_norm( preg_split( '/\s*(?::|\s[-–—]\s)\s*/u', html_entity_decode( (string) $title, ENT_QUOTES, 'UTF-8' ), 2 )[0] );
+			if ( '' !== $base && $base !== $full && strlen( $base ) >= 3 ) {
+				$list[] = $base;
+			}
+			return $list;
+		};
 
-		$reviewed = ntn_core_schema_norm( get_post_meta( (int) $post_id, 'reviewed_item', true ) );
+		$reviewed = ntn_core_schema_norm( get_post_meta( $post_id, 'reviewed_item', true ) );
 		$matched  = array();
 		if ( '' !== $reviewed ) {
 			foreach ( $games as $game ) {
@@ -944,16 +960,57 @@ function ntn_core_schema_pick_games( $post_id ) {
 			}
 		}
 
-		if ( empty( $matched ) ) {
-			$article_title = ntn_core_schema_norm( get_the_title( (int) $post_id ) );
+		$decided = ! empty( $matched );
+		if ( ! $decided ) {
+			$article_title = ntn_core_schema_norm( get_the_title( $post_id ) );
+			$in_title      = array();
 			foreach ( $games as $game ) {
-				if ( $contains( $article_title, ntn_core_schema_norm( $game['title'] ) ) ) {
+				foreach ( $keys( $game['title'] ) as $key ) {
+					if ( $contains( $article_title, $key ) ) {
+						$in_title[] = $game;
+						break;
+					}
+				}
+			}
+
+			// Vince il nome più lungo: via i nomi contenuti in un altro o seguiti nel titolo da un altro gioco.
+			foreach ( $in_title as $game ) {
+				$name    = ntn_core_schema_norm( $game['title'] );
+				$dropped = false;
+				foreach ( $in_title as $other ) {
+					if ( $other === $game ) {
+						continue;
+					}
+					foreach ( $keys( $other['title'] ) as $other_key ) {
+						if ( strlen( $other_key ) > strlen( $name ) && $contains( $other_key, $name ) ) {
+							$dropped = true;
+						}
+					}
+					if ( $contains( $article_title, $name . ' ' . ntn_core_schema_norm( $other['title'] ) ) ) {
+						$dropped = true;
+					}
+				}
+				if ( ! $dropped ) {
 					$matched[] = $game;
 				}
 			}
+
+			if ( ! empty( $matched ) ) {
+				$is_review = function_exists( 'has_category' ) && has_category( array( 'recensioni', 'recensione' ), $post_id );
+				$starts    = false;
+				foreach ( $matched as $game ) {
+					foreach ( $keys( $game['title'] ) as $key ) {
+						if ( $article_title === $key || 0 === strpos( $article_title, $key . ' ' ) ) {
+							$starts = true;
+						}
+					}
+				}
+				// Se un nome corto è stato scartato perché fa parte di un titolo più lungo, l'articolo parla di quello lungo.
+				$decided = $is_review || $starts || count( $matched ) < count( $in_title );
+			}
 		}
 
-		if ( ! empty( $matched ) ) {
+		if ( $decided ) {
 			$games = $matched;
 		}
 	}

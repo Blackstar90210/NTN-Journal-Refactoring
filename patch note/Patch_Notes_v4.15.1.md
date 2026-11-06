@@ -11,8 +11,10 @@ Prima di questa versione, un articolo con più tag di gioco mandava a Google sol
 Quando un articolo ha più giochi collegati, il plugin sceglie così:
 
 1. Se la recensione ha il campo **"Gioco recensito"**, vale solo il gioco che corrisponde.
-2. Altrimenti valgono i giochi il cui nome compare nel titolo dell'articolo (il confronto ignora maiuscole, accenti e simboli).
-3. Altrimenti valgono **tutti** i giochi collegati (al massimo 12), ciascuno con i propri dati: copertina, sviluppatore, editore, generi, data di uscita. Mai più un gioco scelto a caso.
+2. Altrimenti si cercano i giochi il cui nome compare nel titolo (nome intero, oppure la parte prima dei due punti: "Death Stranding 2: On the Beach" è riconosciuto da "Death Stranding 2"). Il confronto ignora maiuscole, accenti e simboli.
+3. Vince il nome più lungo: "Death Stranding" non vale se il titolo parla di "Death Stranding 2", e "Assassin's Creed" non vale se nel titolo è seguito da "Black Flag Resynced".
+4. Con una recensione, o con un titolo che comincia con il nome del gioco, vale solo quel gioco.
+5. Nelle raccolte e nelle notizie su più giochi (per esempio "Le demo della settimana") valgono **tutti** i giochi collegati (al massimo 12), ciascuno con i propri dati: copertina, sviluppatore, editore, generi, data di uscita. Mai più un gioco scelto a caso.
 
 ### 🛠️ 2. Nel grafo di Google
 
@@ -29,4 +31,4 @@ Quando un articolo ha più giochi collegati, il plugin sceglie così:
 
 ### ✅ Test
 
-Sezione 81 della suite (8 prove nuove). Totale 540 prove, tutte superate.
+Sezione 81 della suite (11 prove nuove). Totale 543 prove, tutte superate.

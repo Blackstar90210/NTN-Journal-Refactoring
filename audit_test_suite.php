@@ -5412,6 +5412,43 @@ assert_test(
 	'81.5: One game stays as it is; plain tags and articles without games give no game'
 );
 
+// 81.5b: il nome più lungo vince su quello corto contenuto, anche se IGDB scrive il titolo completo con i due punti
+$gg_ds   = $mg_term( 9120, 'Death Stranding', 'death-stranding-gg', array( '_ntn_igdb_game_id' => 9120, '_ntn_game_title' => 'Death Stranding' ) );
+$gg_ds2  = $mg_term( 9121, 'Death Stranding 2', 'death-stranding-2-gg', array( '_ntn_igdb_game_id' => 9121, '_ntn_game_title' => 'Death Stranding 2: On the Beach' ) );
+$mg_post( 9120, 'post', 'publish', 'gg-ds2', '2026-01-01', array( $gg_ds, $gg_ds2 ) );
+$mock_posts[9120]->post_title = 'Death Stranding 2 ha una data di uscita';
+$gg_pick = ntn_core_schema_pick_games( 9120 );
+assert_test(
+	1 === count( $gg_pick ) && 'Death Stranding 2: On the Beach' === $gg_pick[0]['title'],
+	'81.5b: A short name inside a longer one never wins ("Death Stranding" vs "Death Stranding 2"), and the part before the colon is enough to recognise a game'
+);
+
+// 81.5c: marchio davanti a un altro gioco nel titolo (Assassin's Creed + Black Flag Resynced): resta il gioco vero
+$gg_ac   = $mg_term( 9122, "Assassin's Creed", 'assassins-creed-gg', array( '_ntn_igdb_game_id' => 9122, '_ntn_game_title' => "Assassin's Creed" ) );
+$gg_bf   = $mg_term( 9123, 'Black Flag Resynced', 'black-flag-resynced-gg', array( '_ntn_igdb_game_id' => 9123, '_ntn_game_title' => 'Black Flag Resynced' ) );
+$mg_post( 9121, 'post', 'publish', 'gg-ac', '2026-01-01', array( $gg_ac, $gg_bf ) );
+$mock_posts[9121]->post_title = "Assassin's Creed Black Flag Resynced: tutte le novità";
+$gg_pick = ntn_core_schema_pick_games( 9121 );
+assert_test(
+	1 === count( $gg_pick ) && 'Black Flag Resynced' === $gg_pick[0]['title'],
+	'81.5c: A series name written right before another linked game in the title is dropped; the real game stays'
+);
+
+// 81.5d: raccolta (un nome nel titolo ma non all'inizio): tutti i giochi; recensione: solo quello del titolo
+$gg_eoe  = $gg_game( 9124, 'End of Ember' );
+$gg_d2   = $gg_game( 9125, 'Demo Due' );
+$gg_d3   = $gg_game( 9126, 'Demo Tre' );
+$mg_post( 9122, 'post', 'publish', 'gg-demo', '2026-01-01', array( $gg_eoe, $gg_d2, $gg_d3 ) );
+$mock_posts[9122]->post_title = 'Le demo della settimana: da End of Ember in poi';
+$gg_pick_coll = ntn_core_schema_pick_games( 9122 );
+$mg_post( 9123, 'post', 'publish', 'gg-rev-cat', '2026-01-01', array( $gg_eoe, $gg_d2, $gg_d3 ), array( 'recensioni' ) );
+$mock_posts[9123]->post_title = 'La recensione di End of Ember';
+$gg_pick_rev = ntn_core_schema_pick_games( 9123 );
+assert_test(
+	3 === count( $gg_pick_coll ) && 1 === count( $gg_pick_rev ) && 'End of Ember' === $gg_pick_rev[0]['title'],
+	'81.5d: A collection that only mentions one game gets all its linked games; a review picks the game named in its title'
+);
+
 // 81.6: nel grafo di Google, più giochi = più VideoGame, ognuno con i propri dati, collegati con "about"
 $GLOBALS['queried_object'] = $mock_posts[9112];
 $GLOBALS['post']           = $mock_posts[9112];
