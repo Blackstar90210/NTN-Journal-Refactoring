@@ -4949,11 +4949,16 @@ assert_test(
 );
 
 // =========================================================================
+// Legge un file normalizzando a capo di Windows (CRLF) in LF: i controlli su testo a più righe valgono su entrambi
+function ntn_t_read( $path ) {
+	return str_replace( "\r\n", "\n", (string) file_get_contents( $path ) );
+}
+
 // 73. helpers.php del tema genitore ha solo funzioni di presentazione (v4.10.1, completato nella v4.13.0)
 // =========================================================================
 // Nella 4.10.1 le funzioni di dati erano state protette con function_exists; dalla 4.11.0 alla 4.13.0
 // sono passate tutte al plugin (sezioni 74, 75 e 76).
-$gd_helpers = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/inc/helpers.php' );
+$gd_helpers = ntn_t_read( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/inc/helpers.php' );
 $gd_names   = array( 'get_post_rating', 'ntn_calculate_reading_time', 'ntn_get_primary_category', 'ntn_get_image_alt', 'ntn_get_igdb_data', 'ntn_get_game_hub_url', 'ntn_get_hub_igdb_info', 'ntn_get_tag_igdb_info', 'ntn_get_post_games', 'ntn_resolve_game_term', 'ntn_get_term_game', 'ntn_get_post_meta_game', 'ntn_get_game_review', 'ntn_format_post_game', 'ntn_apply_post_meta_to_game', 'ntn_game_sort_key', 'ntn_get_game_featured_content', 'ntn_get_tag_featured_content', 'ntn_translate_igdb_genres' );
 
 // 73.1: nessuna delle 19 funzioni di dati è più definita in helpers.php
@@ -4987,9 +4992,9 @@ assert_test( 'plugin|plugin|fallback' === trim( (string) $gd_out ), '73.3: helpe
 $pd_names  = array( 'ntn_translate_igdb_genres', 'get_post_rating', 'ntn_calculate_reading_time', 'ntn_get_primary_category', 'ntn_get_image_alt', 'ntn_get_igdb_data', 'ntn_get_game_hub_url', 'ntn_get_hub_igdb_info', 'ntn_get_tag_igdb_info' );
 $pd_core   = ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/';
 $pd_theme  = ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/';
-$pd_data   = file_get_contents( $pd_core . 'inc/game-data.php' );
-$pd_fall   = file_get_contents( $pd_theme . 'inc/plugin-fallbacks.php' );
-$pd_help   = file_get_contents( $pd_theme . 'inc/helpers.php' );
+$pd_data   = ntn_t_read( $pd_core . 'inc/game-data.php' );
+$pd_fall   = ntn_t_read( $pd_theme . 'inc/plugin-fallbacks.php' );
+$pd_help   = ntn_t_read( $pd_theme . 'inc/helpers.php' );
 
 // 74.1: le 9 funzioni sono definite nel plugin, ognuna protetta, e non più in helpers.php del tema
 $pd_bad = array();
@@ -5010,7 +5015,7 @@ foreach ( $pd_names as $pd_name ) {
 	}
 }
 assert_test(
-	empty( $pd_bad ) && false !== strpos( file_get_contents( $pd_theme . 'functions.php' ), "require_once NTN_INC_DIR . 'plugin-fallbacks.php';" ),
+	empty( $pd_bad ) && false !== strpos( ntn_t_read( $pd_theme . 'functions.php' ), "require_once NTN_INC_DIR . 'plugin-fallbacks.php';" ),
 	'74.2: The theme keeps a guarded empty fallback for each moved function and loads it (missing: ' . implode( ', ', $pd_bad ) . ')'
 );
 
@@ -5024,7 +5029,7 @@ $pd_out = trim( (string) shell_exec( escapeshellarg( PHP_BINARY ) . ' ' . escape
 assert_test( '[null,"",null,"Titolo","","",[],[],"Shooter"]' === $pd_out, '74.3: Without the plugin the theme fallbacks return empty values and no errors (output: ' . $pd_out . ')' );
 
 // 74.4: il plugin carica game-data.php solo se il tema NTN Journal è alla 4.10.1 o successiva (con un altro tema sempre)
-$pd_main = file_get_contents( $pd_core . 'ntn-journal-core.php' );
+$pd_main = ntn_t_read( $pd_core . 'ntn-journal-core.php' );
 preg_match( '/function ntn_core_can_load_game_data\(\) \{.*?\n\}/s', $pd_main, $pd_fn );
 $pd_res = array();
 foreach ( array( array( 'ntn-journal', '4.10.0' ), array( 'ntn-journal', '4.10.1' ), array( 'ntn-journal', '4.11.0' ), array( 'twentytwentyfive', '1.0' ) ) as $pd_case ) {
@@ -5043,7 +5048,7 @@ assert_test(
 // 74.5: il plugin chiama queste funzioni direttamente, senza più controllare che il tema le abbia definite
 $pd_bad = array();
 foreach ( array( 'inc/rest-catalog.php', 'inc/schema-markup.php', 'inc/hub-seo.php', 'inc/seo-extras.php', 'inc/game-data.php' ) as $pd_file ) {
-	if ( preg_match( "/[^!] function_exists\\( '(" . implode( '|', $pd_names ) . ")' \\)/", file_get_contents( $pd_core . $pd_file ) ) ) {
+	if ( preg_match( "/[^!] function_exists\\( '(" . implode( '|', $pd_names ) . ")' \\)/", ntn_t_read( $pd_core . $pd_file ) ) ) {
 		$pd_bad[] = $pd_file;
 	}
 }
@@ -5053,9 +5058,9 @@ assert_test( empty( $pd_bad ), '74.5: Plugin files call the moved functions dire
 // 75. Giochi e recensioni di un articolo sono nel plugin (v4.12.0)
 // =========================================================================
 $pg_names = array( 'ntn_get_post_games', 'ntn_resolve_game_term', 'ntn_get_term_game', 'ntn_get_post_meta_game', 'ntn_get_game_review', 'ntn_format_post_game', 'ntn_apply_post_meta_to_game', 'ntn_game_sort_key' );
-$pg_data  = file_get_contents( $pd_core . 'inc/game-data.php' );
-$pg_help  = file_get_contents( $pd_theme . 'inc/helpers.php' );
-$pg_fall  = file_get_contents( $pd_theme . 'inc/plugin-fallbacks.php' );
+$pg_data  = ntn_t_read( $pd_core . 'inc/game-data.php' );
+$pg_help  = ntn_t_read( $pd_theme . 'inc/helpers.php' );
+$pg_fall  = ntn_t_read( $pd_theme . 'inc/plugin-fallbacks.php' );
 
 // 75.1: le 8 funzioni sono nel plugin, protette, e non più nel tema
 $pg_bad = array();
@@ -5088,16 +5093,16 @@ assert_test( '[[],{"title":"Celeste"}]' === $pg_out, '75.3: Without the plugin a
 // =========================================================================
 // 76. Articoli in evidenza dell'Hub e loro cache sono nel plugin (v4.13.0)
 // =========================================================================
-$fc_data  = file_get_contents( $pd_core . 'inc/game-data.php' );
-$fc_keys  = file_get_contents( $pd_core . 'inc/cache-keys.php' );
-$fc_admin = file_get_contents( $pd_core . 'inc/admin/admin-page.php' );
-$fc_main  = file_get_contents( $pd_core . 'ntn-journal-core.php' );
-$fc_fall  = file_get_contents( $pd_theme . 'inc/plugin-fallbacks.php' );
+$fc_data  = ntn_t_read( $pd_core . 'inc/game-data.php' );
+$fc_keys  = ntn_t_read( $pd_core . 'inc/cache-keys.php' );
+$fc_admin = ntn_t_read( $pd_core . 'inc/admin/admin-page.php' );
+$fc_main  = ntn_t_read( $pd_core . 'ntn-journal-core.php' );
+$fc_fall  = ntn_t_read( $pd_theme . 'inc/plugin-fallbacks.php' );
 
 // 76.1: la funzione è nel plugin, protetta; quella mai usata per i tag non esiste più
 assert_test(
 	false !== strpos( $fc_data, "if ( ! function_exists( 'ntn_get_game_featured_content' ) ) :" ) && false !== strpos( $fc_data, 'function ntn_get_game_featured_content(' ) &&
-	false === strpos( $fc_data . file_get_contents( $pd_theme . 'inc/helpers.php' ), 'ntn_get_tag_featured_content' ) &&
+	false === strpos( $fc_data . ntn_t_read( $pd_theme . 'inc/helpers.php' ), 'ntn_get_tag_featured_content' ) &&
 	false !== strpos( $fc_fall, "if ( ! function_exists( 'ntn_get_game_featured_content' ) ) {\n\tfunction ntn_get_game_featured_content( \$object = null ) {\n\t\treturn false;" ),
 	'76.1: Hub featured content lives in the plugin, the unused tag variant is gone, and the theme keeps a fallback returning false'
 );
@@ -5115,7 +5120,7 @@ assert_test(
 // =========================================================================
 // 77. I dati per Google usano gli stessi dati della pagina (v4.14.0)
 // =========================================================================
-$vm_src = file_get_contents( $pd_core . 'inc/api-helpers.php' );
+$vm_src = ntn_t_read( $pd_core . 'inc/api-helpers.php' );
 $vm_empty = array( 'title' => '', 'cover' => '', 'release' => '', 'release_raw' => '', 'release_precision' => '', 'developer' => array(), 'publisher' => array(), 'platforms' => array(), 'genres' => array(), 'engine' => array(), 'franchise' => array(), 'url' => '', 'video_url' => '', 'screenshots' => array() );
 
 // 77.1: i campi vuoti si riempiono con i dati del gioco, nel formato del view model
@@ -5155,16 +5160,16 @@ assert_test(
 // 77.4: i generi sono in italiano come nella pagina, e i chiamanti non cambiano
 assert_test(
 	false !== strpos( $vm_src, "'genres' === \$field && function_exists( 'ntn_translate_igdb_genres' )" ) &&
-	false !== strpos( file_get_contents( $pd_core . 'inc/schema-markup.php' ), 'ntn_get_game_view_model( get_the_ID() )' ) &&
-	false !== strpos( file_get_contents( $pd_core . 'inc/seo-extras.php' ), 'ntn_get_game_view_model( $target_object )' ) &&
-	false !== strpos( file_get_contents( $pd_core . 'inc/schema-markup.php' ), "\$raw_release = \$view_model['release_raw'];" ) &&
-	2 === substr_count( file_get_contents( $pd_core . 'inc/schema-markup.php' ) . file_get_contents( $pd_core . 'inc/seo-extras.php' ), "\$view_model['release_raw'] ? \$view_model['release_raw'] : get_post_meta(" ),
+	false !== strpos( ntn_t_read( $pd_core . 'inc/schema-markup.php' ), 'ntn_get_game_view_model( get_the_ID() )' ) &&
+	false !== strpos( ntn_t_read( $pd_core . 'inc/seo-extras.php' ), 'ntn_get_game_view_model( $target_object )' ) &&
+	false !== strpos( ntn_t_read( $pd_core . 'inc/schema-markup.php' ), "\$raw_release = \$view_model['release_raw'];" ) &&
+	2 === substr_count( ntn_t_read( $pd_core . 'inc/schema-markup.php' ) . ntn_t_read( $pd_core . 'inc/seo-extras.php' ), "\$view_model['release_raw'] ? \$view_model['release_raw'] : get_post_meta(" ),
 	'77.4: Genres are translated as on the page; schema and SEO callers keep calling ntn_get_game_view_model() and take the release date from it'
 );
 
 // 77.5: Hub e tag del gioco scrivono "PC" come le recensioni, nei dati per Google e nel testo visibile
-$vm_hubseo = file_get_contents( $pd_core . 'inc/hub-seo.php' );
-$vm_hubhdr = file_get_contents( $pd_theme . 'template-parts/hub-header.php' );
+$vm_hubseo = ntn_t_read( $pd_core . 'inc/hub-seo.php' );
+$vm_hubhdr = ntn_t_read( $pd_theme . 'template-parts/hub-header.php' );
 assert_test(
 	false !== strpos( $vm_hubseo, "\$platforms = ntn_core_schema_platform_names( ntn_hub_names( \$info['platforms'] ?? array() ) );" ) &&
 	false !== strpos( $vm_hubhdr, "if ( function_exists( 'ntn_core_schema_platform_names' ) ) {" ) && false !== strpos( $vm_hubhdr, 'ntn_core_schema_platform_names( array_filter( $platforms,' ) &&
@@ -5175,7 +5180,7 @@ assert_test(
 // 77.6: la scheda del gioco (colonna laterale e testata da telefono) scrive "PC" come le Hub
 $vm_card_ok = true;
 foreach ( array( 'review-sidebar-desktop.php', 'review-header-mobile.php' ) as $vm_card ) {
-	$vm_card_src = file_get_contents( $pd_theme . 'template-parts/' . $vm_card );
+	$vm_card_src = ntn_t_read( $pd_theme . 'template-parts/' . $vm_card );
 	$vm_card_ok  = $vm_card_ok && false !== strpos( $vm_card_src, "if ( \$platforms && function_exists( 'ntn_core_schema_platform_names' ) ) {" );
 }
 assert_test( $vm_card_ok, '77.6: The game card (desktop sidebar and mobile header) shows PC instead of PC (Microsoft Windows)' );
