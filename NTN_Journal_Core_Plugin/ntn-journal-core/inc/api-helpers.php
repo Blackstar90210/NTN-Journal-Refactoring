@@ -22,6 +22,8 @@ function ntn_get_game_view_model( $object ) {
 		'title'       => '',
 		'cover'       => '',
 		'release'     => '',
+		'release_raw' => '', // v4.14.0: data come salvata (AAAA-MM-GG), per datePublished
+		'release_precision' => '',
 		'developer'   => array(),
 		'publisher'   => array(),
 		'platforms'   => array(),
@@ -62,6 +64,8 @@ function ntn_get_game_view_model( $object ) {
 
 	// Release
 	$release_raw = $get_meta( '_ntn_game_release' );
+	$data['release_raw']       = $release_raw;
+	$data['release_precision'] = $get_meta( '_ntn_game_release_precision' );
 	if ( $release_raw ) {
 		$timestamp = strtotime( $release_raw );
 		if ( $timestamp ) {
@@ -83,6 +87,7 @@ function ntn_get_game_view_model( $object ) {
 			$data[ $field ] = array_values( array_filter( array_map( 'trim', $arr ) ) );
 		}
 	}
+	$data['platforms'] = ntn_core_schema_platform_names( $data['platforms'] );
 
 	$data['url'] = $get_meta( '_ntn_game_url' );
 
@@ -105,6 +110,7 @@ function ntn_get_game_view_model( $object ) {
 
 	// v4.14.0: i campi vuoti si completano con i dati del gioco che mostra la pagina (tag del gioco,
 	// scheda videogioco), così i dati strutturati coincidono con quello che vede il lettore.
+	// Solo i campi della scheda: trailer e screenshot restano quelli scritti sull'oggetto.
 	$source = ntn_core_view_model_source( $is_term ? get_term( $id ) : get_post( $id ) );
 	if ( $source && function_exists( 'ntn_get_hub_igdb_info' ) ) {
 		$data = ntn_core_fill_view_model( $data, ntn_get_hub_igdb_info( $source ) );
@@ -150,7 +156,9 @@ function ntn_core_view_model_source( $object ) {
 
 /**
  * Riempie i campi vuoti del view model con i dati di ntn_get_hub_igdb_info() (v4.14.0).
- * I campi già pieni, letti dall'oggetto stesso, non cambiano.
+ * I campi già pieni, letti dall'oggetto stesso, non cambiano. Si completano solo i campi che la scheda
+ * del gioco mostra al lettore (titolo, copertina, uscita, sviluppatore, editore, piattaforme, generi,
+ * motore): trailer e screenshot no, perché nella pagina di un articolo non si vedono.
  *
  * @param array $data View model di ntn_get_game_view_model().
  * @param array $info Dati di ntn_get_hub_igdb_info().
@@ -170,21 +178,40 @@ function ntn_core_fill_view_model( array $data, $info ) {
 		}
 	}
 	if ( '' === $data['release'] && ! empty( $info['release'] ) ) {
-		$timestamp       = strtotime( $info['release'] );
-		$data['release'] = $timestamp ? wp_date( get_option( 'date_format' ), $timestamp ) : $info['release'];
+		$timestamp                 = strtotime( $info['release'] );
+		$data['release']           = $timestamp ? wp_date( get_option( 'date_format' ), $timestamp ) : $info['release'];
+		$data['release_raw']       = (string) $info['release'];
+		$data['release_precision'] = isset( $info['release_precision'] ) ? (string) $info['release_precision'] : '';
 	}
 	foreach ( array( 'developer', 'publisher', 'platforms', 'genres', 'engine' ) as $field ) {
 		if ( empty( $data[ $field ] ) && ! empty( $info[ $field ] ) ) {
 			$data[ $field ] = $to_list( $info[ $field ] );
 		}
 	}
-	if ( '' === $data['video_url'] && ! empty( $info['video'] ) ) {
-		$data['video_url'] = 'https://www.youtube.com/watch?v=' . esc_attr( $info['video'] );
-	}
-	if ( empty( $data['screenshots'] ) && ! empty( $info['screenshots'] ) ) {
-		foreach ( $to_list( $info['screenshots'] ) as $scr_id ) {
-			$data['screenshots'][] = 'https://images.igdb.com/igdb/image/upload/t_1080p/' . esc_attr( $scr_id ) . '.jpg';
-		}
-	}
+	$data['platforms'] = ntn_core_schema_platform_names( $data['platforms'] );
 	return $data;
+}
+
+/**
+ * Nomi delle piattaforme IGDB come le categorie del sito (v4.14.0).
+ *
+ * I dati strutturati uniscono le piattaforme del gioco a quelle prese dalle categorie, dove il PC si
+ * chiama "PC": senza questo passaggio comparirebbero sia "PC" sia "PC (Microsoft Windows)".
+ *
+ * @param array $platforms Piattaforme.
+ * @return array Piattaforme senza doppioni.
+ */
+function ntn_core_schema_platform_names( array $platforms ) {
+	$names = array(
+		'pc (microsoft windows)' => 'PC',
+		'pc (windows)'           => 'PC',
+		'windows'                => 'PC',
+		'microsoft windows'      => 'PC',
+	);
+	$out = array();
+	foreach ( $platforms as $platform ) {
+		$key   = strtolower( trim( (string) $platform ) );
+		$out[] = isset( $names[ $key ] ) ? $names[ $key ] : $platform;
+	}
+	return array_values( array_unique( $out ) );
 }

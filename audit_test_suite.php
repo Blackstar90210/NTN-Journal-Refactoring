@@ -5116,19 +5116,19 @@ assert_test(
 // =========================================================================
 require_once $pd_core . 'inc/api-helpers.php';
 $vm_src = file_get_contents( $pd_core . 'inc/api-helpers.php' );
-$vm_empty = array( 'title' => '', 'cover' => '', 'release' => '', 'developer' => array(), 'publisher' => array(), 'platforms' => array(), 'genres' => array(), 'engine' => array(), 'franchise' => array(), 'url' => '', 'video_url' => '', 'screenshots' => array() );
+$vm_empty = array( 'title' => '', 'cover' => '', 'release' => '', 'release_raw' => '', 'release_precision' => '', 'developer' => array(), 'publisher' => array(), 'platforms' => array(), 'genres' => array(), 'engine' => array(), 'franchise' => array(), 'url' => '', 'video_url' => '', 'screenshots' => array() );
 
 // 77.1: i campi vuoti si riempiono con i dati del gioco, nel formato del view model
-$vm_info = array( 'title' => 'Celeste', 'cover' => 'https://images.igdb.com/c.jpg', 'release' => '2018-01-25', 'developer' => 'Maddy Makes Games, Extremely OK Games', 'publisher' => 'Matt Makes Games', 'platforms' => 'PC, Switch', 'genres' => 'Platform, Indie', 'engine' => 'XNA', 'url' => 'https://www.igdb.com/games/celeste', 'video' => 'abc123', 'screenshots' => 'sc1, sc2' );
+$vm_info = array( 'title' => 'Celeste', 'cover' => 'https://images.igdb.com/c.jpg', 'release' => '2018-01-25', 'developer' => 'Maddy Makes Games, Extremely OK Games', 'publisher' => 'Matt Makes Games', 'platforms' => 'PC (Microsoft Windows), Switch', 'release_precision' => 'day', 'genres' => 'Platform, Indie', 'engine' => 'XNA', 'url' => 'https://www.igdb.com/games/celeste', 'video' => 'abc123', 'screenshots' => 'sc1, sc2' );
 $vm_prev_fmt = isset( $GLOBALS['mock_options']['date_format'] ) ? $GLOBALS['mock_options']['date_format'] : null;
 $GLOBALS['mock_options']['date_format'] = 'd/m/Y';
 $vm_full = ntn_core_fill_view_model( $vm_empty, $vm_info );
 $GLOBALS['mock_options']['date_format'] = $vm_prev_fmt;
 assert_test(
 	'Celeste' === $vm_full['title'] && array( 'Maddy Makes Games', 'Extremely OK Games' ) === $vm_full['developer'] && array( 'PC', 'Switch' ) === $vm_full['platforms'] &&
-	'https://www.youtube.com/watch?v=abc123' === $vm_full['video_url'] && 2 === count( $vm_full['screenshots'] ) && false !== strpos( $vm_full['screenshots'][1], '/t_1080p/sc2.jpg' ) &&
-	'25/01/2018' === $vm_full['release'] && array() === $vm_full['franchise'],
-	'77.1: Empty view model fields are filled from the game data the page uses, as lists, video URL and screenshot URLs'
+	'25/01/2018' === $vm_full['release'] && '2018-01-25' === $vm_full['release_raw'] && 'day' === $vm_full['release_precision'] && array() === $vm_full['franchise'] &&
+	'' === $vm_full['video_url'] && array() === $vm_full['screenshots'],
+	'77.1: Empty view model fields are filled from the game card data (lists, display and raw release date); trailer and screenshots are not, since an article page does not show them'
 );
 
 // 77.2: i campi già scritti sull'oggetto non cambiano
@@ -5138,8 +5138,9 @@ $vm_own['publisher'] = array( 'Editore scritto a mano' );
 $vm_own              = ntn_core_fill_view_model( $vm_own, $vm_info );
 assert_test(
 	'Celeste (articolo)' === $vm_own['title'] && array( 'Editore scritto a mano' ) === $vm_own['publisher'] && array( 'XNA' ) === $vm_own['engine'] &&
-	$vm_empty === ntn_core_fill_view_model( $vm_empty, array() ),
-	'77.2: Fields already written on the object win; with no game data nothing changes'
+	$vm_empty === ntn_core_fill_view_model( $vm_empty, array() ) &&
+	array( 'PC', 'Switch', 'Mac' ) === ntn_core_schema_platform_names( array( 'PC', 'PC (Microsoft Windows)', 'Switch', 'Mac', 'Windows' ) ),
+	'77.2: Fields already written on the object win; with no game data nothing changes; IGDB PC names match the site category name, without duplicates'
 );
 
 // 77.3: da dove arrivano i dati: tag e scheda videogioco sono il gioco; un articolo usa il gioco della sua scheda
@@ -5155,8 +5156,10 @@ assert_test(
 assert_test(
 	false !== strpos( $vm_src, "'genres' === \$field && function_exists( 'ntn_translate_igdb_genres' )" ) &&
 	false !== strpos( file_get_contents( $pd_core . 'inc/schema-markup.php' ), 'ntn_get_game_view_model( get_the_ID() )' ) &&
-	false !== strpos( file_get_contents( $pd_core . 'inc/seo-extras.php' ), 'ntn_get_game_view_model( $target_object )' ),
-	'77.4: Genres are translated as on the page; schema and SEO callers keep calling ntn_get_game_view_model()'
+	false !== strpos( file_get_contents( $pd_core . 'inc/seo-extras.php' ), 'ntn_get_game_view_model( $target_object )' ) &&
+	false !== strpos( file_get_contents( $pd_core . 'inc/schema-markup.php' ), "\$raw_release = \$view_model['release_raw'];" ) &&
+	2 === substr_count( file_get_contents( $pd_core . 'inc/schema-markup.php' ) . file_get_contents( $pd_core . 'inc/seo-extras.php' ), "\$view_model['release_raw'] ? \$view_model['release_raw'] : get_post_meta(" ),
+	'77.4: Genres are translated as on the page; schema and SEO callers keep calling ntn_get_game_view_model() and take the release date from it'
 );
 
 $GLOBALS['post'] = null;

@@ -982,9 +982,10 @@ function ntn_tsf_add_videogame_schema( $data, $context = array() ) {
 		// Release Date
 		if ( ! empty( $view_model['release'] ) ) {
 			// Try to find raw release date from meta if the view model returned localized string
-			$raw_release = get_post_meta( $post_id, '_ntn_game_release', true );
+			$raw_release   = $view_model['release_raw'] ? $view_model['release_raw'] : get_post_meta( $post_id, '_ntn_game_release', true ); // v4.14.0
+			$raw_precision = $view_model['release_raw'] ? $view_model['release_precision'] : get_post_meta( $post_id, '_ntn_game_release_precision', true );
 			if ( $raw_release ) {
-				$videogame_entity['datePublished'] = function_exists( 'ntn_release_schema_date' ) ? ntn_release_schema_date( $raw_release, (string) get_post_meta( $post_id, '_ntn_game_release_precision', true ) ) : $raw_release; // v3.19.2: solo le parti note
+				$videogame_entity['datePublished'] = function_exists( 'ntn_release_schema_date' ) ? ntn_release_schema_date( $raw_release, (string) $raw_precision ) : $raw_release; // v3.19.2: solo le parti note
 			}
 		}
 
