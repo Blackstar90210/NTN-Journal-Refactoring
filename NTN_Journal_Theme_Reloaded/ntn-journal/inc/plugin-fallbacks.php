@@ -64,3 +64,16 @@ if ( ! function_exists( 'ntn_get_tag_igdb_info' ) ) {
 		return array();
 	}
 }
+
+// v4.12.0: giochi e recensioni di un articolo.
+if ( ! function_exists( 'ntn_get_post_games' ) ) {
+	function ntn_get_post_games( $post_id ) {
+		return array();
+	}
+}
+
+if ( ! function_exists( 'ntn_apply_post_meta_to_game' ) ) {
+	function ntn_apply_post_meta_to_game( array $game, $post_id ) {
+		return $game;
+	}
+}
