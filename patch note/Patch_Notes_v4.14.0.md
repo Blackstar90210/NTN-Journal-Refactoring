@@ -19,6 +19,7 @@ Ultimo passo della fase 2 della revisione di coerenza tra plugin e temi. I dati 
 - Le piattaforme IGDB del PC ("PC (Microsoft Windows)", "Windows") diventano "PC", come la categoria del sito: niente più "PC" e "PC (Microsoft Windows)" insieme.
 - Lo stesso nome vale per Hub e tag del gioco, sia nei dati per Google (`hub-seo.php`) sia nel testo che vede il lettore nella testata (`template-parts/hub-header.php`): ora si legge "PC" ovunque. Con un plugin più vecchio la testata resta com'era.
 - Anche la scheda del gioco (colonna laterale su PC e testata da telefono) scrive "PC".
+- Anche la frase automatica dell'Hub ("In breve" e meta description) scrive "PC". Cambia solo il nome della piattaforma, le parole della frase restano quelle di prima.
 
 ### 📋 2. Chi usa questi dati
 

@@ -5177,6 +5177,12 @@ assert_test(
 	'77.5: Game Hubs and game tags show and send "PC" instead of "PC (Microsoft Windows)", like the reviews'
 );
 
+// 77.7: anche la frase automatica dell'Hub (In breve, meta description) scrive "PC"; la frase non cambia
+assert_test(
+	false !== strpos( ntn_t_read( $pd_core . 'inc/hub-seo.php' ), "array_slice( ntn_core_schema_platform_names( ntn_hub_names( \$info['platforms'] ?? array() ) ), 0, 4 )" ),
+	'77.7: The automatic Hub sentence uses PC instead of PC (Microsoft Windows) and keeps its wording'
+);
+
 // 77.6: la scheda del gioco (colonna laterale e testata da telefono) scrive "PC" come le Hub
 $vm_card_ok = true;
 foreach ( array( 'review-sidebar-desktop.php', 'review-header-mobile.php' ) as $vm_card ) {

@@ -193,7 +193,7 @@ function ntn_get_hub_auto_summary( int $post_id ): string {
 		$sentence .= ', ' . $release;
 	}
 
-	$platforms = array_slice( ntn_hub_names( $info['platforms'] ?? array() ), 0, 4 );
+	$platforms = array_slice( ntn_core_schema_platform_names( ntn_hub_names( $info['platforms'] ?? array() ) ), 0, 4 ); // v4.14.0: solo il nome del PC cambia, la frase resta quella di prima
 	if ( $platforms ) {
 		$sentence .= ' su ' . ntn_hub_join_names( $platforms );
 	}
