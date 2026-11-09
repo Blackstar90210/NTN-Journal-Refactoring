@@ -1655,24 +1655,24 @@ echo "\n--- 24. SEMVER SIMULTANEOUS 4-HEADER SYNCHRONIZATION ---\n";
 $parent_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $parent_css, $m_parent );
 $parent_ver = isset( $m_parent[1] ) ? trim( $m_parent[1] ) : '';
-assert_test( $parent_ver === '4.19.0', "24.1: Parent Theme style.css declares Version: 4.19.0(found: {$parent_ver})" );
+assert_test( $parent_ver === '4.20.0', "24.1: Parent Theme style.css declares Version: 4.20.0(found: {$parent_ver})" );
 
 $child_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $child_css, $m_child );
 $child_ver = isset( $m_child[1] ) ? trim( $m_child[1] ) : '';
-assert_test( $child_ver === '4.19.0', "24.2: Child Theme style.css declares Version: 4.19.0(found: {$child_ver})" );
+assert_test( $child_ver === '4.20.0', "24.2: Child Theme style.css declares Version: 4.20.0(found: {$child_ver})" );
 
 $core_php = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' );
 preg_match( '/\*\s*Version:\s*([0-9\.]+)/', $core_php, $m_core_hdr );
 $core_hdr_ver = isset( $m_core_hdr[1] ) ? trim( $m_core_hdr[1] ) : '';
-assert_test( $core_hdr_ver === '4.19.0', "24.3: Core Plugin header declares Version: 4.19.0(found: {$core_hdr_ver})" );
+assert_test( $core_hdr_ver === '4.20.0', "24.3: Core Plugin header declares Version: 4.20.0(found: {$core_hdr_ver})" );
 
 preg_match( "/define\(\s*'NTN_JOURNAL_CORE_VERSION',\s*'([^']+)'\s*\);/", $core_php, $m_core_const );
 $core_const_ver = isset( $m_core_const[1] ) ? trim( $m_core_const[1] ) : '';
-assert_test( $core_const_ver === '4.19.0', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.19.0(found: {$core_const_ver})" );
+assert_test( $core_const_ver === '4.20.0', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.20.0(found: {$core_const_ver})" );
 
 assert_test(
-	$parent_ver === '4.19.0' && $child_ver === '4.19.0' && $core_hdr_ver === '4.19.0' && $core_const_ver === '4.19.0',
+	$parent_ver === '4.20.0' && $child_ver === '4.20.0' && $core_hdr_ver === '4.20.0' && $core_const_ver === '4.20.0',
 	'24.5: All 4 version headers are 100% synchronized and atomic according to Rule 2 of GEMINI.md'
 );
 
@@ -1819,9 +1819,9 @@ assert_test( ! file_exists( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/in
 $cgc_content = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/template-parts/content-game-card.php' );
 assert_test( strpos( $cgc_content, 'width="400" height="533"' ) !== false, '27.18: content-game-card.php declares explicit width and height' );
 
-// 27.17: performance.php contains ntn_png_has_transparency
-$perf_content = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/inc/performance.php' );
-assert_test( strpos( $perf_content, 'function ntn_png_has_transparency' ) !== false, '27.19: performance.php defines ntn_png_has_transparency helper to protect alpha channels' );
+// 27.17: dalla 4.20.0 le ottimizzazioni del sito stanno nel plugin (inc/site-optimizations.php)
+$perf_content = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/site-optimizations.php' );
+assert_test( strpos( $perf_content, 'function ntn_core_png_has_transparency' ) !== false, '27.19: site-optimizations.php defines ntn_core_png_has_transparency helper to protect alpha channels' );
 
 // --- TEST SUITE 28: Exhaustive Hardening & Resilience Audit v3.1.6 ---
 echo "\n--- 28. EXHAUSTIVE HARDENING & RESILIENCE AUDIT V3.1.6 ---\n";
@@ -1838,7 +1838,7 @@ $parent_av = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journa
 assert_test( strpos( $parent_av, 'width="400" height="533"' ) !== false, '28.5: Parent catalog game card has 3:4 aspect ratio 400x533' );
 
 // 28.6: inc/performance.php: $_GET['author'] sanitized and unslashed
-assert_test( strpos( $perf_content, 'absint( wp_unslash( $_GET[\'author\'] ) )' ) !== false, '28.6: performance.php sanitizes and unslashes $_GET[\'author\']' );
+assert_test( strpos( $perf_content, 'absint( wp_unslash( $_GET[\'author\'] ) )' ) !== false, '28.6: site-optimizations.php sanitizes and unslashes $_GET[\'author\']' );
 
 // 28.7: inc/related-posts.php & template-parts/content.php: fallback dimensions 400x225
 assert_test( strpos( $rp_code, 'width="400" height="225"' ) !== false, '28.7: related-posts.php declares 400x225 on fallback thumbnail' );
@@ -1901,7 +1901,7 @@ $parent_style_ver = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( AB
 $child_style_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' ), $m2 ) ? $m2[1] : '';
 $core_plugin_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m3 ) ? $m3[1] : '';
 $core_const_ver   = preg_match( '/define\(\s*[\'"]NTN_JOURNAL_CORE_VERSION[\'"]\s*,\s*[\'"]([0-9\.]+)[\'"]\s*\)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m4 ) ? $m4[1] : '';
-assert_test( $parent_style_ver === '4.19.0' && $child_style_ver === '4.19.0' && $core_plugin_ver === '4.19.0' && $core_const_ver === '4.19.0', '29.1: All 4 version headers are synchronized to 4.19.0' );
+assert_test( $parent_style_ver === '4.20.0' && $child_style_ver === '4.20.0' && $core_plugin_ver === '4.20.0' && $core_const_ver === '4.20.0', '29.1: All 4 version headers are synchronized to 4.20.0' );
 
 // 29.2: single.php sequence is Google Feed -> Social CTA -> Bottom Related Posts
 $single_php = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/single.php' );
@@ -1993,8 +1993,8 @@ assert_test( strpos( $tab_extra_content, 'Visualizzazione Tag' ) === false && st
 assert_test( strpos( $customizer_php, 'Q-GIN' ) === false, '29.18: customizer.php contains no legacy hardcoded Q-GIN strings' );
 
 // 29.19: performance.php dead comment removed
-$perf_php_content = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/inc/performance.php' );
-assert_test( strpos( $perf_php_content, 'Removed buggy function' ) === false, '29.19: performance.php contains no dead leftover comment' );
+$perf_php_content = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/inc/performance.php' ) . $perf_content;
+assert_test( strpos( $perf_php_content, 'Removed buggy function' ) === false, '29.19: performance.php and site-optimizations.php contain no dead leftover comment' );
 
 // 29.20: breaking-news.php badge color fallback unified to #dc2626
 $bn_php_content = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/inc/breaking-news.php' );
@@ -3600,12 +3600,12 @@ assert_test(
 
 // --- TEST SUITE 61: PNG pieni salvati in RGBA compressi come JPEG v3.22.5 ---
 echo "\n--- 61. TRASPARENZA DEI PNG V3.22.5 ---\n";
-$png_src = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/inc/performance.php' );
+$png_src = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/site-optimizations.php' );
 
 // 61.1: l'intestazione RGBA non basta più, si controllano i pixel
 assert_test(
-	strpos( $png_src, 'function ntn_png_is_fully_opaque' ) !== false &&
-	strpos( $png_src, '$opaque        = ntn_png_is_fully_opaque( $file_path );' ) !== false &&
+	strpos( $png_src, 'function ntn_core_png_is_fully_opaque' ) !== false &&
+	strpos( $png_src, '$opaque        = ntn_core_png_is_fully_opaque( $file_path );' ) !== false &&
 	strpos( $png_src, "if ( 4 === \$color_type || 6 === \$color_type ) {\n\t\t\treturn true;" ) === false,
 	'61.1: An RGBA PNG header alone no longer counts as transparent: the pixels are checked'
 );
@@ -5910,6 +5910,35 @@ assert_test(
 	false !== strpos( ntn_t_read( $cr_dir . 'ntn-journal-core.php' ), "inc/cache-registry.php'" ),
 	'89.4: The flush function and the info box in the Extra tab both read the registry, and the plugin loads it'
 );
+
+// --- TEST SUITE 90: ottimizzazioni del sito spostate nel plugin v4.20.0 ---
+echo "\n--- 90. OTTIMIZZAZIONI DEL SITO NEL PLUGIN V4.20.0 ---\n";
+$so_plugin = ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/site-optimizations.php' );
+$so_theme  = ntn_t_read( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/inc/performance.php' );
+$so_moved  = array( 'get_avatar_class', 'jpeg_quality', 'ntn_journal_disable_emojis', 'ntn_journal_header_cleanup', 'ntn_journal_block_author_enumeration', 'ntn_png_has_transparency', 'ntn_png_is_fully_opaque', 'image_editor_output_format', 'wp_handle_upload', 'big_image_size_threshold' );
+$so_left   = array();
+foreach ( $so_moved as $so_n ) {
+	if ( false !== strpos( $so_theme, $so_n ) ) {
+		$so_left[] = $so_n;
+	}
+}
+assert_test( empty( $so_left ), '90.1: The theme performance.php no longer holds the media, emoji, header, Gravatar and author-enumeration code (still there: ' . implode( ', ', $so_left ) . ')' );
+assert_test(
+	false !== strpos( $so_theme, 'function ntn_preload_lcp_image' ) && false !== strpos( $so_theme, 'function ntn_dns_prefetch_external_resources' ) && false !== strpos( $so_theme, 'function ntn_journal_defer_scripts' ),
+	'90.2: The theme keeps what belongs to its own pages: LCP preload, DNS prefetch, defer of theme scripts'
+);
+assert_test(
+	false !== strpos( $so_plugin, 'function ntn_core_register_site_optimizations()' ) && false !== strpos( $so_plugin, "add_filter( 'big_image_size_threshold', '__return_false' )" ) &&
+	false !== strpos( $so_plugin, "add_action( 'template_redirect', 'ntn_core_block_author_enumeration' )" ) && false !== strpos( $so_plugin, "add_filter( 'wp_handle_upload', 'ntn_core_optimize_upload_size_and_format' )" ) &&
+	false !== strpos( ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), "inc/site-optimizations.php'" ),
+	'90.3: The plugin registers the moved optimizations and loads the file'
+);
+assert_test(
+	false !== strpos( $so_plugin, "version_compare( (string) wp_get_theme( 'ntn-journal' )->get( 'Version' ), '4.20.0', '>=' )" ) &&
+	false !== strpos( $so_plugin, 'if ( ! ntn_core_owns_site_optimizations() ) {' ) && false === strpos( $so_plugin, 'function ntn_journal_' ) && false === strpos( $so_plugin, 'function ntn_png_' ),
+	'90.4: With an older NTN theme (which still does it) the plugin stays out; the moved functions use new ntn_core_ names, so no "Cannot redeclare" with the old theme'
+);
+
 
 $GLOBALS['post'] = null;
 unset( $GLOBALS['mock_wp_query_handler'] );
