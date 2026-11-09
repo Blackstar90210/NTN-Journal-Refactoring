@@ -49,7 +49,7 @@ $primary_cat = ntn_get_primary_category( get_the_ID() );
 		<?php endif; ?>
 		<span class="ntn-card-badge"><?php echo $primary_cat ? esc_html( $primary_cat->name ) : 'POST'; ?></span>
 		<?php if ( ! empty( $rating ) ) : ?>
-			<span class="ntn-card-badge is-red">Voto: <?php echo esc_html( function_exists( 'get_rating_initials' ) ? get_rating_initials( $rating ) : $rating ); ?></span>
+			<span class="ntn-card-badge is-red">Voto: <?php echo esc_html( function_exists( 'ntn_get_rating_initials' ) ? ntn_get_rating_initials( $rating ) : $rating ); ?></span>
 		<?php endif; ?>
 	</div>
 

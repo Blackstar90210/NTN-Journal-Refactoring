@@ -208,7 +208,7 @@ function ntn_journal_block_editor_assets() {
 	wp_enqueue_script(
 		'ntn-ai-summary-gutenberg-js',
 		NTN_JOURNAL_CORE_URL . 'assets/js/ai-summary-gutenberg.js',
-		array( 'wp-plugins', 'wp-edit-post', 'wp-element', 'wp-components', 'wp-data', 'wp-api-fetch' ),
+		array( 'wp-plugins', 'wp-editor', 'wp-edit-post', 'wp-element', 'wp-components', 'wp-data', 'wp-api-fetch' ),
 		filemtime( NTN_JOURNAL_CORE_DIR . 'assets/js/ai-summary-gutenberg.js' ),
 		true
 	);

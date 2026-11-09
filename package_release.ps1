@@ -34,7 +34,7 @@ Add-Type -AssemblyName System.IO.Compression.FileSystem
 Add-Type -AssemblyName System.IO.Compression
 
 function Zip-Folder {
-    param([string]$source, [string]$destination)
+    param([string]$source, [string]$destination, [string[]]$excludeDirs = @())
     if (Test-Path $destination) { Remove-Item $destination -Force }
     
     $resolvedSource = (Resolve-Path $source).Path.TrimEnd('\')
@@ -43,6 +43,10 @@ function Zip-Folder {
     
     Get-ChildItem -Path $resolvedSource -Recurse -File | ForEach-Object {
         $relativePath = $_.FullName.Substring($resolvedSource.Length + 1).Replace('\', '/')
+        # Cartelle di sviluppo che non servono sul sito (es. build/ con i sorgenti di Tailwind)
+        foreach ($excluded in $excludeDirs) {
+            if ($relativePath.StartsWith("$excluded/")) { return }
+        }
         $entryName = "$folderName/$relativePath"
         $null = [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip, $_.FullName, $entryName, [System.IO.Compression.CompressionLevel]::Optimal)
     }
@@ -53,7 +57,7 @@ function Zip-Folder {
 
 # Parent Theme
 Write-Host "Creazione ZIP Parent Theme in corso..." -ForegroundColor Yellow
-Zip-Folder -source "$resolvedSourceDir\NTN_Journal_Theme_Reloaded\ntn-journal" -destination "$resolvedOutputDir\ntn-journal-parent-$Version.zip"
+Zip-Folder -source "$resolvedSourceDir\NTN_Journal_Theme_Reloaded\ntn-journal" -destination "$resolvedOutputDir\ntn-journal-parent-$Version.zip" -excludeDirs @("build")
 
 # Child Theme
 Write-Host "Creazione ZIP Child Theme in corso..." -ForegroundColor Yellow

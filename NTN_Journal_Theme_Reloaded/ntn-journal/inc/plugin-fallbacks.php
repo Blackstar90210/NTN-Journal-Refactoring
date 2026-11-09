@@ -17,8 +17,8 @@ if ( ! function_exists( 'ntn_translate_igdb_genres' ) ) {
 	}
 }
 
-if ( ! function_exists( 'get_post_rating' ) ) {
-	function get_post_rating( $post_id ) {
+if ( ! function_exists( 'ntn_get_post_rating' ) ) {
+	function ntn_get_post_rating( $post_id ) {
 		return null;
 	}
 }

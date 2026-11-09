@@ -55,7 +55,7 @@ $ntn_mp_base = add_query_arg( array( 'page' => 'ntn-journal-functions', 'tab' =>
 									<select id="nadm-mp-<?php echo esc_attr( (string) $ntn_mp_id ); ?>" name="ntn_rating_value[<?php echo esc_attr( (string) $ntn_mp_id ); ?>]">
 										<option value="">—</option>
 										<?php for ( $ntn_mp_i = 5; $ntn_mp_i >= 1; $ntn_mp_i-- ) : ?>
-											<option value="<?php echo esc_attr( (string) $ntn_mp_i ); ?>" <?php selected( $ntn_mp_val, $ntn_mp_i ); ?>><?php echo esc_html( $ntn_mp_i . ' · ' . ucfirst( strtolower( (string) get_rating_label( $ntn_mp_i ) ) ) ); ?></option>
+											<option value="<?php echo esc_attr( (string) $ntn_mp_i ); ?>" <?php selected( $ntn_mp_val, $ntn_mp_i ); ?>><?php echo esc_html( $ntn_mp_i . ' · ' . ucfirst( strtolower( (string) ntn_get_rating_label( $ntn_mp_i ) ) ) ); ?></option>
 										<?php endfor; ?>
 									</select>
 								</td>

@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  */
 
 $post_id = get_the_ID();
-$rating = get_post_rating( $post_id );
+$rating = ntn_get_post_rating( $post_id );
 
 $games      = ntn_get_post_games( $post_id );
 $game_count = count( $games );
@@ -39,7 +39,7 @@ if ( 1 === $game_count ) {
 }
 
 $final_rating = ! empty( $rating ) ? max( 1, min( 5, intval( $rating ) ) ) : 0;
-$rating_label = ( $final_rating && function_exists( 'get_rating_label' ) ) ? get_rating_label( $final_rating ) : '';
+$rating_label = ( $final_rating && function_exists( 'ntn_get_rating_label' ) ) ? ntn_get_rating_label( $final_rating ) : '';
 
 // Copertina, nome, piattaforme, uscita e, se richiesto, il giudizio dell'articolo
 $render_body = static function ( $game, $label, $show_verdict, $lazy = false ) use ( $final_rating, $rating_label ) {

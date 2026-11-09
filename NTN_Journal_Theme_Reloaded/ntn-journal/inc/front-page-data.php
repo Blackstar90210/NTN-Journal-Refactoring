@@ -46,7 +46,7 @@ function ntn_front_game_entity( $post_id ) {
 function ntn_front_card_data( $post_id, $size = 'ntn-grid-thumb' ) {
 	$primary_cat = function_exists( 'ntn_get_primary_category' ) ? ntn_get_primary_category( $post_id ) : null;
 	$minutes     = (int) get_post_meta( $post_id, '_ntn_reading_time', true );
-	$rating      = function_exists( 'get_post_rating' ) ? get_post_rating( $post_id ) : null;
+	$rating      = function_exists( 'ntn_get_post_rating' ) ? ntn_get_post_rating( $post_id ) : null;
 	$excerpt     = wp_strip_all_tags( get_the_excerpt( $post_id ) );
 	$author_id   = (int) get_post_field( 'post_author', $post_id );
 
@@ -314,7 +314,7 @@ function ntn_front_leds( $rating ) {
 	if ( ! $rating ) {
 		return;
 	}
-	$label = function_exists( 'get_rating_label' ) ? get_rating_label( $rating ) : '';
+	$label = function_exists( 'ntn_get_rating_label' ) ? ntn_get_rating_label( $rating ) : '';
 	echo '<span class="ntn-leds" role="img" aria-label="' . esc_attr( sprintf( 'Voto %d su 5', $rating ) ) . '">';
 	for ( $i = 1; $i <= 5; $i++ ) {
 		$cls = 'ntn-led';

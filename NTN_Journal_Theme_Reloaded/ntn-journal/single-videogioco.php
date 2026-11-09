@@ -144,7 +144,7 @@ $has_screenshots = ! empty( $scr_array );
 					$post = $featured_data['post'];
 					setup_postdata( $post );
 
-					$rating = function_exists( 'get_post_rating' ) ? get_post_rating( $post->ID ) : '';
+					$rating = function_exists( 'ntn_get_post_rating' ) ? ntn_get_post_rating( $post->ID ) : '';
 					if ( $featured_data['type'] === 'review' && ! empty( $rating ) ) {
 						get_template_part( 'template-parts/review-original-box', null, array( 'hide_verdict' => true ) );
 						echo '<a class="ntn-readmore" href="' . esc_url( get_permalink( $post->ID ) ) . '"><span>Leggi la recensione completa</span><span aria-hidden="true">→</span></a>';

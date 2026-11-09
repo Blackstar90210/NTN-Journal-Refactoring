@@ -91,11 +91,11 @@ function ntn_translate_igdb_genres( $genres_string ) {
 }
 endif;
 
-if ( ! function_exists( 'get_post_rating' ) ) :
+if ( ! function_exists( 'ntn_get_post_rating' ) ) :
 /**
  * Register custom fields / helper functions for theme attributes like ratings.
  */
-function get_post_rating( $post_id ) {
+function ntn_get_post_rating( $post_id ) {
 	$rating = get_post_meta( $post_id, 'rating', true );
 	if ( ! empty( $rating ) ) {
 		return floatval( $rating );
@@ -104,6 +104,15 @@ function get_post_rating( $post_id ) {
 	return null;
 }
 endif;
+
+/**
+ * Nome vecchio senza prefisso (fino alla 4.20.1), tenuto per snippet e codice esterno.
+ */
+if ( ! function_exists( 'get_post_rating' ) ) {
+	function get_post_rating( $post_id ) {
+		return ntn_get_post_rating( $post_id );
+	}
+}
 
 /**
  * Helper function to calculate post reading time
@@ -311,7 +320,7 @@ function ntn_get_igdb_data( $post_id, $meta_key ) {
 
 	if ( $meta_key === '_ntn_game_title' && empty( $val ) ) {
 		// Se non è presente un titolo gioco esplicito, usiamo il titolo del post solo se è una recensione con voto
-		$rating = get_post_rating( $post_id );
+		$rating = ntn_get_post_rating( $post_id );
 		if ( ! empty( $rating ) ) {
 			$val = get_the_title( $post_id );
 		}
@@ -934,7 +943,7 @@ function ntn_format_post_game( array $info, array $extra ) {
 		'igdb_id'           => $extra['igdb_id'],
 		'hub_url'           => $extra['hub_url'],
 		'review'            => $extra['review'],
-		'review_rating'     => $extra['review'] ? max( 0, min( 5, (int) round( (float) get_post_rating( $extra['review']->ID ) ) ) ) : 0,
+		'review_rating'     => $extra['review'] ? max( 0, min( 5, (int) round( (float) ntn_get_post_rating( $extra['review']->ID ) ) ) ) : 0,
 		'is_current_review' => false,
 	);
 

@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  * The template for displaying archive pages (Categories, Tags, Dates, etc.)
  *
  * Fase 6 del restyling (v3.8.0): intestazione sulla fascia a matrice di punti, articoli a celle.
- * I voti nelle schede sono gestiti da template-parts/content.php (con function_exists( 'get_rating_initials' )).
+ * I voti nelle schede sono gestiti da template-parts/content.php (con function_exists( 'ntn_get_rating_initials' )).
  *
  * @package NTN_Journal
  */

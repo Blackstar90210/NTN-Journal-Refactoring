@@ -4,7 +4,7 @@
  *
  * Google riconosce una recensione solo se ha un voto, e il voto deve essere visibile nella pagina. Molte vecchie
  * recensioni hanno già un giudizio sotto forma di tag (Consigliato, Consigliato con riserva, Must Play, Bocciato...):
- * questa funzione lo traduce nel voto con la stessa scala che il sito usa già (get_rating_label). Il voto nasce solo
+ * questa funzione lo traduce nel voto con la stessa scala che il sito usa già (ntn_get_rating_label). Il voto nasce solo
  * alla conferma dell'amministratore e non sostituisce mai un voto già scritto.
  *
  * @package NTN_Journal_Core
@@ -29,7 +29,7 @@ function ntn_core_rating_norm( $text ) {
 }
 
 /**
- * Giudizi riconosciuti e voto corrispondente. La scala è quella di get_rating_label():
+ * Giudizi riconosciuti e voto corrispondente. La scala è quella di ntn_get_rating_label():
  * 5 Must Play, 4 Consigliato, 3 Consigliato con riserva, 1-2 Bocciato (qui 2).
  *
  * @return array<string,int> Nome normalizzato => voto da 1 a 5.

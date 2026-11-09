@@ -24,7 +24,7 @@ get_header();
 		the_post();
 		$primary_category = ntn_get_primary_category( get_the_ID() );
 		$cat_name = $primary_category ? $primary_category->name : 'ARTICLE';
-		$rating   = get_post_rating( get_the_ID() );
+		$rating   = ntn_get_post_rating( get_the_ID() );
 
 		$game_title  = ntn_get_igdb_data( get_the_ID(), '_ntn_game_title' );
 		$game_cover  = ntn_get_igdb_data( get_the_ID(), '_ntn_game_cover' );
@@ -62,7 +62,7 @@ get_header();
 		$show_updated = $modified_ts && $published_ts && ( $modified_ts - $published_ts ) > DAY_IN_SECONDS;
 
 		// L'autore non è nella riga dei dati: lo mostra la firma subito sotto
-		$rating_label   = ( $rating && function_exists( 'get_rating_label' ) ) ? get_rating_label( $rating ) : '';
+		$rating_label   = ( $rating && function_exists( 'ntn_get_rating_label' ) ) ? ntn_get_rating_label( $rating ) : '';
 		?>
 
 	<article id="post-<?php the_ID(); ?>" <?php post_class( 'ntn-article' ); ?>>
