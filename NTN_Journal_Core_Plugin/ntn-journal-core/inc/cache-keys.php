@@ -25,11 +25,11 @@ function ntn_core_featured_cache_key( $type, $id ) {
 	return NTN_CORE_FEATURED_CACHE_PREFIX . ( 'term' === $type ? 'term_' : 'post_' ) . (int) $id;
 }
 
-// Gruppo della cache in memoria per le risposte pubbliche di ricerca e catalogo (v4.17.0).
+// Gruppo della cache in memoria per le risposte pubbliche di ricerca e catalogo (v4.16.2).
 define( 'NTN_CORE_REST_CACHE_GROUP', 'ntn_rest' );
 
 /**
- * Parametri del catalogo che contano per la cache, già puliti (v4.17.0).
+ * Parametri del catalogo che contano per la cache, già puliti (v4.16.2).
  *
  * La chiave della cache non deve dipendere da parametri sconosciuti: un visitatore potrebbe aggiungerne
  * di nuovi a ogni richiesta (?x=1, ?x=2…) e creare una memoria diversa per ognuno.
@@ -54,7 +54,7 @@ function ntn_core_rest_games_normalized_params( $params ) {
 }
 
 /**
- * Nome della cache di una richiesta al catalogo (v4.17.0).
+ * Nome della cache di una richiesta al catalogo (v4.16.2).
  */
 function ntn_core_rest_games_cache_key( $params ) {
 	return 'ntn_games_' . md5( wp_json_encode( ntn_core_rest_games_normalized_params( $params ) ) );
@@ -62,7 +62,7 @@ function ntn_core_rest_games_cache_key( $params ) {
 
 /**
  * Una richiesta al catalogo può essere salvata nel database solo se le combinazioni possibili sono poche:
- * senza ricerca libera, senza filtri e senza anno, e con la pagina entro la ventesima (v4.17.0).
+ * senza ricerca libera, senza filtri e senza anno, e con la pagina entro la ventesima (v4.16.2).
  * Tutte le altre combinazioni sono infinite: restano solo nella cache in memoria (Redis, Memcached), se c'è.
  */
 function ntn_core_rest_games_uses_database( $params ) {
@@ -72,7 +72,7 @@ function ntn_core_rest_games_uses_database( $params ) {
 }
 
 /**
- * Legge una risposta in cache (v4.17.0).
+ * Legge una risposta in cache (v4.16.2).
  *
  * @param string $key          Nome della cache.
  * @param bool   $use_database true se questa richiesta può stare nel database (transient).
@@ -86,7 +86,7 @@ function ntn_core_rest_cache_get( $key, $use_database = false ) {
 }
 
 /**
- * Salva una risposta in cache (v4.17.0). Senza cache in memoria, le richieste con ricerca libera o filtri
+ * Salva una risposta in cache (v4.16.2). Senza cache in memoria, le richieste con ricerca libera o filtri
  * non vengono salvate: ogni testo diverso avrebbe riempito la tabella delle opzioni.
  */
 function ntn_core_rest_cache_set( $key, $payload, $ttl, $use_database = false ) {
@@ -96,7 +96,7 @@ function ntn_core_rest_cache_set( $key, $payload, $ttl, $use_database = false ) 
 }
 
 /**
- * Toglie una volta le righe lasciate nel database dalle versioni precedenti (v4.17.0): una per ogni testo
+ * Toglie una volta le righe lasciate nel database dalle versioni precedenti (v4.16.2): una per ogni testo
  * cercato nella ricerca e per ogni combinazione del catalogo. Da ora quelle richieste non vengono più salvate lì.
  */
 function ntn_core_rest_cache_cleanup_once() {

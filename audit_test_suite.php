@@ -1653,24 +1653,24 @@ echo "\n--- 24. SEMVER SIMULTANEOUS 4-HEADER SYNCHRONIZATION ---\n";
 $parent_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $parent_css, $m_parent );
 $parent_ver = isset( $m_parent[1] ) ? trim( $m_parent[1] ) : '';
-assert_test( $parent_ver === '4.16.2', "24.1: Parent Theme style.css declares Version: 4.16.2(found: {$parent_ver})" );
+assert_test( $parent_ver === '4.16.3', "24.1: Parent Theme style.css declares Version: 4.16.3(found: {$parent_ver})" );
 
 $child_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $child_css, $m_child );
 $child_ver = isset( $m_child[1] ) ? trim( $m_child[1] ) : '';
-assert_test( $child_ver === '4.16.2', "24.2: Child Theme style.css declares Version: 4.16.2(found: {$child_ver})" );
+assert_test( $child_ver === '4.16.3', "24.2: Child Theme style.css declares Version: 4.16.3(found: {$child_ver})" );
 
 $core_php = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' );
 preg_match( '/\*\s*Version:\s*([0-9\.]+)/', $core_php, $m_core_hdr );
 $core_hdr_ver = isset( $m_core_hdr[1] ) ? trim( $m_core_hdr[1] ) : '';
-assert_test( $core_hdr_ver === '4.16.2', "24.3: Core Plugin header declares Version: 4.16.2(found: {$core_hdr_ver})" );
+assert_test( $core_hdr_ver === '4.16.3', "24.3: Core Plugin header declares Version: 4.16.3(found: {$core_hdr_ver})" );
 
 preg_match( "/define\(\s*'NTN_JOURNAL_CORE_VERSION',\s*'([^']+)'\s*\);/", $core_php, $m_core_const );
 $core_const_ver = isset( $m_core_const[1] ) ? trim( $m_core_const[1] ) : '';
-assert_test( $core_const_ver === '4.16.2', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.16.2(found: {$core_const_ver})" );
+assert_test( $core_const_ver === '4.16.3', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.16.3(found: {$core_const_ver})" );
 
 assert_test(
-	$parent_ver === '4.16.2' && $child_ver === '4.16.2' && $core_hdr_ver === '4.16.2' && $core_const_ver === '4.16.2',
+	$parent_ver === '4.16.3' && $child_ver === '4.16.3' && $core_hdr_ver === '4.16.3' && $core_const_ver === '4.16.3',
 	'24.5: All 4 version headers are 100% synchronized and atomic according to Rule 2 of GEMINI.md'
 );
 
@@ -1899,7 +1899,7 @@ $parent_style_ver = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( AB
 $child_style_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' ), $m2 ) ? $m2[1] : '';
 $core_plugin_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m3 ) ? $m3[1] : '';
 $core_const_ver   = preg_match( '/define\(\s*[\'"]NTN_JOURNAL_CORE_VERSION[\'"]\s*,\s*[\'"]([0-9\.]+)[\'"]\s*\)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m4 ) ? $m4[1] : '';
-assert_test( $parent_style_ver === '4.16.2' && $child_style_ver === '4.16.2' && $core_plugin_ver === '4.16.2' && $core_const_ver === '4.16.2', '29.1: All 4 version headers are synchronized to 4.16.2' );
+assert_test( $parent_style_ver === '4.16.3' && $child_style_ver === '4.16.3' && $core_plugin_ver === '4.16.3' && $core_const_ver === '4.16.3', '29.1: All 4 version headers are synchronized to 4.16.3' );
 
 // 29.2: single.php sequence is Google Feed -> Social CTA -> Bottom Related Posts
 $single_php = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/single.php' );
@@ -5708,6 +5708,53 @@ assert_test(
 	false !== strpos( $rc_rest, 'ntn_core_rest_games_cache_key( $params )' ) && false !== strpos( $rc_rest, "ntn_core_rest_cache_get( \$cache_key, false )" ) &&
 	false !== strpos( $rc_admin, "'ntn_games_', 'ntn_livesearch2_'" ) && false !== strpos( $rc_admin, 'wp_cache_flush_group( NTN_CORE_REST_CACHE_GROUP )' ),
 	'84.4: REST endpoints use the bounded cache helpers (no direct transient, no serialize of all params) and the flush button clears them too'
+);
+
+// --- TEST SUITE 85: script del tema e preload dell'immagine in evidenza v4.16.3 ---
+echo "\n--- 85. DEFER SOLO AGLI SCRIPT DEL TEMA E PRELOAD LCP V4.16.3 ---\n";
+$lc_src = ntn_t_read( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/inc/performance.php' );
+preg_match( '/function ntn_journal_defer_scripts\(.*?\n}\n/s', $lc_src, $lc_defer );
+preg_match( '/function ntn_preload_lcp_image\(.*?\n}\n/s', $lc_src, $lc_preload );
+if ( ! function_exists( 'wp_get_attachment_image_srcset' ) ) {
+	function wp_get_attachment_image_srcset( $id, $size = 'medium' ) { return 'https://example.com/a-1024.jpg 1024w, https://example.com/a-768.jpg 768w'; }
+}
+if ( ! function_exists( 'wp_get_attachment_image_sizes' ) ) {
+	function wp_get_attachment_image_sizes( $id, $size = 'medium' ) { return '(max-width: 1024px) 100vw, 1024px'; }
+}
+function ntn_test_att_src( $id, $size = 'thumbnail' ) { return array( 'https://example.com/a-1024.jpg', 1024, 576 ); }
+eval( ( $lc_defer[0] ?? '' ) . str_replace( 'wp_get_attachment_image_src(', 'ntn_test_att_src(', $lc_preload[0] ?? '' ) );
+
+$lc_tag = '<script src="https://example.com/x.js"></script>';
+assert_test(
+	! empty( $lc_defer[0] ) && ! empty( $lc_preload[0] ) &&
+	false !== strpos( ntn_journal_defer_scripts( $lc_tag, 'ntn-live-search', 'x' ), '<script defer="defer" ' ) &&
+	false !== strpos( ntn_journal_defer_scripts( $lc_tag, 'glightbox', 'x' ), 'defer' ) &&
+	$lc_tag === ntn_journal_defer_scripts( $lc_tag, 'jetpack-stats', 'x' ) && $lc_tag === ntn_journal_defer_scripts( $lc_tag, 'google-analytics', 'x' ) &&
+	$lc_tag === ntn_journal_defer_scripts( $lc_tag, 'jquery', 'x' ),
+	'85.1: Only the theme scripts get defer; scripts from other plugins and jQuery are left as they are'
+);
+
+$mock_posts[9500] = new WP_Post( array( 'ID' => 9500, 'post_title' => 'LCP', 'post_name' => 'lcp', 'post_type' => 'post', 'post_status' => 'publish' ) );
+$mock_posts[9501] = new WP_Post( array( 'ID' => 9501, 'post_title' => 'LCP game', 'post_name' => 'lcp-game', 'post_type' => 'videogioco', 'post_status' => 'publish' ) );
+$mock_postmeta[9500] = array( '_thumbnail_url' => 'https://example.com/a-full.jpg' );
+$mock_postmeta[9501] = array( '_thumbnail_url' => 'https://example.com/a-full.jpg' );
+$GLOBALS['queried_object'] = $mock_posts[9500];
+$GLOBALS['post']           = $mock_posts[9500];
+ob_start();
+ntn_preload_lcp_image();
+$lc_out = ob_get_clean();
+$GLOBALS['queried_object'] = $mock_posts[9501];
+$GLOBALS['post']           = $mock_posts[9501];
+ob_start();
+ntn_preload_lcp_image();
+$lc_out_game = ob_get_clean();
+$GLOBALS['queried_object'] = null;
+$GLOBALS['post']           = null;
+assert_test(
+	false !== strpos( $lc_out, 'rel="preload" as="image" href="https://example.com/a-1024.jpg"' ) && false !== strpos( $lc_out, 'imagesrcset="https://example.com/a-1024.jpg 1024w, https://example.com/a-768.jpg 768w"' ) &&
+	false !== strpos( $lc_out, 'imagesizes="(max-width: 1024px) 100vw, 1024px"' ) && false !== strpos( $lc_out, 'fetchpriority="high"' ) && false === strpos( $lc_out, 'a-full.jpg' ) &&
+	'' === $lc_out_game && false !== strpos( $lc_src, "is_singular( array( 'post', 'page', 'comunicato_stampa' ) )" ) && false === strpos( $lc_src, "'full' );\n\t\tif ( \$image_url )" ),
+	'85.2: The LCP preload uses the displayed size ("large") with its srcset and sizes, and only on templates that show the featured image'
 );
 
 $GLOBALS['post'] = null;

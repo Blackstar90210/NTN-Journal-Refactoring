@@ -110,7 +110,7 @@ function ntn_core_flush_all_caches() {
 			delete_transient( substr( $name, strlen( '_transient_' ) ) );
 		}
 	}
-	// Risposte pubbliche di ricerca e catalogo salvate nella cache in memoria (v4.17.0)
+	// Risposte pubbliche di ricerca e catalogo salvate nella cache in memoria (v4.16.2)
 	if ( function_exists( 'wp_cache_flush_group' ) && function_exists( 'wp_cache_supports' ) && wp_cache_supports( 'flush_group' ) ) {
 		wp_cache_flush_group( NTN_CORE_REST_CACHE_GROUP );
 	}
