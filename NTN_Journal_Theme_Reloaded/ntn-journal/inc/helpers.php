@@ -164,8 +164,8 @@ function ntn_link_engines_to_terms( $engines_string, $badge_class = NTN_ENGINE_B
 		$engines = explode( ',', (string) $engines_string );
 	}
 
+	// v4.25.1: tolta l'opzione ntn_journal_enable_game_engine_links, letta ma mai salvata (valeva sempre "yes").
 	$output_array = array();
-	$enable_links = get_option( 'ntn_journal_enable_game_engine_links', 'yes' );
 
 	foreach ( $engines as $eng ) {
 		if ( ! is_scalar( $eng ) && ( ! is_object( $eng ) || ! method_exists( $eng, '__toString' ) ) ) {
@@ -174,19 +174,17 @@ function ntn_link_engines_to_terms( $engines_string, $badge_class = NTN_ENGINE_B
 		$eng_name = trim( (string) $eng );
 		if ( empty( $eng_name ) ) continue;
 
-		if ( 'yes' === $enable_links ) {
-			// Cerca il termine nella tassonomia game_engine
-			$term = get_term_by( 'name', $eng_name, 'game_engine' );
-			if ( ! $term || is_wp_error( $term ) ) {
-				$term = get_term_by( 'slug', sanitize_title( $eng_name ), 'game_engine' );
-			}
+		// Cerca il termine nella tassonomia game_engine
+		$term = get_term_by( 'name', $eng_name, 'game_engine' );
+		if ( ! $term || is_wp_error( $term ) ) {
+			$term = get_term_by( 'slug', sanitize_title( $eng_name ), 'game_engine' );
+		}
 
-			if ( $term && ! is_wp_error( $term ) && $term instanceof WP_Term ) {
-				$link = get_term_link( $term );
-				if ( ! empty( $link ) && ! is_wp_error( $link ) && is_string( $link ) ) {
-					$output_array[] = '<a href="' . esc_url( $link ) . '" class="' . esc_attr( $badge_class ) . '">' . esc_html( $eng_name ) . '</a>';
-					continue;
-				}
+		if ( $term && ! is_wp_error( $term ) && $term instanceof WP_Term ) {
+			$link = get_term_link( $term );
+			if ( ! empty( $link ) && ! is_wp_error( $link ) && is_string( $link ) ) {
+				$output_array[] = '<a href="' . esc_url( $link ) . '" class="' . esc_attr( $badge_class ) . '">' . esc_html( $eng_name ) . '</a>';
+				continue;
 			}
 		}
 

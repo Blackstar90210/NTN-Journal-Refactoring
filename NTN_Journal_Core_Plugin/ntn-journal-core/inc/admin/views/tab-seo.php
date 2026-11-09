@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</th>
 					<td style="padding-bottom: 20px;">
 						<label style="display: block; margin-bottom: 10px;">
-							<input type="checkbox" name="ntn_seo_enable_base" value="1" <?php checked( get_option('ntn_seo_enable_base', get_theme_mod('ntn_journal_enable_base_seo', true) ? 'yes' : 'no'), 'yes' ); ?>>
+							<input type="checkbox" name="ntn_seo_enable_base" value="1" <?php checked( get_option( 'ntn_seo_enable_base', 'yes' ), 'yes' ); ?>>
 							<strong>Attiva Meta Tag di Base & Breadcrumb JSON-LD</strong>
 						</label>
 						<div class="notice notice-warning inline" style="margin: 0 0 15px 0; padding: 10px;">

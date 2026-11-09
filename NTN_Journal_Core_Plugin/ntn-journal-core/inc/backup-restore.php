@@ -834,7 +834,7 @@ function _ntn_clear_all_backup_caches() {
 		) );
 	}
 
-	delete_option( 'ntn_rewrite_rules_flushed_v3' );
+	ntn_core_request_rewrite_flush();
 }
 
 /**

@@ -180,15 +180,34 @@ function ntn_invalidate_tag_to_cpt_map( $post_id, $post, $update ) {
 add_action( 'save_post_videogioco', 'ntn_invalidate_tag_to_cpt_map', 10, 3 );
 
 /**
- * Rigenera le regole di riscrittura URL.
+ * Numero di versione delle regole URL del plugin (v4.25.1).
+ * Quando le regole cambiano si alza questo numero: al primo caricamento il sito le rigenera da solo.
+ */
+if ( ! defined( 'NTN_CORE_REWRITE_RULES_VERSION' ) ) {
+	define( 'NTN_CORE_REWRITE_RULES_VERSION', '4' );
+}
+
+/**
+ * Chiede di rigenerare le regole URL al prossimo caricamento (v4.25.1).
+ * La usano l'attivazione del plugin, l'impostazione dei link ai videogiochi e il ripristino dei backup.
+ */
+function ntn_core_request_rewrite_flush() {
+	delete_option( 'ntn_rewrite_rules_version' );
+}
+
+/**
+ * Rigenera le regole di riscrittura URL quando il loro numero di versione è cambiato o è stato cancellato.
  */
 function ntn_flush_custom_rewrite_rules() {
-	if ( get_option( 'ntn_rewrite_rules_flushed_v3' ) !== '1' ) {
+	if ( get_option( 'ntn_rewrite_rules_version' ) !== NTN_CORE_REWRITE_RULES_VERSION ) {
 		ntn_register_game_engine_taxonomy();
 		ntn_register_additional_game_taxonomies();
 		ntn_add_videogioco_rewrite_rule();
 		flush_rewrite_rules();
-		update_option( 'ntn_rewrite_rules_flushed_v3', '1' );
+		update_option( 'ntn_rewrite_rules_version', NTN_CORE_REWRITE_RULES_VERSION );
+		// Vecchi segnali, sostituiti dal numero di versione.
+		delete_option( 'ntn_rewrite_rules_flushed_v2' );
+		delete_option( 'ntn_rewrite_rules_flushed_v3' );
 	}
 }
 add_action( 'init', 'ntn_flush_custom_rewrite_rules', 99 );

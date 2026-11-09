@@ -3,7 +3,7 @@
  * Plugin Name: NTN Journal Core
  * Plugin URI: https://example.com/ntn-journal-core
  * Description: Gestisce i Custom Post Type (Comunicato Stampa, Videogioco), Tassonomie, Meta Box IGDB e logiche di backend separate dal tema.
- * Version: 4.25.0
+ * Version: 4.25.1
  * Requires at least: 6.0
  * Requires PHP: 8.0
  * Text Domain: ntn-journal-core
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Definisco la costante di versione globale (deve coincidere con quella del commento header e dei temi!)
-define( 'NTN_JOURNAL_CORE_VERSION', '4.25.0' );
+define( 'NTN_JOURNAL_CORE_VERSION', '4.25.1' );
 define( 'NTN_JOURNAL_CORE_DIR', plugin_dir_path( __FILE__ ) );
 define( 'NTN_JOURNAL_CORE_URL', plugin_dir_url( __FILE__ ) );
 
@@ -89,6 +89,11 @@ require_once NTN_JOURNAL_CORE_DIR . 'inc/api-helpers.php';
 require_once NTN_JOURNAL_CORE_DIR . 'inc/admin/admin-page.php';
 require_once NTN_JOURNAL_CORE_DIR . 'inc/migration-2.4.0.php';
 require_once NTN_JOURNAL_CORE_DIR . 'inc/precomputed-meta.php';
+
+/**
+ * All'attivazione del plugin le regole URL vengono rigenerate al caricamento successivo (v4.25.1).
+ */
+register_activation_hook( __FILE__, 'ntn_core_request_rewrite_flush' );
 
 /**
  * Registrazione image sizes del core

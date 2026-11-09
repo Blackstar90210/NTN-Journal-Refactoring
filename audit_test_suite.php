@@ -1655,24 +1655,24 @@ echo "\n--- 24. SEMVER SIMULTANEOUS 4-HEADER SYNCHRONIZATION ---\n";
 $parent_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $parent_css, $m_parent );
 $parent_ver = isset( $m_parent[1] ) ? trim( $m_parent[1] ) : '';
-assert_test( $parent_ver === '4.25.0', "24.1: Parent Theme style.css declares Version: 4.25.0(found: {$parent_ver})" );
+assert_test( $parent_ver === '4.25.1', "24.1: Parent Theme style.css declares Version: 4.25.1(found: {$parent_ver})" );
 
 $child_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $child_css, $m_child );
 $child_ver = isset( $m_child[1] ) ? trim( $m_child[1] ) : '';
-assert_test( $child_ver === '4.25.0', "24.2: Child Theme style.css declares Version: 4.25.0(found: {$child_ver})" );
+assert_test( $child_ver === '4.25.1', "24.2: Child Theme style.css declares Version: 4.25.1(found: {$child_ver})" );
 
 $core_php = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' );
 preg_match( '/\*\s*Version:\s*([0-9\.]+)/', $core_php, $m_core_hdr );
 $core_hdr_ver = isset( $m_core_hdr[1] ) ? trim( $m_core_hdr[1] ) : '';
-assert_test( $core_hdr_ver === '4.25.0', "24.3: Core Plugin header declares Version: 4.25.0(found: {$core_hdr_ver})" );
+assert_test( $core_hdr_ver === '4.25.1', "24.3: Core Plugin header declares Version: 4.25.1(found: {$core_hdr_ver})" );
 
 preg_match( "/define\(\s*'NTN_JOURNAL_CORE_VERSION',\s*'([^']+)'\s*\);/", $core_php, $m_core_const );
 $core_const_ver = isset( $m_core_const[1] ) ? trim( $m_core_const[1] ) : '';
-assert_test( $core_const_ver === '4.25.0', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.25.0(found: {$core_const_ver})" );
+assert_test( $core_const_ver === '4.25.1', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.25.1(found: {$core_const_ver})" );
 
 assert_test(
-	$parent_ver === '4.25.0' && $child_ver === '4.25.0' && $core_hdr_ver === '4.25.0' && $core_const_ver === '4.25.0',
+	$parent_ver === '4.25.1' && $child_ver === '4.25.1' && $core_hdr_ver === '4.25.1' && $core_const_ver === '4.25.1',
 	'24.5: All 4 version headers are 100% synchronized and atomic according to Rule 2 of GEMINI.md'
 );
 
@@ -1900,7 +1900,7 @@ $parent_style_ver = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( AB
 $child_style_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' ), $m2 ) ? $m2[1] : '';
 $core_plugin_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m3 ) ? $m3[1] : '';
 $core_const_ver   = preg_match( '/define\(\s*[\'"]NTN_JOURNAL_CORE_VERSION[\'"]\s*,\s*[\'"]([0-9\.]+)[\'"]\s*\)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m4 ) ? $m4[1] : '';
-assert_test( $parent_style_ver === '4.25.0' && $child_style_ver === '4.25.0' && $core_plugin_ver === '4.25.0' && $core_const_ver === '4.25.0', '29.1: All 4 version headers are synchronized to 4.25.0' );
+assert_test( $parent_style_ver === '4.25.1' && $child_style_ver === '4.25.1' && $core_plugin_ver === '4.25.1' && $core_const_ver === '4.25.1', '29.1: All 4 version headers are synchronized to 4.25.1' );
 
 // 29.2: single.php sequence is Google Feed -> Social CTA -> Bottom Related Posts
 $single_php = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/single.php' );
@@ -6453,6 +6453,124 @@ assert_test(
 	false !== strpos( $di_text, 'Non risultano usate: 5' ) && false !== strpos( $di_text, 'da riparare: 8' ) && false !== strpos( $di_text, 'In quarantena: 2 file' ) &&
 	'—' === $di_partial['count'] && 'Nessuna analisi ancora fatta' === $di_partial['lines'][0],
 	'97.2: The summary shows "—" and "no analysis yet" without a report, the saved numbers (size, heavy, no alt text, unused, PNG to repair, quarantine) with one, and ignores an interrupted analysis'
+);
+
+
+
+// --- TEST SUITE 98: correzioni minori dell'audit v4.25.1 ---
+echo "\n--- 98. CORREZIONI MINORI DELL'AUDIT V4.25.1 ---\n";
+$mf_core = ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/';
+
+// 98.1: le regole URL si rigenerano quando cambia il loro numero di versione, all'attivazione e dal pulsante Extra
+$mf_tax = ntn_t_read( $mf_core . 'inc/taxonomies.php' );
+$mf_p1  = strpos( $mf_tax, "if ( ! defined( 'NTN_CORE_REWRITE_RULES_VERSION' ) )" );
+$mf_p2  = strpos( $mf_tax, "add_action( 'init', 'ntn_flush_custom_rewrite_rules', 99 );" );
+$mf_src = false !== $mf_p1 && false !== $mf_p2 ? substr( $mf_tax, $mf_p1, $mf_p2 - $mf_p1 ) : '';
+$mf_base = tempnam( sys_get_temp_dir(), 'ntn98' );
+$mf_tmp  = $mf_base . '.php';
+file_put_contents( $mf_tmp, "<?php\n\$o = array( 'ntn_rewrite_rules_flushed_v3' => '1' ); \$f = 0;\n" .
+	"function get_option( \$k, \$d = false ) { global \$o; return array_key_exists( \$k, \$o ) ? \$o[ \$k ] : \$d; }\n" .
+	"function update_option( \$k, \$v ) { global \$o; \$o[ \$k ] = \$v; }\nfunction delete_option( \$k ) { global \$o; unset( \$o[ \$k ] ); }\n" .
+	"function flush_rewrite_rules() { global \$f; \$f++; }\nfunction ntn_register_game_engine_taxonomy() {}\nfunction ntn_register_additional_game_taxonomies() {}\nfunction ntn_add_videogioco_rewrite_rule() {}\n" .
+	$mf_src . "\n\$r = array();\nntn_flush_custom_rewrite_rules(); \$r[] = \$f . ( isset( \$o['ntn_rewrite_rules_flushed_v3'] ) ? 'v3' : '' );\n" .
+	"ntn_flush_custom_rewrite_rules(); \$r[] = \$f;\nntn_core_request_rewrite_flush(); ntn_flush_custom_rewrite_rules(); \$r[] = \$f;\n" .
+	"\$o['ntn_rewrite_rules_version'] = '3'; ntn_flush_custom_rewrite_rules(); \$r[] = \$f . '/' . \$o['ntn_rewrite_rules_version'];\necho implode( ',', \$r );\n" );
+$mf_out = trim( (string) shell_exec( escapeshellarg( PHP_BINARY ) . ' ' . escapeshellarg( $mf_tmp ) . ' 2>&1' ) );
+@unlink( $mf_tmp );
+@unlink( $mf_base );
+$mf_admin = ntn_t_read( $mf_core . 'inc/admin/admin-page.php' );
+$mf_bkp   = ntn_t_read( $mf_core . 'inc/backup-restore.php' );
+$mf_main  = ntn_t_read( $mf_core . 'ntn-journal-core.php' );
+assert_test(
+	'1,1,2,3/4' === $mf_out &&
+	false !== strpos( $mf_admin, 'ntn_core_request_rewrite_flush();' ) && false === strpos( $mf_admin, "delete_option( 'ntn_rewrite_rules_flushed_v" ) &&
+	false !== strpos( $mf_bkp, 'ntn_core_request_rewrite_flush();' ) && false === strpos( $mf_bkp, "delete_option( 'ntn_rewrite_rules_flushed_v" ) &&
+	false !== strpos( $mf_main, "register_activation_hook( __FILE__, 'ntn_core_request_rewrite_flush' );" ),
+	'98.1: URL rules are rebuilt once on upgrade, when their version number changes, on plugin activation and when the Extra videogame-links setting changes (old _v2/_v3 flags removed; got: ' . $mf_out . ')'
+);
+
+// 98.2: lo script IGDB del pannello articolo usa la versione del plugin, così il browser scarica quello nuovo dopo un aggiornamento
+$mf_igdb = ntn_t_read( $mf_core . 'inc/ajax-igdb.php' );
+assert_test(
+	false !== strpos( $mf_igdb, "'assets/js/admin-igdb.js', array( 'jquery' ), NTN_JOURNAL_CORE_VERSION, true );" ) && false === strpos( $mf_igdb, "'1.0.0'" ),
+	'98.2: admin-igdb.js is enqueued with NTN_JOURNAL_CORE_VERSION instead of the fixed 1.0.0, so browsers drop the old copy after an update'
+);
+
+// 98.3: dot-art.js è un file del tema parent: prende la versione del parent anche quando è attivo il child
+$mf_theme = ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/';
+$mf_hubt  = ntn_t_read( $mf_theme . 'inc/category-hub-template.php' );
+assert_test(
+	false !== strpos( $mf_hubt, "'/assets/js/dot-art.js', array(), wp_get_theme( get_template() )->get( 'Version' )," ) && false === strpos( $mf_hubt, 'wp_get_theme()->' ),
+	'98.3: dot-art.js (a parent theme file) is versioned with the parent theme version, also when the child theme is active'
+);
+
+// 98.4: l'opzione dei link ai motori grafici era letta ma mai salvata: tolta, i motori restano sempre linkati
+$mf_help = ntn_t_read( $mf_theme . 'inc/helpers.php' );
+$mf_hits = 0;
+foreach ( array( 'NTN_Journal_Theme_Reloaded', 'NTN_Journal_Core_Plugin' ) as $mf_root ) {
+	foreach ( new RecursiveIteratorIterator( new RecursiveDirectoryIterator( ABSPATH . $mf_root, FilesystemIterator::SKIP_DOTS ) ) as $mf_file ) {
+		if ( 'php' === $mf_file->getExtension() && false !== strpos( (string) file_get_contents( $mf_file->getPathname() ), "get_option( 'ntn_journal_enable_game_engine_links'" ) ) {
+			$mf_hits++;
+		}
+	}
+}
+assert_test(
+	0 === $mf_hits && false === strpos( $mf_help, '$enable_links' ) && false !== strpos( ntn_link_engines_to_terms( array( 'Unreal Engine 5' ) ), 'Unreal Engine 5' ),
+	'98.4: The never-saved ntn_journal_enable_game_engine_links option is no longer read; engine badges keep linking to their archive'
+);
+
+// 98.5: la SEO di base non ripiega più su un'impostazione del tema che il tema non ha: senza scelta salvata vale "yes"
+$mf_seo  = ntn_t_read( $mf_core . 'inc/seo-extras.php' );
+$mf_tabs = ntn_t_read( $mf_core . 'inc/admin/views/tab-seo.php' );
+assert_test(
+	3 === substr_count( $mf_seo, "get_option( 'ntn_seo_enable_base', 'yes' )" ) && false !== strpos( $mf_tabs, "get_option( 'ntn_seo_enable_base', 'yes' )" ) &&
+	false === strpos( $mf_seo . $mf_tabs, 'ntn_journal_enable_base_seo' ),
+	'98.5: Base SEO defaults to "yes" when never saved, without the old get_theme_mod( ntn_journal_enable_base_seo ) fallback (seo-extras.php and the SEO tab)'
+);
+
+// 98.6: la domanda "c'è un altro plugin SEO?" è scritta una volta sola e usata nei tre punti
+preg_match( '/function ntn_core_other_seo_plugin_active\(\) \{.*?\n\t\}/s', $mf_seo, $mf_fn );
+$mf_res = array();
+foreach ( array( '', "define( 'WPSEO_VERSION', '1' );", 'class RankMath {}', "define( 'THE_SEO_FRAMEWORK_VERSION', '5' );", 'function the_seo_framework() { return new stdClass(); }' ) as $mf_case ) {
+	$mf_base = tempnam( sys_get_temp_dir(), 'ntn98' );
+	$mf_tmp  = $mf_base . '.php';
+	file_put_contents( $mf_tmp, "<?php\n" . $mf_case . "\n" . ( isset( $mf_fn[0] ) ? $mf_fn[0] : '' ) . "\necho ntn_core_other_seo_plugin_active() ? 'y' : 'n';\n" );
+	$mf_res[] = trim( (string) shell_exec( escapeshellarg( PHP_BINARY ) . ' ' . escapeshellarg( $mf_tmp ) . ' 2>&1' ) );
+	@unlink( $mf_tmp );
+	@unlink( $mf_base );
+}
+assert_test(
+	'n,y,y,y,y' === implode( ',', $mf_res ) && 3 === substr_count( $mf_seo, 'ntn_core_other_seo_plugin_active()' ) - 1 &&
+	1 === substr_count( $mf_seo, "defined( 'WPSEO_VERSION' )" ) && 1 === substr_count( $mf_seo, "class_exists( 'RankMath' )" ),
+	'98.6: One function (ntn_core_other_seo_plugin_active) detects Yoast, Rank Math or The SEO Framework and replaces the three copied conditions (got: ' . implode( ',', $mf_res ) . ')'
+);
+
+// 98.7: salvare un menu svuota la memoria del pannello Piattaforme (solo le sue voci ntn_pdrop_)
+$mf_menu = ntn_t_read( $mf_theme . 'inc/menu-filters.php' );
+preg_match( '/function ntn_journal_platform_drop_flush\(\) \{.*?\n\}/s', $mf_menu, $mf_fn );
+$mf_base = tempnam( sys_get_temp_dir(), 'ntn98' );
+$mf_tmp  = $mf_base . '.php';
+file_put_contents( $mf_tmp, "<?php\n\$t = array( 'ntn_pdrop_aaa' => 1, 'ntn_pdrop_bbb' => 1, 'ntn_front_data_x' => 1 );\n" .
+	"class NTN98_DB { public \$options = 'wp_options'; public \$like = ''; public function esc_like( \$s ) { return addcslashes( \$s, '_%\\\\' ); }\n" .
+	"  public function prepare( \$q, \$a ) { \$this->like = \$a; return \$q; }\n" .
+	"  public function get_col( \$q ) { global \$t; \$out = array(); foreach ( array_keys( \$t ) as \$k ) { if ( 0 === strpos( '_transient_' . \$k, str_replace( array( '\\\\_', '%' ), array( '_', '' ), \$this->like ) ) ) { \$out[] = '_transient_' . \$k; } } return \$out; } }\n" .
+	"\$wpdb = new NTN98_DB();\nfunction delete_transient( \$k ) { global \$t; unset( \$t[ \$k ] ); }\n" .
+	( isset( $mf_fn[0] ) ? $mf_fn[0] : '' ) . "\nntn_journal_platform_drop_flush();\necho implode( ',', array_keys( \$t ) );\n" );
+$mf_out = trim( (string) shell_exec( escapeshellarg( PHP_BINARY ) . ' ' . escapeshellarg( $mf_tmp ) . ' 2>&1' ) );
+@unlink( $mf_tmp );
+@unlink( $mf_base );
+assert_test(
+	'ntn_front_data_x' === $mf_out && false !== strpos( $mf_menu, "add_action( 'wp_update_nav_menu', 'ntn_journal_platform_drop_flush' );" ),
+	'98.7: Saving a menu (wp_update_nav_menu) empties the Platforms panel cache (ntn_pdrop_ only), so renamed items show at once (left: ' . $mf_out . ')'
+);
+
+// 98.8: Tailwind legge anche i file del plugin, che stampa HTML con classi (percorso, indice, box)
+$mf_in  = ntn_t_read( $mf_theme . 'build/input.css' );
+$mf_css = ntn_t_read( $mf_theme . 'style-tailwind-output.css' );
+assert_test(
+	false !== strpos( $mf_in, '@source "../../../NTN_Journal_Core_Plugin/ntn-journal-core/**/*.php";' ) && is_dir( dirname( $mf_theme . 'build/input.css' ) . '/../../../NTN_Journal_Core_Plugin/ntn-journal-core' ) &&
+	false !== strpos( $mf_css, '.max-w-\[200px\]' ) && false !== strpos( $mf_css, '.truncate' ),
+	'98.8: input.css scans the core plugin PHP files, so classes printed only by the plugin are compiled in style-tailwind-output.css'
 );
 
 

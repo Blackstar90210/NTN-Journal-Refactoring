@@ -353,6 +353,23 @@ function ntn_journal_platform_drop_panel() {
 	echo $html; // phpcs:ignore WordPress.Security.EscapeOutput -- ogni parte è già sanificata sopra.
 }
 
+/**
+ * Svuota la memoria del pannello "Piattaforme" quando si salva un menu (v4.25.1).
+ * Prima, rinominare o spostare una voce senza cambiarne il numero lasciava il pannello vecchio fino a un'ora.
+ */
+function ntn_journal_platform_drop_flush() {
+	global $wpdb;
+	if ( ! isset( $wpdb ) || ! is_object( $wpdb ) ) {
+		return;
+	}
+	$like  = $wpdb->esc_like( '_transient_ntn_pdrop_' ) . '%';
+	$names = $wpdb->get_col( $wpdb->prepare( "SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s", $like ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- solo al salvataggio di un menu.
+	foreach ( (array) $names as $name ) {
+		delete_transient( substr( (string) $name, strlen( '_transient_' ) ) );
+	}
+}
+add_action( 'wp_update_nav_menu', 'ntn_journal_platform_drop_flush' );
+
 /* Rimosso filtro ntn_journal_custom_menu_link_atts poiché ridondante con ntn_journal_menu_link_atts */
 
 

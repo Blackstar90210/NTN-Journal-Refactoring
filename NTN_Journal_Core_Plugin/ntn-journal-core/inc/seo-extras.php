@@ -22,6 +22,20 @@ if ( ! function_exists( 'ntn_core_schema_enabled' ) ) {
 	}
 }
 
+if ( ! function_exists( 'ntn_core_other_seo_plugin_active' ) ) {
+	/**
+	 * Dice se è attivo un plugin SEO completo (Yoast, Rank Math o The SEO Framework) (v4.25.1).
+	 *
+	 * In quel caso il plugin non stampa i suoi meta tag, il JSON-LD del percorso
+	 * e non tocca i tag Open Graph degli altri plugin, per evitare doppioni.
+	 *
+	 * @return bool
+	 */
+	function ntn_core_other_seo_plugin_active() {
+		return defined( 'WPSEO_VERSION' ) || class_exists( 'RankMath' ) || defined( 'THE_SEO_FRAMEWORK_PRESENT' ) || defined( 'THE_SEO_FRAMEWORK_VERSION' ) || ( function_exists( 'the_seo_framework' ) && the_seo_framework() );
+	}
+}
+
 /**
  * Genera il Breadcrumb con JSON-LD
  */
@@ -204,8 +218,8 @@ function ntn_journal_breadcrumb() {
 
 	echo '</nav>';
 
-	$enable_base = get_option( 'ntn_seo_enable_base', get_theme_mod( 'ntn_journal_enable_base_seo', true ) ? 'yes' : 'no' );
-	if ( $enable_base === 'yes' && ntn_core_schema_enabled() && ! defined( 'WPSEO_VERSION' ) && ! class_exists( 'RankMath' ) && ! defined( 'THE_SEO_FRAMEWORK_PRESENT' ) && ! defined( 'THE_SEO_FRAMEWORK_VERSION' ) && ! ( function_exists( 'the_seo_framework' ) && the_seo_framework() ) ) {
+	$enable_base = get_option( 'ntn_seo_enable_base', 'yes' );
+	if ( $enable_base === 'yes' && ntn_core_schema_enabled() && ! ntn_core_other_seo_plugin_active() ) {
 		echo '<script type="application/ld+json">' . wp_json_encode( $schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) . '</script>' . "\n";
 	}
 }
@@ -815,8 +829,8 @@ function ntn_journal_open_graph_tags() {
 	<!-- SEO: meta description di base. Se attivi un plugin SEO (Yoast,
 	Rank Math, The SEO Framework, ecc.) questi tag vengono bypassati per evitare duplicati. -->
 	<?php 
-	$enable_base = get_option( 'ntn_seo_enable_base', get_theme_mod( 'ntn_journal_enable_base_seo', true ) ? 'yes' : 'no' );
-	if ( $enable_base === 'yes' && ! defined( 'WPSEO_VERSION' ) && ! class_exists( 'RankMath' ) && ! defined( 'THE_SEO_FRAMEWORK_PRESENT' ) && ! defined( 'THE_SEO_FRAMEWORK_VERSION' ) && ! ( function_exists( 'the_seo_framework' ) && the_seo_framework() ) ) : ?>
+	$enable_base = get_option( 'ntn_seo_enable_base', 'yes' );
+	if ( $enable_base === 'yes' && ! ntn_core_other_seo_plugin_active() ) : ?>
 		<meta name="description" content="<?php echo esc_attr( $ntn_og_description ); ?>">
 		<meta name="robots" content="<?php echo esc_attr( $robots_meta ); ?>">
 
@@ -860,8 +874,8 @@ add_action( 'wp_head', 'ntn_journal_open_graph_tags', 5 );
 function ntn_journal_cleanup_third_party_og() {
 	// 1. Controllo base: se la nostra SEO è disattivata (o sovrascritta da Yoast/RankMath), 
 	// non tocchiamo nulla dei plugin esterni, lasciamo che se la vedano tra loro.
-	$enable_base = get_option( 'ntn_seo_enable_base', get_theme_mod( 'ntn_journal_enable_base_seo', true ) ? 'yes' : 'no' );
-	if ( $enable_base !== 'yes' || defined( 'WPSEO_VERSION' ) || class_exists( 'RankMath' ) || defined( 'THE_SEO_FRAMEWORK_PRESENT' ) || defined( 'THE_SEO_FRAMEWORK_VERSION' ) || ( function_exists( 'the_seo_framework' ) && the_seo_framework() ) ) {
+	$enable_base = get_option( 'ntn_seo_enable_base', 'yes' );
+	if ( $enable_base !== 'yes' || ntn_core_other_seo_plugin_active() ) {
 		return;
 	}
 
