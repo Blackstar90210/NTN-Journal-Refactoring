@@ -6519,6 +6519,15 @@ assert_test(
 	'98.4: The never-saved ntn_journal_enable_game_engine_links option is no longer read; engine badges keep linking to their archive'
 );
 
+// 98.5: la SEO di base non ripiega più su un'impostazione del tema che il tema non ha: senza scelta salvata vale "yes"
+$mf_seo  = ntn_t_read( $mf_core . 'inc/seo-extras.php' );
+$mf_tabs = ntn_t_read( $mf_core . 'inc/admin/views/tab-seo.php' );
+assert_test(
+	3 === substr_count( $mf_seo, "get_option( 'ntn_seo_enable_base', 'yes' )" ) && false !== strpos( $mf_tabs, "get_option( 'ntn_seo_enable_base', 'yes' )" ) &&
+	false === strpos( $mf_seo . $mf_tabs, 'ntn_journal_enable_base_seo' ),
+	'98.5: Base SEO defaults to "yes" when never saved, without the old get_theme_mod( ntn_journal_enable_base_seo ) fallback (seo-extras.php and the SEO tab)'
+);
+
 
 echo "\n=======================================================================\n";
 echo " AUDIT SUMMARY: {$passed} PASSED, {$failed} FAILED\n";
