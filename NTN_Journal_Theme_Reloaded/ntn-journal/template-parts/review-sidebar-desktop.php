@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  */
 
 $post_id = get_the_ID();
-$rating = get_post_rating( $post_id );
+$rating = ntn_get_post_rating( $post_id );
 
 $final_rating = 0;
 $rating_label = '';
@@ -20,7 +20,7 @@ $rating_label = '';
 if ( ! empty( $rating ) ) {
 	// Dati recensione originale per il voto
 	$final_rating = max( 1, min( 5, intval( $rating ) ) );
-	$rating_label = function_exists( 'get_rating_label' ) ? get_rating_label( $final_rating ) : (string) $final_rating;
+	$rating_label = function_exists( 'ntn_get_rating_label' ) ? ntn_get_rating_label( $final_rating ) : (string) $final_rating;
 }
 
 $games      = ntn_get_post_games( $post_id );

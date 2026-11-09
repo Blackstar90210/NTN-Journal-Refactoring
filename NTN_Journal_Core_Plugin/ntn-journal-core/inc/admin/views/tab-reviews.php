@@ -84,7 +84,7 @@ if ( function_exists( 'ntn_core_reviews_without_rating_query' ) ) {
 						$ntn_pros    = (string) get_post_meta( $ntn_id, 'pros', true );
 						$ntn_cons    = (string) get_post_meta( $ntn_id, 'cons', true );
 						$ntn_verdict = (string) get_post_meta( $ntn_id, 'verdict', true );
-						$ntn_label   = function_exists( 'get_rating_label' ) ? get_rating_label( $ntn_rating ) : '';
+						$ntn_label   = function_exists( 'ntn_get_rating_label' ) ? ntn_get_rating_label( $ntn_rating ) : '';
 						$ntn_row     = 'nadm-rev-' . $ntn_id;
 						$ntn_status  = get_post_status_object( (string) get_post_status() );
 						?>

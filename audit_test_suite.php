@@ -756,7 +756,6 @@ require_once ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/category-hu
 require_once ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/category-hub-stats.php';
 require_once ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/team-page.php';
 require_once ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/rating-labels.php';
-require_once ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/inc/content-format.php';
 require_once ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/inc/menu-filters.php';
 require_once ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/backup-restore.php';
 require_once ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/taxonomies.php';
@@ -1509,36 +1508,29 @@ assert_test( strpos( $bad_author_bio_out, 'href="#"' ) !== false, '17.5: Author 
 assert_test( ! file_exists( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/template-parts/author-bio.php' ), '17.6: Obsolete author-bio.php has been removed from the theme' );
 
 
-// --- TEST SUITE 18: Content Link Formatter Type-Safety ---
-echo "\n--- 18. CONTENT LINK FORMATTER TYPE SAFETY ---\n";
-assert_test( ntn_format_content_links( null ) === null, '18.1: ntn_format_content_links handles null cleanly' );
-assert_test( ntn_format_content_links( false ) === false, '18.2: ntn_format_content_links handles boolean false cleanly' );
-assert_test( ntn_format_content_links( 12345 ) === 12345, '18.3: ntn_format_content_links handles integer cleanly' );
-assert_test( ntn_format_content_links( array( 'content' ) ) === array( 'content' ), '18.4: ntn_format_content_links handles array cleanly' );
-
-$sample_paragraph = '<p>Scopri maggiori dettagli sul <a href="https://example.com/art">nostro articolo di approfondimento</a> per saperne di più.</p>';
-$formatted_paragraph = ntn_format_content_links( $sample_paragraph );
-assert_test( $formatted_paragraph === $sample_paragraph, '18.5: ntn_format_content_links preserves clean link text (Nothing OS CSS typography)' );
+// --- TEST SUITE 18: Content Link Formatter (tolto in 4.20.2: restituiva il testo com'era) ---
+echo "\n--- 18. CONTENT LINK FORMATTER (RIMOSSO) ---\n";
+assert_test( ! function_exists( 'ntn_format_content_links' ), '18.1: The no-op ntn_format_content_links() is gone (content-format.php removed in 4.20.2)' );
 
 // --- TEST SUITE 19: Rating Labels & Initials Strict Type-Safety ---
 echo "\n--- 19. RATING LABELS & INITIALS STRICT TYPE SAFETY ---\n";
-assert_test( get_rating_label( 1 ) === 'BOCCIATO', '19.1: Rating 1 returns BOCCIATO' );
-assert_test( get_rating_label( 2 ) === 'BOCCIATO', '19.2: Rating 2 returns BOCCIATO' );
-assert_test( get_rating_label( 3 ) === 'CONSIGLIATO CON RISERVA', '19.3: Rating 3 returns CONSIGLIATO CON RISERVA' );
-assert_test( get_rating_label( 4 ) === 'CONSIGLIATO', '19.4: Rating 4 returns CONSIGLIATO' );
-assert_test( get_rating_label( 5 ) === 'MUST PLAY', '19.5: Rating 5 returns MUST PLAY' );
-assert_test( get_rating_label( '4' ) === 'CONSIGLIATO', '19.6: Rating string "4" returns CONSIGLIATO' );
-assert_test( get_rating_label( 0 ) === '', '19.7: Rating 0 returns empty string' );
-assert_test( get_rating_label( 99 ) === '', '19.8: Rating 99 returns empty string' );
-assert_test( get_rating_label( array( 4 ) ) === '', '19.9: Array rating returns empty string without PHP warning' );
-assert_test( get_rating_label( new stdClass() ) === '', '19.10: Object rating returns empty string without fatal error' );
-assert_test( get_rating_label( 'not_a_number' ) === '', '19.11: Non-numeric string returns empty string without error' );
+assert_test( ntn_get_rating_label( 1 ) === 'BOCCIATO', '19.1: Rating 1 returns BOCCIATO' );
+assert_test( ntn_get_rating_label( 2 ) === 'BOCCIATO', '19.2: Rating 2 returns BOCCIATO' );
+assert_test( ntn_get_rating_label( 3 ) === 'CONSIGLIATO CON RISERVA', '19.3: Rating 3 returns CONSIGLIATO CON RISERVA' );
+assert_test( ntn_get_rating_label( 4 ) === 'CONSIGLIATO', '19.4: Rating 4 returns CONSIGLIATO' );
+assert_test( ntn_get_rating_label( 5 ) === 'MUST PLAY', '19.5: Rating 5 returns MUST PLAY' );
+assert_test( ntn_get_rating_label( '4' ) === 'CONSIGLIATO', '19.6: Rating string "4" returns CONSIGLIATO' );
+assert_test( ntn_get_rating_label( 0 ) === '', '19.7: Rating 0 returns empty string' );
+assert_test( ntn_get_rating_label( 99 ) === '', '19.8: Rating 99 returns empty string' );
+assert_test( ntn_get_rating_label( array( 4 ) ) === '', '19.9: Array rating returns empty string without PHP warning' );
+assert_test( ntn_get_rating_label( new stdClass() ) === '', '19.10: Object rating returns empty string without fatal error' );
+assert_test( ntn_get_rating_label( 'not_a_number' ) === '', '19.11: Non-numeric string returns empty string without error' );
 
-assert_test( get_rating_initials( 1 ) === 'B', '19.12: Rating 1 initials returns B' );
-assert_test( get_rating_initials( 3 ) === 'C.R.', '19.13: Rating 3 initials returns C.R.' );
-assert_test( get_rating_initials( 4 ) === 'C', '19.14: Rating 4 initials returns C' );
-assert_test( get_rating_initials( 5 ) === 'M.P.', '19.15: Rating 5 initials returns M.P.' );
-assert_test( get_rating_initials( array( 5 ) ) === '', '19.16: Array rating initials returns empty string without warning' );
+assert_test( ntn_get_rating_initials( 1 ) === 'B', '19.12: Rating 1 initials returns B' );
+assert_test( ntn_get_rating_initials( 3 ) === 'C.R.', '19.13: Rating 3 initials returns C.R.' );
+assert_test( ntn_get_rating_initials( 4 ) === 'C', '19.14: Rating 4 initials returns C' );
+assert_test( ntn_get_rating_initials( 5 ) === 'M.P.', '19.15: Rating 5 initials returns M.P.' );
+assert_test( ntn_get_rating_initials( array( 5 ) ) === '', '19.16: Array rating initials returns empty string without warning' );
 
 // --- TEST SUITE 20: Menu Filters & Classes Hardening ---
 echo "\n--- 20. MENU FILTERS & CLASSES HARDENING ---\n";
@@ -1655,24 +1647,24 @@ echo "\n--- 24. SEMVER SIMULTANEOUS 4-HEADER SYNCHRONIZATION ---\n";
 $parent_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $parent_css, $m_parent );
 $parent_ver = isset( $m_parent[1] ) ? trim( $m_parent[1] ) : '';
-assert_test( $parent_ver === '4.20.1', "24.1: Parent Theme style.css declares Version: 4.20.1(found: {$parent_ver})" );
+assert_test( $parent_ver === '4.20.2', "24.1: Parent Theme style.css declares Version: 4.20.2(found: {$parent_ver})" );
 
 $child_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $child_css, $m_child );
 $child_ver = isset( $m_child[1] ) ? trim( $m_child[1] ) : '';
-assert_test( $child_ver === '4.20.1', "24.2: Child Theme style.css declares Version: 4.20.1(found: {$child_ver})" );
+assert_test( $child_ver === '4.20.2', "24.2: Child Theme style.css declares Version: 4.20.2(found: {$child_ver})" );
 
 $core_php = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' );
 preg_match( '/\*\s*Version:\s*([0-9\.]+)/', $core_php, $m_core_hdr );
 $core_hdr_ver = isset( $m_core_hdr[1] ) ? trim( $m_core_hdr[1] ) : '';
-assert_test( $core_hdr_ver === '4.20.1', "24.3: Core Plugin header declares Version: 4.20.1(found: {$core_hdr_ver})" );
+assert_test( $core_hdr_ver === '4.20.2', "24.3: Core Plugin header declares Version: 4.20.2(found: {$core_hdr_ver})" );
 
 preg_match( "/define\(\s*'NTN_JOURNAL_CORE_VERSION',\s*'([^']+)'\s*\);/", $core_php, $m_core_const );
 $core_const_ver = isset( $m_core_const[1] ) ? trim( $m_core_const[1] ) : '';
-assert_test( $core_const_ver === '4.20.1', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.20.1(found: {$core_const_ver})" );
+assert_test( $core_const_ver === '4.20.2', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.20.2(found: {$core_const_ver})" );
 
 assert_test(
-	$parent_ver === '4.20.1' && $child_ver === '4.20.1' && $core_hdr_ver === '4.20.1' && $core_const_ver === '4.20.1',
+	$parent_ver === '4.20.2' && $child_ver === '4.20.2' && $core_hdr_ver === '4.20.2' && $core_const_ver === '4.20.2',
 	'24.5: All 4 version headers are 100% synchronized and atomic according to Rule 2 of GEMINI.md'
 );
 
@@ -1776,23 +1768,22 @@ assert_test( strpos( $notfound_content, 'href="javascript:history.back()"' ) ===
 
 // 27.5: Theme templates do not call plugin functions without function_exists guards
 $archive_php = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/archive.php' );
-assert_test( strpos( $archive_php, 'function_exists( \'get_rating_initials\' )' ) !== false, '27.5: archive.php guards get_rating_initials with function_exists' );
+assert_test( strpos( $archive_php, 'function_exists( \'ntn_get_rating_initials\' )' ) !== false, '27.5: archive.php guards ntn_get_rating_initials with function_exists' );
 
 $author_php = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/author.php' );
-// 27.6 (aggiornato in 3.13.0): la pagina autore usa la scheda comune template-parts/content.php, che protegge get_rating_initials
-assert_test( strpos( $author_php, "get_template_part( 'template-parts/content'" ) !== false && strpos( file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/template-parts/content.php' ), "function_exists( 'get_rating_initials' )" ) !== false, '27.6: author.php cards (template-parts/content.php) guard get_rating_initials with function_exists' );
+// 27.6 (aggiornato in 3.13.0): la pagina autore usa la scheda comune template-parts/content.php, che protegge ntn_get_rating_initials
+assert_test( strpos( $author_php, "get_template_part( 'template-parts/content'" ) !== false && strpos( file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/template-parts/content.php' ), "function_exists( 'ntn_get_rating_initials' )" ) !== false, '27.6: author.php cards (template-parts/content.php) guard ntn_get_rating_initials with function_exists' );
 
 // 27.7 (aggiornato in 3.4.0): la nuova Home legge il giudizio tramite inc/front-page-data.php, sempre protetto da function_exists
 $front_data_php = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/inc/front-page-data.php' );
-assert_test( strpos( $front_data_php, 'function_exists( \'get_rating_label\' )' ) !== false && strpos( $front_data_php, 'function_exists( \'get_post_rating\' )' ) !== false, '27.7: Home data guards get_rating_label and get_post_rating with function_exists' );
+assert_test( strpos( $front_data_php, 'function_exists( \'ntn_get_rating_label\' )' ) !== false && strpos( $front_data_php, 'function_exists( \'ntn_get_post_rating\' )' ) !== false, '27.7: Home data guards ntn_get_rating_label and ntn_get_post_rating with function_exists' );
 
 // 27.8: related-posts.php does not inject duplicate closing </p>
 $rp_code = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/inc/related-posts.php' );
 assert_test( strpos( $rp_code, '$closing_p . $injected_html' ) === false, '27.8: related-posts.php does not inject duplicate or orphan </p> tag after aside' );
 
-// 27.9: content-format.php preserves clean text and tag attributes without mangling spaces
-$formatted_sample = ntn_format_content_links( '<p><a href="https://example.com"><strong class="font-bold">test link text</strong></a></p>' );
-assert_test( strpos( $formatted_sample, 'class="font-bold"' ) !== false && strpos( $formatted_sample, 'test link text' ) !== false, '27.9: content-format.php preserves clean link text and tag attributes (Nothing OS clean style)' );
+// 27.9 (aggiornato in 4.20.2): content-format.php conteneva solo una funzione che restituiva il testo com'era ed è stato tolto
+assert_test( ! file_exists( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/inc/content-format.php' ) && false === strpos( file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/functions.php' ), 'content-format.php' ), '27.9: The empty content-format.php is gone and no longer required by functions.php' );
 
 // 27.10: single-videogioco.php (v4.14.0: solo nel parent, la copia del child è stata tolta) does not contain select-none
 $child_sv = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/single-videogioco.php' );
@@ -1901,7 +1892,7 @@ $parent_style_ver = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( AB
 $child_style_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' ), $m2 ) ? $m2[1] : '';
 $core_plugin_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m3 ) ? $m3[1] : '';
 $core_const_ver   = preg_match( '/define\(\s*[\'"]NTN_JOURNAL_CORE_VERSION[\'"]\s*,\s*[\'"]([0-9\.]+)[\'"]\s*\)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m4 ) ? $m4[1] : '';
-assert_test( $parent_style_ver === '4.20.1' && $child_style_ver === '4.20.1' && $core_plugin_ver === '4.20.1' && $core_const_ver === '4.20.1', '29.1: All 4 version headers are synchronized to 4.20.1' );
+assert_test( $parent_style_ver === '4.20.2' && $child_style_ver === '4.20.2' && $core_plugin_ver === '4.20.2' && $core_const_ver === '4.20.2', '29.1: All 4 version headers are synchronized to 4.20.2' );
 
 // 29.2: single.php sequence is Google Feed -> Social CTA -> Bottom Related Posts
 $single_php = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/single.php' );
@@ -2462,7 +2453,7 @@ assert_test(
 // 36.5: scheda articolo a cella, con categoria, voto e dati protetti
 assert_test(
 	strpos( $card, "post_class( \$is_featured ? 'ntn-cell ntn-card is-featured group' : 'ntn-cell ntn-card group' )" ) !== false &&
-	strpos( $card, "function_exists( 'get_rating_initials' )" ) !== false && strpos( $card, 'class="ntn-card-badge is-red"' ) !== false &&
+	strpos( $card, "function_exists( 'ntn_get_rating_initials' )" ) !== false && strpos( $card, 'class="ntn-card-badge is-red"' ) !== false &&
 	! preg_match( '/echo\s+\$(?!primary_cat \?)/', $card ),
 	'36.5: Article card is a grid cell with category badge, rating badge and escaped data'
 );
@@ -4965,7 +4956,7 @@ function ntn_t_read( $path ) {
 // Nella 4.10.1 le funzioni di dati erano state protette con function_exists; dalla 4.11.0 alla 4.13.0
 // sono passate tutte al plugin (sezioni 74, 75 e 76).
 $gd_helpers = ntn_t_read( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/inc/helpers.php' );
-$gd_names   = array( 'get_post_rating', 'ntn_calculate_reading_time', 'ntn_get_primary_category', 'ntn_get_image_alt', 'ntn_get_igdb_data', 'ntn_get_game_hub_url', 'ntn_get_hub_igdb_info', 'ntn_get_tag_igdb_info', 'ntn_get_post_games', 'ntn_resolve_game_term', 'ntn_get_term_game', 'ntn_get_post_meta_game', 'ntn_get_game_review', 'ntn_format_post_game', 'ntn_apply_post_meta_to_game', 'ntn_game_sort_key', 'ntn_get_game_featured_content', 'ntn_get_tag_featured_content', 'ntn_translate_igdb_genres' );
+$gd_names   = array( 'ntn_get_post_rating', 'ntn_calculate_reading_time', 'ntn_get_primary_category', 'ntn_get_image_alt', 'ntn_get_igdb_data', 'ntn_get_game_hub_url', 'ntn_get_hub_igdb_info', 'ntn_get_tag_igdb_info', 'ntn_get_post_games', 'ntn_resolve_game_term', 'ntn_get_term_game', 'ntn_get_post_meta_game', 'ntn_get_game_review', 'ntn_format_post_game', 'ntn_apply_post_meta_to_game', 'ntn_game_sort_key', 'ntn_get_game_featured_content', 'ntn_get_tag_featured_content', 'ntn_translate_igdb_genres' );
 
 // 73.1: nessuna delle 19 funzioni di dati è più definita in helpers.php
 $gd_left = array();
@@ -4995,7 +4986,7 @@ assert_test( 'plugin|plugin|fallback' === trim( (string) $gd_out ), '73.3: helpe
 // =========================================================================
 // 74. Voto, categoria e dati IGDB sono nel plugin (v4.11.0)
 // =========================================================================
-$pd_names  = array( 'ntn_translate_igdb_genres', 'get_post_rating', 'ntn_calculate_reading_time', 'ntn_get_primary_category', 'ntn_get_image_alt', 'ntn_get_igdb_data', 'ntn_get_game_hub_url', 'ntn_get_hub_igdb_info', 'ntn_get_tag_igdb_info' );
+$pd_names  = array( 'ntn_translate_igdb_genres', 'ntn_get_post_rating', 'ntn_calculate_reading_time', 'ntn_get_primary_category', 'ntn_get_image_alt', 'ntn_get_igdb_data', 'ntn_get_game_hub_url', 'ntn_get_hub_igdb_info', 'ntn_get_tag_igdb_info' );
 $pd_core   = ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/';
 $pd_theme  = ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/';
 $pd_data   = ntn_t_read( $pd_core . 'inc/game-data.php' );
@@ -5028,7 +5019,7 @@ assert_test(
 // 74.3: con il plugin spento le riserve restituiscono valori vuoti, senza errori
 $pd_base = tempnam( sys_get_temp_dir(), 'ntn74' );
 $pd_tmp  = $pd_base . '.php';
-file_put_contents( $pd_tmp, "<?php\ndefine( 'ABSPATH', '/' );\nfunction get_the_title( \$id ) { return 'Titolo'; }\nrequire " . var_export( $pd_theme . 'inc/plugin-fallbacks.php', true ) . ";\necho json_encode( array( get_post_rating( 1 ), ntn_calculate_reading_time( 1 ), ntn_get_primary_category( 1 ), ntn_get_image_alt( 1 ), ntn_get_igdb_data( 1, '_ntn_game_cover' ), ntn_get_game_hub_url( 1 ), ntn_get_hub_igdb_info( 1 ), ntn_get_tag_igdb_info( 1 ), ntn_translate_igdb_genres( 'Shooter' ) ) );\n" );
+file_put_contents( $pd_tmp, "<?php\ndefine( 'ABSPATH', '/' );\nfunction get_the_title( \$id ) { return 'Titolo'; }\nrequire " . var_export( $pd_theme . 'inc/plugin-fallbacks.php', true ) . ";\necho json_encode( array( ntn_get_post_rating( 1 ), ntn_calculate_reading_time( 1 ), ntn_get_primary_category( 1 ), ntn_get_image_alt( 1 ), ntn_get_igdb_data( 1, '_ntn_game_cover' ), ntn_get_game_hub_url( 1 ), ntn_get_hub_igdb_info( 1 ), ntn_get_tag_igdb_info( 1 ), ntn_translate_igdb_genres( 'Shooter' ) ) );\n" );
 $pd_out = trim( (string) shell_exec( escapeshellarg( PHP_BINARY ) . ' ' . escapeshellarg( $pd_tmp ) . ' 2>&1' ) );
 @unlink( $pd_tmp );
 @unlink( $pd_base );
@@ -5570,7 +5561,7 @@ assert_test(
 	3 === ( ntn_core_rating_from_term_names( array( 'Consigliato con riserva' ) )['rating'] ?? 0 ) &&
 	5 === ( ntn_core_rating_from_term_names( array( 'Must Play' ) )['rating'] ?? 0 ) && 5 === ( ntn_core_rating_from_term_names( array( 'Capolavoro', 'must play' ) )['rating'] ?? 0 ) &&
 	2 === ( ntn_core_rating_from_term_names( array( 'Bocciato' ) )['rating'] ?? 0 ) &&
-	'CONSIGLIATO' === get_rating_label( 4 ) && 'CONSIGLIATO CON RISERVA' === get_rating_label( 3 ) && 'MUST PLAY' === get_rating_label( 5 ) && 'BOCCIATO' === get_rating_label( 2 ),
+	'CONSIGLIATO' === ntn_get_rating_label( 4 ) && 'CONSIGLIATO CON RISERVA' === ntn_get_rating_label( 3 ) && 'MUST PLAY' === ntn_get_rating_label( 5 ) && 'BOCCIATO' === ntn_get_rating_label( 2 ),
 	'82.1: A judgment tag becomes the rating with the site scale (Must Play 5, Consigliato 4, Con riserva 3, Bocciato 2); a longer name is not mistaken for a shorter one'
 );
 // 82.2: nessun giudizio o giudizi in contrasto = nessuna proposta
@@ -5989,6 +5980,61 @@ if ( 4 === count( $pt_fn ) && ! function_exists( 'ntn_core_convert_png_to_jpeg_t
 	assert_test( false, '91.2: Functions for the transparent PNG sub-size check could not be loaded' );
 }
 
+
+// --- TEST SUITE 92: pulizie minori v4.20.2 ---
+echo "\n--- 92. PULIZIE MINORI V4.20.2 ---\n";
+$cl_core  = ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/';
+$cl_theme = ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/';
+// 92.1: le funzioni dei voti hanno il prefisso ntn_; i nomi vecchi restano solo come alias dentro function_exists
+$cl_old = array();
+foreach ( array_merge( glob( $cl_core . '{,inc/,inc/admin/,inc/admin/views/}*.php', GLOB_BRACE ), glob( $cl_theme . '{,inc/,template-parts/}*.php', GLOB_BRACE ) ) as $cl_f ) {
+	$cl_src = ntn_t_read( $cl_f );
+	if ( preg_match_all( '/(?<![A-Za-z0-9_])(get_post_rating|get_rating_label|get_rating_initials)\s*\(/', $cl_src, $cl_m ) ) {
+		foreach ( $cl_m[1] as $cl_n ) {
+			// Ammessi solo i tre alias nel plugin: "function get_x(" e la guardia function_exists( 'get_x' ) non contano come chiamate
+			$cl_old[ basename( $cl_f ) ][] = $cl_n;
+		}
+	}
+}
+$cl_allowed = array( 'rating-labels.php' => 2, 'game-data.php' => 1 );
+$cl_bad = array();
+foreach ( $cl_old as $cl_file => $cl_names ) {
+	$cl_max = isset( $cl_allowed[ $cl_file ] ) ? $cl_allowed[ $cl_file ] : 0;
+	if ( count( $cl_names ) > $cl_max ) {
+		$cl_bad[] = $cl_file;
+	}
+}
+assert_test( empty( $cl_bad ), '92.1: Rating functions are called with the ntn_ prefix everywhere; the old names exist only as aliases in the plugin (outside: ' . implode( ', ', $cl_bad ) . ')' );
+
+// 92.2: gli alias vecchi funzionano e danno lo stesso risultato
+assert_test(
+	'MUST PLAY' === get_rating_label( 5 ) && ntn_get_rating_label( 5 ) === get_rating_label( 5 ) && 'C.R.' === get_rating_initials( 3 ) && ntn_get_rating_initials( 3 ) === get_rating_initials( 3 ),
+	'92.2: The old unprefixed rating functions still work as aliases of the ntn_ ones'
+);
+assert_test(
+	false !== strpos( ntn_t_read( $cl_core . 'inc/rating-labels.php' ), "if ( ! function_exists( 'get_rating_label' ) )" ) &&
+	false !== strpos( ntn_t_read( $cl_core . 'inc/game-data.php' ), "if ( ! function_exists( 'get_post_rating' ) )" ),
+	'92.3: The old names are defined only when no other code has them, so another plugin cannot cause a fatal error'
+);
+
+// 92.4: funzioni mai usate tolte
+assert_test(
+	false === strpos( ntn_t_read( $cl_core . 'inc/taxonomies.php' ), 'ntn_get_tag_to_cpt_map' ) && ! file_exists( $cl_theme . 'inc/content-format.php' ),
+	'92.4: The unused ntn_get_tag_to_cpt_map() and the empty content-format.php are gone'
+);
+
+// 92.5: pannello dell'editor senza la funzione obsoleta; ZIP del parent senza build/
+$cl_js  = ntn_t_read( $cl_core . 'assets/js/ai-summary-gutenberg.js' );
+$cl_enq = ntn_t_read( $cl_core . 'inc/ai-summaries.php' );
+assert_test(
+	false !== strpos( $cl_js, 'wp.editor && wp.editor.PluginDocumentSettingPanel' ) && false !== strpos( $cl_js, ': wp.editPost' ) && false !== strpos( $cl_enq, "'wp-plugins', 'wp-editor', 'wp-edit-post'" ),
+	'92.5: The AI panel takes PluginDocumentSettingPanel from wp.editor first (wp.editPost only as fallback) and the script depends on wp-editor'
+);
+$cl_ps = ntn_t_read( ABSPATH . 'package_release.ps1' );
+assert_test(
+	false !== strpos( $cl_ps, '-excludeDirs @("build")' ) && false !== strpos( $cl_ps, '$relativePath.StartsWith("$excluded/")' ) && false !== strpos( $cl_ps, '[string[]]$excludeDirs' ),
+	'92.6: package_release.ps1 leaves the Tailwind build/ folder out of the parent theme ZIP'
+);
 
 $GLOBALS['post'] = null;
 unset( $GLOBALS['mock_wp_query_handler'] );

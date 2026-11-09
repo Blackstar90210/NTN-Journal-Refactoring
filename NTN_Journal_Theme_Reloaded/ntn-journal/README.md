@@ -4,7 +4,7 @@
 
 *Read this document in: [English](#english) | [Italiano](#italiano)*
 
-**Version:** 4.20.1 · **Authors:** Luca Maiolini & Divisione_WP
+**Version:** 4.20.2 · **Authors:** Luca Maiolini & Divisione_WP
 
 ---
 

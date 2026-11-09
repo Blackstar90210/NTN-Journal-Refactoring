@@ -144,11 +144,6 @@ function ntn_get_cpt_videogioco_link_by_slug( $slug ) {
 	return $link;
 }
 
-// Retrocompatibilità
-function ntn_get_tag_to_cpt_map() {
-	return array();
-}
-
 /**
  * Modifica il link dei tag se sono Hub Page (Videogioco)
  */

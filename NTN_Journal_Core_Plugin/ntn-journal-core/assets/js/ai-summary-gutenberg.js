@@ -4,7 +4,8 @@
 
 ( function( wp ) {
 	const { registerPlugin } = wp.plugins;
-	const { PluginDocumentSettingPanel } = wp.editPost;
+	// Da WordPress 6.6 il pannello è in wp.editor; wp.editPost è obsoleto e resta solo come riserva per le versioni precedenti.
+	const { PluginDocumentSettingPanel } = ( wp.editor && wp.editor.PluginDocumentSettingPanel ) ? wp.editor : wp.editPost;
 	const { Button, Spinner, Notice } = wp.components;
 	const { useState } = wp.element;
 	const { useDispatch, useSelect } = wp.data;

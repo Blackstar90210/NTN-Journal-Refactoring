@@ -23,7 +23,6 @@ require_once NTN_INC_DIR . 'plugin-fallbacks.php'; // Riserve vuote per le funzi
 require_once NTN_INC_DIR . 'menu-filters.php';
 require_once NTN_INC_DIR . 'date-social.php';
 require_once NTN_INC_DIR . 'related-posts.php';
-require_once NTN_INC_DIR . 'content-format.php';
 require_once NTN_INC_DIR . 'performance.php';
 require_once NTN_INC_DIR . 'share-buttons.php';
 require_once NTN_INC_DIR . 'social-cta.php';

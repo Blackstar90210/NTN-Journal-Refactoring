@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  */
 
 $post_id = get_the_ID();
-$rating = get_post_rating( $post_id );
+$rating = ntn_get_post_rating( $post_id );
 
 if ( empty( $rating ) ) {
 	return;
@@ -50,7 +50,7 @@ if ( ! empty( $cons_meta ) ) {
 $verdict_text = ! empty( $verdict_meta ) ? $verdict_meta : '';
 
 // Giudizio e link al suo tag (Bocciato, Consigliato con riserva, Consigliato, Must Play)
-$rating_label = function_exists( 'get_rating_label' ) ? get_rating_label( $final_rating ) : (string) $final_rating;
+$rating_label = function_exists( 'ntn_get_rating_label' ) ? ntn_get_rating_label( $final_rating ) : (string) $final_rating;
 $rating_link = '';
 $rating_slug = sanitize_title( $rating_label );
 if ( in_array( $rating_slug, array( 'bocciato', 'consigliato-con-riserva', 'consigliato', 'must-play' ) ) ) {
