@@ -81,7 +81,7 @@ class NTN_Catalog_REST_Controller {
 		if ( $query->have_posts() ) {
 			while ( $query->have_posts() ) {
 				$query->the_post();
-				get_template_part( 'template-parts/content', 'game-card' );
+				get_template_part( 'template-parts/content', 'game-card', array( 'position' => (int) $query->current_post, 'first_page' => ( isset( $params['page'] ) ? absint( $params['page'] ) : 1 ) <= 1 ) );
 			}
 		} else {
 			if ( $params['page'] === 1 ) {

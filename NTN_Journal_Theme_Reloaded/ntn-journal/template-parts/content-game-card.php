@@ -88,12 +88,14 @@ if ( ! empty( $release ) && function_exists( 'ntn_journal_game_card_date' ) ) {
 
 	<div class="ntn-game-cover">
 	<?php if ( $cover ) : 
-		global $wp_query;
 		$loading_attr = 'loading="lazy" decoding="async"';
 		$class_attr   = 'w-full h-full object-cover';
-		
-		// Priority hinting for first 4 elements (Above the fold) to improve LCP
-		if ( isset( $wp_query ) && isset( $wp_query->current_post ) && $wp_query->current_post < 4 ) {
+
+		// Dalla 4.16.4 la posizione arriva da chi disegna l'elenco (argomento 'position', con 'first_page'):
+		// prima si leggeva $wp_query, che per questo elenco non è quello giusto e dava "alta priorità" a tutte le schede.
+		// Priority hinting solo per le prime 4 schede della prima pagina (sopra la piega) per migliorare l'LCP.
+		$card_args = ( isset( $args ) && is_array( $args ) ) ? $args : array();
+		if ( ! empty( $card_args['first_page'] ) && isset( $card_args['position'] ) && (int) $card_args['position'] < 4 ) {
 			$loading_attr = 'fetchpriority="high" loading="eager"';
 			$class_attr  .= ' skip-lazy no-lazy';
 		}

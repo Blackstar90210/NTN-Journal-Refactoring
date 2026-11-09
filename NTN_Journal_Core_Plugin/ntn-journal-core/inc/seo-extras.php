@@ -1475,3 +1475,33 @@ function ntn_tsf_add_videogame_schema( $data, $context = array() ) {
 }
 add_filter( 'the_seo_framework_schema_graph_data', 'ntn_tsf_add_videogame_schema', 10, 2 );
 
+/**
+ * Toglie i codici HTML dai testi dei dati strutturati (v4.16.4).
+ *
+ * Alcuni testi arrivano già "protetti" per l'HTML (la descrizione dell'autore, l'estratto dell'articolo):
+ * un apostrofo è scritto `&#039;`. In un blocco JSON-LD il testo è testo semplice, quindi Google mostrerebbe
+ * il codice così com'è. Si decodifica ogni testo del grafo; il JSON lo scrive poi TSF con le sue regole.
+ *
+ * @param mixed $data Grafo dei dati strutturati (o un suo pezzo).
+ * @return mixed
+ */
+function ntn_core_schema_decode_entities( $data ) {
+	if ( is_array( $data ) ) {
+		foreach ( $data as $key => $value ) {
+			$data[ $key ] = ntn_core_schema_decode_entities( $value );
+		}
+		return $data;
+	}
+	if ( is_string( $data ) && false !== strpos( $data, '&' ) && preg_match( '/&(?:#\d+|#x[0-9a-f]+|[a-z][a-z0-9]+);/i', $data ) ) {
+		for ( $i = 0; $i < 3; $i++ ) {
+			$decoded = html_entity_decode( $data, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+			if ( $decoded === $data ) {
+				break;
+			}
+			$data = $decoded;
+		}
+	}
+	return $data;
+}
+add_filter( 'the_seo_framework_schema_graph_data', 'ntn_core_schema_decode_entities', 99 );
+

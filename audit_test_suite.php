@@ -382,13 +382,14 @@ class WP_Query {
 	public $max_num_pages = 1;
 	public $posts = array();
 	public $found_posts = 0;
+	public $current_post = -1; // come WP_Query vero: indice del post corrente (-1 prima del primo)
 	public function __construct( $args = array() ) {
 		if ( ! empty( $GLOBALS['mock_wp_query_handler'] ) ) {
 			$this->posts = call_user_func( $GLOBALS['mock_wp_query_handler'], $args );
 		}
 	}
 	public function have_posts() { return have_posts(); }
-	public function the_post() { return the_post(); }
+	public function the_post() { $this->current_post++; return the_post(); }
 }
 function get_template_part( $slug, $name = null, $args = array() ) {
 	if ( $slug === 'template-parts/hub-article-feed' ) {
@@ -1653,24 +1654,24 @@ echo "\n--- 24. SEMVER SIMULTANEOUS 4-HEADER SYNCHRONIZATION ---\n";
 $parent_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $parent_css, $m_parent );
 $parent_ver = isset( $m_parent[1] ) ? trim( $m_parent[1] ) : '';
-assert_test( $parent_ver === '4.16.3', "24.1: Parent Theme style.css declares Version: 4.16.3(found: {$parent_ver})" );
+assert_test( $parent_ver === '4.16.4', "24.1: Parent Theme style.css declares Version: 4.16.4(found: {$parent_ver})" );
 
 $child_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $child_css, $m_child );
 $child_ver = isset( $m_child[1] ) ? trim( $m_child[1] ) : '';
-assert_test( $child_ver === '4.16.3', "24.2: Child Theme style.css declares Version: 4.16.3(found: {$child_ver})" );
+assert_test( $child_ver === '4.16.4', "24.2: Child Theme style.css declares Version: 4.16.4(found: {$child_ver})" );
 
 $core_php = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' );
 preg_match( '/\*\s*Version:\s*([0-9\.]+)/', $core_php, $m_core_hdr );
 $core_hdr_ver = isset( $m_core_hdr[1] ) ? trim( $m_core_hdr[1] ) : '';
-assert_test( $core_hdr_ver === '4.16.3', "24.3: Core Plugin header declares Version: 4.16.3(found: {$core_hdr_ver})" );
+assert_test( $core_hdr_ver === '4.16.4', "24.3: Core Plugin header declares Version: 4.16.4(found: {$core_hdr_ver})" );
 
 preg_match( "/define\(\s*'NTN_JOURNAL_CORE_VERSION',\s*'([^']+)'\s*\);/", $core_php, $m_core_const );
 $core_const_ver = isset( $m_core_const[1] ) ? trim( $m_core_const[1] ) : '';
-assert_test( $core_const_ver === '4.16.3', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.16.3(found: {$core_const_ver})" );
+assert_test( $core_const_ver === '4.16.4', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.16.4(found: {$core_const_ver})" );
 
 assert_test(
-	$parent_ver === '4.16.3' && $child_ver === '4.16.3' && $core_hdr_ver === '4.16.3' && $core_const_ver === '4.16.3',
+	$parent_ver === '4.16.4' && $child_ver === '4.16.4' && $core_hdr_ver === '4.16.4' && $core_const_ver === '4.16.4',
 	'24.5: All 4 version headers are 100% synchronized and atomic according to Rule 2 of GEMINI.md'
 );
 
@@ -1899,7 +1900,7 @@ $parent_style_ver = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( AB
 $child_style_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' ), $m2 ) ? $m2[1] : '';
 $core_plugin_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m3 ) ? $m3[1] : '';
 $core_const_ver   = preg_match( '/define\(\s*[\'"]NTN_JOURNAL_CORE_VERSION[\'"]\s*,\s*[\'"]([0-9\.]+)[\'"]\s*\)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m4 ) ? $m4[1] : '';
-assert_test( $parent_style_ver === '4.16.3' && $child_style_ver === '4.16.3' && $core_plugin_ver === '4.16.3' && $core_const_ver === '4.16.3', '29.1: All 4 version headers are synchronized to 4.16.3' );
+assert_test( $parent_style_ver === '4.16.4' && $child_style_ver === '4.16.4' && $core_plugin_ver === '4.16.4' && $core_const_ver === '4.16.4', '29.1: All 4 version headers are synchronized to 4.16.4' );
 
 // 29.2: single.php sequence is Google Feed -> Social CTA -> Bottom Related Posts
 $single_php = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/single.php' );
@@ -2517,7 +2518,7 @@ assert_test(
 
 // 37.4 (aggiornato in 4.10.0): il catalogo del parent è quello con i filtri e disegna la scheda comune
 assert_test(
-	strpos( $cat_parent, "'template-parts/archive-head'" ) !== false && strpos( $cat_parent, "get_template_part( 'template-parts/content', 'game-card' )" ) !== false &&
+	strpos( $cat_parent, "'template-parts/archive-head'" ) !== false && strpos( $cat_parent, "get_template_part( 'template-parts/content', 'game-card'" ) !== false &&
 	strpos( $cat_parent, '<div id="ntn-catalog-grid" class="ntn-games">' ) !== false && strpos( $cat_parent, 'bg-black/85' ) === false,
 	'37.4: Parent catalog uses the shared header and the shared game card template'
 );
@@ -4948,7 +4949,7 @@ assert_test(
 
 // 72.5: l'endpoint REST del plugin trova la scheda del gioco nel parent
 assert_test(
-	false !== strpos( file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/rest-catalog.php' ), "get_template_part( 'template-parts/content', 'game-card' )" ) && file_exists( $fx_parent . 'template-parts/content-game-card.php' ),
+	false !== strpos( file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/rest-catalog.php' ), "get_template_part( 'template-parts/content', 'game-card'" ) && file_exists( $fx_parent . 'template-parts/content-game-card.php' ),
 	'72.5: The plugin REST catalog renders the game card that now ships with the parent theme'
 );
 
@@ -5755,6 +5756,51 @@ assert_test(
 	false !== strpos( $lc_out, 'imagesizes="(max-width: 1024px) 100vw, 1024px"' ) && false !== strpos( $lc_out, 'fetchpriority="high"' ) && false === strpos( $lc_out, 'a-full.jpg' ) &&
 	'' === $lc_out_game && false !== strpos( $lc_src, "is_singular( array( 'post', 'page', 'comunicato_stampa' ) )" ) && false === strpos( $lc_src, "'full' );\n\t\tif ( \$image_url )" ),
 	'85.2: The LCP preload uses the displayed size ("large") with its srcset and sizes, and only on templates that show the featured image'
+);
+
+// --- TEST SUITE 86: apostrofi nei dati per Google e copertine del catalogo v4.16.4 ---
+echo "\n--- 86. DATI PER GOOGLE SENZA CODICI HTML E COPERTINE DEL CATALOGO V4.16.4 ---\n";
+$ge_in = array(
+	array( '@type' => 'Person', 'name' => 'Luca', 'description' => 'Un po&#039; geek e un po&#039; nerd', 'url' => 'https://example.com/?a=1&amp;b=2' ),
+	array( '@type' => 'Review', 'reviewBody' => 'console dell&#039;epoca &amp; &quot;cult&quot;', 'n' => 5, 'list' => array( 'Pok&#233;mon', 'gia\' fatto' ) ),
+);
+$ge_out = ntn_core_schema_decode_entities( $ge_in );
+assert_test(
+	"Un po' geek e un po' nerd" === $ge_out[0]['description'] && 'https://example.com/?a=1&b=2' === $ge_out[0]['url'] && 'Luca' === $ge_out[0]['name'] &&
+	'console dell\'epoca & "cult"' === $ge_out[1]['reviewBody'] && 5 === $ge_out[1]['n'] && 'Pokémon' === $ge_out[1]['list'][0] && "gia' fatto" === $ge_out[1]['list'][1] &&
+	has_filter( 'the_seo_framework_schema_graph_data', 'ntn_core_schema_decode_entities' ) === 99,
+	'86.1: Texts in the structured data lose their HTML codes (&#039;, &amp;, &quot;); other values stay as they are; the filter runs after the others'
+);
+
+$gc_theme = ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/';
+$gc_render = function ( $post_id, $args ) use ( &$mock_posts, &$mock_postmeta, $gc_theme ) {
+	$mock_posts[ $post_id ] = new WP_Post( array( 'ID' => $post_id, 'post_title' => 'Gioco ' . $post_id, 'post_name' => 'gioco-' . $post_id, 'post_type' => 'videogioco', 'post_status' => 'publish' ) );
+	$mock_postmeta[ $post_id ] = array( '_ntn_game_cover' => 'https://images.igdb.com/igdb/image/upload/t_cover_big/co' . $post_id . '.jpg' );
+	$GLOBALS['queried_object'] = $mock_posts[ $post_id ];
+	$GLOBALS['post']           = $mock_posts[ $post_id ];
+	ob_start();
+	( static function ( $args ) use ( $gc_theme ) { require $gc_theme . 'template-parts/content-game-card.php'; } )( $args );
+	return ob_get_clean();
+};
+$gc_first = $gc_render( 9601, array( 'position' => 0, 'first_page' => true ) );
+$gc_fourth = $gc_render( 9602, array( 'position' => 3, 'first_page' => true ) );
+$gc_fifth = $gc_render( 9603, array( 'position' => 4, 'first_page' => true ) );
+$gc_page2 = $gc_render( 9604, array( 'position' => 0, 'first_page' => false ) );
+$gc_noargs = $gc_render( 9605, array() );
+$GLOBALS['queried_object'] = null;
+$GLOBALS['post']           = null;
+assert_test(
+	false !== strpos( $gc_first, 'fetchpriority="high"' ) && false !== strpos( $gc_fourth, 'fetchpriority="high"' ) &&
+	false === strpos( $gc_fifth, 'fetchpriority="high"' ) && false !== strpos( $gc_fifth, 'loading="lazy"' ) &&
+	false === strpos( $gc_page2, 'fetchpriority="high"' ) && false === strpos( $gc_noargs, 'fetchpriority="high"' ) && false !== strpos( $gc_noargs, 'loading="lazy"' ),
+	'86.2: Only the first 4 covers of the first catalog page get high priority; later cards, later pages and calls without arguments stay lazy'
+);
+
+assert_test(
+	false !== strpos( ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/rest-catalog.php' ), "'position' => (int) \$query->current_post" ) &&
+	false !== strpos( ntn_t_read( $gc_theme . 'archive-videogioco.php' ), "'position' => (int) \$query->current_post" ) &&
+	false === strpos( ntn_t_read( $gc_theme . 'template-parts/content-game-card.php' ), 'global $wp_query;' ),
+	'86.3: The catalog page and the REST catalog both pass the card position; the card no longer reads the wrong global query'
 );
 
 $GLOBALS['post'] = null;
