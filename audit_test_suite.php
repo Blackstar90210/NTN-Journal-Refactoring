@@ -98,6 +98,14 @@ class WP_Error {
 			$this->errors[ $code ][] = $message;
 		}
 	}
+	public function get_error_code() {
+		$codes = array_keys( $this->errors );
+		return $codes ? $codes[0] : '';
+	}
+	public function get_error_message() {
+		$code = $this->get_error_code();
+		return '' === $code ? '' : (string) $this->errors[ $code ][0];
+	}
 }
 
 class StringableObject {
@@ -366,8 +374,8 @@ function post_class( $class = '' ) {
 }
 
 function wp_dropdown_categories( $args = array() ) {}
-function get_transient( $transient ) { return false; }
-function set_transient( $transient, $value, $expiration = 0 ) { $GLOBALS['ntn_test_set_transients'][] = $transient; return true; }
+function get_transient( $transient ) { return $GLOBALS['mock_transients'][ $transient ] ?? false; }
+function set_transient( $transient, $value, $expiration = 0 ) { $GLOBALS['ntn_test_set_transients'][] = $transient; $GLOBALS['ntn_test_set_transient_values'][ $transient ] = array( $value, $expiration ); return true; }
 function wp_using_ext_object_cache() { return ! empty( $GLOBALS['ntn_test_ext_cache'] ); }
 function delete_transient( $transient ) { return true; }
 function selected( $selected, $current = true, $echo = true ) {
@@ -1647,24 +1655,24 @@ echo "\n--- 24. SEMVER SIMULTANEOUS 4-HEADER SYNCHRONIZATION ---\n";
 $parent_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $parent_css, $m_parent );
 $parent_ver = isset( $m_parent[1] ) ? trim( $m_parent[1] ) : '';
-assert_test( $parent_ver === '4.21.0', "24.1: Parent Theme style.css declares Version: 4.21.0(found: {$parent_ver})" );
+assert_test( $parent_ver === '4.22.0', "24.1: Parent Theme style.css declares Version: 4.22.0(found: {$parent_ver})" );
 
 $child_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $child_css, $m_child );
 $child_ver = isset( $m_child[1] ) ? trim( $m_child[1] ) : '';
-assert_test( $child_ver === '4.21.0', "24.2: Child Theme style.css declares Version: 4.21.0(found: {$child_ver})" );
+assert_test( $child_ver === '4.22.0', "24.2: Child Theme style.css declares Version: 4.22.0(found: {$child_ver})" );
 
 $core_php = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' );
 preg_match( '/\*\s*Version:\s*([0-9\.]+)/', $core_php, $m_core_hdr );
 $core_hdr_ver = isset( $m_core_hdr[1] ) ? trim( $m_core_hdr[1] ) : '';
-assert_test( $core_hdr_ver === '4.21.0', "24.3: Core Plugin header declares Version: 4.21.0(found: {$core_hdr_ver})" );
+assert_test( $core_hdr_ver === '4.22.0', "24.3: Core Plugin header declares Version: 4.22.0(found: {$core_hdr_ver})" );
 
 preg_match( "/define\(\s*'NTN_JOURNAL_CORE_VERSION',\s*'([^']+)'\s*\);/", $core_php, $m_core_const );
 $core_const_ver = isset( $m_core_const[1] ) ? trim( $m_core_const[1] ) : '';
-assert_test( $core_const_ver === '4.21.0', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.21.0(found: {$core_const_ver})" );
+assert_test( $core_const_ver === '4.22.0', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.22.0(found: {$core_const_ver})" );
 
 assert_test(
-	$parent_ver === '4.21.0' && $child_ver === '4.21.0' && $core_hdr_ver === '4.21.0' && $core_const_ver === '4.21.0',
+	$parent_ver === '4.22.0' && $child_ver === '4.22.0' && $core_hdr_ver === '4.22.0' && $core_const_ver === '4.22.0',
 	'24.5: All 4 version headers are 100% synchronized and atomic according to Rule 2 of GEMINI.md'
 );
 
@@ -1892,7 +1900,7 @@ $parent_style_ver = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( AB
 $child_style_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' ), $m2 ) ? $m2[1] : '';
 $core_plugin_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m3 ) ? $m3[1] : '';
 $core_const_ver   = preg_match( '/define\(\s*[\'"]NTN_JOURNAL_CORE_VERSION[\'"]\s*,\s*[\'"]([0-9\.]+)[\'"]\s*\)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m4 ) ? $m4[1] : '';
-assert_test( $parent_style_ver === '4.21.0' && $child_style_ver === '4.21.0' && $core_plugin_ver === '4.21.0' && $core_const_ver === '4.21.0', '29.1: All 4 version headers are synchronized to 4.21.0' );
+assert_test( $parent_style_ver === '4.22.0' && $child_style_ver === '4.22.0' && $core_plugin_ver === '4.22.0' && $core_const_ver === '4.22.0', '29.1: All 4 version headers are synchronized to 4.22.0' );
 
 // 29.2: single.php sequence is Google Feed -> Social CTA -> Bottom Related Posts
 $single_php = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/single.php' );
@@ -6173,6 +6181,123 @@ foreach ( $pr_it as $pr_item ) {
 
 $GLOBALS['post'] = null;
 unset( $GLOBALS['mock_wp_query_handler'] );
+
+// --- TEST SUITE 94: data vera dei trailer YouTube v4.22.0 ---
+echo "\n--- 94. DATA VERA DEI TRAILER YOUTUBE V4.22.0 ---\n";
+$yt_dir  = ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/';
+$yt_src  = ntn_t_read( $yt_dir . 'inc/youtube-upload-date.php' );
+$yt_main = ntn_t_read( $yt_dir . 'ntn-journal-core.php' );
+$yt_api  = ntn_t_read( $yt_dir . 'inc/api-status.php' );
+$yt_bak  = ntn_t_read( $yt_dir . 'inc/backup-restore.php' );
+$yt_sites = array(
+	ntn_t_read( $yt_dir . 'inc/schema-markup.php' ),
+	ntn_t_read( $yt_dir . 'inc/seo-extras.php' ),
+);
+$yt_uploads = preg_match_all( "/'uploadDate'\s*=>\s*ntn_core_youtube_upload_date\(/", $yt_sites[0] . $yt_sites[1] );
+$yt_raw     = preg_match_all( "/'uploadDate'\s*=>\s*get_the_date/", $yt_sites[0] . $yt_sites[1] );
+assert_test(
+	4 === $yt_uploads && 0 === $yt_raw && false !== strpos( $yt_main, "require_once NTN_JOURNAL_CORE_DIR . 'inc/youtube-upload-date.php';" ) &&
+	false !== strpos( $yt_api, "'ntn_youtube_api_key' => 'API Key'" ) && false !== strpos( $yt_api, "'youtube' === \$service" ) &&
+	2 === substr_count( $yt_bak, "'ntn_youtube_api_key'," ) && false === strpos( $yt_src, "'key'   =>" ),
+	'94.1: All 4 trailer VideoObjects use the YouTube date helper; "youtube" is a service in Servizi API with Verifica; the key is in the backup lists and goes in a header, never in the URL'
+);
+
+require_once ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/youtube-upload-date.php';
+foreach ( array( 'YEAR_IN_SECONDS' => 31536000 ) as $yt_c => $yt_v ) {
+	if ( ! defined( $yt_c ) ) {
+		define( $yt_c, $yt_v );
+	}
+}
+$GLOBALS['yt_requests']  = array();
+$GLOBALS['yt_scheduled'] = array();
+$GLOBALS['yt_response']  = array( 'code' => 200, 'body' => '' );
+if ( ! function_exists( 'wp_remote_get' ) ) {
+	function wp_remote_get( $url, $args = array() ) {
+		$GLOBALS['yt_requests'][] = array( $url, $args );
+		return $GLOBALS['yt_response'];
+	}
+}
+if ( ! function_exists( 'wp_remote_retrieve_response_code' ) ) {
+	function wp_remote_retrieve_response_code( $r ) { return is_array( $r ) ? (int) $r['code'] : 0; }
+}
+if ( ! function_exists( 'wp_remote_retrieve_body' ) ) {
+	function wp_remote_retrieve_body( $r ) { return is_array( $r ) ? (string) $r['body'] : ''; }
+}
+if ( ! function_exists( 'add_query_arg' ) ) {
+	function add_query_arg( $args, $url ) { return $url . '?' . http_build_query( $args ); }
+}
+if ( ! function_exists( 'wp_next_scheduled' ) ) {
+	function wp_next_scheduled( $hook, $args = array() ) { return in_array( array( $hook, $args ), $GLOBALS['yt_scheduled'], true ) ? 1 : false; }
+}
+if ( ! function_exists( 'wp_schedule_single_event' ) ) {
+	function wp_schedule_single_event( $time, $hook, $args = array() ) { $GLOBALS['yt_scheduled'][] = array( $hook, $args ); return true; }
+}
+
+// Pulizia dell'identificativo e scelta della data
+$yt_fb = '2026-01-05T10:00:00+01:00';
+$yt_ids = array(
+	ntn_core_youtube_clean_id( 'dQw4w9WgXcQ' ),
+	ntn_core_youtube_clean_id( 'dQw4w9WgXcQ&t=10' ),
+	ntn_core_youtube_clean_id( 'corto' ),
+	ntn_core_youtube_clean_id( '../etc/passwd' ),
+	ntn_core_youtube_clean_id( null ),
+);
+unset( $GLOBALS['mock_options']['ntn_youtube_api_key'], $GLOBALS['mock_transients'] );
+$yt_nokey = ntn_core_youtube_upload_date( 'dQw4w9WgXcQ', $yt_fb );
+$yt_sched_nokey = count( $GLOBALS['yt_scheduled'] );
+$GLOBALS['mock_options']['ntn_youtube_api_key'] = 'CHIAVE-DI-PROVA';
+$yt_bad     = ntn_core_youtube_upload_date( 'xx', $yt_fb );
+$yt_first   = ntn_core_youtube_upload_date( 'dQw4w9WgXcQ', $yt_fb );
+$yt_second  = ntn_core_youtube_upload_date( 'dQw4w9WgXcQ', $yt_fb );
+$yt_sched   = $GLOBALS['yt_scheduled'];
+$GLOBALS['mock_transients']['ntn_yt_date_dQw4w9WgXcQ'] = '2009-10-25T06:57:33Z';
+$yt_real = ntn_core_youtube_upload_date( 'dQw4w9WgXcQ', $yt_fb );
+$GLOBALS['mock_transients']['ntn_yt_date_dQw4w9WgXcQ'] = 'none';
+$yt_none = ntn_core_youtube_upload_date( 'dQw4w9WgXcQ', $yt_fb );
+$yt_sched_after = count( $GLOBALS['yt_scheduled'] );
+assert_test(
+	array( 'dQw4w9WgXcQ', 'dQw4w9WgXcQ', '', '', '' ) === $yt_ids && $yt_nokey === $yt_fb && 0 === $yt_sched_nokey && $yt_bad === $yt_fb &&
+	$yt_first === $yt_fb && $yt_second === $yt_fb && array( array( NTN_CORE_YT_DATE_HOOK, array( 'dQw4w9WgXcQ' ) ) ) === $yt_sched &&
+	'2009-10-25T06:57:33Z' === $yt_real && $yt_none === $yt_fb && 1 === $yt_sched_after,
+	'94.2: Without a key, with a bad id, or with a "not found" answer the article date is kept; with a key and no stored date one background job is queued (never a request while the page loads); a stored date wins'
+);
+
+// Richiesta a YouTube e salvataggio
+unset( $GLOBALS['mock_transients'] );
+$GLOBALS['ntn_test_set_transient_values'] = array();
+$GLOBALS['yt_response'] = array( 'code' => 200, 'body' => '{"items":[{"snippet":{"publishedAt":"2024-03-02T15:00:00Z"}}]}' );
+ntn_core_youtube_fetch_date( 'abcdefghijk' );
+$yt_ok_val = $GLOBALS['ntn_test_set_transient_values']['ntn_yt_date_abcdefghijk'] ?? null;
+$yt_req    = $GLOBALS['yt_requests'][0] ?? array( '', array() );
+$GLOBALS['yt_response'] = array( 'code' => 200, 'body' => '{"items":[]}' );
+ntn_core_youtube_fetch_date( 'lmnopqrstuv' );
+$yt_nf_val = $GLOBALS['ntn_test_set_transient_values']['ntn_yt_date_lmnopqrstuv'] ?? null;
+$GLOBALS['yt_response'] = array( 'code' => 403, 'body' => '{"error":{"code":403}}' );
+ntn_core_youtube_fetch_date( 'wxyzABCDEFG' );
+$yt_err_val = $GLOBALS['ntn_test_set_transient_values']['ntn_yt_date_wxyzABCDEFG'] ?? null;
+$yt_status  = ntn_core_api_status_get( 'youtube' );
+assert_test(
+	array( '2024-03-02T15:00:00Z', YEAR_IN_SECONDS ) === $yt_ok_val && array( 'none', 7 * DAY_IN_SECONDS ) === $yt_nf_val && array( 'none', HOUR_IN_SECONDS ) === $yt_err_val &&
+	false !== strpos( $yt_req[0], 'id=abcdefghijk' ) && false === strpos( $yt_req[0], 'CHIAVE-DI-PROVA' ) && 'CHIAVE-DI-PROVA' === ( $yt_req[1]['headers']['x-goog-api-key'] ?? '' ) &&
+	'error' === $yt_status['state'] && false !== strpos( $yt_status['message'], 'Chiave non valida' ),
+	'94.3: A good answer is kept for a year, a missing video for 7 days, an error for 1 hour (and the service shows "Errore"); the key travels in a header, not in the address'
+);
+
+// Pulsante Verifica
+$GLOBALS['yt_response'] = array( 'code' => 200, 'body' => '{"items":[{"snippet":{"publishedAt":"2009-10-25T06:57:33Z"}}]}' );
+$yt_verify_ok = ntn_core_api_verify( 'youtube' );
+$GLOBALS['yt_response'] = array( 'code' => 403, 'body' => '' );
+$yt_verify_ko = ntn_core_api_verify( 'youtube' );
+unset( $GLOBALS['mock_options']['ntn_youtube_api_key'] );
+$yt_verify_missing = ntn_core_api_verify( 'youtube' );
+$yt_reg = ntn_core_cache_registry();
+assert_test(
+	'active' === $yt_verify_ok['state'] && 'error' === $yt_verify_ko['state'] && 'missing' === $yt_verify_missing['state'] &&
+	isset( $yt_reg['yt_date'] ) && false === $yt_reg['yt_date']['flush'] && ntn_core_cache_registry_covers( 'ntn_yt_date_dQw4w9WgXcQ' ),
+	'94.4: Verifica works with a good key, a refused key and a missing key; the stored dates are in the cache registry and survive "Svuota tutta la memoria"'
+);
+unset( $GLOBALS['mock_transients'], $GLOBALS['mock_options']['ntn_api_status'] );
+
 
 echo "\n=======================================================================\n";
 echo " AUDIT SUMMARY: {$passed} PASSED, {$failed} FAILED\n";

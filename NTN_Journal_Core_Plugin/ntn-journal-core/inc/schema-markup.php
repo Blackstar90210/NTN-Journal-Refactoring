@@ -104,7 +104,7 @@ function ntn_journal_advanced_schema_markup() {
 					'name'         => $video_name,
 					'description'  => $video_description,
 					'thumbnailUrl' => $body['thumbnail_url'],
-					'uploadDate'   => get_the_date( 'c', $post->ID ), // Data dell'articolo
+					'uploadDate'   => ntn_core_youtube_upload_date( (string) $video_id, get_the_date( 'c', $post->ID ) ), // Data vera di YouTube, se c'è; altrimenti quella dell'articolo
 					'embedUrl'     => 'https://www.youtube.com/embed/' . $video_id
 				);
 				$schema_data[] = $video_schema;
@@ -266,7 +266,7 @@ function ntn_journal_review_article_schema() {
 						'description'  => 'Guarda il trailer ufficiale di ' . ntn_clean_json_ld_text( $ntn_schema_item ),
 						'thumbnailUrl' => 'https://img.youtube.com/vi/' . $video_id . '/hqdefault.jpg',
 						'embedUrl'     => 'https://www.youtube.com/embed/' . $video_id,
-						'uploadDate'   => get_the_date( 'c', get_the_ID() )
+						'uploadDate'   => ntn_core_youtube_upload_date( (string) $video_id, get_the_date( 'c', get_the_ID() ) )
 					);
 				}
 				if ( ! empty( $view_model['screenshots'] ) ) {
@@ -516,7 +516,7 @@ function ntn_journal_review_article_schema() {
 								'description'  => 'Guarda il trailer ufficiale di ' . ntn_clean_json_ld_text( $game_title ),
 								'thumbnailUrl' => 'https://img.youtube.com/vi/' . $video_id . '/hqdefault.jpg',
 								'embedUrl'     => 'https://www.youtube.com/embed/' . $video_id,
-								'uploadDate'   => get_the_date( 'c', get_the_ID() )
+								'uploadDate'   => ntn_core_youtube_upload_date( (string) $video_id, get_the_date( 'c', get_the_ID() ) )
 							);
 						}
 						if ( ! empty( $view_model['screenshots'] ) ) {

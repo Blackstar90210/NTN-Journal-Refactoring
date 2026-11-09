@@ -20,7 +20,7 @@ $ntn_status_colors = array(
 <!-- Servizi API Tab -->
 <div class="card" style="padding: 20px; box-sizing: border-box; background: #fff; border: 1px solid #ccd0d4; max-width: 100%;">
 	<h2>Servizi API ed Integrazioni</h2>
-	<p>Le chiavi dei servizi esterni usati dal sito: i riassunti con l'IA (Gemini, con Groq come riserva) e il database dei giochi IGDB. Per sicurezza le chiavi salvate non vengono mai mostrate: per cambiarne una scrivi quella nuova, per tenerla lascia il campo vuoto.</p>
+	<p>Le chiavi dei servizi esterni usati dal sito: i riassunti con l'IA (Gemini, con Groq come riserva) il database dei giochi IGDB e, facoltativa, la chiave di YouTube per la data vera dei trailer. Per sicurezza le chiavi salvate non vengono mai mostrate: per cambiarne una scrivi quella nuova, per tenerla lascia il campo vuoto.</p>
 
 	<?php foreach ( ntn_core_api_services() as $ntn_service => $ntn_info ) : ?>
 		<?php $ntn_status = ntn_core_api_status_get( $ntn_service ); ?>
@@ -68,7 +68,7 @@ $ntn_status_colors = array(
 				<?php endforeach; ?>
 			</tbody>
 		</table>
-		<p class="description">Gemini: chiave da Google AI Studio. Groq: chiave dalla console di Groq. IGDB: Client ID e Client Secret dalla Twitch Developer Console.</p>
+		<p class="description">Gemini: chiave da Google AI Studio. Groq: chiave dalla console di Groq. IGDB: Client ID e Client Secret dalla Twitch Developer Console. YouTube: chiave della "YouTube Data API v3" dalla Google Cloud Console (gratuita, facoltativa: senza chiave i trailer usano la data dell'articolo).</p>
 
 		<p class="submit">
 			<input type="submit" class="button button-primary" value="Salva Servizi API">

@@ -3,7 +3,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 /**
  * Stato delle chiavi API (v3.17.1, scelta del CEO).
  *
- * Per ogni servizio (Gemini, Groq, IGDB) la scheda "Servizi API" mostra:
+ * Per ogni servizio (Gemini, Groq, IGDB, YouTube) la scheda "Servizi API" mostra:
  * - "Attiva": l'ultima richiesta al servizio è andata a buon fine;
  * - "Salvata, non verificata": la chiave c'è ma non è ancora stata usata;
  * - "Errore": l'ultima richiesta è fallita, con il motivo;
@@ -35,6 +35,10 @@ function ntn_core_api_services() {
 				'ntn_igdb_client_id'     => 'Client ID',
 				'ntn_igdb_client_secret' => 'Client Secret',
 			),
+		),
+		'youtube' => array(
+			'label'   => 'YouTube (data dei trailer)',
+			'options' => array( 'ntn_youtube_api_key' => 'API Key' ),
 		),
 	);
 }
@@ -125,7 +129,7 @@ function ntn_core_api_error_reason( $response ) {
 /**
  * Richiesta di prova che non consuma crediti.
  *
- * @param string $service gemini | groq | igdb.
+ * @param string $service gemini | groq | igdb | youtube.
  * @return array{state:string,label:string,message:string,time:int}
  */
 function ntn_core_api_verify( $service ) {
@@ -154,6 +158,9 @@ function ntn_core_api_verify( $service ) {
 		);
 		$reason = ntn_core_api_error_reason( $response );
 		ntn_core_api_status_set( 'groq', '' === $reason, $reason );
+	} elseif ( 'youtube' === $service && function_exists( 'ntn_core_youtube_verify_key' ) ) {
+		$reason = ntn_core_youtube_verify_key();
+		ntn_core_api_status_set( 'youtube', '' === $reason, $reason );
 	} elseif ( 'igdb' === $service && function_exists( 'ntn_get_igdb_token' ) ) {
 		delete_transient( 'ntn_igdb_access_token' ); // Chiede un accesso nuovo, così la prova è vera
 		ntn_get_igdb_token(); // Registra da sola l'esito
