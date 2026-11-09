@@ -6456,6 +6456,40 @@ assert_test(
 );
 
 
+
+// --- TEST SUITE 98: correzioni minori dell'audit v4.25.1 ---
+echo "\n--- 98. CORREZIONI MINORI DELL'AUDIT V4.25.1 ---\n";
+$mf_core = ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/';
+
+// 98.1: le regole URL si rigenerano quando cambia il loro numero di versione, all'attivazione e dal pulsante Extra
+$mf_tax = ntn_t_read( $mf_core . 'inc/taxonomies.php' );
+$mf_p1  = strpos( $mf_tax, "if ( ! defined( 'NTN_CORE_REWRITE_RULES_VERSION' ) )" );
+$mf_p2  = strpos( $mf_tax, "add_action( 'init', 'ntn_flush_custom_rewrite_rules', 99 );" );
+$mf_src = false !== $mf_p1 && false !== $mf_p2 ? substr( $mf_tax, $mf_p1, $mf_p2 - $mf_p1 ) : '';
+$mf_base = tempnam( sys_get_temp_dir(), 'ntn98' );
+$mf_tmp  = $mf_base . '.php';
+file_put_contents( $mf_tmp, "<?php\n\$o = array( 'ntn_rewrite_rules_flushed_v3' => '1' ); \$f = 0;\n" .
+	"function get_option( \$k, \$d = false ) { global \$o; return array_key_exists( \$k, \$o ) ? \$o[ \$k ] : \$d; }\n" .
+	"function update_option( \$k, \$v ) { global \$o; \$o[ \$k ] = \$v; }\nfunction delete_option( \$k ) { global \$o; unset( \$o[ \$k ] ); }\n" .
+	"function flush_rewrite_rules() { global \$f; \$f++; }\nfunction ntn_register_game_engine_taxonomy() {}\nfunction ntn_register_additional_game_taxonomies() {}\nfunction ntn_add_videogioco_rewrite_rule() {}\n" .
+	$mf_src . "\n\$r = array();\nntn_flush_custom_rewrite_rules(); \$r[] = \$f . ( isset( \$o['ntn_rewrite_rules_flushed_v3'] ) ? 'v3' : '' );\n" .
+	"ntn_flush_custom_rewrite_rules(); \$r[] = \$f;\nntn_core_request_rewrite_flush(); ntn_flush_custom_rewrite_rules(); \$r[] = \$f;\n" .
+	"\$o['ntn_rewrite_rules_version'] = '3'; ntn_flush_custom_rewrite_rules(); \$r[] = \$f . '/' . \$o['ntn_rewrite_rules_version'];\necho implode( ',', \$r );\n" );
+$mf_out = trim( (string) shell_exec( escapeshellarg( PHP_BINARY ) . ' ' . escapeshellarg( $mf_tmp ) . ' 2>&1' ) );
+@unlink( $mf_tmp );
+@unlink( $mf_base );
+$mf_admin = ntn_t_read( $mf_core . 'inc/admin/admin-page.php' );
+$mf_bkp   = ntn_t_read( $mf_core . 'inc/backup-restore.php' );
+$mf_main  = ntn_t_read( $mf_core . 'ntn-journal-core.php' );
+assert_test(
+	'1,1,2,3/4' === $mf_out &&
+	false !== strpos( $mf_admin, 'ntn_core_request_rewrite_flush();' ) && false === strpos( $mf_admin, "delete_option( 'ntn_rewrite_rules_flushed_v" ) &&
+	false !== strpos( $mf_bkp, 'ntn_core_request_rewrite_flush();' ) && false === strpos( $mf_bkp, "delete_option( 'ntn_rewrite_rules_flushed_v" ) &&
+	false !== strpos( $mf_main, "register_activation_hook( __FILE__, 'ntn_core_request_rewrite_flush' );" ),
+	'98.1: URL rules are rebuilt once on upgrade, when their version number changes, on plugin activation and when the Extra videogame-links setting changes (old _v2/_v3 flags removed; got: ' . $mf_out . ')'
+);
+
+
 echo "\n=======================================================================\n";
 echo " AUDIT SUMMARY: {$passed} PASSED, {$failed} FAILED\n";
 echo "=======================================================================\n";

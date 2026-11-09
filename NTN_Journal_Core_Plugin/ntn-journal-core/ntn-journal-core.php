@@ -91,6 +91,11 @@ require_once NTN_JOURNAL_CORE_DIR . 'inc/migration-2.4.0.php';
 require_once NTN_JOURNAL_CORE_DIR . 'inc/precomputed-meta.php';
 
 /**
+ * All'attivazione del plugin le regole URL vengono rigenerate al caricamento successivo (v4.25.1).
+ */
+register_activation_hook( __FILE__, 'ntn_core_request_rewrite_flush' );
+
+/**
  * Registrazione image sizes del core
  */
 function ntn_journal_core_image_sizes() {

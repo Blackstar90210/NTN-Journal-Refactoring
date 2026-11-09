@@ -235,7 +235,7 @@ function ntn_journal_core_admin_handle_post() {
 		update_option( 'ntn_journal_enable_videogame_links', $new_videogame_links );
 		update_option( 'ntn_journal_enable_hub_cache', isset( $_POST['ntn_journal_enable_hub_cache'] ) ? 'yes' : 'no' );
 		if ( $old_videogame_links !== $new_videogame_links ) {
-			delete_option( 'ntn_rewrite_rules_flushed_v2' );
+			ntn_core_request_rewrite_flush(); // v4.25.1: prima cancellava il vecchio segnale _v2, che nessuno leggeva più
 		}
 		$message = 'Impostazioni Extra salvate con successo.';
 	}
