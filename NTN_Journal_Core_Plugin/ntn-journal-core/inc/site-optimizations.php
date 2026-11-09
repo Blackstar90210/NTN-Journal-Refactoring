@@ -257,11 +257,49 @@ function ntn_core_png_is_fully_opaque( $file_path ) {
  * I file pregressi rimangono invariati.
  */
 function ntn_core_convert_png_to_jpeg_thumbnails( $formats, $filename = '', $mime_type = '' ) {
-	if ( ! empty( $filename ) && ntn_core_png_has_transparency( $filename ) ) {
+	// v4.20.1: per le miniature WordPress chiama il filtro senza nome del file. In quel caso si usa
+	// l'originale dell'allegato in lavorazione, così le miniature di un PNG trasparente restano PNG.
+	$source = ! empty( $filename ) ? (string) $filename : ( 'image/png' === $mime_type ? ntn_core_image_source_in_progress() : '' );
+	if ( '' !== $source && ntn_core_png_has_transparency( $source ) ) {
 		return $formats; // Preserva il formato PNG trasparente
 	}
 	$formats['image/png'] = 'image/jpeg';
 	return $formats;
+}
+
+/**
+ * File originale dell'allegato di cui WordPress sta creando le miniature (v4.20.1).
+ *
+ * @param string|null $set Percorso da ricordare, '' per azzerare, null per leggere.
+ * @return string Percorso ricordato ('' se nessuno).
+ */
+function ntn_core_image_source_in_progress( $set = null ) {
+	static $current = '';
+	if ( null !== $set ) {
+		$current = (string) $set;
+	}
+	return $current;
+}
+
+/**
+ * Prima delle miniature: ricorda il file originale dell'allegato.
+ * Agganciata a intermediate_image_sizes_advanced (caricamento e rigenerazione completa, anche da plugin)
+ * e a wp_get_missing_image_subsizes (wp_update_image_subsizes(), che crea solo le misure mancanti).
+ */
+function ntn_core_remember_image_source( $new_sizes, $image_meta = array(), $attachment_id = 0 ) {
+	$file = $attachment_id ? get_attached_file( (int) $attachment_id ) : '';
+	ntn_core_image_source_in_progress( is_string( $file ) ? $file : '' );
+	return $new_sizes;
+}
+
+/**
+ * Dopo tutte le miniature: dimentica il file, così non vale per l'immagine successiva.
+ * Si usa wp_generate_attachment_metadata e non wp_update_attachment_metadata, che WordPress
+ * chiama dopo OGNI miniatura (_wp_make_subsizes): lì il file verrebbe dimenticato troppo presto.
+ */
+function ntn_core_forget_image_source( $metadata ) {
+	ntn_core_image_source_in_progress( '' );
+	return $metadata;
 }
 
 /**
@@ -357,6 +395,9 @@ function ntn_core_register_site_optimizations() {
 	add_action( 'init', 'ntn_core_header_cleanup' );
 	add_action( 'template_redirect', 'ntn_core_block_author_enumeration' );
 	add_filter( 'image_editor_output_format', 'ntn_core_convert_png_to_jpeg_thumbnails', 10, 3 );
+	add_filter( 'intermediate_image_sizes_advanced', 'ntn_core_remember_image_source', 10, 3 );
+	add_filter( 'wp_get_missing_image_subsizes', 'ntn_core_remember_image_source', 10, 3 );
+	add_filter( 'wp_generate_attachment_metadata', 'ntn_core_forget_image_source', 999, 1 );
 	add_filter( 'wp_handle_upload', 'ntn_core_optimize_upload_size_and_format' );
 	add_filter( 'wp_handle_sideload', 'ntn_core_optimize_upload_size_and_format' );
 	// Disabilita lo scaling nativo di WordPress (> 2560px) poiché gestiamo già tutto a 1920px.
