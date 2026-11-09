@@ -1655,24 +1655,24 @@ echo "\n--- 24. SEMVER SIMULTANEOUS 4-HEADER SYNCHRONIZATION ---\n";
 $parent_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $parent_css, $m_parent );
 $parent_ver = isset( $m_parent[1] ) ? trim( $m_parent[1] ) : '';
-assert_test( $parent_ver === '4.22.0', "24.1: Parent Theme style.css declares Version: 4.22.0(found: {$parent_ver})" );
+assert_test( $parent_ver === '4.23.0', "24.1: Parent Theme style.css declares Version: 4.23.0(found: {$parent_ver})" );
 
 $child_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $child_css, $m_child );
 $child_ver = isset( $m_child[1] ) ? trim( $m_child[1] ) : '';
-assert_test( $child_ver === '4.22.0', "24.2: Child Theme style.css declares Version: 4.22.0(found: {$child_ver})" );
+assert_test( $child_ver === '4.23.0', "24.2: Child Theme style.css declares Version: 4.23.0(found: {$child_ver})" );
 
 $core_php = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' );
 preg_match( '/\*\s*Version:\s*([0-9\.]+)/', $core_php, $m_core_hdr );
 $core_hdr_ver = isset( $m_core_hdr[1] ) ? trim( $m_core_hdr[1] ) : '';
-assert_test( $core_hdr_ver === '4.22.0', "24.3: Core Plugin header declares Version: 4.22.0(found: {$core_hdr_ver})" );
+assert_test( $core_hdr_ver === '4.23.0', "24.3: Core Plugin header declares Version: 4.23.0(found: {$core_hdr_ver})" );
 
 preg_match( "/define\(\s*'NTN_JOURNAL_CORE_VERSION',\s*'([^']+)'\s*\);/", $core_php, $m_core_const );
 $core_const_ver = isset( $m_core_const[1] ) ? trim( $m_core_const[1] ) : '';
-assert_test( $core_const_ver === '4.22.0', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.22.0(found: {$core_const_ver})" );
+assert_test( $core_const_ver === '4.23.0', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.23.0(found: {$core_const_ver})" );
 
 assert_test(
-	$parent_ver === '4.22.0' && $child_ver === '4.22.0' && $core_hdr_ver === '4.22.0' && $core_const_ver === '4.22.0',
+	$parent_ver === '4.23.0' && $child_ver === '4.23.0' && $core_hdr_ver === '4.23.0' && $core_const_ver === '4.23.0',
 	'24.5: All 4 version headers are 100% synchronized and atomic according to Rule 2 of GEMINI.md'
 );
 
@@ -1900,7 +1900,7 @@ $parent_style_ver = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( AB
 $child_style_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' ), $m2 ) ? $m2[1] : '';
 $core_plugin_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m3 ) ? $m3[1] : '';
 $core_const_ver   = preg_match( '/define\(\s*[\'"]NTN_JOURNAL_CORE_VERSION[\'"]\s*,\s*[\'"]([0-9\.]+)[\'"]\s*\)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m4 ) ? $m4[1] : '';
-assert_test( $parent_style_ver === '4.22.0' && $child_style_ver === '4.22.0' && $core_plugin_ver === '4.22.0' && $core_const_ver === '4.22.0', '29.1: All 4 version headers are synchronized to 4.22.0' );
+assert_test( $parent_style_ver === '4.23.0' && $child_style_ver === '4.23.0' && $core_plugin_ver === '4.23.0' && $core_const_ver === '4.23.0', '29.1: All 4 version headers are synchronized to 4.23.0' );
 
 // 29.2: single.php sequence is Google Feed -> Social CTA -> Bottom Related Posts
 $single_php = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/single.php' );
@@ -6297,6 +6297,108 @@ assert_test(
 	'94.4: Verifica works with a good key, a refused key and a missing key; the stored dates are in the cache registry and survive "Svuota tutta la memoria"'
 );
 unset( $GLOBALS['mock_transients'], $GLOBALS['mock_options']['ntn_api_status'] );
+
+
+// --- TEST SUITE 95: rapporto di sola lettura sulle immagini v4.23.0 ---
+echo "\n--- 95. RAPPORTO DI SOLA LETTURA SULLE IMMAGINI V4.23.0 ---\n";
+$ir_src  = ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/image-report.php' );
+$ir_main = ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' );
+$ir_tab  = ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/admin/views/tab-extra.php' );
+$ir_ok   = true;
+foreach ( array( 'scan', 'unused' ) as $ir_a ) {
+	$ir_ok = $ir_ok && false !== strpos( $ir_src, "add_action( 'wp_ajax_ntn_image_report_{$ir_a}', 'ntn_core_ajax_image_report_{$ir_a}' );" )
+		&& (bool) preg_match( '/function ntn_core_ajax_image_report_' . $ir_a . '\(\) \{\n\tntn_core_image_report_guard\(\);/', $ir_src );
+}
+$ir_writes = 0;
+foreach ( array( 'unlink(', 'rename(', 'wp_delete_attachment', 'wp_delete_post', '->query(', '->delete(', '->update(', '->insert(', 'file_put_contents', 'wp_update_post', 'update_post_meta', 'delete_post_meta', 'wp_update_attachment_metadata', 'rmdir(' ) as $ir_w ) {
+	$ir_writes += substr_count( $ir_src, $ir_w );
+}
+assert_test(
+	$ir_ok && 0 === $ir_writes && false !== strpos( $ir_src, "check_ajax_referer( 'ntn_image_report', '_ajax_nonce' );" ) && false !== strpos( $ir_src, "current_user_can( 'manage_options' )" ) &&
+	false === strpos( $ir_src, 'wp_ajax_nopriv_' ) && false !== strpos( $ir_main, "require_once NTN_JOURNAL_CORE_DIR . 'inc/image-report.php';" ) &&
+	false !== strpos( $ir_tab, 'ntn_core_image_report_render_box();' ) && false === strpos( $ir_src, 'function ntn_journal_' ),
+	'95.1: Two AJAX steps (Analizza, Cerca non usate) behind the nonce and manage_options; the code never deletes, moves or changes a file, a post or the database (read only, only the report option is saved)'
+);
+
+require_once ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/image-report.php';
+// Gli elenchi hanno un tetto e tengono i file più pesanti
+$ir_list = array();
+for ( $ir_i = 1; $ir_i <= 450; $ir_i++ ) {
+	ntn_core_image_report_push( $ir_list, $ir_i, $ir_i * 1000 );
+}
+usort( $ir_list, static function ( $a, $b ) { return $b[1] <=> $a[1]; } );
+assert_test(
+	count( $ir_list ) <= NTN_IMAGE_REPORT_LIST_MAX * 2 && 450 === $ir_list[0][0] && 450000 === $ir_list[0][1] && NTN_IMAGE_REPORT_HEAVY_BYTES === 1572864,
+	'95.2: Each list is capped (the heaviest images are kept) so the saved report stays small'
+);
+
+// Quando un'immagine risulta usata: prudente, nel dubbio è usata
+class NTN_ImgReport_Mock_Wpdb {
+	public $posts = 'wp_posts';
+	public $postmeta = 'wp_postmeta';
+	public $options = 'wp_options';
+	public $termmeta = 'wp_termmeta';
+	public $usermeta = 'wp_usermeta';
+	public $data = array();
+	public $thumbs = array();
+	public $fail = false;
+	public function esc_like( $text ) { return addcslashes( (string) $text, '_%\\' ); }
+	public function prepare( $sql, ...$args ) {
+		if ( 1 === count( $args ) && is_array( $args[0] ) ) {
+			$args = $args[0];
+		}
+		return array( $sql, $args );
+	}
+	public function get_var( $query ) {
+		list( $sql, $args ) = $query;
+		if ( $this->fail ) {
+			return null;
+		}
+		if ( false !== strpos( $sql, "'_thumbnail_id'" ) ) {
+			return (string) ( $this->thumbs[ (int) $args[0] ] ?? 0 );
+		}
+		preg_match( '/FROM (\w+)/', $sql, $t );
+		$needles = array( stripslashes( trim( (string) $args[0], '%' ) ) );
+		if ( isset( $args[2] ) && false !== strpos( $sql, 'post_content LIKE %s OR post_excerpt' ) ) {
+			$needles[] = stripslashes( trim( (string) $args[2], '%' ) );
+		}
+		$hits = 0;
+		foreach ( $this->data[ $t[1] ] ?? array() as $text ) {
+			foreach ( $needles as $n ) {
+				if ( '' !== $n && false !== strpos( $text, $n ) ) {
+					$hits++;
+					break;
+				}
+			}
+		}
+		return (string) $hits;
+	}
+}
+$ir_saved_db = $GLOBALS['wpdb'] ?? null;
+$ir_db       = new NTN_ImgReport_Mock_Wpdb();
+$GLOBALS['wpdb'] = $ir_db;
+$ir_free     = ntn_core_image_report_usage( 7001 ); // 7001 = logo-trasparente.png
+$ir_db->data['wp_posts'] = array( 'Guarda <img src="https://x/uploads/logo-trasparente-300x200.png">' );
+$ir_in_post  = ntn_core_image_report_usage( 7001 );
+$ir_db->data = array( 'wp_options' => array( 'a:1:{s:3:"url";s:40:"https://x/uploads/logo-trasparente.png";}' ) );
+$ir_in_opt   = ntn_core_image_report_usage( 7001 );
+$ir_db->data = array();
+$ir_db->thumbs[7001] = 1;
+$ir_in_thumb = ntn_core_image_report_usage( 7001 );
+$ir_db->thumbs = array();
+$ir_db->fail = true;
+$ir_doubt    = ntn_core_image_report_usage( 7001 );
+$ir_db->fail = false;
+$GLOBALS['mock_posts'][7001] = (object) array( 'ID' => 7001, 'post_parent' => 900 );
+$GLOBALS['mock_posts'][900]  = (object) array( 'ID' => 900, 'post_type' => 'post' );
+$ir_parent   = ntn_core_image_report_usage( 7001 );
+unset( $GLOBALS['mock_posts'][7001], $GLOBALS['mock_posts'][900] );
+$GLOBALS['wpdb'] = $ir_saved_db;
+assert_test(
+	array() === $ir_free && array( 'articoli e pagine' ) === $ir_in_post && array( 'impostazioni' ) === $ir_in_opt && array( 'immagine in evidenza' ) === $ir_in_thumb &&
+	in_array( 'allegata a un contenuto', $ir_parent, true ) && ! empty( $ir_doubt ) && in_array( 'immagine in evidenza', $ir_doubt, true ),
+	'95.3: An image is "unused" only if nothing cites it: a post, a setting, a featured image or a parent content makes it used; if a database question fails it counts as used'
+);
 
 
 echo "\n=======================================================================\n";
