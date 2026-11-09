@@ -26,7 +26,9 @@ $cons_meta = get_post_meta( $post_id, 'cons', true );
 $verdict_meta = get_post_meta( $post_id, 'verdict', true );
 $review_source_meta = get_post_meta( $post_id, 'ntn_review_source', true );
 
-// Parse Pros: una voce per riga, le virgole restano nel testo (v3.22.4)
+// Pro, contro e verdetto: solo quelli scritti nella recensione. Senza dati la sezione non compare
+// (v4.16.0: niente più testi di esempio del mockup al posto dei dati mancanti).
+// Una voce per riga, le virgole restano nel testo (v3.22.4).
 $pros_arr = array();
 if ( ! empty( $pros_meta ) ) {
 	if ( is_array( $pros_meta ) ) {
@@ -34,11 +36,8 @@ if ( ! empty( $pros_meta ) ) {
 	} else {
 		$pros_arr = array_filter( array_map( 'trim', explode( "\n", str_replace( "\r", "", $pros_meta ) ) ) );
 	}
-} else {
-	$pros_arr = array( "Design minimale iconico ad alto contrasto", "Ottimo bilanciamento termico ed efficienza", "Prezzo competitivo sul mercato attuale" );
 }
 
-// Parse Cons: una voce per riga, le virgole restano nel testo (v3.22.4)
 $cons_arr = array();
 if ( ! empty( $cons_meta ) ) {
 	if ( is_array( $cons_meta ) ) {
@@ -46,12 +45,9 @@ if ( ! empty( $cons_meta ) ) {
 	} else {
 		$cons_arr = array_filter( array_map( 'trim', explode( "\n", str_replace( "\r", "", $cons_meta ) ) ) );
 	}
-} else {
-	$cons_arr = array( "Assenza del caricabatterie nella confezione retail", "Personalizzazione software inizialmente limitata" );
 }
 
-// Verdict
-$verdict_text = ! empty( $verdict_meta ) ? $verdict_meta : "Un prodotto estremamente convincente che sposa in toto la filosofia del design industriale pulito, offrendo un'esperienza d'uso focalizzata ed elegante ad un rapporto qualità-prezzo di assoluto livello.";
+$verdict_text = is_string( $verdict_meta ) ? trim( $verdict_meta ) : '';
 
 // Giudizio e link al suo tag (Bocciato, Consigliato con riserva, Consigliato, Must Play)
 $rating_label = function_exists( 'get_rating_label' ) ? get_rating_label( $final_rating ) : (string) $final_rating;
@@ -110,8 +106,10 @@ if ( in_array( $rating_slug, array( 'bocciato', 'consigliato-con-riserva', 'cons
 		</div>
 	</div>
 
-	<!-- Pro e contro -->
-	<div class="ntn-rbox-pc">
+	<?php if ( ! empty( $pros_arr ) || ! empty( $cons_arr ) ) : ?>
+	<!-- Pro e contro (con una sola colonna occupa tutta la larghezza) -->
+	<div class="ntn-rbox-pc"<?php echo ( empty( $pros_arr ) || empty( $cons_arr ) ) ? ' style="grid-template-columns: minmax(0, 1fr);"' : ''; ?>>
+		<?php if ( ! empty( $pros_arr ) ) : ?>
 		<div class="is-pro">
 			<h4><span>// Pro</span><span><?php echo esc_html( count( $pros_arr ) ); ?></span></h4>
 			<ul>
@@ -120,6 +118,8 @@ if ( in_array( $rating_slug, array( 'bocciato', 'consigliato-con-riserva', 'cons
 				<?php endforeach; ?>
 			</ul>
 		</div>
+		<?php endif; ?>
+		<?php if ( ! empty( $cons_arr ) ) : ?>
 		<div class="is-con">
 			<h4><span>// Contro</span><span><?php echo esc_html( count( $cons_arr ) ); ?></span></h4>
 			<ul>
@@ -128,9 +128,11 @@ if ( in_array( $rating_slug, array( 'bocciato', 'consigliato-con-riserva', 'cons
 				<?php endforeach; ?>
 			</ul>
 		</div>
+		<?php endif; ?>
 	</div>
+	<?php endif; ?>
 
-	<?php if ( empty( $args['hide_verdict'] ) ) : ?>
+	<?php if ( empty( $args['hide_verdict'] ) && '' !== $verdict_text ) : ?>
 	<!-- Il verdetto -->
 	<div class="ntn-rbox-verdict">
 		<span class="ntn-rbox-k">// Il verdetto</span>

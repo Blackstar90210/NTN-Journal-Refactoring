@@ -5615,6 +5615,29 @@ assert_test(
 	$rt_graph === $rt_out_news,
 	'82.5: A review with no linked game is still an article with headline and dates (and no VideoGame); an ordinary article without a game is left as it was'
 );
+
+// 82.6: il riquadro del voto mostra solo pro, contro e verdetto scritti; mai i testi di esempio del mockup
+$mock_posts[9320] = new WP_Post( array( 'ID' => 9320, 'post_title' => 'Voto senza dettagli', 'post_name' => 'voto-senza-dettagli', 'post_type' => 'post', 'post_status' => 'publish' ) );
+$mock_postmeta[9320] = array( 'rating' => '4' );
+$mock_posts[9321] = new WP_Post( array( 'ID' => 9321, 'post_title' => 'Solo i pro', 'post_name' => 'solo-i-pro', 'post_type' => 'post', 'post_status' => 'publish' ) );
+$mock_postmeta[9321] = array( 'rating' => '3', 'pros' => "Primo pro\nSecondo pro", 'verdict' => 'Verdetto scritto.' );
+$rb_out = array();
+foreach ( array( 9320, 9321 ) as $rb_id ) {
+	$queried_object  = $mock_posts[ $rb_id ];
+	$GLOBALS['post'] = $mock_posts[ $rb_id ];
+	ob_start();
+	require ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/template-parts/review-original-box.php';
+	$rb_out[ $rb_id ] = ob_get_clean();
+}
+$rb_src = ntn_t_read( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/template-parts/review-original-box.php' );
+assert_test(
+	false !== strpos( $rb_out[9320], 'class="ntn-rbox-eval"' ) && false === strpos( $rb_out[9320], 'ntn-rbox-pc' ) && false === strpos( $rb_out[9320], 'ntn-rbox-verdict' ) &&
+	false !== strpos( $rb_out[9321], '<li>Primo pro</li>' ) && false !== strpos( $rb_out[9321], 'class="is-pro"' ) && false === strpos( $rb_out[9321], 'class="is-con"' ) &&
+	false !== strpos( $rb_out[9321], 'grid-template-columns: minmax(0, 1fr);' ) && false !== strpos( $rb_out[9321], 'Verdetto scritto.' ) &&
+	false === strpos( $rb_src, 'caricabatterie' ) && false === strpos( $rb_src, 'Design minimale' ) && false === strpos( $rb_src, 'estremamente convincente' ),
+	'82.6: The rating box shows only the pros, cons and verdict written in the review, never the mockup sample texts'
+);
+
 $GLOBALS['queried_object'] = null;
 $GLOBALS['post']           = null;
 

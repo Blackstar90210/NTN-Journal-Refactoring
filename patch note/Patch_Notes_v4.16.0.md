@@ -26,12 +26,17 @@ In cima alla scheda **Recensioni** c'è il nuovo elenco **"Recensioni senza voto
 
 Prima, senza gioco, la pagina di una recensione era un `WebPage` generico, senza autore né data. Ora resta un **articolo** con titolo, autore e date, senza VideoGame. Il `Review` con voto nasce quando il gioco è collegato (Scanner IGDB). Gli articoli normali senza gioco non cambiano.
 
+### 🐞 3. Niente più testi di esempio nel riquadro del voto
+
+- Quando una recensione non aveva pro, contro o verdetto, il riquadro del voto mostrava testi di esempio rimasti dal mockup ("Design minimale iconico…", "Assenza del caricabatterie…", "Un prodotto estremamente convincente…").
+- Ora mostra solo quello che è scritto nella recensione: senza pro e contro la loro sezione non compare, con una sola colonna occupa tutta la larghezza, e senza verdetto il verdetto non compare. Il voto e il giudizio restano sempre.
+
 ### ⚠️ Dopo l'aggiornamento
 
-- Aggiorna il plugin; tema genitore e figlio cambiano solo il numero di versione. Svuota la cache.
+- Aggiorna il plugin e il tema genitore (riquadro del voto); il figlio cambia solo il numero di versione. Svuota la cache.
 - Apri Recensioni, controlla le proposte e conferma.
 - La scheda di un gioco (Hub) continua a non avere un risultato speciale su Google: `VideoGame` da solo non ne dà uno, è una regola di Google.
 
 ### ✅ Test
 
-Sezione 82 della suite (5 prove nuove). Totale 552 prove.
+Sezione 82 della suite (6 prove nuove). Totale 553 prove.
