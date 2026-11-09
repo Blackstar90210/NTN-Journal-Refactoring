@@ -294,6 +294,54 @@ function ntn_core_image_report_unused_view( array $unused ) {
 }
 
 /**
+ * Riepilogo per la Dashboard (v4.25.0). Legge SOLO i risultati già salvati: nessun controllo pesante,
+ * nessuna ricerca nei file o nel database.
+ *
+ * @return array{count:string,lines:string[]} Numero grande e righe di testo.
+ */
+function ntn_core_image_report_dashboard_summary() {
+	$report = ntn_core_image_report_get();
+	$scan   = ! empty( $report['scan']['done'] ) ? $report['scan'] : array();
+	$unused = ! empty( $report['unused']['done'] ) ? $report['unused'] : array();
+	$lines  = array();
+
+	if ( $scan ) {
+		$lines[] = sprintf(
+			'Su disco %1$s · %2$s originali sopra %3$s · %4$s senza testo alternativo',
+			size_format( (int) $scan['bytes_all'], 0 ),
+			number_format_i18n( (int) $scan['heavy_count'] ),
+			size_format( NTN_IMAGE_REPORT_HEAVY_BYTES, 1 ),
+			number_format_i18n( (int) $scan['no_alt_count'] )
+		);
+		if ( ! empty( $scan['missing_count'] ) ) {
+			$lines[] = sprintf( 'File mancanti sul disco: %s', number_format_i18n( (int) $scan['missing_count'] ) );
+		}
+	} else {
+		$lines[] = 'Nessuna analisi ancora fatta';
+	}
+	if ( $unused ) {
+		$lines[] = sprintf( 'Non risultano usate: %1$s (%2$s)', number_format_i18n( (int) $unused['count'] ), size_format( (int) $unused['bytes'], 0 ) );
+	}
+
+	if ( function_exists( 'ntn_core_png_repair_get' ) ) {
+		$png_scan   = ntn_core_png_repair_get( 'scan' );
+		$quarantine = ntn_core_png_repair_get( 'quarantine' );
+		$q_files    = count( (array) ( $quarantine['files'] ?? array() ) );
+		if ( ! empty( $png_scan['done'] ) ) {
+			$lines[] = sprintf( 'Miniature dei PNG trasparenti da riparare: %s', number_format_i18n( count( (array) ( $png_scan['found'] ?? array() ) ) ) );
+		}
+		if ( $q_files > 0 ) {
+			$lines[] = sprintf( 'In quarantena: %s file', number_format_i18n( $q_files ) );
+		}
+	}
+
+	return array(
+		'count' => $scan ? number_format_i18n( (int) $scan['checked'] ) : '—',
+		'lines' => $lines,
+	);
+}
+
+/**
  * Riquadro della scheda Immagini.
  */
 function ntn_core_image_report_render_box() {
