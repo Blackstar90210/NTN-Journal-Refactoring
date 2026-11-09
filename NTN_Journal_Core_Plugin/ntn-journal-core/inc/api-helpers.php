@@ -231,7 +231,7 @@ function ntn_core_post_platform_names( $post_id, array $igdb_platforms = array()
 		if ( ! $inside ) {
 			continue;
 		}
-		$name = trim( wp_strip_all_tags( wp_specialchars_decode( $cat->name, ENT_QUOTES ) ) );
+		$name = trim( ntn_core_schema_plain_text( $cat->name ) );
 		if ( 'pc gaming' === strtolower( $name ) ) {
 			$name = 'PC';
 		}
