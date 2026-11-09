@@ -2,7 +2,7 @@
 /**
  * NTN Journal Core - Rapporto di sola lettura sulle immagini (v4.23.0)
  *
- * Nella scheda Extra, due controlli che NON cambiano, NON spostano e NON eliminano nulla:
+ * Nella scheda Immagini (dalla 4.24.0; prima in Extra), due controlli che NON cambiano, NON spostano e NON eliminano nulla:
  * 1. Analizza: peso delle immagini, immagini troppo pesanti, senza testo alternativo, file mancanti.
  * 2. Cerca immagini non usate: immagini che non risultano da nessuna parte (prudente: nel dubbio "è usata").
  * Il risultato resta salvato nell'opzione ntn_image_report e si rilegge senza rifare il controllo.
@@ -294,7 +294,7 @@ function ntn_core_image_report_unused_view( array $unused ) {
 }
 
 /**
- * Riquadro della scheda Extra.
+ * Riquadro della scheda Immagini.
  */
 function ntn_core_image_report_render_box() {
 	$report = ntn_core_image_report_get();

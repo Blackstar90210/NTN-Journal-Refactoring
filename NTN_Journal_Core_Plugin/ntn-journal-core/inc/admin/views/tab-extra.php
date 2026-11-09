@@ -81,15 +81,5 @@ $enable_videogame_links = get_option( 'ntn_journal_enable_videogame_links', 'yes
 		<?php wp_nonce_field( 'ntn_clear_hub_cache', 'ntn_clear_hub_cache_nonce' ); ?>
 		<?php submit_button( 'Svuota tutta la memoria', 'secondary' ); ?>
 	</form>
-
-	<?php
-	// v4.21.0: riparazione delle miniature dei PNG trasparenti
-	if ( function_exists( 'ntn_core_png_repair_render_box' ) ) {
-		ntn_core_png_repair_render_box();
-	}
-	// v4.23.0: rapporto di sola lettura sulle immagini
-	if ( function_exists( 'ntn_core_image_report_render_box' ) ) {
-		ntn_core_image_report_render_box();
-	}
-	?>
+	<?php // v4.24.0: le miniature dei PNG trasparenti e il rapporto sulle immagini sono nella scheda Immagini ?>
 </div>

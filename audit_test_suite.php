@@ -1655,24 +1655,24 @@ echo "\n--- 24. SEMVER SIMULTANEOUS 4-HEADER SYNCHRONIZATION ---\n";
 $parent_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $parent_css, $m_parent );
 $parent_ver = isset( $m_parent[1] ) ? trim( $m_parent[1] ) : '';
-assert_test( $parent_ver === '4.23.0', "24.1: Parent Theme style.css declares Version: 4.23.0(found: {$parent_ver})" );
+assert_test( $parent_ver === '4.24.0', "24.1: Parent Theme style.css declares Version: 4.24.0(found: {$parent_ver})" );
 
 $child_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $child_css, $m_child );
 $child_ver = isset( $m_child[1] ) ? trim( $m_child[1] ) : '';
-assert_test( $child_ver === '4.23.0', "24.2: Child Theme style.css declares Version: 4.23.0(found: {$child_ver})" );
+assert_test( $child_ver === '4.24.0', "24.2: Child Theme style.css declares Version: 4.24.0(found: {$child_ver})" );
 
 $core_php = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' );
 preg_match( '/\*\s*Version:\s*([0-9\.]+)/', $core_php, $m_core_hdr );
 $core_hdr_ver = isset( $m_core_hdr[1] ) ? trim( $m_core_hdr[1] ) : '';
-assert_test( $core_hdr_ver === '4.23.0', "24.3: Core Plugin header declares Version: 4.23.0(found: {$core_hdr_ver})" );
+assert_test( $core_hdr_ver === '4.24.0', "24.3: Core Plugin header declares Version: 4.24.0(found: {$core_hdr_ver})" );
 
 preg_match( "/define\(\s*'NTN_JOURNAL_CORE_VERSION',\s*'([^']+)'\s*\);/", $core_php, $m_core_const );
 $core_const_ver = isset( $m_core_const[1] ) ? trim( $m_core_const[1] ) : '';
-assert_test( $core_const_ver === '4.23.0', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.23.0(found: {$core_const_ver})" );
+assert_test( $core_const_ver === '4.24.0', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.24.0(found: {$core_const_ver})" );
 
 assert_test(
-	$parent_ver === '4.23.0' && $child_ver === '4.23.0' && $core_hdr_ver === '4.23.0' && $core_const_ver === '4.23.0',
+	$parent_ver === '4.24.0' && $child_ver === '4.24.0' && $core_hdr_ver === '4.24.0' && $core_const_ver === '4.24.0',
 	'24.5: All 4 version headers are 100% synchronized and atomic according to Rule 2 of GEMINI.md'
 );
 
@@ -1900,7 +1900,7 @@ $parent_style_ver = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( AB
 $child_style_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' ), $m2 ) ? $m2[1] : '';
 $core_plugin_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m3 ) ? $m3[1] : '';
 $core_const_ver   = preg_match( '/define\(\s*[\'"]NTN_JOURNAL_CORE_VERSION[\'"]\s*,\s*[\'"]([0-9\.]+)[\'"]\s*\)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m4 ) ? $m4[1] : '';
-assert_test( $parent_style_ver === '4.23.0' && $child_style_ver === '4.23.0' && $core_plugin_ver === '4.23.0' && $core_const_ver === '4.23.0', '29.1: All 4 version headers are synchronized to 4.23.0' );
+assert_test( $parent_style_ver === '4.24.0' && $child_style_ver === '4.24.0' && $core_plugin_ver === '4.24.0' && $core_const_ver === '4.24.0', '29.1: All 4 version headers are synchronized to 4.24.0' );
 
 // 29.2: single.php sequence is Google Feed -> Social CTA -> Bottom Related Posts
 $single_php = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/single.php' );
@@ -6048,7 +6048,7 @@ assert_test(
 echo "\n--- 93. RIPARAZIONE DELLE MINIATURE DEI PNG TRASPARENTI V4.21.0 ---\n";
 $pr_src  = ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/png-thumbnail-repair.php' );
 $pr_main = ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' );
-$pr_tab  = ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/admin/views/tab-extra.php' );
+$pr_tab  = ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/admin/views/tab-immagini.php' );
 $pr_acts = array( 'scan', 'fix', 'quarantine', 'restore', 'purge' );
 $pr_ok   = true;
 foreach ( $pr_acts as $pr_a ) {
@@ -6059,7 +6059,7 @@ assert_test(
 	$pr_ok && false !== strpos( $pr_src, "check_ajax_referer( 'ntn_png_repair', '_ajax_nonce' );" ) && false !== strpos( $pr_src, "current_user_can( 'manage_options' )" ) &&
 	false === strpos( $pr_src, 'wp_ajax_nopriv_' ) && false !== strpos( $pr_main, "require_once NTN_JOURNAL_CORE_DIR . 'inc/png-thumbnail-repair.php';" ) &&
 	false !== strpos( $pr_tab, 'ntn_core_png_repair_render_box();' ) && false === strpos( $pr_src, 'function ntn_journal_' ),
-	'93.1: Five AJAX steps (scan, fix, quarantine, restore, purge), each behind the nonce and manage_options; loaded by the plugin and shown in the Extra tab'
+	'93.1: Five AJAX steps (scan, fix, quarantine, restore, purge), each behind the nonce and manage_options; loaded by the plugin and shown in the Images tab'
 );
 assert_test(
 	false !== strpos( $pr_src, "define( 'NTN_PNG_REPAIR_FIX_BATCH', 5 );" ) && false !== strpos( $pr_src, "define( 'NTN_PNG_REPAIR_QUARANTINE_DAYS', 7 );" ) &&
@@ -6303,7 +6303,7 @@ unset( $GLOBALS['mock_transients'], $GLOBALS['mock_options']['ntn_api_status'] )
 echo "\n--- 95. RAPPORTO DI SOLA LETTURA SULLE IMMAGINI V4.23.0 ---\n";
 $ir_src  = ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/image-report.php' );
 $ir_main = ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' );
-$ir_tab  = ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/admin/views/tab-extra.php' );
+$ir_tab  = ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/admin/views/tab-immagini.php' );
 $ir_ok   = true;
 foreach ( array( 'scan', 'unused' ) as $ir_a ) {
 	$ir_ok = $ir_ok && false !== strpos( $ir_src, "add_action( 'wp_ajax_ntn_image_report_{$ir_a}', 'ntn_core_ajax_image_report_{$ir_a}' );" )
@@ -6398,6 +6398,19 @@ assert_test(
 	array() === $ir_free && array( 'articoli e pagine' ) === $ir_in_post && array( 'impostazioni' ) === $ir_in_opt && array( 'immagine in evidenza' ) === $ir_in_thumb &&
 	in_array( 'allegata a un contenuto', $ir_parent, true ) && ! empty( $ir_doubt ) && in_array( 'immagine in evidenza', $ir_doubt, true ),
 	'95.3: An image is "unused" only if nothing cites it: a post, a setting, a featured image or a parent content makes it used; if a database question fails it counts as used'
+);
+
+// --- TEST SUITE 96: scheda Immagini v4.24.0 ---
+echo "\n--- 96. SCHEDA IMMAGINI V4.24.0 ---\n";
+$ti_admin = ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/admin/admin-page.php' );
+$ti_view  = ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/admin/views/tab-immagini.php' );
+$ti_extra = ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/admin/views/tab-extra.php' );
+assert_test(
+	(bool) preg_match( "/'extra'\s+=> 'Extra',\n\t\t'immagini'\s+=> 'Immagini',/", $ti_admin ) &&
+	false !== strpos( $ti_view, 'ntn_core_png_repair_render_box();' ) && false !== strpos( $ti_view, 'ntn_core_image_report_render_box();' ) &&
+	false === strpos( $ti_extra, 'ntn_core_png_repair_render_box' ) && false === strpos( $ti_extra, 'ntn_core_image_report_render_box' ) &&
+	false !== strpos( $ti_extra, 'Svuota tutta la memoria' ),
+	'96.1: The new Images tab (after Extra) shows the transparent PNG thumbnails and the image report; Extra keeps only its own settings and the cache button'
 );
 
 
