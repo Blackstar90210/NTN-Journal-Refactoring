@@ -58,6 +58,7 @@ function ntn_get_core_backup_options_keys() {
 		// AI Summaries
 		'ntn_gemini_api_key',
 		'ntn_groq_api_key',
+		'ntn_youtube_api_key',
 
 		// Comunicati Stampa
 		'ntn_press_disclaimer',
@@ -450,6 +451,7 @@ function _ntn_restore_option( $key, $value ) {
 		'ntn_igdb_client_secret',
 		'ntn_gemini_api_key',
 		'ntn_groq_api_key',
+		'ntn_youtube_api_key',
 		'ntn_breaking_news_label',
 		'ntn_breaking_news_text',
 	), true ) ) {

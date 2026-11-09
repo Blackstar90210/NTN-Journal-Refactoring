@@ -173,6 +173,14 @@ function ntn_core_cache_registry() {
 			'flush'       => false,
 			'kept_reason' => 'Vengono da YouTube e cambiano di rado: rifarli rallenterebbe le pagine.',
 		),
+		'yt_date'       => array(
+			'label'       => 'Date di caricamento dei trailer YouTube',
+			'what'        => 'La data vera in cui ogni trailer è stato caricato su YouTube, usata nei dati per Google.',
+			'ttl'         => '1 anno',
+			'prefix'      => 'ntn_yt_date_',
+			'flush'       => false,
+			'kept_reason' => 'Non cambiano mai e rifarle costa richieste a YouTube.',
+		),
 		'igdb_answers'  => array(
 			'label'       => 'Risposte di IGDB',
 			'what'        => 'Ricerche, schede dei giochi e controlli dei tag già chiesti a IGDB.',

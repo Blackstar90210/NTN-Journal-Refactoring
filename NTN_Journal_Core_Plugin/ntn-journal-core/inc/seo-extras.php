@@ -1245,7 +1245,7 @@ function ntn_core_schema_single_game_entity( $post_id ) {
 				'description'  => 'Guarda il trailer ufficiale di ' . ntn_core_schema_plain_text( $game_title ?? '' ),
 				'thumbnailUrl' => 'https://img.youtube.com/vi/' . $video_id . '/hqdefault.jpg',
 				'embedUrl'     => 'https://www.youtube.com/embed/' . $video_id,
-				'uploadDate'   => get_the_date( 'c', $post_id )
+				'uploadDate'   => ntn_core_youtube_upload_date( (string) $video_id, get_the_date( 'c', $post_id ) )
 			);
 		}
 
