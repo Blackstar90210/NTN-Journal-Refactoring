@@ -250,40 +250,16 @@ function ntn_core_ajax_update_single_tag_igdb() {
 		wp_send_json_error( 'Dati mancanti' );
 	}
 	
-	$client_id = get_option( 'ntn_igdb_client_id', '' );
-	$token = ntn_get_igdb_token();
-
-	if ( empty( $client_id ) || ! $token ) {
-		wp_send_json_error( 'Credenziali IGDB mancanti o errate' );
-	}
-	
 	$apicalypse = 'fields id, name, url, cover.url, first_release_date, release_dates.date, release_dates.human, platforms.name, involved_companies.company.name, involved_companies.developer, involved_companies.publisher, genres.name, game_engines.name, videos.video_id, screenshots.image_id; where id = ' . $igdb_id . '; limit 1;';
-	
-	$response = wp_remote_post( 'https://api.igdb.com/v4/games', array(
-		'headers' => array(
-			'Client-ID'     => $client_id,
-			'Authorization' => 'Bearer ' . $token,
-			'Content-Type'  => 'text/plain',
-		),
-		'body'    => $apicalypse,
-		'timeout' => 15,
-	) );
-	
-	if ( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) !== 200 ) {
-		$error_code = is_wp_error( $response ) ? 0 : wp_remote_retrieve_response_code( $response );
-		if ( $error_code === 401 ) {
-			delete_transient( 'ntn_igdb_access_token' );
-			wp_send_json_error( 'Token IGDB scaduto (401). È stato invalidato, riprova l\'aggiornamento.' );
-		}
-		$error_msg = is_wp_error( $response ) ? $response->get_error_message() : 'HTTP Error: ' . $error_code;
-		wp_send_json_error( $error_msg );
+
+	$data = ntn_core_igdb_request( $apicalypse );
+	if ( is_wp_error( $data ) ) {
+		wp_send_json_error( 'ntn_igdb_credentials' === $data->get_error_code() ? 'Credenziali IGDB mancanti o errate' : $data->get_error_message() );
 	}
-	
-	$data = json_decode( wp_remote_retrieve_body( $response ), true );
-	if ( ! is_array( $data ) || empty( $data ) ) {
+	if ( empty( $data ) ) {
 		wp_send_json_error( 'Gioco non trovato su IGDB' );
 	}
-	
+
 	$game = $data[0];
 	
 	// Extract Developers and Publishers

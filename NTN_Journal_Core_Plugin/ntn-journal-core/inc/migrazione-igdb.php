@@ -404,10 +404,7 @@ function ntn_ajax_sync_franchises() {
 		) );
 	}
 
-	$client_id = get_option( 'ntn_igdb_client_id', '' );
-	$token = ntn_get_igdb_token();
-
-	if ( empty( $client_id ) || ! $token ) {
+	if ( empty( get_option( 'ntn_igdb_client_id', '' ) ) || ! ntn_get_igdb_token() ) {
 		wp_send_json_error( 'Credenziali IGDB mancanti o errate.' );
 	}
 
@@ -426,18 +423,9 @@ function ntn_ajax_sync_franchises() {
 		if ( ! empty( $igdb_id ) ) {
 			// Chiama IGDB
 			$apicalypse = 'fields franchises.name, collections.name; where id = ' . intval( $igdb_id ) . '; limit 1;';
-			$response = wp_remote_post( 'https://api.igdb.com/v4/games', array(
-				'headers' => array(
-					'Client-ID'     => $client_id,
-					'Authorization' => 'Bearer ' . $token,
-					'Content-Type'  => 'text/plain',
-				),
-				'body'    => $apicalypse,
-				'timeout' => 15,
-			) );
+			$data = ntn_core_igdb_request( $apicalypse );
 
-			if ( ! is_wp_error( $response ) && wp_remote_retrieve_response_code( $response ) === 200 ) {
-				$data = json_decode( wp_remote_retrieve_body( $response ), true );
+			if ( ! is_wp_error( $data ) ) {
 				if ( is_array( $data ) && ! empty( $data[0] ) ) {
 					$game_data = $data[0];
 					$franchises = array();

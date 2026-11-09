@@ -1654,24 +1654,24 @@ echo "\n--- 24. SEMVER SIMULTANEOUS 4-HEADER SYNCHRONIZATION ---\n";
 $parent_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $parent_css, $m_parent );
 $parent_ver = isset( $m_parent[1] ) ? trim( $m_parent[1] ) : '';
-assert_test( $parent_ver === '4.16.4', "24.1: Parent Theme style.css declares Version: 4.16.4(found: {$parent_ver})" );
+assert_test( $parent_ver === '4.17.0', "24.1: Parent Theme style.css declares Version: 4.17.0(found: {$parent_ver})" );
 
 $child_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $child_css, $m_child );
 $child_ver = isset( $m_child[1] ) ? trim( $m_child[1] ) : '';
-assert_test( $child_ver === '4.16.4', "24.2: Child Theme style.css declares Version: 4.16.4(found: {$child_ver})" );
+assert_test( $child_ver === '4.17.0', "24.2: Child Theme style.css declares Version: 4.17.0(found: {$child_ver})" );
 
 $core_php = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' );
 preg_match( '/\*\s*Version:\s*([0-9\.]+)/', $core_php, $m_core_hdr );
 $core_hdr_ver = isset( $m_core_hdr[1] ) ? trim( $m_core_hdr[1] ) : '';
-assert_test( $core_hdr_ver === '4.16.4', "24.3: Core Plugin header declares Version: 4.16.4(found: {$core_hdr_ver})" );
+assert_test( $core_hdr_ver === '4.17.0', "24.3: Core Plugin header declares Version: 4.17.0(found: {$core_hdr_ver})" );
 
 preg_match( "/define\(\s*'NTN_JOURNAL_CORE_VERSION',\s*'([^']+)'\s*\);/", $core_php, $m_core_const );
 $core_const_ver = isset( $m_core_const[1] ) ? trim( $m_core_const[1] ) : '';
-assert_test( $core_const_ver === '4.16.4', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.16.4(found: {$core_const_ver})" );
+assert_test( $core_const_ver === '4.17.0', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.17.0(found: {$core_const_ver})" );
 
 assert_test(
-	$parent_ver === '4.16.4' && $child_ver === '4.16.4' && $core_hdr_ver === '4.16.4' && $core_const_ver === '4.16.4',
+	$parent_ver === '4.17.0' && $child_ver === '4.17.0' && $core_hdr_ver === '4.17.0' && $core_const_ver === '4.17.0',
 	'24.5: All 4 version headers are 100% synchronized and atomic according to Rule 2 of GEMINI.md'
 );
 
@@ -1900,7 +1900,7 @@ $parent_style_ver = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( AB
 $child_style_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' ), $m2 ) ? $m2[1] : '';
 $core_plugin_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m3 ) ? $m3[1] : '';
 $core_const_ver   = preg_match( '/define\(\s*[\'"]NTN_JOURNAL_CORE_VERSION[\'"]\s*,\s*[\'"]([0-9\.]+)[\'"]\s*\)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m4 ) ? $m4[1] : '';
-assert_test( $parent_style_ver === '4.16.4' && $child_style_ver === '4.16.4' && $core_plugin_ver === '4.16.4' && $core_const_ver === '4.16.4', '29.1: All 4 version headers are synchronized to 4.16.4' );
+assert_test( $parent_style_ver === '4.17.0' && $child_style_ver === '4.17.0' && $core_plugin_ver === '4.17.0' && $core_const_ver === '4.17.0', '29.1: All 4 version headers are synchronized to 4.17.0' );
 
 // 29.2: single.php sequence is Google Feed -> Social CTA -> Bottom Related Posts
 $single_php = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/single.php' );
@@ -5802,6 +5802,30 @@ assert_test(
 	false === strpos( ntn_t_read( $gc_theme . 'template-parts/content-game-card.php' ), 'global $wp_query;' ),
 	'86.3: The catalog page and the REST catalog both pass the card position; the card no longer reads the wrong global query'
 );
+
+// --- TEST SUITE 87: una sola funzione per le richieste a IGDB v4.17.0 ---
+echo "\n--- 87. UNA SOLA FUNZIONE PER LE RICHIESTE A IGDB V4.17.0 ---\n";
+$ig_dir = ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/';
+$ig_files = array( 'ajax-igdb.php', 'admin/igdb-ajax-handlers.php', 'igdb-tag-scanner.php', 'migrazione-igdb.php' );
+$ig_calls = 0;
+foreach ( glob( $ig_dir . '{,*/}*.php', GLOB_BRACE ) as $ig_f ) {
+	$ig_calls += substr_count( ntn_t_read( $ig_f ), "wp_remote_post( 'https://api.igdb.com/v4/games'" );
+}
+assert_test( 1 === $ig_calls, "87.1: Only one place in the plugin sends requests to the IGDB games endpoint (found: {$ig_calls})" );
+
+$ig_helper = ntn_t_read( $ig_dir . 'ajax-igdb.php' );
+assert_test(
+	false !== strpos( $ig_helper, 'function ntn_core_igdb_request(' ) &&
+	false !== strpos( $ig_helper, "delete_transient( 'ntn_igdb_access_token' )" ) &&
+	false !== strpos( $ig_helper, "'ntn_igdb_credentials'" ) && false !== strpos( $ig_helper, "'ntn_igdb_401'" ),
+	'87.2: The single IGDB function checks credentials, drops the token on 401 and returns typed WP_Error codes'
+);
+
+$ig_users = 0;
+foreach ( $ig_files as $ig_f ) {
+	$ig_users += substr_count( ntn_t_read( $ig_dir . $ig_f ), 'ntn_core_igdb_request(' );
+}
+assert_test( $ig_users >= 6, "87.3: The six IGDB callers (search, details, updates, single tag, scanner, franchises) use the single function (found: {$ig_users})" );
 
 $GLOBALS['post'] = null;
 unset( $GLOBALS['mock_wp_query_handler'] );
