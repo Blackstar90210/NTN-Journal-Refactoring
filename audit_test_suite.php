@@ -1652,24 +1652,24 @@ echo "\n--- 24. SEMVER SIMULTANEOUS 4-HEADER SYNCHRONIZATION ---\n";
 $parent_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $parent_css, $m_parent );
 $parent_ver = isset( $m_parent[1] ) ? trim( $m_parent[1] ) : '';
-assert_test( $parent_ver === '4.16.0', "24.1: Parent Theme style.css declares Version: 4.16.0(found: {$parent_ver})" );
+assert_test( $parent_ver === '4.16.1', "24.1: Parent Theme style.css declares Version: 4.16.1(found: {$parent_ver})" );
 
 $child_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $child_css, $m_child );
 $child_ver = isset( $m_child[1] ) ? trim( $m_child[1] ) : '';
-assert_test( $child_ver === '4.16.0', "24.2: Child Theme style.css declares Version: 4.16.0(found: {$child_ver})" );
+assert_test( $child_ver === '4.16.1', "24.2: Child Theme style.css declares Version: 4.16.1(found: {$child_ver})" );
 
 $core_php = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' );
 preg_match( '/\*\s*Version:\s*([0-9\.]+)/', $core_php, $m_core_hdr );
 $core_hdr_ver = isset( $m_core_hdr[1] ) ? trim( $m_core_hdr[1] ) : '';
-assert_test( $core_hdr_ver === '4.16.0', "24.3: Core Plugin header declares Version: 4.16.0(found: {$core_hdr_ver})" );
+assert_test( $core_hdr_ver === '4.16.1', "24.3: Core Plugin header declares Version: 4.16.1(found: {$core_hdr_ver})" );
 
 preg_match( "/define\(\s*'NTN_JOURNAL_CORE_VERSION',\s*'([^']+)'\s*\);/", $core_php, $m_core_const );
 $core_const_ver = isset( $m_core_const[1] ) ? trim( $m_core_const[1] ) : '';
-assert_test( $core_const_ver === '4.16.0', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.16.0(found: {$core_const_ver})" );
+assert_test( $core_const_ver === '4.16.1', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.16.1(found: {$core_const_ver})" );
 
 assert_test(
-	$parent_ver === '4.16.0' && $child_ver === '4.16.0' && $core_hdr_ver === '4.16.0' && $core_const_ver === '4.16.0',
+	$parent_ver === '4.16.1' && $child_ver === '4.16.1' && $core_hdr_ver === '4.16.1' && $core_const_ver === '4.16.1',
 	'24.5: All 4 version headers are 100% synchronized and atomic according to Rule 2 of GEMINI.md'
 );
 
@@ -1898,7 +1898,7 @@ $parent_style_ver = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( AB
 $child_style_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' ), $m2 ) ? $m2[1] : '';
 $core_plugin_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m3 ) ? $m3[1] : '';
 $core_const_ver   = preg_match( '/define\(\s*[\'"]NTN_JOURNAL_CORE_VERSION[\'"]\s*,\s*[\'"]([0-9\.]+)[\'"]\s*\)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m4 ) ? $m4[1] : '';
-assert_test( $parent_style_ver === '4.16.0' && $child_style_ver === '4.16.0' && $core_plugin_ver === '4.16.0' && $core_const_ver === '4.16.0', '29.1: All 4 version headers are synchronized to 4.16.0' );
+assert_test( $parent_style_ver === '4.16.1' && $child_style_ver === '4.16.1' && $core_plugin_ver === '4.16.1' && $core_const_ver === '4.16.1', '29.1: All 4 version headers are synchronized to 4.16.1' );
 
 // 29.2: single.php sequence is Google Feed -> Social CTA -> Bottom Related Posts
 $single_php = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/single.php' );
@@ -5617,6 +5617,44 @@ assert_test(
 );
 $GLOBALS['queried_object'] = null;
 $GLOBALS['post']           = null;
+
+// --- TEST SUITE 83: Box Recensione senza testi di esempio v4.16.1 ---
+echo "\n--- 83. BOX RECENSIONE SENZA TESTI DI ESEMPIO V4.16.1 ---\n";
+$rb_render = function ( $post_id, $meta, $args = array() ) use ( &$mock_posts, &$mock_postmeta ) {
+	$mock_posts[ $post_id ] = new WP_Post( array( 'ID' => $post_id, 'post_title' => 'Box ' . $post_id, 'post_name' => 'box-' . $post_id, 'post_type' => 'post', 'post_status' => 'publish' ) );
+	$mock_postmeta[ $post_id ] = $meta;
+	$GLOBALS['queried_object'] = $mock_posts[ $post_id ];
+	$GLOBALS['post']           = $mock_posts[ $post_id ];
+	ob_start();
+	require ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/template-parts/review-original-box.php';
+	return ob_get_clean();
+};
+$rb_only_rating = $rb_render( 9400, array( 'rating' => '4' ) );
+$rb_pros_only   = $rb_render( 9401, array( 'rating' => '4', 'pros' => "Ottima regia\nBuona colonna sonora" ) );
+$rb_full        = $rb_render( 9402, array( 'rating' => '3', 'pros' => 'Ottima regia', 'cons' => 'Troppo breve', 'verdict' => 'Bello ma corto.' ) );
+$rb_src         = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/template-parts/review-original-box.php' );
+
+// 83.1: una recensione con il solo voto non mostra più Pro, Contro e Verdetto inventati
+assert_test(
+	strpos( $rb_only_rating, 'ntn-rbox-eval' ) !== false && strpos( $rb_only_rating, '<b>4</b> / 5' ) !== false &&
+	strpos( $rb_only_rating, '<li>' ) === false && strpos( $rb_only_rating, 'ntn-rbox-pc' ) === false && strpos( $rb_only_rating, 'ntn-rbox-verdict' ) === false &&
+	strpos( $rb_src, 'iconico' ) === false && strpos( $rb_src, 'caricabatterie' ) === false && strpos( $rb_src, 'estremamente convincente' ) === false,
+	'83.1: A review with only a rating shows the rating box without sample pros, cons or verdict'
+);
+
+// 83.2: con i soli pro la colonna occupa tutta la larghezza e i contro non compaiono
+assert_test(
+	2 === substr_count( $rb_pros_only, '<li>' ) && strpos( $rb_pros_only, 'is-pro' ) !== false && strpos( $rb_pros_only, 'is-con' ) === false &&
+	strpos( $rb_pros_only, 'grid-template-columns:minmax(0,1fr)' ) !== false && strpos( $rb_pros_only, 'ntn-rbox-verdict' ) === false,
+	'83.2: With only pros written, the pros column is full width and cons and verdict are not shown'
+);
+
+// 83.3: pro, contro e verdetto scritti compaiono come prima
+assert_test(
+	strpos( $rb_full, 'is-pro' ) !== false && strpos( $rb_full, 'is-con' ) !== false && strpos( $rb_full, 'Bello ma corto.' ) !== false &&
+	strpos( $rb_full, 'grid-template-columns' ) === false && 2 === substr_count( $rb_full, '<li>' ),
+	'83.3: Pros, cons and verdict that are written are still shown as before'
+);
 
 $GLOBALS['post'] = null;
 unset( $GLOBALS['mock_wp_query_handler'] );
