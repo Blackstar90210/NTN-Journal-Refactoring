@@ -6528,6 +6528,23 @@ assert_test(
 	'98.5: Base SEO defaults to "yes" when never saved, without the old get_theme_mod( ntn_journal_enable_base_seo ) fallback (seo-extras.php and the SEO tab)'
 );
 
+// 98.6: la domanda "c'è un altro plugin SEO?" è scritta una volta sola e usata nei tre punti
+preg_match( '/function ntn_core_other_seo_plugin_active\(\) \{.*?\n\t\}/s', $mf_seo, $mf_fn );
+$mf_res = array();
+foreach ( array( '', "define( 'WPSEO_VERSION', '1' );", 'class RankMath {}', "define( 'THE_SEO_FRAMEWORK_VERSION', '5' );", 'function the_seo_framework() { return new stdClass(); }' ) as $mf_case ) {
+	$mf_base = tempnam( sys_get_temp_dir(), 'ntn98' );
+	$mf_tmp  = $mf_base . '.php';
+	file_put_contents( $mf_tmp, "<?php\n" . $mf_case . "\n" . ( isset( $mf_fn[0] ) ? $mf_fn[0] : '' ) . "\necho ntn_core_other_seo_plugin_active() ? 'y' : 'n';\n" );
+	$mf_res[] = trim( (string) shell_exec( escapeshellarg( PHP_BINARY ) . ' ' . escapeshellarg( $mf_tmp ) . ' 2>&1' ) );
+	@unlink( $mf_tmp );
+	@unlink( $mf_base );
+}
+assert_test(
+	'n,y,y,y,y' === implode( ',', $mf_res ) && 3 === substr_count( $mf_seo, 'ntn_core_other_seo_plugin_active()' ) - 1 &&
+	1 === substr_count( $mf_seo, "defined( 'WPSEO_VERSION' )" ) && 1 === substr_count( $mf_seo, "class_exists( 'RankMath' )" ),
+	'98.6: One function (ntn_core_other_seo_plugin_active) detects Yoast, Rank Math or The SEO Framework and replaces the three copied conditions (got: ' . implode( ',', $mf_res ) . ')'
+);
+
 
 echo "\n=======================================================================\n";
 echo " AUDIT SUMMARY: {$passed} PASSED, {$failed} FAILED\n";
