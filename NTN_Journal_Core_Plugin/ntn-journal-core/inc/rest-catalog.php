@@ -57,7 +57,7 @@ class NTN_Catalog_REST_Controller {
 			$params['per_page'] = 20;
 		}
 
-		// v4.17.0: la chiave usa solo i parametri noti; le richieste con ricerca libera o filtri non vanno nel database
+		// v4.16.2: la chiave usa solo i parametri noti; le richieste con ricerca libera o filtri non vanno nel database
 		$cache_key      = ntn_core_rest_games_cache_key( $params );
 		$cache_in_db    = ntn_core_rest_games_uses_database( $params );
 		$cached_payload = ntn_core_rest_cache_get( $cache_key, $cache_in_db );
@@ -121,7 +121,7 @@ class NTN_Catalog_REST_Controller {
 		}
 
 		$cache_key = 'ntn_livesearch2_' . md5( strtolower( $search_term ) );
-		// v4.17.0: il testo cercato è libero, quindi si salva solo nella cache in memoria (mai nel database)
+		// v4.16.2: il testo cercato è libero, quindi si salva solo nella cache in memoria (mai nel database)
 		$cached = ntn_core_rest_cache_get( $cache_key, false );
 		if ( is_array( $cached ) ) {
 			$response = new WP_REST_Response( $cached, 200 );

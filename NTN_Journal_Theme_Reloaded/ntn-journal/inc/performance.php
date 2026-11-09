@@ -127,15 +127,31 @@ add_action( 'template_redirect', 'ntn_journal_block_author_enumeration' );
 
 /**
  * PROP-02 & PROP-16: Preload Immagine in Evidenza (LCP)
- * Inietta un tag <link rel="preload"> nell'head per gli articoli singoli e la homepage.
+ * Inietta un tag <link rel="preload"> nell'head per gli articoli, le pagine e i comunicati stampa.
+ *
+ * Dalla 4.16.3 il preload usa la stessa misura ("large") e lo stesso srcset della pagina: prima scaricava
+ * la misura "full" e il browser poteva scaricare l'immagine due volte. Solo sui modelli che mostrano
+ * davvero l'immagine in evidenza in testata (single.php, page.php, single-comunicato_stampa.php).
  */
 function ntn_preload_lcp_image() {
-	if ( is_singular() && has_post_thumbnail() ) {
-		$image_url = get_the_post_thumbnail_url( get_the_ID(), 'full' );
-		if ( $image_url ) {
-			echo '<link rel="preload" as="image" href="' . esc_url( $image_url ) . '" fetchpriority="high">' . "\n";
+	if ( ! is_singular( array( 'post', 'page', 'comunicato_stampa' ) ) || is_front_page() || ! has_post_thumbnail() ) {
+		return;
+	}
+	$thumb_id = (int) get_post_thumbnail_id();
+	$image    = $thumb_id ? wp_get_attachment_image_src( $thumb_id, 'large' ) : false;
+	if ( empty( $image[0] ) ) {
+		return;
+	}
+	$srcset = wp_get_attachment_image_srcset( $thumb_id, 'large' );
+	$sizes  = wp_get_attachment_image_sizes( $thumb_id, 'large' );
+	$extra  = '';
+	if ( $srcset ) {
+		$extra .= ' imagesrcset="' . esc_attr( $srcset ) . '"';
+		if ( $sizes ) {
+			$extra .= ' imagesizes="' . esc_attr( $sizes ) . '"';
 		}
 	}
+	echo '<link rel="preload" as="image" href="' . esc_url( $image[0] ) . '"' . $extra . ' fetchpriority="high">' . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput -- attributi già filtrati sopra.
 }
 add_action( 'wp_head', 'ntn_preload_lcp_image', 1 );
 
@@ -161,8 +177,11 @@ add_action( 'wp_head', 'ntn_dns_prefetch_external_resources', 2 );
  * ==============================================================================
  */
 function ntn_journal_defer_scripts( $tag, $handle, $src ) {
-	// Escludi backend e jQuery core per evitare problemi con script inline o dipendenze
-	if ( is_admin() || $handle === 'jquery' || $handle === 'jquery-core' || $handle === 'jquery-migrate' ) {
+	// Dalla 4.16.3 solo gli script del tema: prima il filtro metteva defer a tutti gli script del sito,
+	// anche a quelli di altri plugin, che a volte dipendono da script inline (ordine di esecuzione).
+	// Gli script con "strategy" nell'enqueue (main.js, front-page.js, dot-art.js) sono già gestiti da WordPress.
+	$own_handles = apply_filters( 'ntn_journal_deferred_script_handles', array( 'ntn-lazy-video', 'ntn-live-search', 'ntn-catalog-filters', 'glightbox' ) );
+	if ( is_admin() || ! in_array( $handle, (array) $own_handles, true ) ) {
 		return $tag;
 	}
 
