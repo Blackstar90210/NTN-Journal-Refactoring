@@ -1295,9 +1295,13 @@ function ntn_tsf_add_videogame_schema( $data, $context = array() ) {
 	} else {
 		$single_entity = ntn_core_schema_single_game_entity( $post_id );
 		if ( null === $single_entity ) {
-			return $data; // Nessun gioco associato
+			// Nessun gioco associato. Una recensione resta comunque un articolo con autore e data (v4.16.0), senza VideoGame.
+			if ( is_singular( 'videogioco' ) || ! has_category( array( 'recensioni', 'recensione' ), $post_id ) ) {
+				return $data;
+			}
+		} else {
+			$videogame_entities[] = $single_entity;
 		}
-		$videogame_entities[] = $single_entity;
 	}
 	$game_schema_ids = array_values( array_unique( array_column( $videogame_entities, '@id' ) ) );
 
@@ -1414,7 +1418,7 @@ function ntn_tsf_add_videogame_schema( $data, $context = array() ) {
 						
 						// Link to VideoGame via itemReviewed
 						$data[$key]['itemReviewed'] = array( '@id' => $game_schema_ids[0] );
-					} else {
+					} elseif ( ! empty( $game_schema_ids ) ) {
 						// Normal Article -> about -> VideoGame
 						if ( ! isset( $data[$key]['about'] ) ) {
 							$data[$key]['about'] = array();

@@ -748,6 +748,7 @@ require_once ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/seo-extras.
 require_once ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/hub-seo.php';
 require_once ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/schema-flags.php';
 require_once ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/iubenda-compat.php';
+require_once ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/review-rating-backfill.php';
 require_once ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/category-hub.php';
 require_once ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/category-hub-stats.php';
 require_once ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/team-page.php';
@@ -1651,24 +1652,24 @@ echo "\n--- 24. SEMVER SIMULTANEOUS 4-HEADER SYNCHRONIZATION ---\n";
 $parent_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $parent_css, $m_parent );
 $parent_ver = isset( $m_parent[1] ) ? trim( $m_parent[1] ) : '';
-assert_test( $parent_ver === '4.15.4', "24.1: Parent Theme style.css declares Version: 4.15.4(found: {$parent_ver})" );
+assert_test( $parent_ver === '4.16.0', "24.1: Parent Theme style.css declares Version: 4.16.0(found: {$parent_ver})" );
 
 $child_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $child_css, $m_child );
 $child_ver = isset( $m_child[1] ) ? trim( $m_child[1] ) : '';
-assert_test( $child_ver === '4.15.4', "24.2: Child Theme style.css declares Version: 4.15.4(found: {$child_ver})" );
+assert_test( $child_ver === '4.16.0', "24.2: Child Theme style.css declares Version: 4.16.0(found: {$child_ver})" );
 
 $core_php = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' );
 preg_match( '/\*\s*Version:\s*([0-9\.]+)/', $core_php, $m_core_hdr );
 $core_hdr_ver = isset( $m_core_hdr[1] ) ? trim( $m_core_hdr[1] ) : '';
-assert_test( $core_hdr_ver === '4.15.4', "24.3: Core Plugin header declares Version: 4.15.4(found: {$core_hdr_ver})" );
+assert_test( $core_hdr_ver === '4.16.0', "24.3: Core Plugin header declares Version: 4.16.0(found: {$core_hdr_ver})" );
 
 preg_match( "/define\(\s*'NTN_JOURNAL_CORE_VERSION',\s*'([^']+)'\s*\);/", $core_php, $m_core_const );
 $core_const_ver = isset( $m_core_const[1] ) ? trim( $m_core_const[1] ) : '';
-assert_test( $core_const_ver === '4.15.4', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.15.4(found: {$core_const_ver})" );
+assert_test( $core_const_ver === '4.16.0', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.16.0(found: {$core_const_ver})" );
 
 assert_test(
-	$parent_ver === '4.15.4' && $child_ver === '4.15.4' && $core_hdr_ver === '4.15.4' && $core_const_ver === '4.15.4',
+	$parent_ver === '4.16.0' && $child_ver === '4.16.0' && $core_hdr_ver === '4.16.0' && $core_const_ver === '4.16.0',
 	'24.5: All 4 version headers are 100% synchronized and atomic according to Rule 2 of GEMINI.md'
 );
 
@@ -1897,7 +1898,7 @@ $parent_style_ver = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( AB
 $child_style_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' ), $m2 ) ? $m2[1] : '';
 $core_plugin_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m3 ) ? $m3[1] : '';
 $core_const_ver   = preg_match( '/define\(\s*[\'"]NTN_JOURNAL_CORE_VERSION[\'"]\s*,\s*[\'"]([0-9\.]+)[\'"]\s*\)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m4 ) ? $m4[1] : '';
-assert_test( $parent_style_ver === '4.15.4' && $child_style_ver === '4.15.4' && $core_plugin_ver === '4.15.4' && $core_const_ver === '4.15.4', '29.1: All 4 version headers are synchronized to 4.15.4' );
+assert_test( $parent_style_ver === '4.16.0' && $child_style_ver === '4.16.0' && $core_plugin_ver === '4.16.0' && $core_const_ver === '4.16.0', '29.1: All 4 version headers are synchronized to 4.16.0' );
 
 // 29.2: single.php sequence is Google Feed -> Social CTA -> Bottom Related Posts
 $single_php = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/single.php' );
@@ -5524,7 +5525,7 @@ assert_test(
 );
 unset( $mock_postmeta[9124]['rating'] );
 
-// 81.11: anche la Hub del gioco e il testo automatico scrivono le lettere vere (v4.15.4)
+// 81.11: anche la Hub del gioco e il testo automatico scrivono le lettere vere (v4.15.3)
 $mock_posts[9141] = new WP_Post( array( 'ID' => 9141, 'post_title' => 'God of War Ragnar&amp;#246;k', 'post_name' => 'god-of-war-ragnarok-gg', 'post_type' => 'videogioco', 'post_status' => 'publish' ) );
 $mock_postmeta[9141]['_ntn_game_title'] = 'God of War Ragnar&amp;#246;k';
 $mock_postmeta[9141]['_ntn_game_developer'] = 'Santa Monica Studio';
@@ -5553,6 +5554,67 @@ assert_test(
 );
 
 unset( $mock_postmeta[9111]['rating'], $mock_postmeta[9112]['rating'] );
+$GLOBALS['queried_object'] = null;
+$GLOBALS['post']           = null;
+
+// =======================================================================
+// 82. Voti alle vecchie recensioni e recensioni senza gioco (v4.16.0)
+// =======================================================================
+echo "\n--- 82. VOTI ALLE VECCHIE RECENSIONI ---\n";
+// 82.1: il giudizio dei tag diventa il voto con la scala del sito
+assert_test(
+	array( 'rating' => 4, 'label' => 'Consigliato' ) === ntn_core_rating_from_term_names( array( 'Notizie', 'Consigliato', 'Recensioni' ) ) &&
+	3 === ( ntn_core_rating_from_term_names( array( 'Consigliato con riserva' ) )['rating'] ?? 0 ) &&
+	5 === ( ntn_core_rating_from_term_names( array( 'Must Play' ) )['rating'] ?? 0 ) && 5 === ( ntn_core_rating_from_term_names( array( 'Capolavoro', 'must play' ) )['rating'] ?? 0 ) &&
+	2 === ( ntn_core_rating_from_term_names( array( 'Bocciato' ) )['rating'] ?? 0 ) &&
+	'CONSIGLIATO' === get_rating_label( 4 ) && 'CONSIGLIATO CON RISERVA' === get_rating_label( 3 ) && 'MUST PLAY' === get_rating_label( 5 ) && 'BOCCIATO' === get_rating_label( 2 ),
+	'82.1: A judgment tag becomes the rating with the site scale (Must Play 5, Consigliato 4, Con riserva 3, Bocciato 2); a longer name is not mistaken for a shorter one'
+);
+// 82.2: nessun giudizio o giudizi in contrasto = nessuna proposta
+assert_test(
+	null === ntn_core_rating_from_term_names( array( 'Notizie', 'Indie', 'Guide' ) ) && null === ntn_core_rating_from_term_names( array() ) &&
+	null === ntn_core_rating_from_term_names( array( 'Consigliato', 'Bocciato' ) ),
+	'82.2: With no judgment tag, or two that disagree, no rating is proposed'
+);
+// 82.3: scrittura dei voti: solo recensioni senza voto, voti da 1 a 5, mai sopra un voto esistente
+$rt_cat = static function ( $slug ) { return new WP_Term( array( 'term_id' => crc32( $slug ), 'name' => $slug, 'slug' => $slug, 'taxonomy' => 'category' ) ); };
+foreach ( array( 9301 => 'recensioni', 9302 => 'recensioni', 9303 => 'recensioni', 9304 => 'news', 9305 => 'recensioni' ) as $rt_id => $rt_slug ) {
+	$mock_posts[ $rt_id ] = new WP_Post( array( 'ID' => $rt_id, 'post_title' => 'Rec ' . $rt_id, 'post_name' => 'rec-' . $rt_id, 'post_type' => 'post', 'post_status' => 'publish' ) );
+	$mock_post_categories[ $rt_id ] = array( $rt_cat( $rt_slug ) );
+}
+$mock_postmeta[9303]['rating'] = '3';
+$rt_written = ntn_core_apply_review_ratings( array( 9301 => 4, 9302 => 9, 9303 => 5, 9304 => 4, 9305 => 0, 9999 => 4 ) );
+assert_test(
+	1 === $rt_written && '4' === ( $mock_postmeta[9301]['rating'] ?? '' ) && ! isset( $mock_postmeta[9302]['rating'] ) && '3' === $mock_postmeta[9303]['rating'] && ! isset( $mock_postmeta[9304]['rating'] ) && ! isset( $mock_postmeta[9305]['rating'] ),
+	'82.3: Only reviews without a rating get one, ratings outside 1-5 and non-reviews are skipped, an existing rating is never replaced'
+);
+// 82.4: sicurezza e struttura del salvataggio
+$rt_admin = ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/admin/admin-page.php' );
+$rt_view  = ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/admin/views/reviews-missing-rating.php' );
+$rt_main  = ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' );
+assert_test(
+	false !== strpos( $rt_admin, "ntn_journal_core_admin_nonce_ok( 'ntn_rating_backfill_nonce', 'ntn_rating_backfill' )" ) && false !== strpos( $rt_admin, "current_user_can( 'manage_options' )" ) &&
+	false !== strpos( $rt_view, "wp_nonce_field( 'ntn_rating_backfill', 'ntn_rating_backfill_nonce' )" ) && false !== strpos( $rt_view, 'Conferma selezionati' ) && false !== strpos( $rt_view, 'Conferma tutte le' ) &&
+	false !== strpos( $rt_main, "inc/review-rating-backfill.php" ) && false === strpos( $rt_view, 'innerHTML' ),
+	'82.4: The ratings list needs the nonce and manage_options, offers confirm selected and confirm all, and writes nothing without confirmation'
+);
+// 82.5: una recensione senza gioco resta un articolo con autore e data, un articolo normale senza gioco non cambia
+$mock_posts[9310] = new WP_Post( array( 'ID' => 9310, 'post_title' => 'Recensione di un accessorio', 'post_name' => 'rec-accessorio', 'post_type' => 'post', 'post_status' => 'publish', 'post_author' => 1 ) );
+$mock_post_categories[9310] = array( $rt_cat( 'recensioni' ) );
+$mock_posts[9311] = new WP_Post( array( 'ID' => 9311, 'post_title' => 'Una notizia senza gioco', 'post_name' => 'notizia-no-gioco', 'post_type' => 'post', 'post_status' => 'publish', 'post_author' => 1 ) );
+$mock_post_categories[9311] = array( $rt_cat( 'news' ) );
+$rt_graph = array( array( '@type' => 'WebPage', '@id' => 'https://example.com/#webpage' ) );
+$GLOBALS['queried_object'] = $mock_posts[9310];
+$GLOBALS['post']           = $mock_posts[9310];
+$rt_out_rev = ntn_tsf_add_videogame_schema( $rt_graph, array() );
+$GLOBALS['queried_object'] = $mock_posts[9311];
+$GLOBALS['post']           = $mock_posts[9311];
+$rt_out_news = ntn_tsf_add_videogame_schema( $rt_graph, array() );
+assert_test(
+	array( 'WebPage', 'NewsArticle' ) === $rt_out_rev[0]['@type'] && ! empty( $rt_out_rev[0]['datePublished'] ) && ! empty( $rt_out_rev[0]['headline'] ) && 1 === count( $rt_out_rev ) && ! isset( $rt_out_rev[0]['about'] ) &&
+	$rt_graph === $rt_out_news,
+	'82.5: A review with no linked game is still an article with headline and dates (and no VideoGame); an ordinary article without a game is left as it was'
+);
 $GLOBALS['queried_object'] = null;
 $GLOBALS['post']           = null;
 

@@ -307,6 +307,27 @@ function ntn_journal_core_admin_handle_post() {
 		}
 	}
 
+	// Voti alle vecchie recensioni (v4.16.0): solo alla conferma, mai sopra un voto già scritto
+	if ( ntn_journal_core_admin_nonce_ok( 'ntn_rating_backfill_nonce', 'ntn_rating_backfill' ) && function_exists( 'ntn_core_apply_review_ratings' ) ) {
+		if ( 'all' === sanitize_key( ntn_journal_core_admin_field( 'ntn_rating_backfill_mode' ) ) ) {
+			$written = ntn_core_apply_all_proposed_ratings();
+		} else {
+			$picks  = isset( $_POST['ntn_rating_pick'] ) && is_array( $_POST['ntn_rating_pick'] ) ? array_map( 'absint', array_keys( wp_unslash( $_POST['ntn_rating_pick'] ) ) ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- solo ID numerici.
+			$values = isset( $_POST['ntn_rating_value'] ) && is_array( $_POST['ntn_rating_value'] ) ? wp_unslash( $_POST['ntn_rating_value'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- numeri, puliti sotto.
+			$chosen = array();
+			foreach ( $picks as $pick_id ) {
+				$chosen[ $pick_id ] = isset( $values[ $pick_id ] ) ? absint( $values[ $pick_id ] ) : 0;
+			}
+			$written = ntn_core_apply_review_ratings( $chosen );
+		}
+		ntn_core_flush_all_caches();
+		$message = $written > 0 ? sprintf( 'Voto scritto su %d recensioni: ora compare nella pagina e nei dati per Google.', $written ) : 'Nessun voto scritto: scegli un voto per le recensioni selezionate.';
+		$type    = $written > 0 ? 'success' : 'error';
+		set_transient( 'ntn_admin_notice_' . get_current_user_id(), array( 'type' => $type, 'text' => $message ), MINUTE_IN_SECONDS );
+		wp_safe_redirect( add_query_arg( array( 'page' => 'ntn-journal-functions', 'tab' => 'reviews' ), admin_url( 'admin.php' ) ) );
+		exit;
+	}
+
 	// Svuota tutte le memorie (v3.17.1: non solo le Hub dei videogiochi)
 	if ( ntn_journal_core_admin_nonce_ok( 'ntn_clear_hub_cache_nonce', 'ntn_clear_hub_cache' ) ) {
 		ntn_core_flush_all_caches();

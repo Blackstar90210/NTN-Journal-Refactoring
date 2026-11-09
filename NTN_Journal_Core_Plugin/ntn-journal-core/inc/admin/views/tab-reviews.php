@@ -44,6 +44,11 @@ $ntn_url  = static function ( $args ) use ( $ntn_base, $ntn_q, $ntn_filter ) {
 	return add_query_arg( array_filter( array_merge( array( 'q' => $ntn_q, 'giudizio' => $ntn_filter ), $args ) ), $ntn_base );
 };
 ?>
+<?php // v4.16.0: voti alle vecchie recensioni
+if ( function_exists( 'ntn_core_reviews_without_rating_query' ) ) {
+	require __DIR__ . '/reviews-missing-rating.php';
+}
+?>
 <div class="nadm-panel">
 	<div class="nadm-sec"><h2>// Recensioni</h2><span class="nadm-aside"><?php echo esc_html( number_format_i18n( (int) $ntn_reviews->found_posts ) . ' trovate · 20 per pagina' ); ?></span></div>
 
