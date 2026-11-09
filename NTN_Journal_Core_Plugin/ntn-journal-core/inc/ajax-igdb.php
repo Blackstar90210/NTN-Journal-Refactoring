@@ -57,6 +57,56 @@ function ntn_get_igdb_token() {
 }
 
 /**
+ * Unica porta d'ingresso per le richieste a IGDB (v4.17.0).
+ * Controlla le credenziali, prende il token, invia la richiesta e legge la risposta.
+ * Se IGDB risponde 401 il token salvato viene cancellato, così la richiesta dopo ne chiede uno nuovo.
+ *
+ * @param string $apicalypse Richiesta nel linguaggio di IGDB (Apicalypse).
+ * @param int    $timeout    Secondi massimi di attesa.
+ * @return array|WP_Error    I dati letti da IGDB, oppure l'errore. Codici: ntn_igdb_credentials,
+ *                           ntn_igdb_401, ntn_igdb_http (con 'status' nei dati), ntn_igdb_invalid.
+ */
+if ( ! function_exists( 'ntn_core_igdb_request' ) ) {
+	function ntn_core_igdb_request( $apicalypse, $timeout = 15 ) {
+		$client_id = get_option( 'ntn_igdb_client_id', '' );
+		$token     = ntn_get_igdb_token();
+
+		if ( empty( $client_id ) || ! $token ) {
+			return new WP_Error( 'ntn_igdb_credentials', 'Credenziali IGDB mancanti o errate' );
+		}
+
+		$response = wp_remote_post( 'https://api.igdb.com/v4/games', array(
+			'headers' => array(
+				'Client-ID'     => $client_id,
+				'Authorization' => 'Bearer ' . $token,
+				'Content-Type'  => 'text/plain',
+			),
+			'body'    => (string) $apicalypse,
+			'timeout' => (int) $timeout,
+		) );
+
+		if ( is_wp_error( $response ) ) {
+			return new WP_Error( 'ntn_igdb_http', $response->get_error_message(), array( 'status' => 0 ) );
+		}
+
+		$code = (int) wp_remote_retrieve_response_code( $response );
+		if ( 401 === $code ) {
+			delete_transient( 'ntn_igdb_access_token' );
+			return new WP_Error( 'ntn_igdb_401', 'Token IGDB scaduto (401). È stato invalidato, riprova.', array( 'status' => 401 ) );
+		}
+		if ( 200 !== $code ) {
+			return new WP_Error( 'ntn_igdb_http', 'HTTP Error: ' . $code, array( 'status' => $code ) );
+		}
+
+		$data = json_decode( wp_remote_retrieve_body( $response ), true );
+		if ( ! is_array( $data ) ) {
+			return new WP_Error( 'ntn_igdb_invalid', 'Risposta API non valida' );
+		}
+		return $data;
+	}
+}
+
+/**
  * Quanto è precisa la data di uscita (v3.19.1). IGDB mette al 31 dicembre i giochi di cui conosce solo
  * l'anno, quindi la data da sola non basta: si legge la voce di "release_dates" con la stessa data di
  * "first_release_date" e il suo testo "human" ("Oct 23, 2026", "Oct 2026", "Q4 2026", "2026", "TBD").
@@ -225,14 +275,8 @@ function ntn_journal_ajax_search_igdb() {
 		wp_send_json_error( array( 'message' => 'Query vuota' ) );
 	}
 
-	$client_id = get_option( 'ntn_igdb_client_id', '' );
-	if ( empty( $client_id ) ) {
+	if ( empty( get_option( 'ntn_igdb_client_id', '' ) ) ) {
 		wp_send_json_error( array( 'message' => 'Client ID IGDB non configurato' ) );
-	}
-
-	$token = ntn_get_igdb_token();
-	if ( ! $token ) {
-		wp_send_json_error( array( 'message' => 'Impossibile ottenere il token IGDB. Controlla le credenziali.' ) );
 	}
 
 	if ( is_numeric( $query ) ) {
@@ -249,30 +293,12 @@ function ntn_journal_ajax_search_igdb() {
 		wp_send_json_success( $cached_results );
 	}
 
-	$response = wp_remote_post( 'https://api.igdb.com/v4/games', array(
-		'headers' => array(
-			'Client-ID'     => $client_id,
-			'Authorization' => 'Bearer ' . $token,
-			'Content-Type'  => 'text/plain',
-		),
-		'body'    => $apicalypse,
-		'timeout' => 15,
-	) );
-
-	if ( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) !== 200 ) {
-		$error_code = is_wp_error( $response ) ? 0 : wp_remote_retrieve_response_code( $response );
-		if ( $error_code === 401 ) {
-			delete_transient( 'ntn_igdb_access_token' );
-			wp_send_json_error( array( 'message' => 'Token IGDB scaduto (401). È stato invalidato, riprova la ricerca.' ) );
+	$data = ntn_core_igdb_request( $apicalypse );
+	if ( is_wp_error( $data ) ) {
+		if ( 'ntn_igdb_credentials' === $data->get_error_code() ) {
+			wp_send_json_error( array( 'message' => 'Impossibile ottenere il token IGDB. Controlla le credenziali.' ) );
 		}
-		$error_msg = is_wp_error( $response ) ? $response->get_error_message() : 'HTTP Error: ' . $error_code;
-		wp_send_json_error( array( 'message' => $error_msg ) );
-	}
-
-	$data = json_decode( wp_remote_retrieve_body( $response ), true );
-
-	if ( ! is_array( $data ) ) {
-		wp_send_json_error( array( 'message' => 'Risposta API non valida' ) );
+		wp_send_json_error( array( 'message' => $data->get_error_message() ) );
 	}
 
 	// Format results for JS
@@ -312,37 +338,13 @@ function ntn_get_igdb_game_details( $game_id ) {
 		return $cached;
 	}
 	
-	$client_id = get_option( 'ntn_igdb_client_id', '' );
-	$token = ntn_get_igdb_token();
-
-	if ( empty( $client_id ) || ! $token ) {
-		return new WP_Error( 'igdb_error', 'Credenziali IGDB mancanti o errate' );
-	}
-
 	$apicalypse = 'fields id, name, url, cover.url, first_release_date, release_dates.date, release_dates.human, platforms.name, involved_companies.company.name, involved_companies.developer, involved_companies.publisher, genres.name, game_engines.name, franchises.name, collections.name, videos.video_id, screenshots.image_id; where id = ' . intval( $game_id ) . '; limit 1;';
 
-	$response = wp_remote_post( 'https://api.igdb.com/v4/games', array(
-		'headers' => array(
-			'Client-ID'     => $client_id,
-			'Authorization' => 'Bearer ' . $token,
-			'Content-Type'  => 'text/plain',
-		),
-		'body'    => $apicalypse,
-		'timeout' => 15,
-	) );
-
-	if ( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) !== 200 ) {
-		$error_code = is_wp_error( $response ) ? 0 : wp_remote_retrieve_response_code( $response );
-		if ( $error_code === 401 ) {
-			delete_transient( 'ntn_igdb_access_token' );
-			return new WP_Error( 'igdb_401', 'Token IGDB scaduto (401). È stato invalidato, riprova.' );
-		}
-		$error_msg = is_wp_error( $response ) ? $response->get_error_message() : 'HTTP Error: ' . $error_code;
-		return new WP_Error( 'igdb_api_error', $error_msg );
+	$data = ntn_core_igdb_request( $apicalypse );
+	if ( is_wp_error( $data ) ) {
+		return $data;
 	}
-
-	$data = json_decode( wp_remote_retrieve_body( $response ), true );
-	if ( ! is_array( $data ) || empty( $data ) ) {
+	if ( empty( $data ) ) {
 		return new WP_Error( 'igdb_not_found', 'Gioco non trovato su IGDB' );
 	}
 
@@ -658,34 +660,16 @@ function ntn_ajax_check_igdb_updates() {
 		wp_send_json_error( 'Nessun ID fornito' );
 	}
 
-	$client_id = get_option( 'ntn_igdb_client_id', '' );
-	$token = ntn_get_igdb_token();
-
-	if ( empty( $client_id ) || ! $token ) {
-		wp_send_json_error( 'Credenziali IGDB mancanti o errate' );
-	}
-
 	// IGDB API accetta query con `where id = (1,2,3)`
 	$ids_string = implode( ',', array_map( 'intval', $igdb_ids ) );
 	$apicalypse = 'fields id, updated_at; where id = (' . $ids_string . '); limit 500;';
 
-	$response = wp_remote_post( 'https://api.igdb.com/v4/games', array(
-		'headers' => array(
-			'Client-ID'     => $client_id,
-			'Authorization' => 'Bearer ' . $token,
-			'Content-Type'  => 'text/plain',
-		),
-		'body'    => $apicalypse,
-		'timeout' => 15,
-	) );
-
-	if ( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) !== 200 ) {
-		wp_send_json_error( 'Errore di comunicazione con IGDB' );
-	}
-
-	$data = json_decode( wp_remote_retrieve_body( $response ), true );
-	if ( ! is_array( $data ) ) {
-		wp_send_json_error( 'Risposta API non valida' );
+	$data = ntn_core_igdb_request( $apicalypse );
+	if ( is_wp_error( $data ) ) {
+		if ( 'ntn_igdb_credentials' === $data->get_error_code() ) {
+			wp_send_json_error( 'Credenziali IGDB mancanti o errate' );
+		}
+		wp_send_json_error( 'ntn_igdb_invalid' === $data->get_error_code() ? 'Risposta API non valida' : 'Errore di comunicazione con IGDB' );
 	}
 
 	$updates = array();

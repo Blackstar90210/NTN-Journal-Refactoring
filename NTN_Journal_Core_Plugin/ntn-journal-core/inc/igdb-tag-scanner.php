@@ -113,38 +113,13 @@ function ntn_igdb_scan_lookup( $name ) {
 		return $cached;
 	}
 
-	$client_id = get_option( 'ntn_igdb_client_id', '' );
-	$token     = ntn_get_igdb_token();
-	if ( empty( $client_id ) || ! $token ) {
-		return new WP_Error( 'ntn_igdb_credentials', 'Credenziali IGDB mancanti o errate' );
-	}
-
-	$response = wp_remote_post(
-		'https://api.igdb.com/v4/games',
-		array(
-			'headers' => array(
-				'Client-ID'     => $client_id,
-				'Authorization' => 'Bearer ' . $token,
-				'Content-Type'  => 'text/plain',
-			),
-			'body'    => ntn_igdb_scan_query( $name ),
-			'timeout' => 15,
-		)
-	);
+	$data = ntn_core_igdb_request( ntn_igdb_scan_query( $name ) );
 	usleep( 300000 ); // IGDB accetta al massimo 4 richieste al secondo
-
-	if ( is_wp_error( $response ) ) {
-		return $response;
-	}
-	$code = (int) wp_remote_retrieve_response_code( $response );
-	if ( 401 === $code ) {
-		delete_transient( 'ntn_igdb_access_token' );
-	}
-	if ( 200 !== $code ) {
-		return new WP_Error( 'ntn_igdb_http', 'Errore di comunicazione con IGDB (' . $code . ')' );
+	if ( is_wp_error( $data ) ) {
+		return $data;
 	}
 
-	$list = ntn_igdb_scan_format_games( json_decode( wp_remote_retrieve_body( $response ), true ) );
+	$list = ntn_igdb_scan_format_games( $data );
 	set_transient( $transient, $list, DAY_IN_SECONDS );
 	return $list;
 }
