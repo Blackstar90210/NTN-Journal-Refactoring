@@ -1654,24 +1654,24 @@ echo "\n--- 24. SEMVER SIMULTANEOUS 4-HEADER SYNCHRONIZATION ---\n";
 $parent_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $parent_css, $m_parent );
 $parent_ver = isset( $m_parent[1] ) ? trim( $m_parent[1] ) : '';
-assert_test( $parent_ver === '4.17.0', "24.1: Parent Theme style.css declares Version: 4.17.0(found: {$parent_ver})" );
+assert_test( $parent_ver === '4.18.0', "24.1: Parent Theme style.css declares Version: 4.18.0(found: {$parent_ver})" );
 
 $child_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $child_css, $m_child );
 $child_ver = isset( $m_child[1] ) ? trim( $m_child[1] ) : '';
-assert_test( $child_ver === '4.17.0', "24.2: Child Theme style.css declares Version: 4.17.0(found: {$child_ver})" );
+assert_test( $child_ver === '4.18.0', "24.2: Child Theme style.css declares Version: 4.18.0(found: {$child_ver})" );
 
 $core_php = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' );
 preg_match( '/\*\s*Version:\s*([0-9\.]+)/', $core_php, $m_core_hdr );
 $core_hdr_ver = isset( $m_core_hdr[1] ) ? trim( $m_core_hdr[1] ) : '';
-assert_test( $core_hdr_ver === '4.17.0', "24.3: Core Plugin header declares Version: 4.17.0(found: {$core_hdr_ver})" );
+assert_test( $core_hdr_ver === '4.18.0', "24.3: Core Plugin header declares Version: 4.18.0(found: {$core_hdr_ver})" );
 
 preg_match( "/define\(\s*'NTN_JOURNAL_CORE_VERSION',\s*'([^']+)'\s*\);/", $core_php, $m_core_const );
 $core_const_ver = isset( $m_core_const[1] ) ? trim( $m_core_const[1] ) : '';
-assert_test( $core_const_ver === '4.17.0', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.17.0(found: {$core_const_ver})" );
+assert_test( $core_const_ver === '4.18.0', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.18.0(found: {$core_const_ver})" );
 
 assert_test(
-	$parent_ver === '4.17.0' && $child_ver === '4.17.0' && $core_hdr_ver === '4.17.0' && $core_const_ver === '4.17.0',
+	$parent_ver === '4.18.0' && $child_ver === '4.18.0' && $core_hdr_ver === '4.18.0' && $core_const_ver === '4.18.0',
 	'24.5: All 4 version headers are 100% synchronized and atomic according to Rule 2 of GEMINI.md'
 );
 
@@ -1900,7 +1900,7 @@ $parent_style_ver = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( AB
 $child_style_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' ), $m2 ) ? $m2[1] : '';
 $core_plugin_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m3 ) ? $m3[1] : '';
 $core_const_ver   = preg_match( '/define\(\s*[\'"]NTN_JOURNAL_CORE_VERSION[\'"]\s*,\s*[\'"]([0-9\.]+)[\'"]\s*\)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m4 ) ? $m4[1] : '';
-assert_test( $parent_style_ver === '4.17.0' && $child_style_ver === '4.17.0' && $core_plugin_ver === '4.17.0' && $core_const_ver === '4.17.0', '29.1: All 4 version headers are synchronized to 4.17.0' );
+assert_test( $parent_style_ver === '4.18.0' && $child_style_ver === '4.18.0' && $core_plugin_ver === '4.18.0' && $core_const_ver === '4.18.0', '29.1: All 4 version headers are synchronized to 4.18.0' );
 
 // 29.2: single.php sequence is Google Feed -> Social CTA -> Bottom Related Posts
 $single_php = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/single.php' );
@@ -5826,6 +5826,34 @@ foreach ( $ig_files as $ig_f ) {
 	$ig_users += substr_count( ntn_t_read( $ig_dir . $ig_f ), 'ntn_core_igdb_request(' );
 }
 assert_test( $ig_users >= 6, "87.3: The six IGDB callers (search, details, updates, single tag, scanner, franchises) use the single function (found: {$ig_users})" );
+
+// --- TEST SUITE 88: avviso se plugin e temi hanno versioni diverse v4.18.0 ---
+echo "\n--- 88. AVVISO SE PLUGIN E TEMI HANNO VERSIONI DIVERSE V4.18.0 ---\n";
+$vc_file = ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/version-check.php';
+require_once $vc_file;
+assert_test(
+	array() === ntn_core_version_mismatches( '4.18.0', '4.18.0', '4.18.0' ) &&
+	array() === ntn_core_version_mismatches( '4.18.0', '4.18.0', null ) &&
+	array() === ntn_core_version_mismatches( '4.18.0', '', null ),
+	'88.1: No warning when the versions match, when no child theme is active, or when the parent theme is missing'
+);
+$vc_rows = ntn_core_version_mismatches( '4.18.0', '4.17.0', '4.16.4' );
+assert_test(
+	2 === count( $vc_rows ) && '4.17.0' === $vc_rows[0]['found'] && '4.18.0' === $vc_rows[0]['expected'] && '4.16.4' === $vc_rows[1]['found'],
+	'88.2: A parent or child theme behind the plugin is reported with the version found and the version expected'
+);
+assert_test(
+	1 === count( ntn_core_version_mismatches( '4.18.0', '4.18.0', '4.17.0' ) ) && array() === ntn_core_version_mismatches( '', '4.18.0', '4.17.0' ),
+	'88.3: Only the component that differs is listed; an empty plugin version reports nothing'
+);
+$vc_src = ntn_t_read( $vc_file );
+assert_test(
+	false !== strpos( $vc_src, "add_action( 'admin_notices', 'ntn_core_version_check_notice' )" ) &&
+	false !== strpos( $vc_src, "current_user_can( 'update_plugins' )" ) &&
+	false !== strpos( $vc_src, 'ntn_core_can_load_game_data' ) &&
+	false !== strpos( ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), "inc/version-check.php'" ),
+	'88.4: The notice is limited to users who can update, skips the old-theme case already covered by its own notice, and is loaded by the plugin'
+);
 
 $GLOBALS['post'] = null;
 unset( $GLOBALS['mock_wp_query_handler'] );
