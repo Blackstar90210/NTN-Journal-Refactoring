@@ -6545,6 +6545,25 @@ assert_test(
 	'98.6: One function (ntn_core_other_seo_plugin_active) detects Yoast, Rank Math or The SEO Framework and replaces the three copied conditions (got: ' . implode( ',', $mf_res ) . ')'
 );
 
+// 98.7: salvare un menu svuota la memoria del pannello Piattaforme (solo le sue voci ntn_pdrop_)
+$mf_menu = ntn_t_read( $mf_theme . 'inc/menu-filters.php' );
+preg_match( '/function ntn_journal_platform_drop_flush\(\) \{.*?\n\}/s', $mf_menu, $mf_fn );
+$mf_base = tempnam( sys_get_temp_dir(), 'ntn98' );
+$mf_tmp  = $mf_base . '.php';
+file_put_contents( $mf_tmp, "<?php\n\$t = array( 'ntn_pdrop_aaa' => 1, 'ntn_pdrop_bbb' => 1, 'ntn_front_data_x' => 1 );\n" .
+	"class NTN98_DB { public \$options = 'wp_options'; public \$like = ''; public function esc_like( \$s ) { return addcslashes( \$s, '_%\\\\' ); }\n" .
+	"  public function prepare( \$q, \$a ) { \$this->like = \$a; return \$q; }\n" .
+	"  public function get_col( \$q ) { global \$t; \$out = array(); foreach ( array_keys( \$t ) as \$k ) { if ( 0 === strpos( '_transient_' . \$k, str_replace( array( '\\\\_', '%' ), array( '_', '' ), \$this->like ) ) ) { \$out[] = '_transient_' . \$k; } } return \$out; } }\n" .
+	"\$wpdb = new NTN98_DB();\nfunction delete_transient( \$k ) { global \$t; unset( \$t[ \$k ] ); }\n" .
+	( isset( $mf_fn[0] ) ? $mf_fn[0] : '' ) . "\nntn_journal_platform_drop_flush();\necho implode( ',', array_keys( \$t ) );\n" );
+$mf_out = trim( (string) shell_exec( escapeshellarg( PHP_BINARY ) . ' ' . escapeshellarg( $mf_tmp ) . ' 2>&1' ) );
+@unlink( $mf_tmp );
+@unlink( $mf_base );
+assert_test(
+	'ntn_front_data_x' === $mf_out && false !== strpos( $mf_menu, "add_action( 'wp_update_nav_menu', 'ntn_journal_platform_drop_flush' );" ),
+	'98.7: Saving a menu (wp_update_nav_menu) empties the Platforms panel cache (ntn_pdrop_ only), so renamed items show at once (left: ' . $mf_out . ')'
+);
+
 
 echo "\n=======================================================================\n";
 echo " AUDIT SUMMARY: {$passed} PASSED, {$failed} FAILED\n";
