@@ -60,9 +60,25 @@ $enable_videogame_links = get_option( 'ntn_journal_enable_videogame_links', 'yes
 	<hr style="margin: 30px 0;">
 
 	<h2>Azioni Manutenzione</h2>
+	<div class="notice notice-info inline" style="margin:12px 0 16px;padding:12px 16px">
+		<p style="margin-top:0"><strong>Cosa succede se svuoti la memoria</strong></p>
+		<p>Per andare più veloce il sito si tiene delle copie dei calcoli più pesanti. Svuotarle non cancella nessun articolo né impostazione: le copie si rifanno da sole alla prima visita, che per quella pagina sarà un po' più lenta. Serve solo quando una modifica non compare subito.</p>
+		<p style="margin-bottom:4px"><strong>Viene svuotato:</strong></p>
+		<ul style="list-style:disc;margin:0 0 12px 20px">
+			<?php foreach ( ntn_core_cache_registry_flushed() as $ntn_cache ) : ?>
+				<li><strong><?php echo esc_html( $ntn_cache['label'] ); ?></strong>: <?php echo esc_html( $ntn_cache['what'] ); ?> <em>(dura <?php echo esc_html( $ntn_cache['ttl'] ); ?>)</em></li>
+			<?php endforeach; ?>
+		</ul>
+		<p style="margin-bottom:4px"><strong>Non viene toccato:</strong></p>
+		<ul style="list-style:disc;margin:0 0 0 20px">
+			<?php foreach ( ntn_core_cache_registry_kept() as $ntn_cache ) : ?>
+				<li><strong><?php echo esc_html( $ntn_cache['label'] ); ?></strong>: <?php echo esc_html( $ntn_cache['kept_reason'] ); ?></li>
+			<?php endforeach; ?>
+			<li><strong>Articoli, pagine, impostazioni, redirect e backup</strong>: non sono memorie e non si toccano mai.</li>
+		</ul>
+	</div>
 	<form method="post" action="">
 		<?php wp_nonce_field( 'ntn_clear_hub_cache', 'ntn_clear_hub_cache_nonce' ); ?>
-		<p>Svuota la memoria del sito se una modifica non compare subito: Hub dei videogiochi, Hub di categoria (Console, Sviluppatori italiani), pagina Redazione, Home e numeri degli autori. Si ricalcolano da soli alla prima visita.</p>
 		<?php submit_button( 'Svuota tutta la memoria', 'secondary' ); ?>
 	</form>
 </div>
