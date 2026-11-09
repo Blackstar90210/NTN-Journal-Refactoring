@@ -179,7 +179,7 @@ get_template_part(
 			if ( $query->have_posts() ) {
 				while ( $query->have_posts() ) {
 					$query->the_post();
-					get_template_part( 'template-parts/content', 'game-card' );
+					get_template_part( 'template-parts/content', 'game-card', array( 'position' => (int) $query->current_post, 'first_page' => absint( get_query_var( 'paged' ) ) <= 1 ) );
 				}
 				// Passa max_pages al JS
 				echo '<script>window.ntn_ssr_max_pages = ' . intval( $query->max_num_pages ) . ';</script>';
