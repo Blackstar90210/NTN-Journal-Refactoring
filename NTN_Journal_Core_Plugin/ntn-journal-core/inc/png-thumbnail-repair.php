@@ -399,9 +399,7 @@ function ntn_core_ajax_png_repair_quarantine() {
 		$size = (int) @filesize( $from );
 		if ( @rename( $from, $to ) ) {
 			$q['files'][] = array( 'from' => $rel, 'to' => NTN_PNG_REPAIR_QUARANTINE_DIR . '/' . $rel, 'size' => $size );
-			if ( empty( $q['created'] ) ) {
-				$q['created'] = time();
-			}
+			$q['created'] = time(); // i 7 giorni contano dall'ultimo file spostato
 		} else {
 			$kept[ $rel ] = 'spostamento non riuscito';
 		}

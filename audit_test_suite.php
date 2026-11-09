@@ -6159,7 +6159,7 @@ $pr_back = file_exists( $pr_tmp . '/2026/10/logo-768x512.jpg' ) && ! file_exists
 $pr_empty_purge = ntn_core_png_repair_purge_blocker( true );
 assert_test(
 	array( '2026/10/logo-300x200.jpg' ) === $pr_after_move && false !== strpos( $pr_purge_3d, '7 giorni' ) && false !== strpos( $pr_purge_nob, 'backup' ) &&
-	'' === $pr_purge_ok && 1 === $pr_restored && 0 === $pr_left && $pr_back && ! is_dir( $pr_tmp . '/ntn-quarantena/2026' ) && 'La quarantena è vuota.' === $pr_empty_purge,
+	'' === $pr_purge_ok && false === strpos( $pr_src, "empty( \$q['created'] ) ) {\n\t\t\t\t\$q['created'] = time();" ) && false !== strpos( $pr_src, "\$q['created'] = time(); // i 7 giorni" ) && 1 === $pr_restored && 0 === $pr_left && $pr_back && ! is_dir( $pr_tmp . '/ntn-quarantena/2026' ) && 'La quarantena è vuota.' === $pr_empty_purge,
 	'93.5: Purge needs 7 days AND a confirmed backup; Restore puts the files back, clears the list and removes the empty folders'
 );
 
