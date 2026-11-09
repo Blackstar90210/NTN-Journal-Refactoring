@@ -102,17 +102,19 @@ add_filter( 'admin_title', 'ntn_journal_core_admin_title', 10, 2 );
  */
 function ntn_core_flush_all_caches() {
 	global $wpdb;
-	$prefixes = array( NTN_CORE_FEATURED_CACHE_PREFIX, 'ntn_hub_counts_', 'ntn_cat_hub_', 'ntn_team_', 'ntn_front_data_', 'ntn_author_stats_', 'ntn_author_reading_', 'ntn_games_', 'ntn_livesearch2_' );
-	foreach ( $prefixes as $prefix ) {
-		$like  = $wpdb->esc_like( '_transient_' . $prefix ) . '%';
-		$names = $wpdb->get_col( $wpdb->prepare( "SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s", $like ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- pulizia manuale richiesta dall'amministratore.
-		foreach ( (array) $names as $name ) {
-			delete_transient( substr( $name, strlen( '_transient_' ) ) );
+	// L'elenco di cosa si cancella sta in inc/cache-registry.php (v4.19.0): qui non ce n'è un secondo.
+	foreach ( ntn_core_cache_registry_flushed() as $entry ) {
+		if ( '' !== $entry['prefix'] ) {
+			$like  = $wpdb->esc_like( '_transient_' . $entry['prefix'] ) . '%';
+			$names = $wpdb->get_col( $wpdb->prepare( "SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s", $like ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery -- pulizia manuale richiesta dall'amministratore.
+			foreach ( (array) $names as $name ) {
+				delete_transient( substr( $name, strlen( '_transient_' ) ) );
+			}
 		}
-	}
-	// Risposte pubbliche di ricerca e catalogo salvate nella cache in memoria (v4.16.2)
-	if ( function_exists( 'wp_cache_flush_group' ) && function_exists( 'wp_cache_supports' ) && wp_cache_supports( 'flush_group' ) ) {
-		wp_cache_flush_group( NTN_CORE_REST_CACHE_GROUP );
+		// Risposte salvate nella cache in memoria del server, quando c'è (v4.16.2)
+		if ( ! empty( $entry['object_group'] ) && function_exists( 'wp_cache_flush_group' ) && function_exists( 'wp_cache_supports' ) && wp_cache_supports( 'flush_group' ) ) {
+			wp_cache_flush_group( $entry['object_group'] );
+		}
 	}
 	// Le memorie a "versione" si invalidano anche con una cache persistente (Redis, Memcached)
 	if ( function_exists( 'ntn_core_category_hub_flush' ) ) {
@@ -335,7 +337,7 @@ function ntn_journal_core_admin_handle_post() {
 	// Svuota tutte le memorie (v3.17.1: non solo le Hub dei videogiochi)
 	if ( ntn_journal_core_admin_nonce_ok( 'ntn_clear_hub_cache_nonce', 'ntn_clear_hub_cache' ) ) {
 		ntn_core_flush_all_caches();
-		$message = 'Memoria svuotata: Hub dei videogiochi, Hub di categoria, pagina Redazione, Home e numeri degli autori si aggiorneranno alla prima visita.';
+		$message = 'Memoria svuotata: Hub, catalogo, Home, pagina Redazione e numeri degli autori si aggiorneranno alla prima visita. Le voci che restano sono elencate qui sotto.';
 	}
 
 	if ( '' === $message ) {

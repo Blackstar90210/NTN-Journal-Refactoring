@@ -742,6 +742,7 @@ if ( ! function_exists( 'has_block' ) ) {
 
 // Load target project files
 require_once ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/cache-keys.php';
+require_once ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/cache-registry.php';
 require_once ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/api-helpers.php';
 require_once ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/game-data.php'; // come WordPress: prima il plugin
 require_once ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/inc/helpers.php';
@@ -1654,24 +1655,24 @@ echo "\n--- 24. SEMVER SIMULTANEOUS 4-HEADER SYNCHRONIZATION ---\n";
 $parent_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $parent_css, $m_parent );
 $parent_ver = isset( $m_parent[1] ) ? trim( $m_parent[1] ) : '';
-assert_test( $parent_ver === '4.18.0', "24.1: Parent Theme style.css declares Version: 4.18.0(found: {$parent_ver})" );
+assert_test( $parent_ver === '4.19.0', "24.1: Parent Theme style.css declares Version: 4.19.0(found: {$parent_ver})" );
 
 $child_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $child_css, $m_child );
 $child_ver = isset( $m_child[1] ) ? trim( $m_child[1] ) : '';
-assert_test( $child_ver === '4.18.0', "24.2: Child Theme style.css declares Version: 4.18.0(found: {$child_ver})" );
+assert_test( $child_ver === '4.19.0', "24.2: Child Theme style.css declares Version: 4.19.0(found: {$child_ver})" );
 
 $core_php = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' );
 preg_match( '/\*\s*Version:\s*([0-9\.]+)/', $core_php, $m_core_hdr );
 $core_hdr_ver = isset( $m_core_hdr[1] ) ? trim( $m_core_hdr[1] ) : '';
-assert_test( $core_hdr_ver === '4.18.0', "24.3: Core Plugin header declares Version: 4.18.0(found: {$core_hdr_ver})" );
+assert_test( $core_hdr_ver === '4.19.0', "24.3: Core Plugin header declares Version: 4.19.0(found: {$core_hdr_ver})" );
 
 preg_match( "/define\(\s*'NTN_JOURNAL_CORE_VERSION',\s*'([^']+)'\s*\);/", $core_php, $m_core_const );
 $core_const_ver = isset( $m_core_const[1] ) ? trim( $m_core_const[1] ) : '';
-assert_test( $core_const_ver === '4.18.0', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.18.0(found: {$core_const_ver})" );
+assert_test( $core_const_ver === '4.19.0', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.19.0(found: {$core_const_ver})" );
 
 assert_test(
-	$parent_ver === '4.18.0' && $child_ver === '4.18.0' && $core_hdr_ver === '4.18.0' && $core_const_ver === '4.18.0',
+	$parent_ver === '4.19.0' && $child_ver === '4.19.0' && $core_hdr_ver === '4.19.0' && $core_const_ver === '4.19.0',
 	'24.5: All 4 version headers are 100% synchronized and atomic according to Rule 2 of GEMINI.md'
 );
 
@@ -1900,7 +1901,7 @@ $parent_style_ver = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( AB
 $child_style_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' ), $m2 ) ? $m2[1] : '';
 $core_plugin_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m3 ) ? $m3[1] : '';
 $core_const_ver   = preg_match( '/define\(\s*[\'"]NTN_JOURNAL_CORE_VERSION[\'"]\s*,\s*[\'"]([0-9\.]+)[\'"]\s*\)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m4 ) ? $m4[1] : '';
-assert_test( $parent_style_ver === '4.18.0' && $child_style_ver === '4.18.0' && $core_plugin_ver === '4.18.0' && $core_const_ver === '4.18.0', '29.1: All 4 version headers are synchronized to 4.18.0' );
+assert_test( $parent_style_ver === '4.19.0' && $child_style_ver === '4.19.0' && $core_plugin_ver === '4.19.0' && $core_const_ver === '4.19.0', '29.1: All 4 version headers are synchronized to 4.19.0' );
 
 // 29.2: single.php sequence is Google Feed -> Social CTA -> Bottom Related Posts
 $single_php = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/single.php' );
@@ -3062,7 +3063,7 @@ update_option( 'ntn_seo_enable_review_schema', 'no' );
 $fx_off = ! ntn_core_schema_enabled();
 update_option( 'ntn_seo_enable_review_schema', 'yes' );
 assert_test(
-	$fx_off && ntn_core_schema_enabled() && strpos( $fx_admin, "'ntn_cat_hub_', 'ntn_team_', 'ntn_front_data_', 'ntn_author_stats_'" ) !== false &&
+	$fx_off && ntn_core_schema_enabled() && count( array_diff( array( 'ntn_cat_hub_', 'ntn_team_', 'ntn_front_data_', 'ntn_author_stats_' ), array_column( ntn_core_cache_registry_flushed(), 'prefix' ) ) ) === 0 &&
 	strpos( file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/team-page.php' ), '! ntn_core_schema_enabled()' ) !== false &&
 	strpos( file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/schema-markup.php' ), '! ntn_core_schema_enabled()' ) !== false &&
 	substr_count( file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/seo-extras.php' ), 'ntn_core_schema_enabled()' ) >= 4,
@@ -5117,7 +5118,7 @@ assert_test(
 	ntn_core_featured_cache_key( 'post', 12 ) === 'ntn_hub_featured_post_12' && ntn_core_featured_cache_key( 'term', '7' ) === 'ntn_hub_featured_term_7' &&
 	false !== strpos( $fc_main, "require_once NTN_JOURNAL_CORE_DIR . 'inc/cache-keys.php';\n\nif ( ntn_core_can_load_game_data() )" ) &&
 	2 === substr_count( $fc_data, 'ntn_core_featured_cache_key(' ) && 5 === substr_count( $fc_admin, 'delete_transient( ntn_core_featured_cache_key(' ) &&
-	false !== strpos( $fc_admin, 'array( NTN_CORE_FEATURED_CACHE_PREFIX, ' ) && false === strpos( $fc_admin . $fc_data, "'ntn_hub_featured_" ) &&
+	NTN_CORE_FEATURED_CACHE_PREFIX === ntn_core_cache_registry()['hub_featured']['prefix'] && true === ntn_core_cache_registry()['hub_featured']['flush'] && false === strpos( $fc_admin . $fc_data, "'ntn_hub_featured_" ) &&
 	false !== strpos( $fc_keys, "define( 'NTN_CORE_FEATURED_CACHE_PREFIX', 'ntn_hub_featured_' );" ),
 	'76.2: One function names the Hub featured cache (same names as before); it is always loaded and used to save, clear and flush the cache'
 );
@@ -5707,7 +5708,7 @@ $rc_admin = ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/
 assert_test(
 	false === strpos( $rc_rest, 'set_transient(' ) && false === strpos( $rc_rest, 'get_transient(' ) && false === strpos( $rc_rest, 'serialize(' ) &&
 	false !== strpos( $rc_rest, 'ntn_core_rest_games_cache_key( $params )' ) && false !== strpos( $rc_rest, "ntn_core_rest_cache_get( \$cache_key, false )" ) &&
-	false !== strpos( $rc_admin, "'ntn_games_', 'ntn_livesearch2_'" ) && false !== strpos( $rc_admin, 'wp_cache_flush_group( NTN_CORE_REST_CACHE_GROUP )' ),
+	count( array_diff( array( 'ntn_games_', 'ntn_livesearch2_' ), array_column( ntn_core_cache_registry_flushed(), 'prefix' ) ) ) === 0 && NTN_CORE_REST_CACHE_GROUP === ntn_core_cache_registry()['catalog']['object_group'] && false !== strpos( $rc_admin, 'wp_cache_flush_group( $entry[\'object_group\'] )' ),
 	'84.4: REST endpoints use the bounded cache helpers (no direct transient, no serialize of all params) and the flush button clears them too'
 );
 
@@ -5853,6 +5854,61 @@ assert_test(
 	false !== strpos( $vc_src, 'ntn_core_can_load_game_data' ) &&
 	false !== strpos( ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), "inc/version-check.php'" ),
 	'88.4: The notice is limited to users who can update, skips the old-theme case already covered by its own notice, and is loaded by the plugin'
+);
+
+// --- TEST SUITE 89: registro delle memorie v4.19.0 ---
+echo "\n--- 89. REGISTRO DELLE MEMORIE V4.19.0 ---\n";
+$cr_dir = ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/';
+$cr_reg = ntn_core_cache_registry();
+$cr_ok  = ! empty( $cr_reg );
+foreach ( $cr_reg as $cr_id => $cr_e ) {
+	$cr_ok = $cr_ok && isset( $cr_e['label'], $cr_e['what'], $cr_e['ttl'], $cr_e['prefix'], $cr_e['flush'] ) && ( $cr_e['flush'] || ! empty( $cr_e['kept_reason'] ) || ! empty( $cr_e['hidden'] ) );
+}
+assert_test( $cr_ok, '89.1: Every registry entry has label, content, duration, prefix and flush flag; the ones that are kept say why' );
+
+// 89.2: ogni nome di memoria scritto nel codice è coperto da una voce del registro (nessun secondo elenco da dimenticare)
+$cr_names = array();
+$cr_files = array_merge(
+	glob( $cr_dir . '{,inc/,inc/admin/,inc/admin/views/}*.php', GLOB_BRACE ),
+	glob( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/{,inc/,template-parts/}*.php', GLOB_BRACE )
+);
+foreach ( $cr_files as $cr_f ) {
+	$cr_src = ntn_t_read( $cr_f );
+	if ( false === strpos( $cr_src, 'set_transient(' ) ) {
+		continue;
+	}
+	if ( preg_match_all( "/set_transient\(\s*'(ntn_[a-z0-9_]+)/", $cr_src, $cr_m ) ) {
+		$cr_names = array_merge( $cr_names, $cr_m[1] );
+	}
+	if ( preg_match_all( "/\\\$(?:transient_key|cache_key|ntn_key|key)\s*=\s*'(ntn_[a-z0-9_]+)/", $cr_src, $cr_m ) ) {
+		$cr_names = array_merge( $cr_names, $cr_m[1] );
+	}
+}
+$cr_names = array_unique( $cr_names );
+$cr_missing = array();
+foreach ( $cr_names as $cr_n ) {
+	if ( ! ntn_core_cache_registry_covers( $cr_n ) ) {
+		$cr_missing[] = $cr_n;
+	}
+}
+assert_test( count( $cr_names ) > 20 && empty( $cr_missing ), '89.2: Every cache name used in the plugin and the parent theme is covered by a registry entry (missing: ' . implode( ', ', $cr_missing ) . '; names checked: ' . count( $cr_names ) . ')' );
+
+$cr_flushed = array_column( ntn_core_cache_registry_flushed(), 'prefix' );
+$cr_kept    = array_column( ntn_core_cache_registry_kept(), 'prefix' );
+assert_test(
+	in_array( 'ntn_studio_', $cr_flushed, true ) && in_array( 'ntn_vg_link_', $cr_flushed, true ) && in_array( 'ntn_news_sitemap_cache', $cr_flushed, true ) &&
+	in_array( 'ntn_ai_summary_', $cr_kept, true ) && in_array( 'ntn_igdb_', $cr_kept, true ) && in_array( 'ntn_yt_oembed_', $cr_kept, true ) &&
+	! in_array( 'ntn_admin_notice_', $cr_kept, true ),
+	'89.3: The flush button now also clears the Studio hubs, game links and news sitemap; the AI summaries, IGDB answers and YouTube data stay; the hidden notice entry is not listed'
+);
+
+$cr_adm = ntn_t_read( $cr_dir . 'inc/admin/admin-page.php' );
+$cr_tab = ntn_t_read( $cr_dir . 'inc/admin/views/tab-extra.php' );
+assert_test(
+	false !== strpos( $cr_adm, 'foreach ( ntn_core_cache_registry_flushed() as $entry )' ) && false === strpos( $cr_adm, "'ntn_hub_counts_'" ) &&
+	false !== strpos( $cr_tab, 'ntn_core_cache_registry_flushed()' ) && false !== strpos( $cr_tab, 'ntn_core_cache_registry_kept()' ) &&
+	false !== strpos( ntn_t_read( $cr_dir . 'ntn-journal-core.php' ), "inc/cache-registry.php'" ),
+	'89.4: The flush function and the info box in the Extra tab both read the registry, and the plugin loads it'
 );
 
 $GLOBALS['post'] = null;
