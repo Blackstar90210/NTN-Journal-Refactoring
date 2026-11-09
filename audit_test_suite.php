@@ -6504,6 +6504,21 @@ assert_test(
 	'98.3: dot-art.js (a parent theme file) is versioned with the parent theme version, also when the child theme is active'
 );
 
+// 98.4: l'opzione dei link ai motori grafici era letta ma mai salvata: tolta, i motori restano sempre linkati
+$mf_help = ntn_t_read( $mf_theme . 'inc/helpers.php' );
+$mf_hits = 0;
+foreach ( array( 'NTN_Journal_Theme_Reloaded', 'NTN_Journal_Core_Plugin' ) as $mf_root ) {
+	foreach ( new RecursiveIteratorIterator( new RecursiveDirectoryIterator( ABSPATH . $mf_root, FilesystemIterator::SKIP_DOTS ) ) as $mf_file ) {
+		if ( 'php' === $mf_file->getExtension() && false !== strpos( (string) file_get_contents( $mf_file->getPathname() ), "get_option( 'ntn_journal_enable_game_engine_links'" ) ) {
+			$mf_hits++;
+		}
+	}
+}
+assert_test(
+	0 === $mf_hits && false === strpos( $mf_help, '$enable_links' ) && false !== strpos( ntn_link_engines_to_terms( array( 'Unreal Engine 5' ) ), 'Unreal Engine 5' ),
+	'98.4: The never-saved ntn_journal_enable_game_engine_links option is no longer read; engine badges keep linking to their archive'
+);
+
 
 echo "\n=======================================================================\n";
 echo " AUDIT SUMMARY: {$passed} PASSED, {$failed} FAILED\n";
