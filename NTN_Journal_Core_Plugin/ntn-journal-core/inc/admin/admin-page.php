@@ -21,6 +21,7 @@ function ntn_journal_core_admin_tabs() {
 		'api-services'  => 'Servizi API',
 		'seo'           => 'SEO',
 		'extra'         => 'Extra',
+		'immagini'      => 'Immagini', // v4.24.0: miniature dei PNG trasparenti e rapporto sulle immagini (prima in Extra)
 		'backup'        => 'Backup',
 	);
 }

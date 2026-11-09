@@ -4,7 +4,7 @@
  *
  * Fino alla 4.20.0 le miniature dei PNG trasparenti venivano salvate in JPG, con lo sfondo pieno.
  * La 4.20.1 corregge i nuovi caricamenti; questo strumento sistema le immagini già caricate.
- * Tre passi separati, nella scheda Extra del pannello:
+ * Tre passi separati, nella scheda Immagini del pannello (dalla 4.24.0; prima in Extra):
  *   1. Controlla: solo lettura, trova i PNG davvero trasparenti con miniature JPG.
  *   2. Ripara: rifà le miniature (in PNG grazie alla 4.20.1) e registra i vecchi file JPG.
  *   3. Pulizia in due tempi: 3a sposta in quarantena i vecchi JPG che nessuno usa (con Ripristina),
@@ -486,7 +486,7 @@ function ntn_core_ajax_png_repair_purge() {
 add_action( 'wp_ajax_ntn_png_repair_purge', 'ntn_core_ajax_png_repair_purge' );
 
 /**
- * Riquadro della scheda Extra.
+ * Riquadro della scheda Immagini.
  */
 function ntn_core_png_repair_render_box() {
 	$scan  = ntn_core_png_repair_get( 'scan' );
