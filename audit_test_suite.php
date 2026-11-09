@@ -1647,24 +1647,24 @@ echo "\n--- 24. SEMVER SIMULTANEOUS 4-HEADER SYNCHRONIZATION ---\n";
 $parent_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $parent_css, $m_parent );
 $parent_ver = isset( $m_parent[1] ) ? trim( $m_parent[1] ) : '';
-assert_test( $parent_ver === '4.20.2', "24.1: Parent Theme style.css declares Version: 4.20.2(found: {$parent_ver})" );
+assert_test( $parent_ver === '4.21.0', "24.1: Parent Theme style.css declares Version: 4.21.0(found: {$parent_ver})" );
 
 $child_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $child_css, $m_child );
 $child_ver = isset( $m_child[1] ) ? trim( $m_child[1] ) : '';
-assert_test( $child_ver === '4.20.2', "24.2: Child Theme style.css declares Version: 4.20.2(found: {$child_ver})" );
+assert_test( $child_ver === '4.21.0', "24.2: Child Theme style.css declares Version: 4.21.0(found: {$child_ver})" );
 
 $core_php = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' );
 preg_match( '/\*\s*Version:\s*([0-9\.]+)/', $core_php, $m_core_hdr );
 $core_hdr_ver = isset( $m_core_hdr[1] ) ? trim( $m_core_hdr[1] ) : '';
-assert_test( $core_hdr_ver === '4.20.2', "24.3: Core Plugin header declares Version: 4.20.2(found: {$core_hdr_ver})" );
+assert_test( $core_hdr_ver === '4.21.0', "24.3: Core Plugin header declares Version: 4.21.0(found: {$core_hdr_ver})" );
 
 preg_match( "/define\(\s*'NTN_JOURNAL_CORE_VERSION',\s*'([^']+)'\s*\);/", $core_php, $m_core_const );
 $core_const_ver = isset( $m_core_const[1] ) ? trim( $m_core_const[1] ) : '';
-assert_test( $core_const_ver === '4.20.2', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.20.2(found: {$core_const_ver})" );
+assert_test( $core_const_ver === '4.21.0', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.21.0(found: {$core_const_ver})" );
 
 assert_test(
-	$parent_ver === '4.20.2' && $child_ver === '4.20.2' && $core_hdr_ver === '4.20.2' && $core_const_ver === '4.20.2',
+	$parent_ver === '4.21.0' && $child_ver === '4.21.0' && $core_hdr_ver === '4.21.0' && $core_const_ver === '4.21.0',
 	'24.5: All 4 version headers are 100% synchronized and atomic according to Rule 2 of GEMINI.md'
 );
 
@@ -1892,7 +1892,7 @@ $parent_style_ver = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( AB
 $child_style_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' ), $m2 ) ? $m2[1] : '';
 $core_plugin_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m3 ) ? $m3[1] : '';
 $core_const_ver   = preg_match( '/define\(\s*[\'"]NTN_JOURNAL_CORE_VERSION[\'"]\s*,\s*[\'"]([0-9\.]+)[\'"]\s*\)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m4 ) ? $m4[1] : '';
-assert_test( $parent_style_ver === '4.20.2' && $child_style_ver === '4.20.2' && $core_plugin_ver === '4.20.2' && $core_const_ver === '4.20.2', '29.1: All 4 version headers are synchronized to 4.20.2' );
+assert_test( $parent_style_ver === '4.21.0' && $child_style_ver === '4.21.0' && $core_plugin_ver === '4.21.0' && $core_const_ver === '4.21.0', '29.1: All 4 version headers are synchronized to 4.21.0' );
 
 // 29.2: single.php sequence is Google Feed -> Social CTA -> Bottom Related Posts
 $single_php = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/single.php' );
@@ -6035,6 +6035,141 @@ assert_test(
 	false !== strpos( $cl_ps, '-excludeDirs @("build")' ) && false !== strpos( $cl_ps, '$relativePath.StartsWith("$excluded/")' ) && false !== strpos( $cl_ps, '[string[]]$excludeDirs' ),
 	'92.6: package_release.ps1 leaves the Tailwind build/ folder out of the parent theme ZIP'
 );
+
+// --- TEST SUITE 93: riparazione delle miniature dei PNG trasparenti v4.21.0 ---
+echo "\n--- 93. RIPARAZIONE DELLE MINIATURE DEI PNG TRASPARENTI V4.21.0 ---\n";
+$pr_src  = ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/png-thumbnail-repair.php' );
+$pr_main = ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' );
+$pr_tab  = ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/admin/views/tab-extra.php' );
+$pr_acts = array( 'scan', 'fix', 'quarantine', 'restore', 'purge' );
+$pr_ok   = true;
+foreach ( $pr_acts as $pr_a ) {
+	$pr_ok = $pr_ok && false !== strpos( $pr_src, "add_action( 'wp_ajax_ntn_png_repair_{$pr_a}', 'ntn_core_ajax_png_repair_{$pr_a}' );" )
+		&& (bool) preg_match( '/function ntn_core_ajax_png_repair_' . $pr_a . '\(\) \{\n\tntn_core_png_repair_guard\(\);/', $pr_src );
+}
+assert_test(
+	$pr_ok && false !== strpos( $pr_src, "check_ajax_referer( 'ntn_png_repair', '_ajax_nonce' );" ) && false !== strpos( $pr_src, "current_user_can( 'manage_options' )" ) &&
+	false === strpos( $pr_src, 'wp_ajax_nopriv_' ) && false !== strpos( $pr_main, "require_once NTN_JOURNAL_CORE_DIR . 'inc/png-thumbnail-repair.php';" ) &&
+	false !== strpos( $pr_tab, 'ntn_core_png_repair_render_box();' ) && false === strpos( $pr_src, 'function ntn_journal_' ),
+	'93.1: Five AJAX steps (scan, fix, quarantine, restore, purge), each behind the nonce and manage_options; loaded by the plugin and shown in the Extra tab'
+);
+assert_test(
+	false !== strpos( $pr_src, "define( 'NTN_PNG_REPAIR_FIX_BATCH', 5 );" ) && false !== strpos( $pr_src, "define( 'NTN_PNG_REPAIR_QUARANTINE_DAYS', 7 );" ) &&
+	false !== strpos( $pr_src, '$meta = wp_generate_attachment_metadata( $attachment_id, $file );' ) && false !== strpos( $pr_src, "'vecchi_file' => \$old" ) &&
+	false !== strpos( $pr_src, 'ntn_core_png_repair_memory_ok( $file )' ) && false !== strpos( $pr_src, 'if ( ! ntn_core_png_repair_can_fix() ) {' ) &&
+	false === strpos( $pr_src, 'unlink( $file' ) && false !== strpos( $pr_src, "/.htaccess'" ) && false !== strpos( $pr_src, "/index.php'" ),
+	'93.2: Repair works in groups of 5, records the old JPG files before regenerating, checks memory and the 4.20.1 fix, never deletes the original; quarantine is protected by index.php and .htaccess'
+);
+
+// Prove funzionali in una cartella temporanea e con un database finto
+class NTN_PngRepair_Mock_Wpdb {
+	public $posts = 'wp_posts';
+	public $postmeta = 'wp_postmeta';
+	public $options = 'wp_options';
+	public $termmeta = 'wp_termmeta';
+	public $usermeta = 'wp_usermeta';
+	public $comments = 'wp_comments';
+	public $data = array();
+	public $last = array();
+	public function esc_like( $text ) {
+		return addcslashes( (string) $text, '_%\\' );
+	}
+	public function prepare( $sql, ...$args ) {
+		if ( 1 === count( $args ) && is_array( $args[0] ) ) {
+			$args = $args[0];
+		}
+		$this->last[ md5( $sql . serialize( $args ) ) ] = $args;
+		return array( $sql, $args );
+	}
+	public function get_var( $query ) {
+		list( $sql, $args ) = $query;
+		preg_match( '/FROM (\w+)/', $sql, $t );
+		$needle = stripslashes( trim( (string) $args[0], '%' ) );
+		$hits   = 0;
+		foreach ( $this->data[ $t[1] ] ?? array() as $text ) {
+			if ( false !== strpos( $text, $needle ) ) {
+				$hits++;
+			}
+		}
+		return (string) $hits;
+	}
+}
+$pr_tmp = sys_get_temp_dir() . '/ntn-audit-png-repair-' . getmypid();
+@mkdir( $pr_tmp . '/2026/10', 0777, true );
+if ( ! function_exists( 'wp_normalize_path' ) ) {
+	function wp_normalize_path( $path ) { return str_replace( '\\', '/', (string) $path ); }
+}
+if ( ! function_exists( 'trailingslashit' ) ) {
+	function trailingslashit( $value ) { return rtrim( (string) $value, '/\\' ) . '/'; }
+}
+if ( ! function_exists( 'wp_get_upload_dir' ) ) {
+	function wp_get_upload_dir() { return array( 'basedir' => $GLOBALS['ntn_audit_uploads_dir'], 'baseurl' => 'https://example.com/wp-content/uploads' ); }
+}
+if ( ! function_exists( 'wp_list_pluck' ) ) {
+	function wp_list_pluck( $list, $field ) { return array_map( static function ( $row ) use ( $field ) { return is_array( $row ) ? $row[ $field ] : $row->$field; }, (array) $list ); }
+}
+$GLOBALS['ntn_audit_uploads_dir'] = $pr_tmp;
+require_once ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/png-thumbnail-repair.php';
+
+$pr_saved_db = $GLOBALS['wpdb'] ?? null;
+$GLOBALS['wpdb'] = new NTN_PngRepair_Mock_Wpdb();
+$GLOBALS['wpdb']->data = array(
+	'wp_posts'    => array( '<p>Logo: <img src="https://example.com/wp-content/uploads/2026/10/logo-300x200.jpg"></p>' ),
+	'wp_postmeta' => array( 'a:1:{s:5:"sizes";a:1:{s:6:"medium";a:1:{s:4:"file";s:19:"logo-1024x683.png";}}}' ),
+	'wp_options'  => array( 'widget testo con badge-150x150.jpg' ),
+);
+foreach ( array( 'logo-300x200.jpg', 'logo-768x512.jpg', 'badge-150x150.jpg' ) as $pr_f ) {
+	file_put_contents( $pr_tmp . '/2026/10/' . $pr_f, 'x' );
+}
+$pr_b_used    = ntn_core_png_repair_move_blocker( '2026/10/logo-300x200.jpg' );
+$pr_b_widget  = ntn_core_png_repair_move_blocker( '2026/10/badge-150x150.jpg' );
+$pr_b_free    = ntn_core_png_repair_move_blocker( '2026/10/logo-768x512.jpg' );
+$pr_b_missing = ntn_core_png_repair_move_blocker( '2026/10/logo-150x150.jpg' );
+$pr_b_escape  = ntn_core_png_repair_move_blocker( '../wp-config.php' );
+$pr_b_png     = ntn_core_png_repair_move_blocker( '2026/10/logo-1024x683.png' );
+assert_test(
+	false !== strpos( $pr_b_used, 'articoli e pagine' ) && false !== strpos( $pr_b_widget, 'impostazioni' ) && '' === $pr_b_free &&
+	'file già assente' === $pr_b_missing && 'percorso non valido' === $pr_b_escape && 'percorso non valido' === $pr_b_png,
+	'93.3: A JPG cited in an article or a widget is NOT moved; only an unused JPG inside uploads can go to quarantine (no paths outside, no PNG)'
+);
+
+// Registro: solo le immagini riparate e solo i file ancora presenti
+$GLOBALS['mock_options']['ntn_png_repair_log'] = array(
+	10 => array( 'name' => 'logo.png', 'stato' => 'riparato', 'motivo' => '', 'vecchi_file' => array( '2026/10/logo-300x200.jpg', '2026/10/logo-768x512.jpg', '2026/10/logo-150x150.jpg' ) ),
+	11 => array( 'name' => 'grande.png', 'stato' => 'saltato', 'motivo' => 'memoria', 'vecchi_file' => array( '2026/10/badge-150x150.jpg' ) ),
+);
+$GLOBALS['mock_options']['ntn_png_repair_quarantine'] = array();
+$pr_pending = ntn_core_png_repair_pending_old_files();
+assert_test(
+	array( '2026/10/logo-300x200.jpg', '2026/10/logo-768x512.jpg' ) === $pr_pending,
+	'93.4: Only old files of repaired images that still exist are candidates for quarantine'
+);
+
+// Quarantena e Ripristina sul disco
+@mkdir( $pr_tmp . '/ntn-quarantena/2026/10', 0777, true );
+rename( $pr_tmp . '/2026/10/logo-768x512.jpg', $pr_tmp . '/ntn-quarantena/2026/10/logo-768x512.jpg' );
+$GLOBALS['mock_options']['ntn_png_repair_quarantine'] = array( 'created' => time() - 3 * DAY_IN_SECONDS, 'files' => array( array( 'from' => '2026/10/logo-768x512.jpg', 'to' => 'ntn-quarantena/2026/10/logo-768x512.jpg', 'size' => 1 ) ), 'kept' => array() );
+$pr_after_move = ntn_core_png_repair_pending_old_files();
+$pr_purge_3d   = ntn_core_png_repair_purge_blocker( true );
+$GLOBALS['mock_options']['ntn_png_repair_quarantine']['created'] = time() - 8 * DAY_IN_SECONDS;
+$pr_purge_nob  = ntn_core_png_repair_purge_blocker( false );
+$pr_purge_ok   = ntn_core_png_repair_purge_blocker( true );
+list( $pr_restored, $pr_left ) = ntn_core_png_repair_restore_all();
+$pr_back = file_exists( $pr_tmp . '/2026/10/logo-768x512.jpg' ) && ! file_exists( $pr_tmp . '/ntn-quarantena/2026/10/logo-768x512.jpg' );
+$pr_empty_purge = ntn_core_png_repair_purge_blocker( true );
+assert_test(
+	array( '2026/10/logo-300x200.jpg' ) === $pr_after_move && false !== strpos( $pr_purge_3d, '7 giorni' ) && false !== strpos( $pr_purge_nob, 'backup' ) &&
+	'' === $pr_purge_ok && 1 === $pr_restored && 0 === $pr_left && $pr_back && ! is_dir( $pr_tmp . '/ntn-quarantena/2026' ) && 'La quarantena è vuota.' === $pr_empty_purge,
+	'93.5: Purge needs 7 days AND a confirmed backup; Restore puts the files back, clears the list and removes the empty folders'
+);
+
+$GLOBALS['wpdb'] = $pr_saved_db;
+unset( $GLOBALS['mock_options']['ntn_png_repair_log'], $GLOBALS['mock_options']['ntn_png_repair_quarantine'] );
+$pr_it = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $pr_tmp, FilesystemIterator::SKIP_DOTS ), RecursiveIteratorIterator::CHILD_FIRST );
+foreach ( $pr_it as $pr_item ) {
+	$pr_item->isDir() ? @rmdir( $pr_item->getPathname() ) : @unlink( $pr_item->getPathname() );
+}
+@rmdir( $pr_tmp );
 
 $GLOBALS['post'] = null;
 unset( $GLOBALS['mock_wp_query_handler'] );

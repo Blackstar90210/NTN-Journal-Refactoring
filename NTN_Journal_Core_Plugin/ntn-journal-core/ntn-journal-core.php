@@ -3,7 +3,7 @@
  * Plugin Name: NTN Journal Core
  * Plugin URI: https://example.com/ntn-journal-core
  * Description: Gestisce i Custom Post Type (Comunicato Stampa, Videogioco), Tassonomie, Meta Box IGDB e logiche di backend separate dal tema.
- * Version: 4.20.2
+ * Version: 4.21.0
  * Requires at least: 6.0
  * Requires PHP: 8.0
  * Text Domain: ntn-journal-core
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Definisco la costante di versione globale (deve coincidere con quella del commento header e dei temi!)
-define( 'NTN_JOURNAL_CORE_VERSION', '4.20.2' );
+define( 'NTN_JOURNAL_CORE_VERSION', '4.21.0' );
 define( 'NTN_JOURNAL_CORE_DIR', plugin_dir_path( __FILE__ ) );
 define( 'NTN_JOURNAL_CORE_URL', plugin_dir_url( __FILE__ ) );
 
@@ -59,6 +59,7 @@ require_once NTN_JOURNAL_CORE_DIR . 'inc/api-status.php';
 require_once NTN_JOURNAL_CORE_DIR . 'inc/version-check.php'; // v4.20.0: avviso se plugin e temi hanno versioni diverse
 require_once NTN_JOURNAL_CORE_DIR . 'inc/cache-registry.php'; // v4.20.0: registro delle memorie e cosa svuota il pulsante
 require_once NTN_JOURNAL_CORE_DIR . 'inc/site-optimizations.php'; // v4.20.0: ottimizzazioni e protezioni del sito (prima nel tema)
+require_once NTN_JOURNAL_CORE_DIR . 'inc/png-thumbnail-repair.php'; // v4.21.0: riparazione delle miniature dei PNG trasparenti
 require_once NTN_JOURNAL_CORE_DIR . 'inc/ajax-igdb.php';
 require_once NTN_JOURNAL_CORE_DIR . 'inc/igdb-tag-scanner.php';
 require_once NTN_JOURNAL_CORE_DIR . 'inc/igdb-seo-routing.php';
