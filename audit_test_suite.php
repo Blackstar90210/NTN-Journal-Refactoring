@@ -6489,6 +6489,13 @@ assert_test(
 	'98.1: URL rules are rebuilt once on upgrade, when their version number changes, on plugin activation and when the Extra videogame-links setting changes (old _v2/_v3 flags removed; got: ' . $mf_out . ')'
 );
 
+// 98.2: lo script IGDB del pannello articolo usa la versione del plugin, così il browser scarica quello nuovo dopo un aggiornamento
+$mf_igdb = ntn_t_read( $mf_core . 'inc/ajax-igdb.php' );
+assert_test(
+	false !== strpos( $mf_igdb, "'assets/js/admin-igdb.js', array( 'jquery' ), NTN_JOURNAL_CORE_VERSION, true );" ) && false === strpos( $mf_igdb, "'1.0.0'" ),
+	'98.2: admin-igdb.js is enqueued with NTN_JOURNAL_CORE_VERSION instead of the fixed 1.0.0, so browsers drop the old copy after an update'
+);
+
 
 echo "\n=======================================================================\n";
 echo " AUDIT SUMMARY: {$passed} PASSED, {$failed} FAILED\n";

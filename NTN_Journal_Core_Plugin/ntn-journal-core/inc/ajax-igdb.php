@@ -638,7 +638,7 @@ function ntn_journal_admin_scripts( $hook ) {
 	if ( ! in_array( $post_type, array( 'post', 'videogioco' ) ) ) { return; }
 	
 	if ( $hook === 'post-new.php' || $hook === 'post.php' ) {
-		wp_enqueue_script( 'ntn-admin-igdb-js', NTN_JOURNAL_CORE_URL . 'assets/js/admin-igdb.js', array( 'jquery' ), '1.0.0', true );
+		wp_enqueue_script( 'ntn-admin-igdb-js', NTN_JOURNAL_CORE_URL . 'assets/js/admin-igdb.js', array( 'jquery' ), NTN_JOURNAL_CORE_VERSION, true );
 		wp_localize_script( 'ntn-admin-igdb-js', 'ntn_igdb_vars', array(
 			'nonce' => wp_create_nonce( 'ntn_igdb_nonce' )
 		) );
