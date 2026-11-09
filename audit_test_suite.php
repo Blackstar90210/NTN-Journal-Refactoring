@@ -1836,8 +1836,8 @@ assert_test( strpos( $child_sv, 'width="640" height="360"' ) !== false, '28.4: s
 $parent_av = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/template-parts/content-game-card.php' );
 assert_test( strpos( $parent_av, 'width="400" height="533"' ) !== false, '28.5: Parent catalog game card has 3:4 aspect ratio 400x533' );
 
-// 28.6: inc/performance.php: $_GET['author'] sanitized and unslashed
-assert_test( strpos( $perf_content, 'absint( wp_unslash( $_GET[\'author\'] ) )' ) !== false, '28.6: site-optimizations.php sanitizes and unslashes $_GET[\'author\']' );
+// 28.6: $_GET['author'] è solo controllato (dalla v4.25.2 dà 404 ai visitatori), il suo valore non viene mai usato
+assert_test( 1 === substr_count( $perf_content, '$_GET[\'author\']' ) && strpos( $perf_content, '! empty( $_GET[\'author\'] )' ) !== false, '28.6: site-optimizations.php only checks $_GET[\'author\'] for presence and never uses its value' );
 
 // 28.7: inc/related-posts.php & template-parts/content.php: fallback dimensions 400x225
 assert_test( strpos( $rp_code, 'width="400" height="225"' ) !== false, '28.7: related-posts.php declares 400x225 on fallback thumbnail' );
@@ -5928,7 +5928,7 @@ assert_test(
 );
 assert_test(
 	false !== strpos( $so_plugin, 'function ntn_core_register_site_optimizations()' ) && false !== strpos( $so_plugin, "add_filter( 'big_image_size_threshold', '__return_false' )" ) &&
-	false !== strpos( $so_plugin, "add_action( 'template_redirect', 'ntn_core_block_author_enumeration' )" ) && false !== strpos( $so_plugin, "add_filter( 'wp_handle_upload', 'ntn_core_optimize_upload_size_and_format' )" ) &&
+	false !== strpos( $so_plugin, "add_action( 'template_redirect', 'ntn_core_block_author_enumeration', 1 )" ) && false !== strpos( $so_plugin, "add_filter( 'wp_handle_upload', 'ntn_core_optimize_upload_size_and_format' )" ) &&
 	false !== strpos( ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), "inc/site-optimizations.php'" ),
 	'90.3: The plugin registers the moved optimizations and loads the file'
 );
@@ -6571,6 +6571,63 @@ assert_test(
 	false !== strpos( $mf_in, '@source "../../../NTN_Journal_Core_Plugin/ntn-journal-core/**/*.php";' ) && is_dir( dirname( $mf_theme . 'build/input.css' ) . '/../../../NTN_Journal_Core_Plugin/ntn-journal-core' ) &&
 	false !== strpos( $mf_css, '.max-w-\[200px\]' ) && false !== strpos( $mf_css, '.truncate' ),
 	'98.8: input.css scans the core plugin PHP files, so classes printed only by the plugin are compiled in style-tailwind-output.css'
+);
+
+
+
+// --- TEST SUITE 99: blocco vero dell'enumerazione degli autori v4.25.2 ---
+echo "\n--- 99. BLOCCO DELL'ENUMERAZIONE DEGLI AUTORI V4.25.2 ---\n";
+$ae_src = ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/site-optimizations.php' );
+preg_match( '/function ntn_core_hidden_author_logins\(\) \{.*?function ntn_core_sitemap_hide_authors\( \$args \) \{.*?\n\}/s', $ae_src, $ae_fn );
+$ae_run = function ( $setup, $call ) use ( $ae_fn ) {
+	$base = tempnam( sys_get_temp_dir(), 'ntn99' );
+	$tmp  = $base . '.php';
+	file_put_contents( $tmp, "<?php\n\$GLOBALS['in'] = false; \$GLOBALS['adm'] = false; \$GLOBALS['obj'] = null; \$GLOBALS['st'] = 0; \$GLOBALS['rm'] = 0;\n" .
+		"class WP_User { public \$user_login; public function __construct( \$l ) { \$this->user_login = \$l; } }\n" .
+		"class NTN99_Q { public \$is404 = false; public function set_404() { \$this->is404 = true; } }\n\$wp_query = new NTN99_Q();\n" .
+		"function apply_filters( \$t, \$v ) { return \$v; }\nfunction is_admin() { return \$GLOBALS['adm']; }\nfunction is_user_logged_in() { return \$GLOBALS['in']; }\n" .
+		"function is_author() { return null !== \$GLOBALS['obj']; }\nfunction get_queried_object() { return \$GLOBALS['obj']; }\n" .
+		"function remove_action( \$h, \$c ) { if ( 'template_redirect' === \$h && 'redirect_canonical' === \$c ) { \$GLOBALS['rm']++; } }\nfunction status_header( \$c ) { \$GLOBALS['st'] = \$c; }\nfunction nocache_headers() {}\n" .
+		( isset( $ae_fn[0] ) ? $ae_fn[0] : '' ) . "\n" . $setup . "\n" . $call . "\n" );
+	$out = trim( (string) shell_exec( escapeshellarg( PHP_BINARY ) . ' ' . escapeshellarg( $tmp ) . ' 2>&1' ) );
+	@unlink( $tmp );
+	@unlink( $base );
+	return $out;
+};
+$ae_page = "ntn_core_block_author_enumeration(); echo ( \$wp_query->is404 ? '404' : 'ok' ) . ( \$GLOBALS['st'] ? ':' . \$GLOBALS['st'] : '' ) . ( \$GLOBALS['rm'] ? ':nocanon' : '' );";
+$ae_res = array(
+	'visitor ?author=1'      => $ae_run( "\$_GET = array( 'author' => '1' );", $ae_page ),
+	'visitor ?author_name'   => $ae_run( "\$_GET = array( 'author_name' => 'luca' );", $ae_page ),
+	'logged ?author=1'       => $ae_run( "\$_GET = array( 'author' => '1' ); \$GLOBALS['in'] = true;", $ae_page ),
+	'admin area ?author=1'   => $ae_run( "\$_GET = array( 'author' => '1' ); \$GLOBALS['adm'] = true;", $ae_page ),
+	'visitor /author/admin/' => $ae_run( "\$_GET = array(); \$GLOBALS['obj'] = new WP_User( 'admin' );", $ae_page ),
+	'logged /author/admin/'  => $ae_run( "\$_GET = array(); \$GLOBALS['obj'] = new WP_User( 'admin' ); \$GLOBALS['in'] = true;", $ae_page ),
+	'visitor /author/luca/'  => $ae_run( "\$_GET = array(); \$GLOBALS['obj'] = new WP_User( 'luca' );", $ae_page ),
+);
+$ae_want = array(
+	'visitor ?author=1'      => '404:404:nocanon',
+	'visitor ?author_name'   => '404:404:nocanon',
+	'logged ?author=1'       => 'ok',
+	'admin area ?author=1'   => 'ok',
+	'visitor /author/admin/' => '404:404:nocanon',
+	'logged /author/admin/'  => 'ok',
+	'visitor /author/luca/'  => 'ok',
+);
+assert_test(
+	$ae_want === $ae_res && false !== strpos( $ae_src, "add_action( 'template_redirect', 'ntn_core_block_author_enumeration', 1 );" ) && false === strpos( $ae_src, 'wp_safe_redirect( $author_url' ),
+	'99.1: For visitors /?author=N and /?author_name= give 404 (no more redirect to /author/name/) and /author/admin/ gives 404; logged-in users, the admin area and other author pages are unchanged (got: ' . json_encode( $ae_res ) . ')'
+);
+
+$ae_routes = "\$e = array( '/wp/v2/users' => 1, '/wp/v2/users/(?P<id>[\\\\d]+)' => 1, '/wp/v2/users/me' => 1, '/wp/v2/posts' => 1 );";
+$ae_rest = array(
+	$ae_run( $ae_routes, "echo implode( ',', array_keys( ntn_core_hide_rest_users( \$e ) ) );" ),
+	$ae_run( $ae_routes . " \$GLOBALS['in'] = true;", "echo count( ntn_core_hide_rest_users( \$e ) );" ),
+	$ae_run( '', "echo json_encode( ntn_core_sitemap_hide_authors( array( 'number' => 10, 'login__not_in' => array( 'x' ) ) ) ) . '|' . json_encode( ntn_core_sitemap_hide_authors( array() ) );" ),
+);
+assert_test(
+	'/wp/v2/posts' === $ae_rest[0] && '4' === $ae_rest[1] && '{"number":10,"login__not_in":["x","admin"]}|{"login__not_in":["admin"]}' === $ae_rest[2] &&
+	false !== strpos( $ae_src, "add_filter( 'rest_endpoints', 'ntn_core_hide_rest_users' );" ) && false !== strpos( $ae_src, "add_filter( 'wp_sitemaps_users_query_args', 'ntn_core_sitemap_hide_authors' );" ),
+	'99.2: For visitors the public user list (/wp/v2/users) is gone, while logged-in users keep it; "admin" is excluded from the WordPress users sitemap (got: ' . implode( ' / ', $ae_rest ) . ')'
 );
 
 

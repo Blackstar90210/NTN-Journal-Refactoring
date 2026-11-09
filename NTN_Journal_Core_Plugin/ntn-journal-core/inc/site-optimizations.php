@@ -125,25 +125,94 @@ function ntn_core_header_cleanup() {
 }
 
 /**
- * Blocca l'enumerazione degli autori (/?author=1)
- * Redireziona allo slug corretto dell'autore per preservare SEO ed E-E-A-T.
+ * Login degli utenti da non mostrare ai visitatori (v4.25.2): pagina autore, elenco utenti, sitemap.
+ *
+ * @return string[]
+ */
+function ntn_core_hidden_author_logins() {
+	$logins = apply_filters( 'ntn_core_hidden_author_logins', array( 'admin' ) );
+	return array_values( array_filter( array_map( 'strval', (array) $logins ) ) );
+}
+
+/**
+ * La protezione degli autori vale per questa richiesta? (v4.25.2)
+ * Solo per i visitatori: chi ha fatto l'accesso al sito e il pannello di amministrazione non cambiano.
+ *
+ * @return bool
+ */
+function ntn_core_author_protection_applies() {
+	return ! is_admin() && ! is_user_logged_in();
+}
+
+/**
+ * Risponde "pagina non trovata" (404) e lascia che WordPress mostri la pagina 404 del tema.
+ */
+function ntn_core_author_not_found() {
+	global $wp_query;
+	if ( isset( $wp_query ) && is_object( $wp_query ) && method_exists( $wp_query, 'set_404' ) ) {
+		$wp_query->set_404();
+	}
+	remove_action( 'template_redirect', 'redirect_canonical' ); // niente rimando a /author/nome/
+	status_header( 404 );
+	nocache_headers();
+}
+
+/**
+ * Blocca davvero l'enumerazione degli autori (v4.25.2).
+ *
+ * Prima /?author=1 rimandava a /author/nome-utente/ e quindi mostrava il nome: ora, per i visitatori,
+ * /?author=N e /?author_name=... danno 404. Anche la pagina autore degli utenti nascosti (login "admin")
+ * dà 404. Le altre pagine autore (/author/nome/) restano come prima.
  */
 function ntn_core_block_author_enumeration() {
-	if ( is_admin() ) {
+	if ( ! ntn_core_author_protection_applies() ) {
 		return;
 	}
-	
-	// Se il parametro author è presente nella query, redireziona
-	if ( isset( $_GET['author'] ) && ! empty( $_GET['author'] ) ) {
-		$author_id  = absint( wp_unslash( $_GET['author'] ) );
-		$author_url = get_author_posts_url( $author_id );
-		if ( ! empty( $author_url ) && ! is_wp_error( $author_url ) && is_string( $author_url ) ) {
-			wp_safe_redirect( $author_url, 301 );
-		} else {
-			wp_safe_redirect( home_url(), 301 );
-		}
-		exit;
+
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- sola lettura dell'indirizzo.
+	if ( ! empty( $_GET['author'] ) || ! empty( $_GET['author_name'] ) ) {
+		ntn_core_author_not_found();
+		return;
 	}
+
+	if ( is_author() ) {
+		$user = get_queried_object();
+		if ( $user instanceof WP_User && in_array( $user->user_login, ntn_core_hidden_author_logins(), true ) ) {
+			ntn_core_author_not_found();
+		}
+	}
+}
+
+/**
+ * Elenco utenti pubblico dell'API (/wp-json/wp/v2/users): per i visitatori non esiste più (v4.25.2).
+ * Il sito non lo usa; l'editor e il pannello, con l'accesso fatto, continuano ad averlo.
+ *
+ * @param array $endpoints Rotte dell'API.
+ * @return array
+ */
+function ntn_core_hide_rest_users( $endpoints ) {
+	if ( is_user_logged_in() || ! is_array( $endpoints ) ) {
+		return $endpoints;
+	}
+	foreach ( array_keys( $endpoints ) as $route ) {
+		if ( 0 === strpos( (string) $route, '/wp/v2/users' ) ) {
+			unset( $endpoints[ $route ] );
+		}
+	}
+	return $endpoints;
+}
+
+/**
+ * Toglie gli utenti nascosti (login "admin") dalla sitemap degli utenti di WordPress (v4.25.2).
+ *
+ * @param array $args Argomenti di WP_User_Query.
+ * @return array
+ */
+function ntn_core_sitemap_hide_authors( $args ) {
+	$args                  = is_array( $args ) ? $args : array();
+	$current               = isset( $args['login__not_in'] ) ? (array) $args['login__not_in'] : array();
+	$args['login__not_in'] = array_values( array_unique( array_merge( $current, ntn_core_hidden_author_logins() ) ) );
+	return $args;
 }
 
 
@@ -393,7 +462,9 @@ function ntn_core_register_site_optimizations() {
 	add_filter( 'wp_editor_set_quality', 'ntn_core_jpeg_quality' );
 	add_action( 'init', 'ntn_core_disable_emojis' );
 	add_action( 'init', 'ntn_core_header_cleanup' );
-	add_action( 'template_redirect', 'ntn_core_block_author_enumeration' );
+	add_action( 'template_redirect', 'ntn_core_block_author_enumeration', 1 ); // v4.25.2: prima del rimando automatico di WordPress
+	add_filter( 'rest_endpoints', 'ntn_core_hide_rest_users' );
+	add_filter( 'wp_sitemaps_users_query_args', 'ntn_core_sitemap_hide_authors' );
 	add_filter( 'image_editor_output_format', 'ntn_core_convert_png_to_jpeg_thumbnails', 10, 3 );
 	add_filter( 'intermediate_image_sizes_advanced', 'ntn_core_remember_image_source', 10, 3 );
 	add_filter( 'wp_get_missing_image_subsizes', 'ntn_core_remember_image_source', 10, 3 );
