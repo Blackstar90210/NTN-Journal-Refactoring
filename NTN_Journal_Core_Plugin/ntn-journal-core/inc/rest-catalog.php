@@ -57,8 +57,10 @@ class NTN_Catalog_REST_Controller {
 			$params['per_page'] = 20;
 		}
 
-		$cache_key = 'ntn_games_' . md5( serialize( $params ) );
-		$cached_payload = get_transient( $cache_key );
+		// v4.17.0: la chiave usa solo i parametri noti; le richieste con ricerca libera o filtri non vanno nel database
+		$cache_key      = ntn_core_rest_games_cache_key( $params );
+		$cache_in_db    = ntn_core_rest_games_uses_database( $params );
+		$cached_payload = ntn_core_rest_cache_get( $cache_key, $cache_in_db );
 		if ( false !== $cached_payload ) {
 			$response = new WP_REST_Response( $cached_payload, 200 );
 			$response->header( 'Cache-Control', 'public, max-age=300, stale-while-revalidate=60' );
@@ -98,7 +100,7 @@ class NTN_Catalog_REST_Controller {
 				'found_posts' => $query->found_posts,
 			)
 		);
-		set_transient( $cache_key, $payload, 300 );
+		ntn_core_rest_cache_set( $cache_key, $payload, 300, $cache_in_db );
 
 		$response = new WP_REST_Response( $payload, 200 );
 		$response->header( 'Cache-Control', 'public, max-age=300, stale-while-revalidate=60' );
@@ -119,7 +121,8 @@ class NTN_Catalog_REST_Controller {
 		}
 
 		$cache_key = 'ntn_livesearch2_' . md5( strtolower( $search_term ) );
-		$cached = get_transient( $cache_key );
+		// v4.17.0: il testo cercato è libero, quindi si salva solo nella cache in memoria (mai nel database)
+		$cached = ntn_core_rest_cache_get( $cache_key, false );
 		if ( is_array( $cached ) ) {
 			$response = new WP_REST_Response( $cached, 200 );
 			$response->header( 'Cache-Control', 'public, max-age=60' );
@@ -219,7 +222,7 @@ class NTN_Catalog_REST_Controller {
 				'total_games'    => $total_games,
 			),
 		);
-		set_transient( $cache_key, $payload, 5 * MINUTE_IN_SECONDS );
+		ntn_core_rest_cache_set( $cache_key, $payload, 5 * MINUTE_IN_SECONDS, false );
 
 		$response = new WP_REST_Response( $payload, 200 );
 		$response->header( 'Cache-Control', 'public, max-age=60' );

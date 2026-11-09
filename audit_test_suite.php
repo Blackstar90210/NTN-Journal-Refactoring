@@ -367,7 +367,8 @@ function post_class( $class = '' ) {
 
 function wp_dropdown_categories( $args = array() ) {}
 function get_transient( $transient ) { return false; }
-function set_transient( $transient, $value, $expiration = 0 ) { return true; }
+function set_transient( $transient, $value, $expiration = 0 ) { $GLOBALS['ntn_test_set_transients'][] = $transient; return true; }
+function wp_using_ext_object_cache() { return ! empty( $GLOBALS['ntn_test_ext_cache'] ); }
 function delete_transient( $transient ) { return true; }
 function selected( $selected, $current = true, $echo = true ) {
     $result = (string) $selected === (string) $current ? ' selected=\'selected\'' : '';
@@ -1652,24 +1653,24 @@ echo "\n--- 24. SEMVER SIMULTANEOUS 4-HEADER SYNCHRONIZATION ---\n";
 $parent_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $parent_css, $m_parent );
 $parent_ver = isset( $m_parent[1] ) ? trim( $m_parent[1] ) : '';
-assert_test( $parent_ver === '4.16.1', "24.1: Parent Theme style.css declares Version: 4.16.1(found: {$parent_ver})" );
+assert_test( $parent_ver === '4.16.2', "24.1: Parent Theme style.css declares Version: 4.16.2(found: {$parent_ver})" );
 
 $child_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $child_css, $m_child );
 $child_ver = isset( $m_child[1] ) ? trim( $m_child[1] ) : '';
-assert_test( $child_ver === '4.16.1', "24.2: Child Theme style.css declares Version: 4.16.1(found: {$child_ver})" );
+assert_test( $child_ver === '4.16.2', "24.2: Child Theme style.css declares Version: 4.16.2(found: {$child_ver})" );
 
 $core_php = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' );
 preg_match( '/\*\s*Version:\s*([0-9\.]+)/', $core_php, $m_core_hdr );
 $core_hdr_ver = isset( $m_core_hdr[1] ) ? trim( $m_core_hdr[1] ) : '';
-assert_test( $core_hdr_ver === '4.16.1', "24.3: Core Plugin header declares Version: 4.16.1(found: {$core_hdr_ver})" );
+assert_test( $core_hdr_ver === '4.16.2', "24.3: Core Plugin header declares Version: 4.16.2(found: {$core_hdr_ver})" );
 
 preg_match( "/define\(\s*'NTN_JOURNAL_CORE_VERSION',\s*'([^']+)'\s*\);/", $core_php, $m_core_const );
 $core_const_ver = isset( $m_core_const[1] ) ? trim( $m_core_const[1] ) : '';
-assert_test( $core_const_ver === '4.16.1', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.16.1(found: {$core_const_ver})" );
+assert_test( $core_const_ver === '4.16.2', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.16.2(found: {$core_const_ver})" );
 
 assert_test(
-	$parent_ver === '4.16.1' && $child_ver === '4.16.1' && $core_hdr_ver === '4.16.1' && $core_const_ver === '4.16.1',
+	$parent_ver === '4.16.2' && $child_ver === '4.16.2' && $core_hdr_ver === '4.16.2' && $core_const_ver === '4.16.2',
 	'24.5: All 4 version headers are 100% synchronized and atomic according to Rule 2 of GEMINI.md'
 );
 
@@ -1898,7 +1899,7 @@ $parent_style_ver = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( AB
 $child_style_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' ), $m2 ) ? $m2[1] : '';
 $core_plugin_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m3 ) ? $m3[1] : '';
 $core_const_ver   = preg_match( '/define\(\s*[\'"]NTN_JOURNAL_CORE_VERSION[\'"]\s*,\s*[\'"]([0-9\.]+)[\'"]\s*\)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m4 ) ? $m4[1] : '';
-assert_test( $parent_style_ver === '4.16.1' && $child_style_ver === '4.16.1' && $core_plugin_ver === '4.16.1' && $core_const_ver === '4.16.1', '29.1: All 4 version headers are synchronized to 4.16.1' );
+assert_test( $parent_style_ver === '4.16.2' && $child_style_ver === '4.16.2' && $core_plugin_ver === '4.16.2' && $core_const_ver === '4.16.2', '29.1: All 4 version headers are synchronized to 4.16.2' );
 
 // 29.2: single.php sequence is Google Feed -> Social CTA -> Bottom Related Posts
 $single_php = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/single.php' );
@@ -3334,7 +3335,7 @@ assert_test(
 
 // --- TEST SUITE 53: Google e condivisioni delle Hub di categoria e dei tag v3.20.0 ---
 echo "\n--- 53. SEO DI HUB DI CATEGORIA E TAG V3.20.0 ---\n";
-$sh_cat = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/category-hub.php' );
+$sh_cat = ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/category-hub.php' );
 $sh_hub = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/hub-seo.php' );
 
 // 53.1: descrizione automatica della Hub di categoria (introduzione o dati), mai sopra una scritta a mano
@@ -3465,7 +3466,7 @@ assert_test(
 // --- TEST SUITE 56: Hub Mobile e PC Gaming, disegni su griglia, tendina Piattaforme v3.22.0 ---
 echo "\n--- 56. PIATTAFORME V3.22.0 ---\n";
 $pf_dot = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/assets/js/dot-art.js' );
-$pf_hub = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/category-hub.php' );
+$pf_hub = ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/category-hub.php' );
 $pf_mf  = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/inc/menu-filters.php' );
 
 // 56.1: disegni a punti su griglia fissa (forme agganciate, tasti rossi come punti), con postazione PC e telefoni
@@ -3491,7 +3492,7 @@ assert_test(
 assert_test(
 	strpos( $hm_tool, 'class="ntn-submenu ntn-nav-drop-panel ntn-pdrop" id="ntn-pdrop"' ) !== false && strpos( $hm_tool, 'ntn-pdrop-icon is-mini' ) !== false &&
 	strpos( $hm_tool, '<span class="ntn-tools-sep" aria-hidden="true"></span>' ) !== false &&
-	strpos( file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/header.php' ), "<div class=\"ntn-header-tools\">\n\t\t\t\t<?php if ( function_exists( 'ntn_journal_header_platform_drop' ) )" ) !== false &&
+	strpos( ntn_t_read( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/header.php' ), "<div class=\"ntn-header-tools\">\n\t\t\t\t<?php if ( function_exists( 'ntn_journal_header_platform_drop' ) )" ) !== false &&
 	strpos( $pf_mf, "set_transient( \$cache_key, \$html, HOUR_IN_SECONDS );" ) !== false && strpos( $pf_mf, "'<span class=\"ntn-pdrop-plats\">'" ) !== false &&
 	strpos( file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/assets/js/main.js' ), "drop.classList.contains('is-mega')" ) !== false,
 	'56.3: Piattaforme dropdown is a wide panel built from the menu, with dot icons, counts and brands with their consoles'
@@ -3629,7 +3630,7 @@ if ( ! function_exists( 'wp_parse_url' ) ) {
 	}
 }
 require_once ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/redirect-manager.php';
-$fr_src = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/redirect-manager.php' );
+$fr_src = ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/redirect-manager.php' );
 
 // 62.1: le cartelle scritte a mano diventano /cartella/; indirizzi di altri siti e percorsi strani sono scartati
 assert_test(
@@ -3829,7 +3830,7 @@ class NTN_Stats_Mock_Wpdb {
 	}
 }
 
-$hs_src  = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/category-hub-stats.php' );
+$hs_src  = ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/category-hub-stats.php' );
 $hs_year = (int) gmdate( 'Y' );
 $hs_old  = $hs_year - 1;
 foreach ( array( 9601 => 'Console', 9602 => 'Sony', 9603 => 'PS5', 9610 => 'Altra', 9620 => 'Vuota', 9630 => 'Vecchia' ) as $hs_id => $hs_name ) {
@@ -4315,7 +4316,7 @@ $GLOBALS['queried_object']   = $pg_queried_backup;
 echo "\n--- 66. SEO HUB STATISTICHE ---\n";
 
 $se_src = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/category-hub-stats.php' );
-$se_hub = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/category-hub.php' );
+$se_hub = ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/category-hub.php' );
 $se_stat = new WP_Term( array( 'term_id' => 9901, 'name' => 'Numeri', 'slug' => 'numeri', 'taxonomy' => 'category' ) );
 $mock_termmeta[9901] = array( '_ntn_hub_enabled' => '1', '_ntn_hub_type' => 'statistiche' );
 $se_backup_q     = $GLOBALS['queried_object'];
@@ -5654,6 +5655,59 @@ assert_test(
 	strpos( $rb_full, 'is-pro' ) !== false && strpos( $rb_full, 'is-con' ) !== false && strpos( $rb_full, 'Bello ma corto.' ) !== false &&
 	strpos( $rb_full, 'grid-template-columns' ) === false && 2 === substr_count( $rb_full, '<li>' ),
 	'83.3: Pros, cons and verdict that are written are still shown as before'
+);
+
+// --- TEST SUITE 84: ricerca e catalogo pubblici, cache nel database limitata v4.16.2 ---
+echo "\n--- 84. CACHE DI RICERCA E CATALOGO V4.16.2 ---\n";
+$rc_base = array( 'page' => 1, 'per_page' => 20, 'sort' => 'year_desc' );
+
+// 84.1: la chiave della cache ignora i parametri sconosciuti (?x=1, ?x=2...) e non cambia per i valori equivalenti
+assert_test(
+	ntn_core_rest_games_cache_key( $rc_base ) === ntn_core_rest_games_cache_key( $rc_base + array( 'x' => '1', '_' => '1700000000' ) ) &&
+	ntn_core_rest_games_cache_key( $rc_base ) === ntn_core_rest_games_cache_key( array( 'sort' => 'year_desc' ) ) &&
+	ntn_core_rest_games_cache_key( $rc_base ) !== ntn_core_rest_games_cache_key( array( 'page' => 2 ) + $rc_base ) &&
+	0 === strpos( ntn_core_rest_games_cache_key( $rc_base ), 'ntn_games_' ),
+	'84.1: The catalog cache key depends only on the known parameters, never on extra ones a visitor adds'
+);
+
+// 84.2: solo le richieste con poche combinazioni possibili possono stare nel database
+assert_test(
+	ntn_core_rest_games_uses_database( $rc_base ) && ntn_core_rest_games_uses_database( array( 'page' => 20 ) + $rc_base ) &&
+	! ntn_core_rest_games_uses_database( array( 'page' => 21 ) + $rc_base ) &&
+	! ntn_core_rest_games_uses_database( array( 'search' => 'zelda' ) + $rc_base ) &&
+	! ntn_core_rest_games_uses_database( array( 'franchise' => 'mario' ) + $rc_base ) &&
+	! ntn_core_rest_games_uses_database( array( 'developer' => 'x' ) + $rc_base ) &&
+	! ntn_core_rest_games_uses_database( array( 'publisher' => 'x' ) + $rc_base ) &&
+	! ntn_core_rest_games_uses_database( array( 'engine' => 'x' ) + $rc_base ) &&
+	! ntn_core_rest_games_uses_database( array( 'year' => 2020 ) + $rc_base ),
+	'84.2: Only catalog requests with few possible combinations (no free text, filters or year) are stored in the database'
+);
+
+// 84.3: senza cache in memoria le ricerche libere non scrivono nulla; con la cache in memoria si salvano
+$GLOBALS['ntn_test_set_transients'] = array();
+$GLOBALS['ntn_test_ext_cache']      = false;
+ntn_core_rest_cache_set( 'ntn_livesearch2_abc', array( 1 ), 300, false );
+ntn_core_rest_cache_set( 'ntn_games_free', array( 1 ), 300, false );
+$rc_none = count( $GLOBALS['ntn_test_set_transients'] );
+ntn_core_rest_cache_set( 'ntn_games_stable', array( 1 ), 300, true );
+$rc_stable = count( $GLOBALS['ntn_test_set_transients'] );
+$GLOBALS['ntn_test_ext_cache'] = true;
+ntn_core_rest_cache_set( 'ntn_livesearch2_abc', array( 1 ), 300, false );
+$rc_ext = count( $GLOBALS['ntn_test_set_transients'] );
+$GLOBALS['ntn_test_ext_cache'] = false;
+assert_test(
+	0 === $rc_none && 1 === $rc_stable && 2 === $rc_ext && false === ntn_core_rest_cache_get( 'ntn_livesearch2_abc', false ),
+	'84.3: Without an object cache, free searches and filtered catalog requests write nothing; stable requests and an object cache do'
+);
+
+// 84.4: gli endpoint usano le funzioni nuove, nessun transient diretto; "Svuota" tocca anche ricerca e catalogo
+$rc_rest  = ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/rest-catalog.php' );
+$rc_admin = ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/admin/admin-page.php' );
+assert_test(
+	false === strpos( $rc_rest, 'set_transient(' ) && false === strpos( $rc_rest, 'get_transient(' ) && false === strpos( $rc_rest, 'serialize(' ) &&
+	false !== strpos( $rc_rest, 'ntn_core_rest_games_cache_key( $params )' ) && false !== strpos( $rc_rest, "ntn_core_rest_cache_get( \$cache_key, false )" ) &&
+	false !== strpos( $rc_admin, "'ntn_games_', 'ntn_livesearch2_'" ) && false !== strpos( $rc_admin, 'wp_cache_flush_group( NTN_CORE_REST_CACHE_GROUP )' ),
+	'84.4: REST endpoints use the bounded cache helpers (no direct transient, no serialize of all params) and the flush button clears them too'
 );
 
 $GLOBALS['post'] = null;
