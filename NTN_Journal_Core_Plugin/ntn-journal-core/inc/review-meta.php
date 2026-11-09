@@ -160,3 +160,107 @@ function ntn_save_review_meta_box_data( $post_id ) {
 }
 add_action( 'save_post', 'ntn_save_review_meta_box_data' );
 
+/**
+ * Voto della recensione pulito (v4.25.3): numero tra 1 e 5 salvato come testo, come oggi.
+ * Vuoto, zero o testo non numerico diventano "" (nessun voto), cioè come il sito li legge già.
+ *
+ * @param mixed $value Valore da salvare.
+ * @return string
+ */
+function ntn_core_sanitize_review_rating( $value ) {
+	if ( ! is_scalar( $value ) ) {
+		return '';
+	}
+	$value = trim( sanitize_text_field( (string) $value ) );
+	if ( '' === $value || ! is_numeric( $value ) ) {
+		return '';
+	}
+	$number = (float) $value;
+	if ( $number <= 0 ) {
+		return '';
+	}
+	$number = min( 5.0, $number );
+	return ( floor( $number ) == $number ) ? (string) (int) $number : (string) round( $number, 1 );
+}
+
+/**
+ * Pro e contro puliti (v4.25.3): testo su più righe; i vecchi valori salvati come elenco restano elenco.
+ *
+ * @param mixed $value Valore da salvare.
+ * @return string|string[]
+ */
+function ntn_core_sanitize_review_lines( $value ) {
+	if ( is_array( $value ) ) {
+		return array_values( array_map( 'sanitize_textarea_field', array_filter( $value, 'is_scalar' ) ) );
+	}
+	return is_scalar( $value ) ? sanitize_textarea_field( (string) $value ) : '';
+}
+
+/**
+ * Testo del verdetto pulito (v4.25.3).
+ *
+ * @param mixed $value Valore da salvare.
+ * @return string
+ */
+function ntn_core_sanitize_review_textarea( $value ) {
+	return is_scalar( $value ) ? sanitize_textarea_field( (string) $value ) : '';
+}
+
+/**
+ * Nome del gioco recensito pulito (v4.25.3).
+ *
+ * @param mixed $value Valore da salvare.
+ * @return string
+ */
+function ntn_core_sanitize_review_text( $value ) {
+	return is_scalar( $value ) ? sanitize_text_field( (string) $value ) : '';
+}
+
+/**
+ * Può modificare i campi della recensione solo chi può modificare l'articolo (v4.25.3).
+ *
+ * @param bool   $allowed  Valore proposto.
+ * @param string $meta_key Nome del campo.
+ * @param int    $post_id  Articolo.
+ * @return bool
+ */
+function ntn_core_review_meta_auth( $allowed, $meta_key, $post_id ) {
+	return current_user_can( 'edit_post', (int) $post_id );
+}
+
+/**
+ * Campi della recensione (nomi senza prefisso, tenuti così per non spostare i dati).
+ *
+ * @return array<string, callable>
+ */
+function ntn_core_review_meta_fields() {
+	return array(
+		'rating'        => 'ntn_core_sanitize_review_rating',
+		'pros'          => 'ntn_core_sanitize_review_lines',
+		'cons'          => 'ntn_core_sanitize_review_lines',
+		'verdict'       => 'ntn_core_sanitize_review_textarea',
+		'reviewed_item' => 'ntn_core_sanitize_review_text',
+	);
+}
+
+/**
+ * Dichiara a WordPress i campi della recensione (v4.25.3), senza rinominarli né spostare i dati.
+ * Restano testo (come oggi), uno per articolo, e non vanno nell'API: nessuna parte del sito li legge da lì.
+ */
+function ntn_core_register_review_meta() {
+	foreach ( ntn_core_review_meta_fields() as $meta_key => $sanitize ) {
+		register_post_meta(
+			'post',
+			$meta_key,
+			array(
+				'type'              => 'string',
+				'single'            => true,
+				'sanitize_callback' => $sanitize,
+				'auth_callback'     => 'ntn_core_review_meta_auth',
+				'show_in_rest'      => false,
+			)
+		);
+	}
+}
+add_action( 'init', 'ntn_core_register_review_meta' );
+

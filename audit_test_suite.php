@@ -1655,24 +1655,24 @@ echo "\n--- 24. SEMVER SIMULTANEOUS 4-HEADER SYNCHRONIZATION ---\n";
 $parent_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $parent_css, $m_parent );
 $parent_ver = isset( $m_parent[1] ) ? trim( $m_parent[1] ) : '';
-assert_test( $parent_ver === '4.25.1', "24.1: Parent Theme style.css declares Version: 4.25.1(found: {$parent_ver})" );
+assert_test( $parent_ver === '4.25.3', "24.1: Parent Theme style.css declares Version: 4.25.3(found: {$parent_ver})" );
 
 $child_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $child_css, $m_child );
 $child_ver = isset( $m_child[1] ) ? trim( $m_child[1] ) : '';
-assert_test( $child_ver === '4.25.1', "24.2: Child Theme style.css declares Version: 4.25.1(found: {$child_ver})" );
+assert_test( $child_ver === '4.25.3', "24.2: Child Theme style.css declares Version: 4.25.3(found: {$child_ver})" );
 
 $core_php = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' );
 preg_match( '/\*\s*Version:\s*([0-9\.]+)/', $core_php, $m_core_hdr );
 $core_hdr_ver = isset( $m_core_hdr[1] ) ? trim( $m_core_hdr[1] ) : '';
-assert_test( $core_hdr_ver === '4.25.1', "24.3: Core Plugin header declares Version: 4.25.1(found: {$core_hdr_ver})" );
+assert_test( $core_hdr_ver === '4.25.3', "24.3: Core Plugin header declares Version: 4.25.3(found: {$core_hdr_ver})" );
 
 preg_match( "/define\(\s*'NTN_JOURNAL_CORE_VERSION',\s*'([^']+)'\s*\);/", $core_php, $m_core_const );
 $core_const_ver = isset( $m_core_const[1] ) ? trim( $m_core_const[1] ) : '';
-assert_test( $core_const_ver === '4.25.1', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.25.1(found: {$core_const_ver})" );
+assert_test( $core_const_ver === '4.25.3', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.25.3(found: {$core_const_ver})" );
 
 assert_test(
-	$parent_ver === '4.25.1' && $child_ver === '4.25.1' && $core_hdr_ver === '4.25.1' && $core_const_ver === '4.25.1',
+	$parent_ver === '4.25.3' && $child_ver === '4.25.3' && $core_hdr_ver === '4.25.3' && $core_const_ver === '4.25.3',
 	'24.5: All 4 version headers are 100% synchronized and atomic according to Rule 2 of GEMINI.md'
 );
 
@@ -1900,7 +1900,7 @@ $parent_style_ver = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( AB
 $child_style_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' ), $m2 ) ? $m2[1] : '';
 $core_plugin_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m3 ) ? $m3[1] : '';
 $core_const_ver   = preg_match( '/define\(\s*[\'"]NTN_JOURNAL_CORE_VERSION[\'"]\s*,\s*[\'"]([0-9\.]+)[\'"]\s*\)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m4 ) ? $m4[1] : '';
-assert_test( $parent_style_ver === '4.25.1' && $child_style_ver === '4.25.1' && $core_plugin_ver === '4.25.1' && $core_const_ver === '4.25.1', '29.1: All 4 version headers are synchronized to 4.25.1' );
+assert_test( $parent_style_ver === '4.25.3' && $child_style_ver === '4.25.3' && $core_plugin_ver === '4.25.3' && $core_const_ver === '4.25.3', '29.1: All 4 version headers are synchronized to 4.25.3' );
 
 // 29.2: single.php sequence is Google Feed -> Social CTA -> Bottom Related Posts
 $single_php = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/single.php' );
@@ -6628,6 +6628,83 @@ assert_test(
 	'/wp/v2/posts' === $ae_rest[0] && '4' === $ae_rest[1] && '{"number":10,"login__not_in":["x","admin"]}|{"login__not_in":["admin"]}' === $ae_rest[2] &&
 	false !== strpos( $ae_src, "add_filter( 'rest_endpoints', 'ntn_core_hide_rest_users' );" ) && false !== strpos( $ae_src, "add_filter( 'wp_sitemaps_users_query_args', 'ntn_core_sitemap_hide_authors' );" ),
 	'99.2: For visitors the public user list (/wp/v2/users) is gone, while logged-in users keep it; "admin" is excluded from the WordPress users sitemap (got: ' . implode( ' / ', $ae_rest ) . ')'
+);
+
+
+// --- TEST SUITE 100: campi della recensione dichiarati a WordPress v4.25.3 ---
+echo "\n--- 100. CAMPI DELLA RECENSIONE REGISTRATI V4.25.3 ---\n";
+$rm_src = ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/review-meta.php' );
+$rm_pos = strpos( $rm_src, 'function ntn_core_sanitize_review_rating' );
+$rm_fn  = false !== $rm_pos ? substr( $rm_src, strrpos( substr( $rm_src, 0, $rm_pos ), '/**' ) ) : '';
+$rm_run = function ( $call ) use ( $rm_fn ) {
+	$base = tempnam( sys_get_temp_dir(), 'ntn100' );
+	$tmp  = $base . '.php';
+	file_put_contents( $tmp, "<?php\n\$GLOBALS['reg'] = array(); \$GLOBALS['hooks'] = array(); \$GLOBALS['caps'] = array( 7 );\n" .
+		"function sanitize_text_field( \$s ) { return trim( preg_replace( '/[\\r\\n\\t ]+/', ' ', strip_tags( (string) \$s ) ) ); }\n" .
+		"function sanitize_textarea_field( \$s ) { return trim( strip_tags( (string) \$s ) ); }\n" .
+		"function current_user_can( \$c, \$id ) { return 'edit_post' === \$c && in_array( \$id, \$GLOBALS['caps'], true ); }\n" .
+		"function add_action( \$h, \$c ) { \$GLOBALS['hooks'][] = \$h . '>' . \$c; }\n" .
+		"function register_post_meta( \$t, \$k, \$a ) { \$GLOBALS['reg'][ \$t . ':' . \$k ] = \$a; return true; }\n" .
+		// Come update_metadata() di WordPress: il valore passa dal sanitize_callback registrato prima di essere salvato.
+		"function ntn100_save( \$k, \$v ) { if ( ! \$GLOBALS['reg'] ) { ntn_core_register_review_meta(); } \$a = \$GLOBALS['reg'][ 'post:' . \$k ]; return call_user_func( \$a['sanitize_callback'], \$v, \$k, 'post', 'post' ); }\n" .
+		$rm_fn . "\n" . $call . "\n" );
+	$out = trim( (string) shell_exec( escapeshellarg( PHP_BINARY ) . ' ' . escapeshellarg( $tmp ) . ' 2>&1' ) );
+	@unlink( $tmp );
+	@unlink( $base );
+	return $out;
+};
+
+$rm_reg = $rm_run( "ntn_core_register_review_meta(); \$o = array(); foreach ( \$GLOBALS['reg'] as \$k => \$a ) { \$o[] = \$k . '=' . \$a['type'] . '/' . ( \$a['single'] ? 1 : 0 ) . '/' . ( \$a['show_in_rest'] ? 1 : 0 ) . '/' . \$a['sanitize_callback'] . '/' . ( call_user_func( \$a['auth_callback'], false, 'rating', 7 ) ? 'y' : 'n' ) . ( call_user_func( \$a['auth_callback'], true, 'rating', 8 ) ? 'y' : 'n' ); } echo implode( ',', \$o ) . '|' . implode( ',', \$GLOBALS['hooks'] );" );
+$rm_reg_want = 'post:rating=string/1/0/ntn_core_sanitize_review_rating/yn,post:pros=string/1/0/ntn_core_sanitize_review_lines/yn,post:cons=string/1/0/ntn_core_sanitize_review_lines/yn,post:verdict=string/1/0/ntn_core_sanitize_review_textarea/yn,post:reviewed_item=string/1/0/ntn_core_sanitize_review_text/yn|init>ntn_core_register_review_meta';
+assert_test(
+	$rm_reg_want === $rm_reg && false !== strpos( $rm_src, "add_action( 'init', 'ntn_core_register_review_meta' );" ),
+	'100.1: rating, pros, cons, verdict and reviewed_item are registered on posts with their current names: string, single, a sanitize callback each, edit_post required to change them, not exposed in the REST API (got: ' . $rm_reg . ')'
+);
+
+// Voto: i valori di oggi restano uguali; quelli non validi diventano "nessun voto", come il sito li legge già.
+$rm_rating = $rm_run( "\$in = array( '4', '1', '5', '', ' 3 ', 4, '4.5', '7', '0', '-2', 'abc', '<b>4</b>', null, array( 4 ) ); \$o = array(); foreach ( \$in as \$v ) { \$o[] = var_export( ntn100_save( 'rating', \$v ), true ); } echo implode( ' ', \$o );" );
+assert_test(
+	"'4' '1' '5' '' '3' '4' '4.5' '5' '' '' '' '4' '' ''" === $rm_rating,
+	'100.2: The rating is kept as text: 1-5 unchanged (also an integer from the backup restore becomes "4"), above 5 becomes 5, empty, zero, negative or non-numeric become "" (no rating) (got: ' . $rm_rating . ')'
+);
+
+// Pro, contro, verdetto, gioco: quello che il box recensione salva oggi resta identico dopo il nuovo controllo.
+$rm_same = $rm_run(
+	"\$box = array( 'pros' => sanitize_textarea_field( \"Grafica eccezionale\\nStoria avvincente\" ), 'cons' => sanitize_textarea_field( 'Qualche bug residuo' ), 'verdict' => sanitize_textarea_field( \"Un capolavoro.\\n\\nDa giocare.\" ), 'reviewed_item' => sanitize_text_field( \"Assassin's Creed Black Flag Resynced\" ), 'rating' => sanitize_text_field( '4' ) );" .
+	" \$o = array(); foreach ( \$box as \$k => \$v ) { \$o[] = ( ntn100_save( \$k, \$v ) === \$v ) ? 'same' : 'DIFF:' . \$k; }" .
+	" \$o[] = json_encode( ntn100_save( 'pros', array( 'Uno', '<i>Due</i>', array( 'x' ) ) ) ); \$o[] = var_export( ntn100_save( 'verdict', '<script>x</script>Bello' ), true ); \$o[] = var_export( ntn100_save( 'reviewed_item', array( 'x' ) ), true );" .
+	" echo implode( ' ', \$o );"
+);
+assert_test(
+	'same same same same same ["Uno","Due"] \'xBello\' \'\'' === $rm_same,
+	'100.3: What the review box saves today (pros, cons, verdict, game, rating) is stored identically; old pros/cons lists stay lists, HTML is stripped, a list sent as the game name is refused (got: ' . $rm_same . ')'
+);
+
+// Le letture non cambiano: nessuna rinomina e nessuna migrazione dei dati.
+$rm_reads = array(
+	'schema-markup.php' => array( "get_post_meta( get_the_ID(), 'rating', true )", "get_post_meta( get_the_ID(), 'reviewed_item', true )", "get_post_meta( get_the_ID(), 'verdict', true )", "get_post_meta( get_the_ID(), 'pros', true )", "get_post_meta( get_the_ID(), 'cons', true )" ),
+	'game-data.php'     => array( "get_post_meta( \$post_id, 'rating', true )" ),
+	'review-meta.php'   => array( "update_post_meta( \$post_id, 'rating', sanitize_text_field(", "update_post_meta( \$post_id, 'pros', sanitize_textarea_field(", "update_post_meta( \$post_id, 'reviewed_item', sanitize_text_field(" ),
+);
+$rm_missing = array();
+foreach ( $rm_reads as $rm_file => $rm_needles ) {
+	$rm_file_src = ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/' . $rm_file );
+	foreach ( $rm_needles as $rm_needle ) {
+		if ( false === strpos( $rm_file_src, $rm_needle ) ) {
+			$rm_missing[] = $rm_file . ': ' . $rm_needle;
+		}
+	}
+}
+assert_test(
+	array() === $rm_missing && false === stripos( $rm_src, 'delete_post_meta' ) && false === strpos( $rm_src, "'ntn_core_rating'" ),
+	'100.4: Names are unchanged: the review box, Google data (schema) and game data still read and write rating, pros, cons, verdict and reviewed_item; no data is moved or renamed (missing: ' . implode( '; ', $rm_missing ) . ')'
+);
+
+// Regola dei prefissi scritta nelle regole del progetto.
+$rm_rules = ntn_t_read( ABSPATH . 'AGENTS.md' );
+assert_test(
+	false !== strpos( $rm_rules, 'ntn_core_' ) && false !== stripos( $rm_rules, 'non si rinomina' ) && false !== strpos( $rm_rules, 'ntn_journal_' ),
+	'100.5: AGENTS.md states the prefix rule: new plugin code uses ntn_core_, existing ntn_ / ntn_journal_ names are not renamed, ntn_journal_ stays for what is shared with the theme'
 );
 
 
