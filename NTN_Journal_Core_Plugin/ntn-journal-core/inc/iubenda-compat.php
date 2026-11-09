@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return mixed Pagina con i JSON-LD puliti.
  */
 function ntn_core_restore_jsonld_entities( $html ) {
-	if ( ! is_string( $html ) || false === stripos( $html, 'ld+json' ) || ! function_exists( 'mb_chr' ) ) {
+	if ( ! is_string( $html ) || false === stripos( $html, 'ld+json' ) ) {
 		return $html;
 	}
 
@@ -37,7 +37,8 @@ function ntn_core_restore_jsonld_entities( $html ) {
 					if ( $code < 0x80 || $code > 0x10FFFF || ( $code >= 0xD800 && $code <= 0xDFFF ) ) {
 						return $e[0];
 					}
-					return mb_chr( $code, 'UTF-8' );
+					// html_entity_decode non richiede l'estensione mbstring (mb_chr sì)
+					return html_entity_decode( '&#' . $code . ';', ENT_QUOTES | ENT_HTML5, 'UTF-8' );
 				},
 				$m[2]
 			);
