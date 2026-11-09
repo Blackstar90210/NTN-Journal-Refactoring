@@ -42,7 +42,7 @@ add_filter( 'category_template', 'ntn_journal_category_hub_template' );
  */
 function ntn_journal_category_hub_assets() {
 	if ( ntn_journal_is_category_hub() ) {
-		wp_enqueue_script( 'ntn-dot-art', get_template_directory_uri() . '/assets/js/dot-art.js', array(), wp_get_theme()->get( 'Version' ), array( 'in_footer' => true, 'strategy' => 'defer' ) );
+		wp_enqueue_script( 'ntn-dot-art', get_template_directory_uri() . '/assets/js/dot-art.js', array(), wp_get_theme( get_template() )->get( 'Version' ), array( 'in_footer' => true, 'strategy' => 'defer' ) );
 	}
 }
 add_action( 'wp_enqueue_scripts', 'ntn_journal_category_hub_assets' );

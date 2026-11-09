@@ -6496,6 +6496,14 @@ assert_test(
 	'98.2: admin-igdb.js is enqueued with NTN_JOURNAL_CORE_VERSION instead of the fixed 1.0.0, so browsers drop the old copy after an update'
 );
 
+// 98.3: dot-art.js è un file del tema parent: prende la versione del parent anche quando è attivo il child
+$mf_theme = ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/';
+$mf_hubt  = ntn_t_read( $mf_theme . 'inc/category-hub-template.php' );
+assert_test(
+	false !== strpos( $mf_hubt, "'/assets/js/dot-art.js', array(), wp_get_theme( get_template() )->get( 'Version' )," ) && false === strpos( $mf_hubt, 'wp_get_theme()->' ),
+	'98.3: dot-art.js (a parent theme file) is versioned with the parent theme version, also when the child theme is active'
+);
+
 
 echo "\n=======================================================================\n";
 echo " AUDIT SUMMARY: {$passed} PASSED, {$failed} FAILED\n";
