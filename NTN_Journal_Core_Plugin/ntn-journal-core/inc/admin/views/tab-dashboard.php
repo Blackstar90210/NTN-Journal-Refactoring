@@ -138,6 +138,18 @@ $ntn_api_active = count( array_filter( $ntn_api, static function ( $s ) { return
 		</div>
 
 		<div class="nadm-cell">
+			<span class="ntn-adm-k">// Immagini</span>
+			<?php $ntn_img = function_exists( 'ntn_core_image_report_dashboard_summary' ) ? ntn_core_image_report_dashboard_summary() : array( 'count' => '—', 'lines' => array( 'Strumenti non disponibili' ) ); ?>
+			<span class="nadm-v"><?php echo esc_html( $ntn_img['count'] ); ?></span>
+			<span class="nadm-s">
+				<?php foreach ( $ntn_img['lines'] as $ntn_img_line ) : ?>
+					<?php echo esc_html( $ntn_img_line ); ?><br>
+				<?php endforeach; ?>
+			</span>
+			<a class="nadm-go" href="<?php echo esc_url( $ntn_tab( 'immagini' ) ); ?>">Apri →</a>
+		</div>
+
+		<div class="nadm-cell">
 			<span class="ntn-adm-k">// SEO</span>
 			<?php $ntn_schema = function_exists( 'ntn_core_schema_enabled' ) ? ntn_core_schema_enabled() : true; ?>
 			<span class="nadm-v<?php echo $ntn_schema ? '' : ' nadm-red'; ?>"><?php echo $ntn_schema ? 'On' : 'Off'; ?></span>
