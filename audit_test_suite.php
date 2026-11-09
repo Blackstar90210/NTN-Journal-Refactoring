@@ -6564,6 +6564,15 @@ assert_test(
 	'98.7: Saving a menu (wp_update_nav_menu) empties the Platforms panel cache (ntn_pdrop_ only), so renamed items show at once (left: ' . $mf_out . ')'
 );
 
+// 98.8: Tailwind legge anche i file del plugin, che stampa HTML con classi (percorso, indice, box)
+$mf_in  = ntn_t_read( $mf_theme . 'build/input.css' );
+$mf_css = ntn_t_read( $mf_theme . 'style-tailwind-output.css' );
+assert_test(
+	false !== strpos( $mf_in, '@source "../../../NTN_Journal_Core_Plugin/ntn-journal-core/**/*.php";' ) && is_dir( dirname( $mf_theme . 'build/input.css' ) . '/../../../NTN_Journal_Core_Plugin/ntn-journal-core' ) &&
+	false !== strpos( $mf_css, '.max-w-\[200px\]' ) && false !== strpos( $mf_css, '.truncate' ),
+	'98.8: input.css scans the core plugin PHP files, so classes printed only by the plugin are compiled in style-tailwind-output.css'
+);
+
 
 echo "\n=======================================================================\n";
 echo " AUDIT SUMMARY: {$passed} PASSED, {$failed} FAILED\n";

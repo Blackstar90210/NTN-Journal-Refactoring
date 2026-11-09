@@ -4,6 +4,8 @@
 /* Il tema child usa le classi compilate qui: vanno lette anche le sue pagine e i suoi script */
 @source "../../ntn-journal-reloaded/**/*.php";
 @source "../../ntn-journal-reloaded/assets/js/*.js";
+/* v4.25.1: anche il plugin stampa HTML con classi Tailwind (percorso, indice, box): vanno compilate qui */
+@source "../../../NTN_Journal_Core_Plugin/ntn-journal-core/**/*.php";
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* === Mappatura Font (Stile Nothing-Inspired) === */
