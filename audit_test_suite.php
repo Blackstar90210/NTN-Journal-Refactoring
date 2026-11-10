@@ -1655,24 +1655,24 @@ echo "\n--- 24. SEMVER SIMULTANEOUS 4-HEADER SYNCHRONIZATION ---\n";
 $parent_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $parent_css, $m_parent );
 $parent_ver = isset( $m_parent[1] ) ? trim( $m_parent[1] ) : '';
-assert_test( $parent_ver === '4.26.0', "24.1: Parent Theme style.css declares Version: 4.26.0(found: {$parent_ver})" );
+assert_test( $parent_ver === '4.27.0', "24.1: Parent Theme style.css declares Version: 4.27.0(found: {$parent_ver})" );
 
 $child_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $child_css, $m_child );
 $child_ver = isset( $m_child[1] ) ? trim( $m_child[1] ) : '';
-assert_test( $child_ver === '4.26.0', "24.2: Child Theme style.css declares Version: 4.26.0(found: {$child_ver})" );
+assert_test( $child_ver === '4.27.0', "24.2: Child Theme style.css declares Version: 4.27.0(found: {$child_ver})" );
 
 $core_php = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' );
 preg_match( '/\*\s*Version:\s*([0-9\.]+)/', $core_php, $m_core_hdr );
 $core_hdr_ver = isset( $m_core_hdr[1] ) ? trim( $m_core_hdr[1] ) : '';
-assert_test( $core_hdr_ver === '4.26.0', "24.3: Core Plugin header declares Version: 4.26.0(found: {$core_hdr_ver})" );
+assert_test( $core_hdr_ver === '4.27.0', "24.3: Core Plugin header declares Version: 4.27.0(found: {$core_hdr_ver})" );
 
 preg_match( "/define\(\s*'NTN_JOURNAL_CORE_VERSION',\s*'([^']+)'\s*\);/", $core_php, $m_core_const );
 $core_const_ver = isset( $m_core_const[1] ) ? trim( $m_core_const[1] ) : '';
-assert_test( $core_const_ver === '4.26.0', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.26.0(found: {$core_const_ver})" );
+assert_test( $core_const_ver === '4.27.0', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.27.0(found: {$core_const_ver})" );
 
 assert_test(
-	$parent_ver === '4.26.0' && $child_ver === '4.26.0' && $core_hdr_ver === '4.26.0' && $core_const_ver === '4.26.0',
+	$parent_ver === '4.27.0' && $child_ver === '4.27.0' && $core_hdr_ver === '4.27.0' && $core_const_ver === '4.27.0',
 	'24.5: All 4 version headers are 100% synchronized and atomic according to Rule 2 of GEMINI.md'
 );
 
@@ -1900,7 +1900,7 @@ $parent_style_ver = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( AB
 $child_style_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' ), $m2 ) ? $m2[1] : '';
 $core_plugin_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m3 ) ? $m3[1] : '';
 $core_const_ver   = preg_match( '/define\(\s*[\'"]NTN_JOURNAL_CORE_VERSION[\'"]\s*,\s*[\'"]([0-9\.]+)[\'"]\s*\)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m4 ) ? $m4[1] : '';
-assert_test( $parent_style_ver === '4.26.0' && $child_style_ver === '4.26.0' && $core_plugin_ver === '4.26.0' && $core_const_ver === '4.26.0', '29.1: All 4 version headers are synchronized to 4.26.0' );
+assert_test( $parent_style_ver === '4.27.0' && $child_style_ver === '4.27.0' && $core_plugin_ver === '4.27.0' && $core_const_ver === '4.27.0', '29.1: All 4 version headers are synchronized to 4.27.0' );
 
 // 29.2: single.php sequence is Google Feed -> Social CTA -> Bottom Related Posts
 $single_php = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/single.php' );
@@ -3036,7 +3036,7 @@ $fx_admin  = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-c
 $fx_api    = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/admin/views/tab-api-services.php' );
 $fx_status = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/api-status.php' );
 $fx_extra  = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/admin/views/tab-extra.php' );
-$fx_igdb   = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/admin/views/tab-igdb.php' );
+$fx_igdb   = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/admin/views/tab-igdb.php' ) . "\n" . file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/assets/js/admin-igdb-scanner.js' ); // dalla 4.27.0 il codice della scheda sta nel file JS
 $fx_igdbjs = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/assets/js/admin-igdb.js' );
 
 // 48.1: caselle inutili tolte, spiegazione di "Link Videogioco" riscritta, commenti anche nelle pagine
@@ -6824,9 +6824,9 @@ assert_test( false !== strpos( $sc_png, "isset( \$_POST['backup'] ) && '1' === s
 // 102.5: il valore nel JS dei nonce passa da esc_js; i comunicati usano esc_html_e; i fogli di stile del tema restano uguali
 $sc_js = ntn_t_read( $sc_core . 'admin/views/tab-igdb.php' ) . ntn_t_read( $sc_core . 'migrazione-igdb.php' );
 assert_test(
-	0 === preg_match( "/<\?php echo wp_create_nonce\(/", $sc_js ) && substr_count( $sc_js, 'esc_js( wp_create_nonce(' ) === 16 &&
+	0 === preg_match( "/<\?php echo wp_create_nonce\(/", $sc_js ) && substr_count( $sc_js, 'esc_js( wp_create_nonce(' ) === 2 && false === strpos( ntn_t_read( $sc_core . 'admin/views/tab-igdb.php' ), '<script' ) &&
 	0 === preg_match( '/<\?php _e\(/', ntn_t_read( $sc_core . 'cpt-comunicati-stampa.php' ) ) && substr_count( ntn_t_read( $sc_core . 'cpt-comunicati-stampa.php' ), 'esc_html_e(' ) === 7,
-	'102.5: Nonces printed inside scripts pass through esc_js (16), press release labels use esc_html_e (7)'
+	'102.5: Nonces printed inside scripts pass through esc_js (2 left in migrazione-igdb.php; since 4.27.0 the IGDB tab hands them over with wp_localize_script, see 104.1), press release labels use esc_html_e (7)'
 );
 
 // 102.6: in_array stretto dove i valori sono testi o numeri interi
@@ -6970,6 +6970,55 @@ assert_test(
 	1 === preg_match_all( '/-excludeDirs\s+@\(/', $tp_pkg ) && false !== strpos( $tp_pkg, '-excludeDirs @("build")' ) && false === stripos( $tp_pkg, 'uninstall' ) && false === stripos( $tp_pkg, 'readme' ) && false === stripos( $tp_pkg, 'screenshot' ),
 	'103.9: package_release.ps1 leaves uninstall.php, readme.txt and screenshot.png in the ZIPs (only build/ is excluded)'
 );
+
+
+// --- TEST SUITE 104: script della scheda IGDB fuori dalla pagina PHP v4.27.0 ---
+echo "\n--- 104. SCRIPT DELLA SCHEDA IGDB IN UN FILE V4.27.0 ---\n";
+$js_core = ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/';
+$js_view = ntn_t_read( $js_core . 'inc/admin/views/tab-igdb.php' );
+$js_file = ntn_t_read( $js_core . 'assets/js/admin-igdb-scanner.js' );
+$js_flat = ntn_t_flat( $js_view );
+
+// 104.1: la pagina non ha più codice JavaScript; carica il file e passa i due nonce con wp_localize_script
+assert_test(
+	false === strpos( $js_view, '<script' ) && false === strpos( $js_view, 'esc_js' ) && false === strpos( $js_view, 'ajaxurl' ) &&
+	1 === preg_match( "/wp_enqueue_script\( 'ntn-core-igdb-scanner', NTN_JOURNAL_CORE_URL \. 'assets\/js\/admin-igdb-scanner\.js', array\( ?\), NTN_JOURNAL_CORE_VERSION, true \)/", $js_flat ) &&
+	false !== strpos( $js_flat, "'ntnIgdbScanner'" ) && false !== strpos( $js_flat, "'nonce' => wp_create_nonce( 'ntn_igdb_nonce' )" ) && false !== strpos( $js_flat, "'batchNonce' => wp_create_nonce( 'ntn_batch_scan_igdb_nonce' )" ),
+	'104.1: tab-igdb.php has no inline script any more: it loads admin-igdb-scanner.js (versioned, in the footer) and hands over the two nonces with wp_localize_script'
+);
+
+// 104.2: il file JS non ha PHP, usa solo i due nonce passati, e ogni richiesta manda il nonce che il suo gestore controlla
+$js_pairs = array();
+preg_match_all( "/data\.append\('action', '([a-z_]+)'\);\s*data\.append\('_ajax_nonce', ntnIgdbScanner\.(nonce|batchNonce)\);/", $js_file, $js_m, PREG_SET_ORDER );
+foreach ( $js_m as $js_row ) {
+	$js_pairs[ $js_row[1] ] = $js_row[2];
+}
+$js_php = '';
+foreach ( new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $js_core . 'inc', FilesystemIterator::SKIP_DOTS ) ) as $js_f ) {
+	if ( 'php' === $js_f->getExtension() ) {
+		$js_php .= "\n" . ntn_t_read( $js_f->getPathname() );
+	}
+}
+$js_bad = array();
+foreach ( $js_pairs as $js_action => $js_kind ) {
+	$js_want = 'nonce' === $js_kind ? 'ntn_igdb_nonce' : 'ntn_batch_scan_igdb_nonce';
+	if ( ! preg_match( "/wp_ajax_" . preg_quote( $js_action, '/' ) . "', '([a-z_]+)'/", $js_php, $js_h ) ) {
+		$js_bad[] = $js_action . ' (no handler)';
+		continue;
+	}
+	if ( ! preg_match( '/function ' . preg_quote( $js_h[1], '/' ) . '\(.*?\n}\n/s', $js_php, $js_fn ) || false === strpos( $js_fn[0], "check_ajax_referer( '" . $js_want . "'" ) ) {
+		$js_bad[] = $js_action;
+	}
+}
+assert_test(
+	false === strpos( $js_file, '<?' ) && 14 === count( $js_pairs ) && 3 === substr_count( $js_file, 'ntnIgdbScanner.nonce' ) && 11 === substr_count( $js_file, 'ntnIgdbScanner.batchNonce' ) &&
+	14 === substr_count( $js_file, "data.append('_ajax_nonce'," ) && empty( $js_bad ),
+	'104.2: admin-igdb-scanner.js has no PHP, 14 requests send the nonce (3 + 11) and each sends the one its PHP handler checks (problems: ' . implode( ', ', $js_bad ) . ')'
+);
+
+// 104.3: il file è valido (node) e ntnEsc resta una funzione globale; niente dati PHP rimasti
+$js_node = trim( (string) shell_exec( 'node --check ' . escapeshellarg( $js_core . 'assets/js/admin-igdb-scanner.js' ) . ' 2>&1 && echo OK' ) );
+assert_test( 'OK' === $js_node && 1 === preg_match( '/^\s*function ntnEsc\(value\)/m', $js_file ), '104.3: the moved script is valid JavaScript and ntnEsc is still a global function (' . $js_node . ')' );
 
 
 echo "\n=======================================================================\n";
