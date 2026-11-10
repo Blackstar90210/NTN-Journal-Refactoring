@@ -1655,24 +1655,24 @@ echo "\n--- 24. SEMVER SIMULTANEOUS 4-HEADER SYNCHRONIZATION ---\n";
 $parent_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $parent_css, $m_parent );
 $parent_ver = isset( $m_parent[1] ) ? trim( $m_parent[1] ) : '';
-assert_test( $parent_ver === '4.28.0', "24.1: Parent Theme style.css declares Version: 4.28.0(found: {$parent_ver})" );
+assert_test( $parent_ver === '4.29.0', "24.1: Parent Theme style.css declares Version: 4.29.0(found: {$parent_ver})" );
 
 $child_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $child_css, $m_child );
 $child_ver = isset( $m_child[1] ) ? trim( $m_child[1] ) : '';
-assert_test( $child_ver === '4.28.0', "24.2: Child Theme style.css declares Version: 4.28.0(found: {$child_ver})" );
+assert_test( $child_ver === '4.29.0', "24.2: Child Theme style.css declares Version: 4.29.0(found: {$child_ver})" );
 
 $core_php = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' );
 preg_match( '/\*\s*Version:\s*([0-9\.]+)/', $core_php, $m_core_hdr );
 $core_hdr_ver = isset( $m_core_hdr[1] ) ? trim( $m_core_hdr[1] ) : '';
-assert_test( $core_hdr_ver === '4.28.0', "24.3: Core Plugin header declares Version: 4.28.0(found: {$core_hdr_ver})" );
+assert_test( $core_hdr_ver === '4.29.0', "24.3: Core Plugin header declares Version: 4.29.0(found: {$core_hdr_ver})" );
 
 preg_match( "/define\(\s*'NTN_JOURNAL_CORE_VERSION',\s*'([^']+)'\s*\);/", $core_php, $m_core_const );
 $core_const_ver = isset( $m_core_const[1] ) ? trim( $m_core_const[1] ) : '';
-assert_test( $core_const_ver === '4.28.0', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.28.0(found: {$core_const_ver})" );
+assert_test( $core_const_ver === '4.29.0', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.29.0(found: {$core_const_ver})" );
 
 assert_test(
-	$parent_ver === '4.28.0' && $child_ver === '4.28.0' && $core_hdr_ver === '4.28.0' && $core_const_ver === '4.28.0',
+	$parent_ver === '4.29.0' && $child_ver === '4.29.0' && $core_hdr_ver === '4.29.0' && $core_const_ver === '4.29.0',
 	'24.5: All 4 version headers are 100% synchronized and atomic according to Rule 2 of GEMINI.md'
 );
 
@@ -1900,7 +1900,7 @@ $parent_style_ver = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( AB
 $child_style_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' ), $m2 ) ? $m2[1] : '';
 $core_plugin_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m3 ) ? $m3[1] : '';
 $core_const_ver   = preg_match( '/define\(\s*[\'"]NTN_JOURNAL_CORE_VERSION[\'"]\s*,\s*[\'"]([0-9\.]+)[\'"]\s*\)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m4 ) ? $m4[1] : '';
-assert_test( $parent_style_ver === '4.28.0' && $child_style_ver === '4.28.0' && $core_plugin_ver === '4.28.0' && $core_const_ver === '4.28.0', '29.1: All 4 version headers are synchronized to 4.28.0' );
+assert_test( $parent_style_ver === '4.29.0' && $child_style_ver === '4.29.0' && $core_plugin_ver === '4.29.0' && $core_const_ver === '4.29.0', '29.1: All 4 version headers are synchronized to 4.29.0' );
 
 // 29.2: single.php sequence is Google Feed -> Social CTA -> Bottom Related Posts
 $single_php = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/single.php' );
@@ -7042,6 +7042,31 @@ assert_test(
 	false !== strpos( ntn_t_flat( $ts_scan_src ), "check_ajax_referer( 'ntn_igdb_scan', '_ajax_nonce' )" ) && false !== strpos( ntn_t_flat( $ts_scan_src ), "check_ajax_referer( 'ntn_igdb_nonce', '_ajax_nonce' )" ) &&
 	false === strpos( $ts_js, 'innerHTML' ) && 'OK' === $ts_node,
 	'105.2: admin-igdb-tag-scanner.js has no PHP, uses the scan nonce by default and the search nonce for ntn_search_igdb (the two ones their PHP handlers check), has no innerHTML, and is valid JavaScript (' . $ts_node . ')'
+);
+
+
+// --- TEST SUITE 106: script della scheda Backup in un file v4.29.0 ---
+echo "\n--- 106. SCRIPT DELLA SCHEDA BACKUP IN UN FILE V4.29.0 ---\n";
+$bk_core = ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/';
+$bk_view = ntn_t_read( $bk_core . 'inc/admin/views/tab-backup.php' );
+$bk_js   = ntn_t_read( $bk_core . 'assets/js/admin-backup.js' );
+$bk_flat = ntn_t_flat( $bk_view );
+assert_test(
+	false === strpos( $bk_view, '<script' ) && false === strpos( $bk_view, 'wp_json_encode' ) &&
+	1 === preg_match( "/wp_enqueue_script\( 'ntn-core-backup', NTN_JOURNAL_CORE_URL \. 'assets\/js\/admin-backup\.js', array\( ?\), NTN_JOURNAL_CORE_VERSION, true \)/", $bk_flat ) &&
+	false !== strpos( $bk_flat, "'ntnBackup'" ) && false !== strpos( $bk_flat, "'ajaxUrl' => admin_url( 'admin-ajax.php' )" ) && false !== strpos( $bk_flat, "'nonce' => \$backup_nonce" ) &&
+	false !== strpos( $bk_view, "\$backup_nonce = wp_create_nonce( 'ntn_backup_nonce' );" ) &&
+	false !== strpos( $bk_view, 'id="ntn-btn-export-core"' ) && false !== strpos( $bk_view, 'id="ntn-import-file-input"' ),
+	'106.1: tab-backup.php has no inline script: it keeps the markup and the ntn_backup_nonce nonce, loads admin-backup.js (versioned, footer) and hands over ajax URL and nonce with wp_localize_script'
+);
+$bk_php  = ntn_t_flat( ntn_t_read( $bk_core . 'inc/backup-restore.php' ) );
+$bk_node = trim( (string) shell_exec( 'node --check ' . escapeshellarg( $bk_core . 'assets/js/admin-backup.js' ) . ' 2>&1 && echo OK' ) );
+assert_test(
+	false === strpos( $bk_js, '<?' ) && 1 === substr_count( $bk_js, 'ntnBackup.ajaxUrl' ) && 1 === substr_count( $bk_js, 'ntnBackup.nonce' ) &&
+	false !== strpos( $bk_js, "append('action', 'ntn_backup_export')" ) && false !== strpos( $bk_js, "append('action', 'ntn_backup_import')" ) &&
+	false !== strpos( $bk_php, "wp_ajax_ntn_backup_export" ) && false !== strpos( $bk_php, "wp_ajax_ntn_backup_import" ) &&
+	2 === substr_count( $bk_php, "check_ajax_referer( 'ntn_backup_nonce', '_ajax_nonce' )" ) && 'OK' === $bk_node,
+	'106.2: admin-backup.js has no PHP, sends export and import requests with the nonce their two PHP handlers check (ntn_backup_nonce), and is valid JavaScript (' . $bk_node . ')'
 );
 
 
