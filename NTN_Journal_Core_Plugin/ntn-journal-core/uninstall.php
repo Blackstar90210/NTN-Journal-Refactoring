@@ -36,6 +36,8 @@ function ntn_core_uninstall_current_site( $remove_settings ) {
 	// 2. Operazioni programmate dal plugin.
 	wp_unschedule_hook( 'ntn_async_prefetch_oembed' );
 	wp_unschedule_hook( 'ntn_core_youtube_date_lookup' );
+	wp_unschedule_hook( 'ntn_core_steam_revenue_weekly' );
+	wp_unschedule_hook( 'ntn_core_steam_revenue_batch' );
 
 	if ( ! $remove_settings ) {
 		return;

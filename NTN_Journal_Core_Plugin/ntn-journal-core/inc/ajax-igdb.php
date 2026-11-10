@@ -270,6 +270,7 @@ function ntn_igdb_parse_game_data( $game ) {
 		'url'               => isset( $game['url'] ) ? esc_url_raw( $game['url'] ) : '',
 		'video'             => $video_id,
 		'screenshots'       => implode( ',', $screenshots ),
+		'steam_appid'       => function_exists( 'ntn_core_steam_appid_from_igdb' ) ? ntn_core_steam_appid_from_igdb( $game ) : '',
 	);
 }
 
@@ -344,13 +345,13 @@ add_action( 'wp_ajax_ntn_search_igdb', 'ntn_journal_ajax_search_igdb' );
  * Shared helper to fetch and parse game details from IGDB
  */
 function ntn_get_igdb_game_details( $game_id ) {
-	$transient_key = 'ntn_igdb_game2_' . $game_id; // v3.19.1: "2" perché ora c'è anche la precisione della data
+	$transient_key = 'ntn_igdb_game3_' . $game_id; // "3": ora c'è anche l'ID Steam (prima "2" con la precisione della data, v3.19.1)
 	$cached        = get_transient( $transient_key );
 	if ( false !== $cached ) {
 		return $cached;
 	}
 
-	$apicalypse = 'fields id, name, url, cover.url, first_release_date, release_dates.date, release_dates.human, platforms.name, involved_companies.company.name, involved_companies.developer, involved_companies.publisher, genres.name, game_engines.name, franchises.name, collections.name, videos.video_id, screenshots.image_id; where id = ' . intval( $game_id ) . '; limit 1;';
+	$apicalypse = 'fields id, name, url, cover.url, first_release_date, release_dates.date, release_dates.human, platforms.name, involved_companies.company.name, involved_companies.developer, involved_companies.publisher, genres.name, game_engines.name, franchises.name, collections.name, videos.video_id, screenshots.image_id, external_games.uid, external_games.external_game_source; where id = ' . intval( $game_id ) . '; limit 1;';
 
 	$data = ntn_core_igdb_request( $apicalypse );
 	if ( is_wp_error( $data ) ) {
@@ -476,6 +477,10 @@ function ntn_igdb_link_tag_to_game( $tag_id, $igdb_id ) {
 	update_term_meta( $tag_id, '_ntn_igdb_last_sync', time() );
 	if ( isset( $details['raw_url'] ) ) {
 		update_term_meta( $tag_id, '_ntn_game_url', $details['raw_url'] );
+	}
+	// ID Steam e stima degli introiti, aggiornata in secondo piano (inc/steam-revenue.php).
+	if ( function_exists( 'ntn_core_steam_after_igdb_sync' ) && array_key_exists( 'steam_appid', $details ) ) {
+		ntn_core_steam_after_igdb_sync( $tag_id, $details['steam_appid'] );
 	}
 
 	// Sincronizza con CPT "videogioco"

@@ -229,6 +229,9 @@ function ntn_core_ajax_reset_tag_igdb() {
 		'_ntn_game_url',
 		'_ntn_featured_review_id',
 	);
+	if ( function_exists( 'ntn_core_steam_meta_keys' ) ) {
+		$keys = array_merge( $keys, ntn_core_steam_meta_keys() ); // Senza gioco non resta nemmeno la stima Steam.
+	}
 
 	foreach ( $keys as $key ) {
 		delete_term_meta( $tag_id, $key );
@@ -254,7 +257,7 @@ function ntn_core_ajax_update_single_tag_igdb() {
 		wp_send_json_error( 'Dati mancanti' );
 	}
 
-	$apicalypse = 'fields id, name, url, cover.url, first_release_date, release_dates.date, release_dates.human, platforms.name, involved_companies.company.name, involved_companies.developer, involved_companies.publisher, genres.name, game_engines.name, videos.video_id, screenshots.image_id; where id = ' . $igdb_id . '; limit 1;';
+	$apicalypse = 'fields id, name, url, cover.url, first_release_date, release_dates.date, release_dates.human, platforms.name, involved_companies.company.name, involved_companies.developer, involved_companies.publisher, genres.name, game_engines.name, videos.video_id, screenshots.image_id, external_games.uid, external_games.external_game_source; where id = ' . $igdb_id . '; limit 1;';
 
 	$data = ntn_core_igdb_request( $apicalypse );
 	if ( is_wp_error( $data ) ) {
@@ -343,6 +346,10 @@ function ntn_core_ajax_update_single_tag_igdb() {
 	if ( isset( $game['url'] ) ) {
 		update_term_meta( $tag_id, '_ntn_game_url', esc_url_raw( $game['url'] ) );
 	}
+	// ID Steam e stima degli introiti, aggiornata in secondo piano (inc/steam-revenue.php).
+	if ( function_exists( 'ntn_core_steam_after_igdb_sync' ) ) {
+		ntn_core_steam_after_igdb_sync( $tag_id, ntn_core_steam_appid_from_igdb( $game ) );
+	}
 
 	// Sincronizza anche con il CPT videogioco corrispondente se esiste
 	$tag = get_term( $tag_id, 'post_tag' );
@@ -420,6 +427,9 @@ function ntn_core_ajax_unlink_all_tags_igdb() {
 		'_ntn_game_screenshots',
 		'_ntn_game_url',
 	);
+	if ( function_exists( 'ntn_core_steam_meta_keys' ) ) {
+		$keys = array_merge( $keys, ntn_core_steam_meta_keys() ); // Senza gioco non resta nemmeno la stima Steam.
+	}
 
 	foreach ( $keys as $key ) {
 		// delete_metadata con $delete_all=true rimuove per tutti i term (gestendo la cache)

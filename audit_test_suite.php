@@ -6911,7 +6911,7 @@ $tp_safe = $tp_run( false );
 $tp_all  = $tp_run( true );
 assert_test(
 	false !== strpos( $tp_un, "defined( 'WP_UNINSTALL_PLUGIN' )" ) && 2 === count( $tp_safe['q'] ?? array() ) && array() === ( $tp_safe['del'] ?? null ) &&
-	array( 'ntn_async_prefetch_oembed', 'ntn_core_youtube_date_lookup' ) === ( $tp_safe['unsch'] ?? null ) &&
+	array( 'ntn_async_prefetch_oembed', 'ntn_core_youtube_date_lookup', 'ntn_core_steam_revenue_weekly', 'ntn_core_steam_revenue_batch' ) === ( $tp_safe['unsch'] ?? null ) &&
 	false !== strpos( ( $tp_safe['q'][0] ?? '' ) . ( $tp_safe['q'][1] ?? '' ), '[\_transient\_ntn\_%]' ) && false !== strpos( $tp_safe['q'][1] ?? '', '[\_transient\_timeout\_ntn\_%]' ),
 	'103.4: By default uninstall.php only removes the ntn_ transients (and their timeouts) and the scheduled jobs; no settings are touched (' . json_encode( $tp_safe ) . ')'
 );
@@ -7137,6 +7137,162 @@ assert_test(
 	false !== strpos( $mg_flat, "wp_ajax_ntn_migrate_tags_to_cpt'" ) && false !== strpos( $mg_flat, "wp_ajax_ntn_sync_franchises'" ) &&
 	2 === substr_count( $mg_flat, "check_ajax_referer( 'ntn_igdb_migrate_nonce', '_ajax_nonce' )" ) && 'OK' === $mg_node,
 	'109.2: admin-igdb-migration.js has no PHP, sends the nonce its two PHP handlers check (ntn_igdb_migrate_nonce) for migration and franchise sync, and is valid JavaScript (' . $mg_node . ')'
+);
+
+
+// --- TEST SUITE 110: introiti stimati su Steam, fase 1 (solo dati) ---
+echo "\n--- 110. INTROITI STIMATI SU STEAM (DATI) ---\n";
+if ( ! function_exists( 'delete_term_meta' ) ) {
+	function delete_term_meta( $term_id, $key ) { unset( $GLOBALS['mock_termmeta'][ (int) $term_id ][ $key ] ); return true; }
+}
+if ( ! function_exists( 'wp_schedule_event' ) ) {
+	function wp_schedule_event( $time, $recurrence, $hook, $args = array() ) { $GLOBALS['yt_scheduled'][] = array( $hook, $args ); return true; }
+}
+// IGDB: la funzione vera (ajax-igdb.php, già caricata) con credenziali e token finti e una finta risposta HTTP
+if ( ! function_exists( 'wp_remote_post' ) ) {
+	function wp_remote_post( $url, $args = array() ) {
+		$GLOBALS['st_igdb_q'][] = (string) ( $args['body'] ?? '' );
+		$answer = $GLOBALS['st_igdb_answer'];
+		return is_wp_error( $answer ) ? array( 'code' => 500, 'body' => '' ) : array( 'code' => 200, 'body' => json_encode( $answer ) );
+	}
+}
+$GLOBALS['mock_options']['ntn_igdb_client_id'] = 'ID-DI-PROVA';
+$GLOBALS['mock_options']['ntn_igdb_client_secret'] = 'SEGRETO-DI-PROVA';
+$GLOBALS['mock_transients']['ntn_igdb_access_token'] = 'TOKEN-DI-PROVA';
+$st_core = ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/';
+require_once $st_core . 'inc/steam-revenue.php';
+add_filter( 'ntn_core_steam_pause_seconds', static function () { return 0; } );
+
+// 110.1: ID Steam letto da IGDB (external_game_source = 1, vecchio "category" come ripiego)
+$st_ids = array(
+	ntn_core_steam_appid_from_igdb( array( 'external_games' => array( array( 'external_game_source' => 5, 'uid' => '999' ), array( 'external_game_source' => 1, 'uid' => '1245620' ) ) ) ),
+	ntn_core_steam_appid_from_igdb( array( 'external_games' => array( array( 'category' => 1, 'uid' => '367520' ) ) ) ),
+	ntn_core_steam_appid_from_igdb( array( 'external_games' => array( array( 'external_game_source' => 1, 'uid' => 'abc' ) ) ) ),
+	ntn_core_steam_appid_from_igdb( array( 'external_games' => array( array( 'external_game_source' => 26, 'uid' => '123' ) ) ) ),
+	ntn_core_steam_appid_from_igdb( array( 'name' => 'Senza negozi' ) ),
+	ntn_core_steam_appid_from_igdb( null ),
+);
+$st_igdb_src = ntn_t_read( $st_core . 'inc/ajax-igdb.php' ) . ntn_t_read( $st_core . 'inc/admin/igdb-ajax-handlers.php' );
+assert_test(
+	array( '1245620', '367520', '', '', '', '' ) === $st_ids &&
+	2 === substr_count( $st_igdb_src, 'screenshots.image_id, external_games.uid, external_games.external_game_source; where id = ' ) &&
+	false !== strpos( $st_igdb_src, "'ntn_igdb_game3_' . \$game_id" ) && false === strpos( $st_igdb_src, "'ntn_igdb_game2_'" ) &&
+	false !== strpos( $st_igdb_src, "ntn_core_steam_after_igdb_sync( \$tag_id, \$details['steam_appid'] )" ) && false !== strpos( $st_igdb_src, 'ntn_core_steam_after_igdb_sync( $tag_id, ntn_core_steam_appid_from_igdb( $game ) )' ) &&
+	2 === substr_count( $st_igdb_src, 'array_merge( $keys, ntn_core_steam_meta_keys() )' ),
+	'110.1: The Steam app id is read from IGDB external_games (source 1 = Steam, old "category" as fallback, digits only); both IGDB detail requests ask for it, the details cache moved to game3, linking/updating a game saves it, unlinking removes the Steam data'
+);
+
+// 110.2: calcolo (recensioni x 25..50 x prezzo x 0,5) e casi senza stima
+$st_er   = ntn_core_steam_estimate( 835772, 5999 );
+$st_hd   = ntn_core_steam_estimate( 100, 2499 );
+add_filter( 'ntn_core_steam_revenue_params', function ( $p ) { return array( 'copies_min' => 30, 'copies_max' => 10, 'net_share' => 3, 'min_reviews' => 0 ); } );
+$st_par  = ntn_core_steam_params();
+$GLOBALS['wp_filters']['ntn_core_steam_revenue_params'] = array();
+assert_test(
+	array( 'status' => 'ok', 'min' => 626724529, 'max' => 1253449057 ) === $st_er &&
+	array( 'status' => 'ok', 'min' => 31238, 'max' => 62475 ) === $st_hd &&
+	array( 'status' => 'free' ) === ntn_core_steam_estimate( 900000, 0, true ) && array( 'status' => 'no_price' ) === ntn_core_steam_estimate( 900000, 0 ) &&
+	array( 'status' => 'few_reviews' ) === ntn_core_steam_estimate( 49, 1999 ) && 'ok' === ntn_core_steam_estimate( 50, 1999 )['status'] &&
+	array( 'copies_min' => 30, 'copies_max' => 30, 'net_share' => 1.0, 'min_reviews' => 1 ) === $st_par && 25 === ntn_core_steam_params()['copies_min'],
+	'110.2: Estimate = reviews x 25..50 x list price x 0.5; free, priceless and under-50-review games get no estimate; the numbers can be changed with a filter but stay sane (max >= min, share <= 1)'
+);
+
+// 110.3: lettura delle risposte di Steam (recensioni a lotti con GetItems, prezzi a lotti con appdetails)
+$GLOBALS['yt_requests'] = array();
+$GLOBALS['yt_response'] = array( 'code' => 200, 'body' => '{"response":{"store_items":[{"appid":1245620,"success":1,"reviews":{"summary_filtered":{"review_count":835772}}},{"appid":570,"success":1,"is_free":true,"reviews":{"summary_filtered":{"review_count":2813195}}},{"id":42,"success":2}]}}' );
+$st_rev = ntn_core_steam_fetch_reviews( array( 1245620, '570', 42, 'x', 1245620 ) );
+$st_rev_url = $GLOBALS['yt_requests'][0][0] ?? '';
+$GLOBALS['yt_response'] = array( 'code' => 200, 'body' => '{"1245620":{"success":true,"data":{"price_overview":{"currency":"USD","initial":5999,"final":2999}}},"570":{"success":true,"data":[]},"77":{"success":true,"data":{"price_overview":{"currency":"EUR","initial":1999}}},"42":{"success":false}}' );
+$st_pri = ntn_core_steam_fetch_prices( array( 1245620, 570, 77, 42 ) );
+$st_pri_url = $GLOBALS['yt_requests'][1][0] ?? '';
+$st_pri_args = $GLOBALS['yt_requests'][1][1] ?? array();
+$GLOBALS['yt_response'] = array( 'code' => 302, 'body' => '' );
+$st_redirect = ntn_core_steam_fetch_reviews( array( 1 ) );
+$GLOBALS['yt_response'] = array( 'code' => 200, 'body' => '<!DOCTYPE html><html>Welcome to Steam</html>' );
+$st_html = ntn_core_steam_fetch_prices( array( 1 ) );
+assert_test(
+	array( 1245620 => array( 'found' => true, 'reviews' => 835772, 'is_free' => false ), 570 => array( 'found' => true, 'reviews' => 2813195, 'is_free' => true ), 42 => array( 'found' => false, 'reviews' => 0, 'is_free' => false ) ) === $st_rev &&
+	0 === strpos( $st_rev_url, 'https://api.steampowered.com/IStoreBrowseService/GetItems/v1/?input_json=' ) && false !== strpos( urldecode( $st_rev_url ), '"ids":[{"appid":1245620},{"appid":570},{"appid":42}]' ) && false !== strpos( urldecode( $st_rev_url ), '"include_reviews":true' ) &&
+	array( 1245620 => array( 'found' => true, 'price' => 5999 ), 570 => array( 'found' => true, 'price' => 0 ), 77 => array( 'found' => true, 'price' => 0 ), 42 => array( 'found' => false, 'price' => 0 ) ) === $st_pri &&
+	'https://store.steampowered.com/api/appdetails?appids=1245620,570,77,42&cc=us&filters=price_overview' === $st_pri_url && 8 === ( $st_pri_args['timeout'] ?? 0 ) && 0 === ( $st_pri_args['redirection'] ?? -1 ) &&
+	is_wp_error( $st_redirect ) && is_wp_error( $st_html ) && array() === ntn_core_steam_fetch_reviews( array() ) && array() === ntn_core_steam_fetch_prices( array( 0, -3 ) ) && 4 === count( $GLOBALS['yt_requests'] ),
+	'110.3: Reviews come in one GetItems request for the whole batch, list prices (USD, not the discounted price) in one appdetails request; free, missing and non-USD games are recognised; redirects and HTML pages are errors; short timeout, no request for an empty list'
+);
+
+// 110.4: salvataggio dell'esito sul tag del gioco
+// (la finta richiesta HTTP del test 94 dà sempre la stessa risposta, quindi le due richieste si provano una per volta)
+$GLOBALS['mock_termmeta'][9601] = array( '_ntn_igdb_game_id' => 119133 );                                       // Elden Ring
+$GLOBALS['mock_termmeta'][9602] = array( '_ntn_igdb_game_id' => 113112, '_ntn_core_steam_appid' => '1145360' ); // Hades, poche recensioni (finte)
+$GLOBALS['mock_termmeta'][9603] = array( '_ntn_igdb_game_id' => 5555 );                                         // Non su Steam
+$GLOBALS['mock_termmeta'][9604] = array( '_ntn_igdb_game_id' => 120, '_ntn_core_steam_appid' => '10', '_ntn_core_steam_rev_status' => 'ok', '_ntn_core_steam_rev_min' => 5, '_ntn_core_steam_rev_max' => 9 );
+$GLOBALS['st_resp_queue'] = array(
+	array( 'code' => 200, 'body' => '{"response":{"store_items":[{"appid":1245620,"success":1,"reviews":{"summary_filtered":{"review_count":835772}}},{"appid":1145360,"success":1,"reviews":{"summary_filtered":{"review_count":30}}},{"appid":10,"success":1,"reviews":{"summary_filtered":{"review_count":1000}}}]}}' ),
+	array( 'code' => 200, 'body' => '{"1245620":{"success":true,"data":{"price_overview":{"currency":"USD","initial":5999}}},"1145360":{"success":true,"data":{"price_overview":{"currency":"USD","initial":2499}}},"10":{"success":false}}' ),
+);
+$GLOBALS['yt_response'] = $GLOBALS['st_resp_queue'][0];
+$st_rev_b = ntn_core_steam_fetch_reviews( array( 1245620, 1145360, 10 ) );
+$GLOBALS['yt_response'] = $GLOBALS['st_resp_queue'][1];
+$st_pri_b = ntn_core_steam_fetch_prices( array( 1245620, 1145360, 10 ) );
+$st_now = time();
+foreach ( array( 9601 => 1245620, 9602 => 1145360, 9604 => 10 ) as $st_t => $st_a ) {
+	if ( 9601 === $st_t ) {
+		ntn_core_steam_save_appid( 9601, '1245620' );
+	}
+	ntn_core_steam_store_result( $st_t, $st_rev_b[ $st_a ], $st_pri_b[ $st_a ], $st_now );
+}
+$st_m = $GLOBALS['mock_termmeta'];
+assert_test(
+	'ok' === $st_m[9601]['_ntn_core_steam_rev_status'] && $st_er['min'] === $st_m[9601]['_ntn_core_steam_rev_min'] && $st_er['max'] === $st_m[9601]['_ntn_core_steam_rev_max'] &&
+	835772 === $st_m[9601]['_ntn_core_steam_reviews'] && 5999 === $st_m[9601]['_ntn_core_steam_price'] && $st_now === $st_m[9601]['_ntn_core_steam_rev_updated'] &&
+	'few_reviews' === $st_m[9602]['_ntn_core_steam_rev_status'] && ! isset( $st_m[9602]['_ntn_core_steam_rev_min'] ) &&
+	'not_found' === $st_m[9604]['_ntn_core_steam_rev_status'] && ! isset( $st_m[9604]['_ntn_core_steam_rev_min'], $st_m[9604]['_ntn_core_steam_rev_max'] ),
+	'110.4: Results are stored on the game tag: the estimate with reviews, price and date when there is one; no min/max when there are too few reviews or Steam does not know the game (an old estimate is removed)'
+);
+
+// 110.5: giro del lotto con IGDB: gli ID mancanti in una sola richiesta, i giochi non su Steam segnati "no_appid"
+$GLOBALS['mock_termmeta'][9601] = array( '_ntn_igdb_game_id' => 119133 );
+$GLOBALS['mock_termmeta'][9606] = array( '_ntn_igdb_game_id' => 0 );
+$GLOBALS['st_igdb_q'] = array();
+$GLOBALS['yt_requests'] = array();
+$GLOBALS['st_igdb_answer'] = array( array( 'id' => 5555, 'external_games' => array() ) );
+$st_only_none = ntn_core_steam_refresh_terms( array( 9603, 9606, '9603' ) );
+$st_m = $GLOBALS['mock_termmeta'];
+$st_q_none = $GLOBALS['st_igdb_q'];
+$GLOBALS['st_igdb_answer'] = new WP_Error( 'ntn_igdb_http', 'IGDB giù' );
+$GLOBALS['mock_termmeta'][9601] = array( '_ntn_igdb_game_id' => 119133, '_ntn_core_steam_rev_status' => 'ok', '_ntn_core_steam_rev_min' => 7, '_ntn_core_steam_rev_max' => 8 );
+$st_err = ntn_core_steam_refresh_terms( array( 9601 ) );
+assert_test(
+	2 === $st_only_none && array( 'fields id, external_games.uid, external_games.external_game_source; where id = (5555); limit 1;' ) === $st_q_none && 0 === count( $GLOBALS['yt_requests'] ) &&
+	'none' === $st_m[9603]['_ntn_core_steam_appid'] && 'no_appid' === $st_m[9603]['_ntn_core_steam_rev_status'] && 'none' === $st_m[9606]['_ntn_core_steam_appid'] && 'no_appid' === $st_m[9606]['_ntn_core_steam_rev_status'] &&
+	is_wp_error( $st_err ) && 7 === $GLOBALS['mock_termmeta'][9601]['_ntn_core_steam_rev_min'] && ! isset( $GLOBALS['mock_termmeta'][9601]['_ntn_core_steam_rev_updated'] ),
+	'110.5: Missing Steam ids are asked to IGDB in one request; games not on Steam are marked "no_appid" without asking Steam; when IGDB does not answer nothing is overwritten (the old estimate stays, the game is retried)'
+);
+
+// 110.6: lettura per il tema (mai richieste esterne), ID che cambia, coda dopo un collegamento IGDB, giro settimanale
+$GLOBALS['mock_termmeta'][9610] = array( '_ntn_core_steam_appid' => '1245620', '_ntn_core_steam_rev_status' => 'ok', '_ntn_core_steam_rev_min' => 100, '_ntn_core_steam_rev_max' => 200, '_ntn_core_steam_reviews' => 80, '_ntn_core_steam_price' => 1999, '_ntn_core_steam_rev_updated' => 1700000000 );
+$GLOBALS['mock_termmeta'][9611] = array( '_ntn_core_steam_rev_status' => 'ok', '_ntn_core_steam_rev_min' => 300, '_ntn_core_steam_rev_max' => 200 );
+$GLOBALS['mock_termmeta'][9612] = array( '_ntn_core_steam_rev_status' => 'free' );
+$GLOBALS['yt_requests'] = array();
+$st_read = ntn_core_steam_revenue( 9610 );
+$st_bad  = array( ntn_core_steam_revenue( 9611 ), ntn_core_steam_revenue( 9612 ), ntn_core_steam_revenue( 0 ), ntn_core_steam_revenue( 424242 ) );
+$GLOBALS['yt_scheduled'] = array();
+ntn_core_steam_after_igdb_sync( 9610, '1145360' );
+ntn_core_steam_after_igdb_sync( 9612, '' );
+$st_m = $GLOBALS['mock_termmeta'];
+$st_sched = $GLOBALS['yt_scheduled'];
+ntn_core_steam_schedule();
+ntn_core_steam_schedule();
+$st_src = ntn_t_read( $st_core . 'inc/steam-revenue.php' );
+$st_main = ntn_t_read( $st_core . 'ntn-journal-core.php' );
+assert_test(
+	array( 'min' => 100, 'max' => 200, 'reviews' => 80, 'price' => 19.99, 'appid' => '1245620', 'updated' => 1700000000 ) === $st_read && array( null, null, null, null ) === $st_bad && 0 === count( $GLOBALS['yt_requests'] ) &&
+	'1145360' === $st_m[9610]['_ntn_core_steam_appid'] && ! isset( $st_m[9610]['_ntn_core_steam_rev_min'] ) && 0 === $st_m[9610]['_ntn_core_steam_rev_updated'] && 'none' === $st_m[9612]['_ntn_core_steam_appid'] &&
+	false !== strpos( $st_src, "ORDER BY MIN( CAST( COALESCE( u.meta_value, '1' ) AS UNSIGNED ) ) ASC" ) &&
+	array( array( NTN_CORE_STEAM_BATCH_HOOK, array() ) ) === $st_sched && array( NTN_CORE_STEAM_WEEKLY_HOOK, array() ) === ( $GLOBALS['yt_scheduled'][1] ?? null ) && 2 === count( $GLOBALS['yt_scheduled'] ) &&
+	false !== strpos( $st_main, "require_once NTN_JOURNAL_CORE_DIR . 'inc/steam-revenue.php';" ) &&
+	false !== strpos( $st_src, "add_action( NTN_CORE_STEAM_WEEKLY_HOOK, 'ntn_core_steam_run_batch' );" ) && false !== strpos( $st_src, "add_action( NTN_CORE_STEAM_BATCH_HOOK, 'ntn_core_steam_run_batch' );" ) &&
+	false !== strpos( $st_src, "'weekly', NTN_CORE_STEAM_WEEKLY_HOOK" ) && false !== strpos( $st_src, "add_action( 'admin_init', 'ntn_core_steam_schedule' );" ) && false === strpos( $st_src, "add_action( 'wp'" ) && false === strpos( $st_src, 'template_redirect' ),
+	'110.6: The theme reader returns the saved estimate only when it is valid and never calls Steam; a new Steam id drops the old estimate; an IGDB sync queues one background batch; the weekly job is scheduled once, from the admin only'
 );
 
 

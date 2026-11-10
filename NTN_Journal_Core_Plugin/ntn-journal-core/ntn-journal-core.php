@@ -66,6 +66,7 @@ require_once NTN_JOURNAL_CORE_DIR . 'inc/site-optimizations.php'; // v4.20.0: ot
 require_once NTN_JOURNAL_CORE_DIR . 'inc/png-thumbnail-repair.php'; // v4.21.0: riparazione delle miniature dei PNG trasparenti
 require_once NTN_JOURNAL_CORE_DIR . 'inc/youtube-upload-date.php'; // v4.22.0: data vera di caricamento dei trailer YouTube
 require_once NTN_JOURNAL_CORE_DIR . 'inc/image-report.php'; // v4.23.0: rapporto di sola lettura sulle immagini
+require_once NTN_JOURNAL_CORE_DIR . 'inc/steam-revenue.php'; // Introiti stimati su Steam (dati salvati, aggiornati in secondo piano)
 require_once NTN_JOURNAL_CORE_DIR . 'inc/ajax-igdb.php';
 require_once NTN_JOURNAL_CORE_DIR . 'inc/igdb-tag-scanner.php';
 require_once NTN_JOURNAL_CORE_DIR . 'inc/igdb-seo-routing.php';
