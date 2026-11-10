@@ -14,8 +14,8 @@ La scheda ha lo stesso aspetto di prima.
 - Nuova suite 107 (107.1): la vista non ha `<style>` né `style=`; le tre regole sono in `admin.css`; `admin.css` si carica nella pagina del pannello.
 - Suite: 640 test, 0 falliti. Versione 4.30.0 nei 4 header e nei controlli 24.x e 29.1.
 
-### Cosa resta
-Gli attributi `style="..."` scritti riga per riga nelle altre schede (circa 280): vedi la proposta nel messaggio di rilascio. Sono i meno urgenti: WordPress non li vieta, e spostarli può cambiare l'aspetto se una regola del pannello li batte in specificità.
+### Cosa resta (deciso: si lascia)
+Gli attributi `style="..."` scritti riga per riga nelle altre schede (circa 280) restano come sono: WordPress non li vieta, e spostarli poteva cambiare l'aspetto del pannello (una regola del pannello può batterli in specificità, come succede per `max-width` sulle schede) senza dare niente di visibile. Restano da spostare tre piccoli script dentro riquadri del pannello: pulizia PNG (`png-thumbnail-repair.php`, 80 righe), rapporto sulle immagini (`image-report.php`, 70) e migrazione IGDB (`migrazione-igdb.php`, 62), nelle prossime versioni. I blocchi `application/ld+json` (dati strutturati per Google) restano dove sono: sono dati, non codice.
 
 ### Ordine di installazione
 Plugin, poi tema parent, poi child. (I temi sono solo ribattezzati 4.30.0.)
