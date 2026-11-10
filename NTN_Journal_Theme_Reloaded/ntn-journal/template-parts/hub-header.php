@@ -144,11 +144,11 @@ $release_text = ! empty( $igdb_info['release'] ) ? ntn_journal_release_label( $i
 						<?php if ( $hub_counts['latest'] ) : ?>
 							<span><b><?php echo esc_html( $hub_counts['latest'] ); ?></b>Ultimo articolo</span>
 						<?php endif; ?>
-						<?php if ( ! empty( $hub_steam['range'] ) ) : ?>
-							<span class="ntn-gcounts-steam"><b><?php echo esc_html( $hub_steam['range'] ); ?></b>Introiti stimati su Steam*</span>
+						<?php if ( ! empty( $hub_steam['label'] ) ) : ?>
+							<span class="ntn-gcounts-steam"><b><?php echo esc_html( $hub_steam['label'] ); ?></b>Introiti stimati su Steam*</span>
 						<?php endif; ?>
 					</div>
-					<?php if ( ! empty( $hub_steam['range'] ) ) : ?>
+					<?php if ( ! empty( $hub_steam['label'] ) ) : ?>
 						<p class="ntn-gcounts-note">* Stima basata sulle recensioni Steam · solo versione PC · non è un dato ufficiale</p>
 					<?php endif; ?>
 				<?php endif; ?>

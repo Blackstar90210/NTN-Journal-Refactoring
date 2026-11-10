@@ -5,7 +5,9 @@
  * Per ogni gioco (tag con i dati IGDB) il plugin salva una stima degli incassi netti su Steam:
  * - l'ID Steam del gioco arriva da IGDB (external_games con external_game_source = 1, cioè Steam);
  * - il numero di recensioni e il prezzo di listino in dollari arrivano da Steam, senza chiave API;
- * - copie vendute: da recensioni x 25 a recensioni x 50 (metodo di Boxleiter);
+ * - copie vendute: recensioni x 36 (metodo di Boxleiter). Si mostra un solo valore "circa": un intervallo
+ *   (prima x 25..50) era troppo largo da leggere. COPIES_MIN e COPIES_MAX restano per chi volesse di nuovo
+ *   un intervallo: il sito mostra comunque il valore centrale;
  * - incasso netto: copie x prezzo x 0,295. Come steam-revenue-calculator.com: dal lordo si tolgono
  *   prezzi regionali (-9%), sconti (-20%) e rimborsi (-12%), e resta 0,59 del lordo; da questo resto
  *   si tolgono la quota di Steam (30%) e l'IVA (20%), e ne resta metà: 0,59 x 0,5 = 0,295.
@@ -23,11 +25,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+if ( ! defined( 'NTN_CORE_STEAM_COPIES' ) ) {
+	define( 'NTN_CORE_STEAM_COPIES', 36 ); // Copie vendute per ogni recensione.
+}
 if ( ! defined( 'NTN_CORE_STEAM_COPIES_MIN' ) ) {
-	define( 'NTN_CORE_STEAM_COPIES_MIN', 25 ); // Copie per recensione, stima bassa.
+	define( 'NTN_CORE_STEAM_COPIES_MIN', NTN_CORE_STEAM_COPIES ); // Uguale a COPIES: niente intervallo.
 }
 if ( ! defined( 'NTN_CORE_STEAM_COPIES_MAX' ) ) {
-	define( 'NTN_CORE_STEAM_COPIES_MAX', 50 ); // Copie per recensione, stima alta.
+	define( 'NTN_CORE_STEAM_COPIES_MAX', NTN_CORE_STEAM_COPIES );
 }
 if ( ! defined( 'NTN_CORE_STEAM_NET_SHARE' ) ) {
 	define( 'NTN_CORE_STEAM_NET_SHARE', 0.295 ); // Parte del lordo che resta come incasso netto (vedi in alto).
@@ -528,32 +533,23 @@ function ntn_core_steam_money_short( $dollars ) {
 }
 
 /**
- * L'intervallo per l'intestazione della Hub, con una sola unità: "0,6-1,3 mld $", "95-191 mln $",
- * "4,2-8,4 mln $", "86-172 mila $".
+ * Il valore "circa" per l'intestazione della Hub: "~576 mln $", "~1,2 mld $", "~4,2 mln $", "~86 mila $".
  *
- * @param int $min Dollari, minimo.
- * @param int $max Dollari, massimo.
+ * @param int $dollars Dollari.
  * @return string
  */
-function ntn_core_steam_range_short( $min, $max ) {
-	$min = (int) $min;
-	$max = (int) $max;
-	if ( $max >= 1000000000 ) {
-		$div      = 1000000000;
-		$unit     = 'mld';
-		$decimals = 1;
-	} elseif ( $max >= 1000000 ) {
-		$div      = 1000000;
-		$unit     = 'mln';
-		$decimals = $max >= 10000000 ? 0 : 1;
-	} elseif ( $max >= 1000 ) {
-		$div      = 1000;
-		$unit     = 'mila';
-		$decimals = 0;
-	} else {
-		return number_format_i18n( $min ) . '-' . number_format_i18n( $max ) . ' $';
+function ntn_core_steam_amount_short( $dollars ) {
+	$dollars = (int) $dollars;
+	if ( $dollars >= 1000000000 ) {
+		return '~' . number_format_i18n( $dollars / 1000000000, 1 ) . ' mld $';
 	}
-	return number_format_i18n( $min / $div, $decimals ) . '-' . number_format_i18n( $max / $div, $decimals ) . ' ' . $unit . ' $';
+	if ( $dollars >= 1000000 ) {
+		return '~' . number_format_i18n( $dollars / 1000000, $dollars >= 10000000 ? 0 : 1 ) . ' mln $';
+	}
+	if ( $dollars >= 1000 ) {
+		return '~' . number_format_i18n( $dollars / 1000 ) . ' mila $';
+	}
+	return '~' . number_format_i18n( $dollars ) . ' $';
 }
 
 /**
@@ -579,8 +575,8 @@ function ntn_core_steam_admin_cell( $term_id ) {
 
 	$revenue = ntn_core_steam_revenue( $term_id );
 	if ( $revenue ) {
-		$main  = '<strong>' . esc_html( ntn_core_steam_money_short( $revenue['min'] ) . ' – ' . ntn_core_steam_money_short( $revenue['max'] ) ) . '</strong>';
-		$title = '$' . number_format_i18n( $revenue['min'] ) . ' – $' . number_format_i18n( $revenue['max'] ) . ' netti';
+		$main  = '<strong>~' . esc_html( ntn_core_steam_money_short( $revenue['value'] ) ) . '</strong>';
+		$title = 'circa $' . number_format_i18n( $revenue['value'] ) . ' netti';
 		$info  = number_format_i18n( $revenue['reviews'] ) . ' recensioni · $' . number_format_i18n( $revenue['price'], 2 );
 	} elseif ( isset( $reasons[ $status ] ) ) {
 		$main  = '<span style="opacity: .75;">' . esc_html( $reasons[ $status ] ) . '</span>';
@@ -609,8 +605,8 @@ function ntn_core_steam_admin_cell( $term_id ) {
  * Non fa mai richieste esterne.
  *
  * @param int $term_id ID del tag del gioco.
- * @return array|null array( 'min', 'max' (dollari), 'reviews', 'price' (dollari), 'appid', 'updated' ),
- *                    oppure null se per quel gioco non c'è una stima.
+ * @return array|null array( 'value' (dollari, il valore mostrato: il centro tra min e max), 'min', 'max',
+ *                    'reviews', 'price' (dollari), 'appid', 'updated' ), oppure null se non c'è una stima.
  */
 function ntn_core_steam_revenue( $term_id ) {
 	$term_id = (int) $term_id;
@@ -623,6 +619,7 @@ function ntn_core_steam_revenue( $term_id ) {
 		return null;
 	}
 	return array(
+		'value'   => (int) round( ( $min + $max ) / 2 ),
 		'min'     => $min,
 		'max'     => $max,
 		'reviews' => (int) get_term_meta( $term_id, '_ntn_core_steam_reviews', true ),

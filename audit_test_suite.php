@@ -7182,20 +7182,20 @@ assert_test(
 	'110.1: The Steam app id is read from IGDB external_games (source 1 = Steam, old "category" as fallback, digits only); both IGDB detail requests ask for it, the details cache moved to game3, linking/updating a game saves it, unlinking removes the Steam data'
 );
 
-// 110.2: calcolo (recensioni x 25..50 x prezzo x 0,5) e casi senza stima
+// 110.2: calcolo (recensioni x 36 x prezzo x 0,295) e casi senza stima
 $st_er   = ntn_core_steam_estimate( 835772, 5999 );
 $st_hd   = ntn_core_steam_estimate( 100, 2499 );
 add_filter( 'ntn_core_steam_revenue_params', function ( $p ) { return array( 'copies_min' => 30, 'copies_max' => 10, 'net_share' => 3, 'min_reviews' => 0 ); } );
 $st_par  = ntn_core_steam_params();
 $GLOBALS['wp_filters']['ntn_core_steam_revenue_params'] = array();
 assert_test(
-	array( 'status' => 'ok', 'min' => 369767472, 'max' => 739534944 ) === $st_er &&
-	array( 'status' => 'ok', 'min' => 18430, 'max' => 36860 ) === $st_hd && 0.295 === NTN_CORE_STEAM_NET_SHARE &&
-	array( 'status' => 'ok', 'min' => 399679026, 'max' => 799358051 ) === ntn_core_steam_estimate( 903380, 5999 ) &&
+	array( 'status' => 'ok', 'min' => 532465159, 'max' => 532465159 ) === $st_er &&
+	array( 'status' => 'ok', 'min' => 26539, 'max' => 26539 ) === $st_hd && 0.295 === NTN_CORE_STEAM_NET_SHARE &&
+	array( 'status' => 'ok', 'min' => 575537797, 'max' => 575537797 ) === ntn_core_steam_estimate( 903380, 5999 ) && 36 === NTN_CORE_STEAM_COPIES &&
 	array( 'status' => 'free' ) === ntn_core_steam_estimate( 900000, 0, true ) && array( 'status' => 'no_price' ) === ntn_core_steam_estimate( 900000, 0 ) &&
 	array( 'status' => 'few_reviews' ) === ntn_core_steam_estimate( 49, 1999 ) && 'ok' === ntn_core_steam_estimate( 50, 1999 )['status'] &&
-	array( 'copies_min' => 30, 'copies_max' => 30, 'net_share' => 1.0, 'min_reviews' => 1 ) === $st_par && 25 === ntn_core_steam_params()['copies_min'],
-	'110.2: Estimate = reviews x 25..50 x list price x 0.295 (Cyberpunk 2077: 400-800 million, like steam-revenue-calculator.com 767 million); free, priceless and under-50-review games get no estimate; the numbers can be changed with a filter but stay sane (max >= min, share <= 1)'
+	array( 'copies_min' => 30, 'copies_max' => 30, 'net_share' => 1.0, 'min_reviews' => 1 ) === $st_par && 36 === ntn_core_steam_params()['copies_min'] && 36 === ntn_core_steam_params()['copies_max'],
+	'110.2: Estimate = reviews x 36 x list price x 0.295, one value (Cyberpunk 2077: about 576 million; steam-revenue-calculator.com says 767 million); free, priceless and under-50-review games get no estimate; the numbers can be changed with a filter but stay sane (max >= min, share <= 1)'
 );
 
 // 110.3: lettura delle risposte di Steam (recensioni a lotti con GetItems, prezzi a lotti con appdetails)
@@ -7286,7 +7286,7 @@ ntn_core_steam_schedule();
 $st_src = ntn_t_read( $st_core . 'inc/steam-revenue.php' );
 $st_main = ntn_t_read( $st_core . 'ntn-journal-core.php' );
 assert_test(
-	array( 'min' => 100, 'max' => 200, 'reviews' => 80, 'price' => 19.99, 'appid' => '1245620', 'updated' => 1700000000 ) === $st_read && array( null, null, null, null ) === $st_bad && 0 === count( $GLOBALS['yt_requests'] ) &&
+	array( 'value' => 150, 'min' => 100, 'max' => 200, 'reviews' => 80, 'price' => 19.99, 'appid' => '1245620', 'updated' => 1700000000 ) === $st_read && array( null, null, null, null ) === $st_bad && 0 === count( $GLOBALS['yt_requests'] ) &&
 	'1145360' === $st_m[9610]['_ntn_core_steam_appid'] && ! isset( $st_m[9610]['_ntn_core_steam_rev_min'] ) && 0 === $st_m[9610]['_ntn_core_steam_rev_updated'] && 'none' === $st_m[9612]['_ntn_core_steam_appid'] &&
 	false !== strpos( $st_src, "ORDER BY MIN( CAST( COALESCE( u.meta_value, '1' ) AS UNSIGNED ) ) ASC" ) &&
 	array( array( NTN_CORE_STEAM_BATCH_HOOK, array() ) ) === $st_sched && array( NTN_CORE_STEAM_WEEKLY_HOOK, array() ) === ( $GLOBALS['yt_scheduled'][1] ?? null ) && 2 === count( $GLOBALS['yt_scheduled'] ) &&
@@ -7297,7 +7297,7 @@ assert_test(
 );
 
 // 110.7: colonna di sola lettura nella scheda IGDB (tabella dei tag collegati)
-$GLOBALS['mock_termmeta'][9620] = array( '_ntn_core_steam_appid' => '1091500', '_ntn_core_steam_rev_status' => 'ok', '_ntn_core_steam_rev_min' => 677422078, '_ntn_core_steam_rev_max' => 1354844155, '_ntn_core_steam_reviews' => 903380, '_ntn_core_steam_price' => 5999, '_ntn_core_steam_rev_updated' => gmmktime( 12, 0, 0, 11, 10, 2026 ) );
+$GLOBALS['mock_termmeta'][9620] = array( '_ntn_core_steam_appid' => '1091500', '_ntn_core_steam_rev_status' => 'ok', '_ntn_core_steam_rev_min' => 575537797, '_ntn_core_steam_rev_max' => 575537797, '_ntn_core_steam_reviews' => 903380, '_ntn_core_steam_price' => 5999, '_ntn_core_steam_rev_updated' => gmmktime( 12, 0, 0, 11, 10, 2026 ) );
 $GLOBALS['mock_termmeta'][9621] = array( '_ntn_core_steam_appid' => '3985330', '_ntn_core_steam_rev_status' => 'few_reviews', '_ntn_core_steam_reviews' => 12, '_ntn_core_steam_rev_updated' => gmmktime( 12, 0, 0, 11, 10, 2026 ) );
 $GLOBALS['mock_termmeta'][9622] = array( '_ntn_core_steam_appid' => 'none', '_ntn_core_steam_rev_status' => 'no_appid', '_ntn_core_steam_rev_updated' => 1 );
 $GLOBALS['mock_termmeta'][9623] = array( '_ntn_core_steam_rev_status' => '<script>x</script>' );
@@ -7313,7 +7313,7 @@ $GLOBALS['mock_termmeta'][9612]['_ntn_core_steam_rev_status'] = 'no_price';
 $st_cell_np = ntn_core_steam_admin_cell( 9612 );
 $st_hand = ntn_t_read( $st_core . 'inc/admin/igdb-ajax-handlers.php' );
 assert_test(
-	false !== strpos( $st_cells[0], '<strong>$677,4 mln – $1,35 mld</strong>' ) && false !== strpos( $st_cells[0], 'title="$677.422.078 – $1.354.844.155 netti"' ) &&
+	false !== strpos( $st_cells[0], '<strong>~$575,5 mln</strong>' ) && false !== strpos( $st_cells[0], 'title="circa $575.537.797 netti"' ) &&
 	false !== strpos( $st_cells[0], '903.380 recensioni · $59,99 · aggiornata il 10/11/2026 · Steam 1091500' ) &&
 	false !== strpos( $st_cells[1], 'Poche recensioni (12, ne servono 50)' ) && false !== strpos( $st_cells[2], 'Non su Steam' ) && false === strpos( $st_cells[2], 'Steam none' ) &&
 	false !== strpos( $st_cells[3], 'In attesa del primo controllo' ) && false === strpos( $st_cells[3], '<script' ) && false !== strpos( $st_cells[5], 'In attesa del primo controllo' ) &&
@@ -7321,7 +7321,7 @@ assert_test(
 	'$86 mila' === ntn_core_steam_money_short( 86224 ) && '$95,3 mln' === ntn_core_steam_money_short( 95259576 ) && '$1,25 mld' === ntn_core_steam_money_short( 1253449057 ) && '$950' === ntn_core_steam_money_short( 950 ) &&
 	0 === count( $GLOBALS['yt_requests'] ) &&
 	false !== strpos( $st_hand, "'<th>Introiti Steam (stima netta)</th>'" ) && false !== strpos( $st_hand, "'<td>' . ntn_core_steam_admin_cell( \$term->term_id ) . '</td>'" ) && false !== strpos( $st_hand, "colspan=\"' . ( \$steam_col ? 6 : 5 ) . '\"" ),
-	'110.7: The IGDB tab table gets a read-only "Introiti Steam" column: short range with the full figures on hover, reviews, price, date and Steam id; for games without an estimate the reason (free, no price, not on Steam, few reviews, not found, not checked yet); no requests, unknown values never printed'
+	'110.7: The IGDB tab table gets a read-only "Introiti Steam" column: one approximate value with the full figure on hover, reviews, price, date and Steam id; for games without an estimate the reason (free, no price, not on Steam, few reviews, not found, not checked yet); no requests, unknown values never printed'
 );
 
 // 110.8: voce nell'intestazione della Hub (fase 2): dati salvati, riserva vuota nel tema, nessun dato per Google
@@ -7341,16 +7341,16 @@ file_put_contents( $st_fb_tmp, "<?php\ndefine( 'ABSPATH', '/' );\nfunction get_t
 $st_fb_out = trim( (string) shell_exec( escapeshellarg( PHP_BINARY ) . ' ' . escapeshellarg( $st_fb_tmp ) . ' 2>&1' ) );
 @unlink( $st_fb_tmp );
 assert_test(
-	'0,7-1,4 mld $' === ( $st_hub_ok['range'] ?? '' ) && 677422078 === ( $st_hub_ok['min'] ?? 0 ) && $st_hub_ok === $st_hub_term && array( array(), array(), array() ) === $st_hub_none && 0 === count( $GLOBALS['yt_requests'] ) &&
-	'95-191 mln $' === ntn_core_steam_range_short( 95259576, 190519153 ) && '4,2-8,4 mln $' === ntn_core_steam_range_short( 4200000, 8400000 ) && '86-172 mila $' === ntn_core_steam_range_short( 86224, 172449 ) && '600-900 $' === ntn_core_steam_range_short( 600, 900 ) &&
+	'~576 mln $' === ( $st_hub_ok['label'] ?? '' ) && 575537797 === ( $st_hub_ok['value'] ?? 0 ) && $st_hub_ok === $st_hub_term && array( array(), array(), array() ) === $st_hub_none && 0 === count( $GLOBALS['yt_requests'] ) &&
+	'~81 mln $' === ntn_core_steam_amount_short( 80932536 ) && '~4,2 mln $' === ntn_core_steam_amount_short( 4200000 ) && '~86 mila $' === ntn_core_steam_amount_short( 86224 ) && '~1,0 mld $' === ntn_core_steam_amount_short( 1016133117 ) && '~600 $' === ntn_core_steam_amount_short( 600 ) &&
 	'[]' === $st_fb_out && false !== strpos( $st_fall, "if ( ! function_exists( 'ntn_journal_get_steam_revenue' ) ) {\n\tfunction ntn_journal_get_steam_revenue(" ) &&
 	strpos( $st_gd, "if ( ! function_exists( 'ntn_journal_get_steam_revenue' ) ) :" ) < strpos( $st_gd, 'function ntn_journal_get_steam_revenue(' ),
-	'110.8: The Hub header reads the saved estimate through ntn_journal_get_steam_revenue() (plugin, guarded) as one short range ("0,7-1,4 mld $"), never calling Steam; without an estimate or without the plugin (theme fallback) it gets nothing (' . $st_fb_out . ')'
+	'110.8: The Hub header reads the saved estimate through ntn_journal_get_steam_revenue() (plugin, guarded) as one approximate value ("~576 mln $"), never calling Steam; without an estimate or without the plugin (theme fallback) it gets nothing (' . $st_fb_out . ')'
 );
 assert_test(
 	false !== strpos( $st_hub, '$hub_steam = $hub_tag instanceof WP_Term ? ntn_journal_get_steam_revenue( $hub_tag ) : array();' ) &&
-	2 === substr_count( $st_hub, "<?php if ( ! empty( \$hub_steam['range'] ) ) : ?>" ) &&
-	false !== strpos( $st_hub, "<span class=\"ntn-gcounts-steam\"><b><?php echo esc_html( \$hub_steam['range'] ); ?></b>Introiti stimati su Steam*</span>" ) &&
+	2 === substr_count( $st_hub, "<?php if ( ! empty( \$hub_steam['label'] ) ) : ?>" ) &&
+	false !== strpos( $st_hub, "<span class=\"ntn-gcounts-steam\"><b><?php echo esc_html( \$hub_steam['label'] ); ?></b>Introiti stimati su Steam*</span>" ) &&
 	false !== strpos( $st_hub, '<p class="ntn-gcounts-note">* Stima basata sulle recensioni Steam · solo versione PC · non è un dato ufficiale</p>' ) &&
 	false !== strpos( $st_in, '.ntn-gcounts .ntn-gcounts-steam b { color: var(--ntn-band-accent);' ) && false !== strpos( $st_in, '.ntn-gcounts-note {' ) &&
 	false !== strpos( $st_out, '.ntn-gcounts-note' ) && false !== strpos( $st_out, 'ntn-gcounts-steam' ) &&

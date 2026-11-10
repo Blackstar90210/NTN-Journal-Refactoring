@@ -1236,7 +1236,7 @@ if ( ! function_exists( 'ntn_journal_get_steam_revenue' ) ) :
 	 * Legge solo la stima salvata (inc/steam-revenue.php): nessuna richiesta a Steam mentre la pagina si carica.
 	 *
 	 * @param WP_Term|int $term Tag del gioco o il suo ID.
-	 * @return array Vuoto se non c'è una stima; altrimenti 'range' (es. "0,6-1,3 mld $"), 'min', 'max',
+	 * @return array Vuoto se non c'è una stima; altrimenti 'label' (es. "~576 mln $"), 'value', 'min', 'max',
 	 *               'reviews', 'price', 'appid', 'updated'.
 	 */
 	function ntn_journal_get_steam_revenue( $term ) {
@@ -1248,7 +1248,7 @@ if ( ! function_exists( 'ntn_journal_get_steam_revenue' ) ) :
 		if ( ! $revenue ) {
 			return array();
 		}
-		$revenue['range'] = ntn_core_steam_range_short( $revenue['min'], $revenue['max'] );
+		$revenue['label'] = ntn_core_steam_amount_short( $revenue['value'] );
 		return $revenue;
 	}
 endif;
