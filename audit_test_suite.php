@@ -1655,24 +1655,24 @@ echo "\n--- 24. SEMVER SIMULTANEOUS 4-HEADER SYNCHRONIZATION ---\n";
 $parent_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $parent_css, $m_parent );
 $parent_ver = isset( $m_parent[1] ) ? trim( $m_parent[1] ) : '';
-assert_test( $parent_ver === '4.30.0', "24.1: Parent Theme style.css declares Version: 4.30.0(found: {$parent_ver})" );
+assert_test( $parent_ver === '4.31.0', "24.1: Parent Theme style.css declares Version: 4.31.0(found: {$parent_ver})" );
 
 $child_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $child_css, $m_child );
 $child_ver = isset( $m_child[1] ) ? trim( $m_child[1] ) : '';
-assert_test( $child_ver === '4.30.0', "24.2: Child Theme style.css declares Version: 4.30.0(found: {$child_ver})" );
+assert_test( $child_ver === '4.31.0', "24.2: Child Theme style.css declares Version: 4.31.0(found: {$child_ver})" );
 
 $core_php = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' );
 preg_match( '/\*\s*Version:\s*([0-9\.]+)/', $core_php, $m_core_hdr );
 $core_hdr_ver = isset( $m_core_hdr[1] ) ? trim( $m_core_hdr[1] ) : '';
-assert_test( $core_hdr_ver === '4.30.0', "24.3: Core Plugin header declares Version: 4.30.0(found: {$core_hdr_ver})" );
+assert_test( $core_hdr_ver === '4.31.0', "24.3: Core Plugin header declares Version: 4.31.0(found: {$core_hdr_ver})" );
 
 preg_match( "/define\(\s*'NTN_JOURNAL_CORE_VERSION',\s*'([^']+)'\s*\);/", $core_php, $m_core_const );
 $core_const_ver = isset( $m_core_const[1] ) ? trim( $m_core_const[1] ) : '';
-assert_test( $core_const_ver === '4.30.0', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.30.0(found: {$core_const_ver})" );
+assert_test( $core_const_ver === '4.31.0', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.31.0(found: {$core_const_ver})" );
 
 assert_test(
-	$parent_ver === '4.30.0' && $child_ver === '4.30.0' && $core_hdr_ver === '4.30.0' && $core_const_ver === '4.30.0',
+	$parent_ver === '4.31.0' && $child_ver === '4.31.0' && $core_hdr_ver === '4.31.0' && $core_const_ver === '4.31.0',
 	'24.5: All 4 version headers are 100% synchronized and atomic according to Rule 2 of GEMINI.md'
 );
 
@@ -1900,7 +1900,7 @@ $parent_style_ver = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( AB
 $child_style_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' ), $m2 ) ? $m2[1] : '';
 $core_plugin_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m3 ) ? $m3[1] : '';
 $core_const_ver   = preg_match( '/define\(\s*[\'"]NTN_JOURNAL_CORE_VERSION[\'"]\s*,\s*[\'"]([0-9\.]+)[\'"]\s*\)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m4 ) ? $m4[1] : '';
-assert_test( $parent_style_ver === '4.30.0' && $child_style_ver === '4.30.0' && $core_plugin_ver === '4.30.0' && $core_const_ver === '4.30.0', '29.1: All 4 version headers are synchronized to 4.30.0' );
+assert_test( $parent_style_ver === '4.31.0' && $child_style_ver === '4.31.0' && $core_plugin_ver === '4.31.0' && $core_const_ver === '4.31.0', '29.1: All 4 version headers are synchronized to 4.31.0' );
 
 // 29.2: single.php sequence is Google Feed -> Social CTA -> Bottom Related Posts
 $single_php = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/single.php' );
@@ -7082,6 +7082,38 @@ assert_test(
 	false !== strpos( $im_css, '.card.ntn-images-tab > hr:first-of-type { display: none; }' ) &&
 	false !== strpos( $im_page, "wp_enqueue_style( 'ntn-core-admin', NTN_JOURNAL_CORE_URL . 'assets/css/admin.css'" ) && false !== strpos( $im_page, "'toplevel_page_ntn-journal-functions' !== \$hook" ),
 	'107.1: tab-immagini.php has no <style> block and no style attribute; the same three declarations (full width, no top margin, first rule hidden) are in admin.css, which loads on the whole NTN Journal Funzioni page'
+);
+
+
+// --- TEST SUITE 108: script della pulizia PNG e del rapporto immagini in file v4.31.0 ---
+echo "\n--- 108. SCRIPT DELLA PULIZIA PNG E DEL RAPPORTO IMMAGINI IN FILE V4.31.0 ---\n";
+$ps_core = ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/';
+$ps_png  = ntn_t_read( $ps_core . 'inc/png-thumbnail-repair.php' );
+$ps_pjs  = ntn_t_read( $ps_core . 'assets/js/admin-png-repair.js' );
+$ps_pngf = ntn_t_flat( $ps_png );
+$ps_node = trim( (string) shell_exec( 'node --check ' . escapeshellarg( $ps_core . 'assets/js/admin-png-repair.js' ) . ' 2>&1 && echo OK' ) );
+$ps_hand = true;
+foreach ( array( 'scan', 'fix', 'quarantine', 'restore', 'purge' ) as $ps_a ) {
+	$ps_hand = $ps_hand && false !== strpos( $ps_pngf, "wp_ajax_ntn_png_repair_{$ps_a}'" ) && false !== strpos( $ps_pjs, "'{$ps_a}'" );
+}
+assert_test(
+	false === strpos( $ps_png, '<script' ) && 1 === preg_match( "/wp_enqueue_script\( 'ntn-core-png-repair', NTN_JOURNAL_CORE_URL \. 'assets\/js\/admin-png-repair\.js', array\( ?\), NTN_JOURNAL_CORE_VERSION, true \)/", $ps_pngf ) &&
+	false !== strpos( $ps_png, 'id="ntn-png-repair-box" data-nonce="<?php echo esc_attr( $nonce ); ?>"' ) &&
+	false === strpos( $ps_pjs, '<?' ) && false !== strpos( $ps_pjs, "fd.append( '_ajax_nonce', box.dataset.nonce );" ) && false !== strpos( $ps_pjs, "'ntn_png_repair_' + action" ) &&
+	$ps_hand && 'OK' === $ps_node,
+	'108.1: png-thumbnail-repair.php has no inline script: the box keeps its data-nonce, admin-png-repair.js (versioned, footer) reads it, has no PHP, calls the 5 actions that have their PHP handlers, and is valid JavaScript (' . $ps_node . ')'
+);
+$ps_rep  = ntn_t_read( $ps_core . 'inc/image-report.php' );
+$ps_rjs  = ntn_t_read( $ps_core . 'assets/js/admin-image-report.js' );
+$ps_repf = ntn_t_flat( $ps_rep );
+$ps_node2 = trim( (string) shell_exec( 'node --check ' . escapeshellarg( $ps_core . 'assets/js/admin-image-report.js' ) . ' 2>&1 && echo OK' ) );
+assert_test(
+	false === strpos( $ps_rep, '<script' ) && 1 === preg_match( "/wp_enqueue_script\( 'ntn-core-image-report', NTN_JOURNAL_CORE_URL \. 'assets\/js\/admin-image-report\.js', array\( ?\), NTN_JOURNAL_CORE_VERSION, true \)/", $ps_repf ) &&
+	false !== strpos( $ps_repf, "wp_localize_script( 'ntn-core-image-report', 'ntnImageReport', array( 'saved' => \$saved ) )" ) &&
+	false !== strpos( $ps_rep, 'id="ntn-image-report-box" data-nonce="<?php echo esc_attr( $nonce ); ?>" data-heavy=' ) &&
+	false === strpos( $ps_rjs, '<?' ) && false !== strpos( $ps_rjs, 'var saved = ntnImageReport.saved;' ) && false !== strpos( $ps_rjs, "'ntn_image_report_' + action" ) &&
+	false !== strpos( $ps_repf, "wp_ajax_ntn_image_report_scan'" ) && false !== strpos( $ps_repf, "wp_ajax_ntn_image_report_unused'" ) && 'OK' === $ps_node2,
+	'108.2: image-report.php has no inline script: it hands the saved report over with wp_localize_script (ntnImageReport.saved), admin-image-report.js (versioned, footer) has no PHP, reads nonce and threshold from the box, and is valid JavaScript (' . $ps_node2 . ')'
 );
 
 
