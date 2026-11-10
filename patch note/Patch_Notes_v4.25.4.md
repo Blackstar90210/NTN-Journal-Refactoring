@@ -12,7 +12,7 @@ Nuovo file `phpcs.xml.dist` nella radice del repository (non entra negli ZIP). D
 - le funzioni del progetto che verificano il nonce (`ntn_journal_core_admin_nonce_ok`, `ntn_igdb_scan_guard`, `ntn_core_png_repair_guard`, `ntn_core_image_report_guard`), così PHPCS non segnala più falsi "nonce mancante".
 
 ### 🧹 Formattazione automatica (phpcbf)
-98 file PHP sistemati in automatico. Segnalazioni PHPCS: **da 3.845 a 1.521**.
+98 file PHP sistemati in automatico. Segnalazioni PHPCS con le stesse regole (`phpcs.xml.dist`): **da 4.149 a 1.521** (-63%). I 3.845 del report iniziale erano contati con le regole base di WordPress, senza prefissi e senza le funzioni del nonce.
 
 Controllo di equivalenza: ho confrontato il codice prima e dopo pezzo per pezzo (token PHP, senza spazi e commenti). Le sole differenze sono forme equivalenti:
 - virgola finale negli elenchi su più righe (152);
