@@ -7,8 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 ?>
 
-<div class="card ntn-images-tab" style="max-width: 100%; margin-top: 0;">
-	<style>.ntn-images-tab > hr:first-of-type { display: none; }</style>
+<div class="card ntn-images-tab">
 	<?php
 	// v4.21.0: riparazione delle miniature dei PNG trasparenti
 	if ( function_exists( 'ntn_core_png_repair_render_box' ) ) {
