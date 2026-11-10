@@ -2,7 +2,7 @@
 Contributors: blackstar90210
 Requires at least: 6.0
 Requires PHP: 8.0
-Stable tag: 4.30.0
+Stable tag: 4.31.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
