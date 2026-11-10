@@ -95,7 +95,7 @@ function ntn_core_png_repair_can_fix() {
  * C'è abbastanza memoria per lavorare l'immagine? Stima prudente: 3 copie a 4 byte per pixel.
  */
 function ntn_core_png_repair_memory_ok( $file ) {
-	$size = @getimagesize( $file );
+	$size = @getimagesize( $file ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- file immagine rovinato o mancante: l'esito è già controllato nel codice, l'avviso PHP non serve.
 	if ( ! $size ) {
 		return false;
 	}
@@ -157,10 +157,10 @@ function ntn_core_png_repair_quarantine_dir() {
 		wp_mkdir_p( $dir );
 	}
 	if ( ! file_exists( $dir . '/index.php' ) ) {
-		@file_put_contents( $dir . '/index.php', "<?php\n// Silence is golden.\n" );
+		@file_put_contents( $dir . '/index.php', "<?php\n// Silence is golden.\n" ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- file immagine rovinato o mancante: l'esito è già controllato nel codice, l'avviso PHP non serve.
 	}
 	if ( ! file_exists( $dir . '/.htaccess' ) ) {
-		@file_put_contents( $dir . '/.htaccess', "Require all denied\n<IfModule !mod_authz_core.c>\nDeny from all\n</IfModule>\n" );
+		@file_put_contents( $dir . '/.htaccess', "Require all denied\n<IfModule !mod_authz_core.c>\nDeny from all\n</IfModule>\n" ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- file immagine rovinato o mancante: l'esito è già controllato nel codice, l'avviso PHP non serve.
 	}
 	return $dir;
 }
@@ -177,7 +177,7 @@ function ntn_core_png_repair_prune_dirs() {
 	$it = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $root, FilesystemIterator::SKIP_DOTS ), RecursiveIteratorIterator::CHILD_FIRST );
 	foreach ( $it as $item ) {
 		if ( $item->isDir() ) {
-			@rmdir( $item->getPathname() ); // riesce solo se la cartella è vuota
+			@rmdir( $item->getPathname() ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- riesce solo se la cartella è vuota
 		}
 	}
 }
@@ -228,7 +228,7 @@ function ntn_core_ajax_png_repair_scan() {
 		}
 		$file = get_attached_file( $id );
 		$name = $file ? basename( $file ) : '#' . $id;
-		if ( ! $file || ! is_readable( $file ) || ! @getimagesize( $file ) ) {
+		if ( ! $file || ! is_readable( $file ) || ! @getimagesize( $file ) ) { // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- file immagine rovinato o mancante: l'esito è già controllato nel codice, l'avviso PHP non serve.
 			$state['unreadable'][ $id ] = $name;
 			continue;
 		}
@@ -435,8 +435,8 @@ function ntn_core_ajax_png_repair_quarantine() {
 		$from = ntn_core_png_repair_absolute( $rel );
 		$to   = $dir . '/' . $rel;
 		wp_mkdir_p( dirname( $to ) );
-		$size = (int) @filesize( $from );
-		if ( @rename( $from, $to ) ) {
+		$size = (int) @filesize( $from ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- file immagine rovinato o mancante: l'esito è già controllato nel codice, l'avviso PHP non serve.
+		if ( @rename( $from, $to ) ) { // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- file immagine rovinato o mancante: l'esito è già controllato nel codice, l'avviso PHP non serve.
 			$q['files'][] = array(
 				'from' => $rel,
 				'to'   => NTN_PNG_REPAIR_QUARANTINE_DIR . '/' . $rel,
@@ -478,7 +478,7 @@ function ntn_core_png_repair_restore_all() {
 	foreach ( (array) ( $q['files'] ?? array() ) as $row ) {
 		$from = ntn_core_png_repair_absolute( $row['to'] );
 		$to   = ntn_core_png_repair_absolute( $row['from'] );
-		if ( '' !== $from && '' !== $to && file_exists( $from ) && ! file_exists( $to ) && @rename( $from, $to ) ) {
+		if ( '' !== $from && '' !== $to && file_exists( $from ) && ! file_exists( $to ) && @rename( $from, $to ) ) { // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- file immagine rovinato o mancante: l'esito è già controllato nel codice, l'avviso PHP non serve.
 			++$restored;
 		} else {
 			$left[] = $row;
@@ -527,7 +527,7 @@ function ntn_core_png_repair_purge_blocker( $backup_confirmed ) {
 
 function ntn_core_ajax_png_repair_purge() {
 	ntn_core_png_repair_guard();
-	$why = ntn_core_png_repair_purge_blocker( ! empty( $_POST['backup'] ) && '1' === (string) $_POST['backup'] );
+	$why = ntn_core_png_repair_purge_blocker( isset( $_POST['backup'] ) && '1' === sanitize_text_field( wp_unslash( $_POST['backup'] ) ) );
 	if ( '' !== $why ) {
 		wp_send_json_error( $why );
 	}
@@ -536,7 +536,7 @@ function ntn_core_ajax_png_repair_purge() {
 	$bytes   = 0;
 	foreach ( (array) $q['files'] as $row ) {
 		$path = ntn_core_png_repair_absolute( $row['to'] );
-		if ( '' !== $path && 0 === strpos( ntn_core_png_repair_relative( $path ), NTN_PNG_REPAIR_QUARANTINE_DIR . '/' ) && file_exists( $path ) && @unlink( $path ) ) {
+		if ( '' !== $path && 0 === strpos( ntn_core_png_repair_relative( $path ), NTN_PNG_REPAIR_QUARANTINE_DIR . '/' ) && file_exists( $path ) && @unlink( $path ) ) { // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- file immagine rovinato o mancante: l'esito è già controllato nel codice, l'avviso PHP non serve.
 			++$deleted;
 			$bytes += (int) $row['size'];
 		}

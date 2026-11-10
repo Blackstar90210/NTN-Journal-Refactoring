@@ -101,7 +101,7 @@ if ( ! empty( $release ) && function_exists( 'ntn_journal_game_card_date' ) ) {
 			$class_attr  .= ' skip-lazy no-lazy';
 		}
 		?>
-		<img src="<?php echo esc_url( $cover ); ?>" alt="<?php the_title_attribute( array( 'post' => $post_id ) ); ?>" width="400" height="533" <?php echo $loading_attr; ?> class="<?php echo esc_attr( $class_attr ); ?>">
+		<img src="<?php echo esc_url( $cover ); ?>" alt="<?php the_title_attribute( array( 'post' => $post_id ) ); ?>" width="400" height="533" <?php echo $loading_attr; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- stringa fissa scelta nel codice sopra. ?> class="<?php echo esc_attr( $class_attr ); ?>">
 	<?php else : ?>
 		<div class="ntn-game-nocover">NO COVER</div>
 	<?php endif; ?>

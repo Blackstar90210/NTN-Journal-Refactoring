@@ -166,7 +166,7 @@ function ntn_journal_suggest_box( $post ) {
 	}
 
 	$out  = '<aside class="ntn-suggest not-prose" aria-label="' . esc_attr__( 'Lettura consigliata', 'ntn-journal' ) . '">';
-	$out .= '<a class="ntn-suggest-in" href="' . esc_url( get_permalink( $post ) ) . '" aria-label="' . esc_attr( sprintf( __( 'Leggi l\'articolo: %s', 'ntn-journal' ), $title ) ) . '">';
+	$out .= '<a class="ntn-suggest-in" href="' . esc_url( get_permalink( $post ) ) . '" aria-label="' . esc_attr( sprintf( /* translators: %s: titolo dell'articolo. */ __( 'Leggi l\'articolo: %s', 'ntn-journal' ), $title ) ) . '">';
 	$out .= '<span class="ntn-suggest-img" aria-hidden="true">' . $thumb . '</span>';
 	$out .= '<span class="ntn-suggest-txt">';
 	$out .= '<span class="ntn-suggest-lbl">// Consigliati</span>';

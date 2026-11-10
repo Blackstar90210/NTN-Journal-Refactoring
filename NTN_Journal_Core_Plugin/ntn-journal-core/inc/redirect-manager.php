@@ -29,7 +29,7 @@ function ntn_get_redirects_map() {
 }
 
 function ntn_journal_process_redirects() {
-	$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? (string) $_SERVER['REQUEST_URI'] : '';
+	$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? (string) wp_unslash( $_SERVER['REQUEST_URI'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- solo confrontata con i redirect salvati, mai stampata.
 	// Eseguiamo solo lato frontend, non in admin, ajax, cron o wp-login
 	if ( is_admin() || wp_doing_ajax() || wp_doing_cron() || ( '' !== $request_uri && strpos( $request_uri, 'wp-login' ) !== false ) ) {
 		return;
@@ -41,7 +41,6 @@ function ntn_journal_process_redirects() {
 	}
 
 	// Otteniamo la URI richiesta ignorando i query params per il match di base
-	$request_uri = $_SERVER['REQUEST_URI'];
 	$parsed_url  = wp_parse_url( $request_uri );
 	$path        = isset( $parsed_url['path'] ) ? $parsed_url['path'] : '';
 
@@ -143,10 +142,10 @@ function ntn_journal_render_redirects_ui() {
 	}
 
 	// Salvataggio nuovo redirect
-	if ( isset( $_POST['ntn_save_redirect_nonce'] ) && wp_verify_nonce( $_POST['ntn_save_redirect_nonce'], 'ntn_save_redirect' ) ) {
-		$source = sanitize_text_field( wp_unslash( $_POST['redirect_source'] ) );
-		$target = esc_url_raw( wp_unslash( $_POST['redirect_target'] ) );
-		$code   = intval( $_POST['redirect_code'] );
+	if ( isset( $_POST['ntn_save_redirect_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['ntn_save_redirect_nonce'] ) ), 'ntn_save_redirect' ) ) {
+		$source = isset( $_POST['redirect_source'] ) ? sanitize_text_field( wp_unslash( $_POST['redirect_source'] ) ) : '';
+		$target = isset( $_POST['redirect_target'] ) ? esc_url_raw( wp_unslash( $_POST['redirect_target'] ) ) : '';
+		$code   = isset( $_POST['redirect_code'] ) ? intval( wp_unslash( $_POST['redirect_code'] ) ) : 0;
 
 		if ( $source !== '' && $target !== '' ) {
 			// Prevenzione Loop basica
@@ -182,8 +181,8 @@ function ntn_journal_render_redirects_ui() {
 	}
 
 	// Eliminazione redirect (via POST hidden o GET con nonce)
-	if ( isset( $_POST['ntn_delete_redirect_nonce'] ) && wp_verify_nonce( $_POST['ntn_delete_redirect_nonce'], 'ntn_delete_redirect' ) ) {
-		$del_hash = sanitize_text_field( $_POST['delete_hash'] );
+	if ( isset( $_POST['ntn_delete_redirect_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['ntn_delete_redirect_nonce'] ) ), 'ntn_delete_redirect' ) ) {
+		$del_hash = isset( $_POST['delete_hash'] ) ? sanitize_text_field( wp_unslash( $_POST['delete_hash'] ) ) : '';
 		if ( ! empty( $del_hash ) && isset( $redirects_map[ $del_hash ] ) ) {
 			unset( $redirects_map[ $del_hash ] );
 			update_option( 'ntn_redirects_map', $redirects_map, 'yes' );

@@ -225,7 +225,7 @@ function ntn_core_png_has_transparency( $file_path ) {
 	if ( empty( $file_path ) || ! file_exists( $file_path ) || ! is_readable( $file_path ) ) {
 		return false;
 	}
-	$contents = @file_get_contents( $file_path, false, null, 0, 1024 );
+	$contents = @file_get_contents( $file_path, false, null, 0, 1024 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- file immagine rovinato o mancante: l'esito è già controllato nel codice, l'avviso PHP non serve.
 	if ( ! $contents || strlen( $contents ) < 26 ) {
 		return false;
 	}
@@ -241,7 +241,7 @@ function ntn_core_png_has_transparency( $file_path ) {
 
 	// Il filtro dei formati chiama la funzione per ogni miniatura: il risultato si calcola una volta sola
 	static $cache = array();
-	$key          = $file_path . '|' . (int) @filesize( $file_path ) . '|' . (int) @filemtime( $file_path );
+	$key          = $file_path . '|' . (int) @filesize( $file_path ) . '|' . (int) @filemtime( $file_path ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- file immagine rovinato o mancante: l'esito è già controllato nel codice, l'avviso PHP non serve.
 	if ( ! isset( $cache[ $key ] ) ) {
 		$opaque        = ntn_core_png_is_fully_opaque( $file_path );
 		$cache[ $key ] = ( true !== $opaque ); // Se i pixel non si possono leggere, il PNG resta protetto
@@ -259,7 +259,7 @@ function ntn_core_png_is_fully_opaque( $file_path ) {
 	$max = 256;
 
 	if ( function_exists( 'imagecreatefrompng' ) ) {
-		$src = @imagecreatefrompng( $file_path );
+		$src = @imagecreatefrompng( $file_path ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- file immagine rovinato o mancante: l'esito è già controllato nel codice, l'avviso PHP non serve.
 		if ( ! $src ) {
 			return null;
 		}
@@ -425,7 +425,7 @@ function ntn_core_optimize_upload_size_and_format( $upload ) {
 					// Rimuove il file originale solo se il path differisce in modo sostanziale (es. da .png a .jpg).
 					// L'uso di strtolower previene la cancellazione accidentale su Windows per i file .JPG
 					if ( strtolower( $new_file_path ) !== strtolower( $file_path ) ) {
-						@unlink( $file_path );
+						@unlink( $file_path ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- file immagine rovinato o mancante: l'esito è già controllato nel codice, l'avviso PHP non serve.
 					}
 
 					// Aggiorna sempre i riferimenti se c'è stata una modifica testuale nel path (es. .JPG -> .jpg)

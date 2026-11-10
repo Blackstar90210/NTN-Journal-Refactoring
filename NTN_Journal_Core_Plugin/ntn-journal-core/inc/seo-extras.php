@@ -1369,10 +1369,10 @@ function ntn_tsf_add_videogame_schema( $data, $context = array() ) {
 		foreach ( $data as $key => $entity ) {
 			if ( is_array( $entity ) && isset( $entity['@type'] ) ) {
 				$types = (array) $entity['@type'];
-				if ( in_array( 'Article', $types ) || in_array( 'NewsArticle', $types ) || in_array( 'BlogPosting', $types ) || in_array( 'WebPage', $types ) ) {
+				if ( in_array( 'Article', $types, true ) || in_array( 'NewsArticle', $types, true ) || in_array( 'BlogPosting', $types, true ) || in_array( 'WebPage', $types, true ) ) {
 
 					// Upgrade WebPage to NewsArticle if it's missing the Article nature
-					if ( in_array( 'WebPage', $types ) && count( array_intersect( array( 'Article', 'NewsArticle', 'BlogPosting' ), $types ) ) === 0 ) {
+					if ( in_array( 'WebPage', $types, true ) && count( array_intersect( array( 'Article', 'NewsArticle', 'BlogPosting' ), $types ) ) === 0 ) {
 						$data[ $key ]['@type'] = array( 'WebPage', 'NewsArticle' );
 					}
 

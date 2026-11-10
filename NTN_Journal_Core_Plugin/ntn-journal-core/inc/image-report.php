@@ -81,7 +81,7 @@ function ntn_core_image_report_sizes( $attachment_id ) {
 			'total'    => 0,
 		);
 	}
-	$original = (int) @filesize( $file );
+	$original = (int) @filesize( $file ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- il file può mancare: in quel caso la dimensione vale 0 e non serve un avviso PHP.
 	$total    = $original;
 	$meta     = wp_get_attachment_metadata( $attachment_id );
 	$dir      = trailingslashit( dirname( $file ) );
@@ -94,7 +94,7 @@ function ntn_core_image_report_sizes( $attachment_id ) {
 			}
 			$seen[ $name ] = true;
 			if ( file_exists( $dir . $name ) ) {
-				$total += (int) @filesize( $dir . $name );
+				$total += (int) @filesize( $dir . $name ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- il file può mancare: in quel caso la dimensione vale 0 e non serve un avviso PHP.
 			}
 		}
 	}

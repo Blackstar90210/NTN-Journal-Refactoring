@@ -225,7 +225,7 @@ endif;
 				
 				const data = new URLSearchParams();
 				data.append('action', 'ntn_search_wp_tags');
-				data.append('_ajax_nonce', '<?php echo wp_create_nonce( 'ntn_igdb_nonce' ); ?>');
+				data.append('_ajax_nonce', '<?php echo esc_js( wp_create_nonce( 'ntn_igdb_nonce' ) ); ?>');
 				data.append('query', val);
 				
 				fetch(ajaxurl, { method: 'POST', body: data })
@@ -269,7 +269,7 @@ endif;
 			
 			const data = new URLSearchParams();
 			data.append('action', 'ntn_search_igdb');
-			data.append('_ajax_nonce', '<?php echo wp_create_nonce( 'ntn_igdb_nonce' ); ?>');
+			data.append('_ajax_nonce', '<?php echo esc_js( wp_create_nonce( 'ntn_igdb_nonce' ) ); ?>');
 			data.append('query', val);
 			
 			fetch(ajaxurl, { method: 'POST', body: data })
@@ -327,7 +327,7 @@ endif;
 			
 			const data = new URLSearchParams();
 			data.append('action', 'ntn_save_tag_igdb_assoc');
-			data.append('_ajax_nonce', '<?php echo wp_create_nonce( 'ntn_igdb_nonce' ); ?>');
+			data.append('_ajax_nonce', '<?php echo esc_js( wp_create_nonce( 'ntn_igdb_nonce' ) ); ?>');
 			data.append('tag_id', selectedTag);
 			data.append('igdb_id', selectedIgdbGameId);
 			
@@ -389,7 +389,7 @@ endif;
 				
 				const data = new URLSearchParams();
 				data.append('action', 'ntn_reset_igdb_data');
-				data.append('_ajax_nonce', '<?php echo wp_create_nonce( 'ntn_batch_scan_igdb_nonce' ); ?>');
+				data.append('_ajax_nonce', '<?php echo esc_js( wp_create_nonce( 'ntn_batch_scan_igdb_nonce' ) ); ?>');
 				
 				fetch(ajaxurl, {
 					method: 'POST',
@@ -424,7 +424,7 @@ endif;
 				
 				const data = new URLSearchParams();
 				data.append('action', 'ntn_get_igdb_connections');
-				data.append('_ajax_nonce', '<?php echo wp_create_nonce( 'ntn_batch_scan_igdb_nonce' ); ?>');
+				data.append('_ajax_nonce', '<?php echo esc_js( wp_create_nonce( 'ntn_batch_scan_igdb_nonce' ) ); ?>');
 				
 				fetch(ajaxurl, {
 					method: 'POST',
@@ -460,7 +460,7 @@ endif;
 					
 					const data = new URLSearchParams();
 					data.append('action', 'ntn_reset_single_igdb');
-					data.append('_ajax_nonce', '<?php echo wp_create_nonce( 'ntn_batch_scan_igdb_nonce' ); ?>');
+					data.append('_ajax_nonce', '<?php echo esc_js( wp_create_nonce( 'ntn_batch_scan_igdb_nonce' ) ); ?>');
 					data.append('post_id', postId);
 					
 					fetch(ajaxurl, {
@@ -497,7 +497,7 @@ endif;
 				
 				const data = new URLSearchParams();
 				data.append('action', 'ntn_get_igdb_tag_connections');
-				data.append('_ajax_nonce', '<?php echo wp_create_nonce( 'ntn_batch_scan_igdb_nonce' ); ?>');
+				data.append('_ajax_nonce', '<?php echo esc_js( wp_create_nonce( 'ntn_batch_scan_igdb_nonce' ) ); ?>');
 				
 				fetch(ajaxurl, { method: 'POST', body: data })
 				.then(response => response.json())
@@ -530,7 +530,7 @@ endif;
 					
 					const data = new URLSearchParams();
 					data.append('action', 'ntn_reset_tag_igdb');
-					data.append('_ajax_nonce', '<?php echo wp_create_nonce( 'ntn_batch_scan_igdb_nonce' ); ?>');
+					data.append('_ajax_nonce', '<?php echo esc_js( wp_create_nonce( 'ntn_batch_scan_igdb_nonce' ) ); ?>');
 					data.append('tag_id', termId);
 					
 					fetch(ajaxurl, { method: 'POST', body: data })
@@ -571,7 +571,7 @@ endif;
 					
 					const data = new URLSearchParams();
 					data.append('action', 'ntn_update_single_tag_igdb');
-					data.append('_ajax_nonce', '<?php echo wp_create_nonce( 'ntn_batch_scan_igdb_nonce' ); ?>');
+					data.append('_ajax_nonce', '<?php echo esc_js( wp_create_nonce( 'ntn_batch_scan_igdb_nonce' ) ); ?>');
 					data.append('tag_id', termId);
 					data.append('igdb_id', igdbId);
 					
@@ -617,7 +617,7 @@ endif;
 					if (igdbIds.length > 0) {
 						const data = new URLSearchParams();
 						data.append('action', 'ntn_check_igdb_updates');
-						data.append('_ajax_nonce', '<?php echo wp_create_nonce( 'ntn_batch_scan_igdb_nonce' ); ?>');
+						data.append('_ajax_nonce', '<?php echo esc_js( wp_create_nonce( 'ntn_batch_scan_igdb_nonce' ) ); ?>');
 						igdbIds.forEach(id => data.append('igdb_ids[]', id));
 						
 						fetch(ajaxurl, { method: 'POST', body: data })
@@ -661,7 +661,7 @@ endif;
 				
 				const data = new URLSearchParams();
 				data.append('action', 'ntn_unlink_all_tags_igdb');
-				data.append('_ajax_nonce', '<?php echo wp_create_nonce( 'ntn_batch_scan_igdb_nonce' ); ?>');
+				data.append('_ajax_nonce', '<?php echo esc_js( wp_create_nonce( 'ntn_batch_scan_igdb_nonce' ) ); ?>');
 				
 				fetch(ajaxurl, { method: 'POST', body: data })
 				.then(response => response.json())
@@ -728,7 +728,7 @@ endif;
 				
 				const data = new URLSearchParams();
 				data.append('action', 'ntn_igdb_refresh_cache');
-				data.append('_ajax_nonce', '<?php echo wp_create_nonce( 'ntn_batch_scan_igdb_nonce' ); ?>');
+				data.append('_ajax_nonce', '<?php echo esc_js( wp_create_nonce( 'ntn_batch_scan_igdb_nonce' ) ); ?>');
 				
 				fetch(ajaxurl, { method: 'POST', body: data })
 				.then(r => r.json())
@@ -759,7 +759,7 @@ endif;
 				
 				const data = new URLSearchParams();
 				data.append('action', 'ntn_igdb_clear_cache');
-				data.append('_ajax_nonce', '<?php echo wp_create_nonce( 'ntn_batch_scan_igdb_nonce' ); ?>');
+				data.append('_ajax_nonce', '<?php echo esc_js( wp_create_nonce( 'ntn_batch_scan_igdb_nonce' ) ); ?>');
 				
 				fetch(ajaxurl, { method: 'POST', body: data })
 				.then(r => r.json())
@@ -793,7 +793,7 @@ endif;
 				
 				const data = new URLSearchParams();
 				data.append('action', 'ntn_repair_reconnect_igdb_tags');
-				data.append('_ajax_nonce', '<?php echo wp_create_nonce( 'ntn_batch_scan_igdb_nonce' ); ?>');
+				data.append('_ajax_nonce', '<?php echo esc_js( wp_create_nonce( 'ntn_batch_scan_igdb_nonce' ) ); ?>');
 				
 				fetch(ajaxurl, { method: 'POST', body: data })
 				.then(r => r.json())

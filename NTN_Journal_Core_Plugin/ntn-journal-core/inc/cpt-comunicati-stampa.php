@@ -93,48 +93,48 @@ function ntn_journal_comunicato_meta_callback( $post ) {
 
 	?>
 	<div style="margin-bottom: 15px;">
-		<label for="ntn_press_publisher" style="display:block;font-weight:bold;margin-bottom:5px;"><?php _e( 'Editore (Publisher)', 'ntn-journal-core' ); ?></label>
+		<label for="ntn_press_publisher" style="display:block;font-weight:bold;margin-bottom:5px;"><?php esc_html_e( 'Editore (Publisher)', 'ntn-journal-core' ); ?></label>
 		<input type="text" id="ntn_press_publisher" name="ntn_press_publisher" value="<?php echo esc_attr( $publisher ); ?>" style="width:100%;" placeholder="Es. Sony Interactive Entertainment" />
 	</div>
 
 	<div style="margin-bottom: 15px;">
-		<label for="ntn_press_developer" style="display:block;font-weight:bold;margin-bottom:5px;"><?php _e( 'Studio di Sviluppo (Developer)', 'ntn-journal-core' ); ?></label>
+		<label for="ntn_press_developer" style="display:block;font-weight:bold;margin-bottom:5px;"><?php esc_html_e( 'Studio di Sviluppo (Developer)', 'ntn-journal-core' ); ?></label>
 		<input type="text" id="ntn_press_developer" name="ntn_press_developer" value="<?php echo esc_attr( $developer ); ?>" style="width:100%;" placeholder="Es. Naughty Dog" />
 	</div>
 
 	<div style="margin-bottom: 15px;">
-		<label for="ntn_press_agency" style="display:block;font-weight:bold;margin-bottom:5px;"><?php _e( 'Agenzia PR', 'ntn-journal-core' ); ?></label>
+		<label for="ntn_press_agency" style="display:block;font-weight:bold;margin-bottom:5px;"><?php esc_html_e( 'Agenzia PR', 'ntn-journal-core' ); ?></label>
 		<input type="text" id="ntn_press_agency" name="ntn_press_agency" value="<?php echo esc_attr( $agency ); ?>" style="width:100%;" placeholder="Es. Tiziana Pollio PR" />
 	</div>
 
 	
 	<div style="margin-bottom: 15px;">
-		<label for="ntn_press_source_link" style="display:block;font-weight:bold;margin-bottom:5px;"><?php _e( 'Link Fonte Ufficiale (URL)', 'ntn-journal-core' ); ?></label>
+		<label for="ntn_press_source_link" style="display:block;font-weight:bold;margin-bottom:5px;"><?php esc_html_e( 'Link Fonte Ufficiale (URL)', 'ntn-journal-core' ); ?></label>
 		<input type="url" id="ntn_press_source_link" name="ntn_press_source_link" value="<?php echo esc_attr( $source_link ); ?>" style="width:100%;" placeholder="Es. https://blog.playstation.com/..." />
 	</div>
 
 	<div style="margin-bottom: 15px;">
-		<label for="ntn_press_embargo" style="display:block;font-weight:bold;margin-bottom:5px;"><?php _e( 'Data/Ora Embargo (Testo Libero)', 'ntn-journal-core' ); ?></label>
+		<label for="ntn_press_embargo" style="display:block;font-weight:bold;margin-bottom:5px;"><?php esc_html_e( 'Data/Ora Embargo (Testo Libero)', 'ntn-journal-core' ); ?></label>
 		<input type="text" id="ntn_press_embargo" name="ntn_press_embargo" value="<?php echo esc_attr( $embargo ); ?>" style="width:100%;" placeholder="Es. 15 Novembre 2024, ore 15:00" />
 		<p class="description">Nota: questo è solo un pro-memoria testuale per la redazione.</p>
 	</div>
 
 	<div style="margin-bottom: 15px;">
-		<label for="ntn_press_assets" style="display:block;font-weight:bold;margin-bottom:5px;"><?php _e( 'Materiale Stampa / Press Kit (URL)', 'ntn-journal-core' ); ?></label>
+		<label for="ntn_press_assets" style="display:block;font-weight:bold;margin-bottom:5px;"><?php esc_html_e( 'Materiale Stampa / Press Kit (URL)', 'ntn-journal-core' ); ?></label>
 		<input type="url" id="ntn_press_assets" name="ntn_press_assets" value="<?php echo esc_attr( $assets ); ?>" style="width:100%;" placeholder="Es. Google Drive o Dropbox URL" />
 	</div>
 
 	<div style="margin-bottom: 15px;">
 		<label style="font-weight:bold;">
 			<input type="checkbox" name="ntn_press_noindex" value="1" <?php checked( $noindex, '1' ); ?> />
-			<?php _e( 'Applica tag "noindex" a questo comunicato per evitare penalizzazioni SEO (da usare se è un copia-incolla esatto).', 'ntn-journal-core' ); ?>
+			<?php esc_html_e( 'Applica tag "noindex" a questo comunicato per evitare penalizzazioni SEO (da usare se è un copia-incolla esatto).', 'ntn-journal-core' ); ?>
 		</label>
 	</div>
 	<?php
 }
 
 function ntn_journal_save_comunicato_meta( $post_id ) {
-	if ( ! isset( $_POST['ntn_comunicato_nonce'] ) || ! wp_verify_nonce( $_POST['ntn_comunicato_nonce'], 'ntn_comunicato_save_meta' ) ) {
+	if ( ! isset( $_POST['ntn_comunicato_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['ntn_comunicato_nonce'] ) ), 'ntn_comunicato_save_meta' ) ) {
 		return;
 	}
 

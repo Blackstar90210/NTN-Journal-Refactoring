@@ -55,7 +55,7 @@ $verdict_text = ! empty( $verdict_meta ) ? $verdict_meta : '';
 $rating_label = function_exists( 'ntn_get_rating_label' ) ? ntn_get_rating_label( $final_rating ) : (string) $final_rating;
 $rating_link  = '';
 $rating_slug  = sanitize_title( $rating_label );
-if ( in_array( $rating_slug, array( 'bocciato', 'consigliato-con-riserva', 'consigliato', 'must-play' ) ) ) {
+if ( in_array( $rating_slug, array( 'bocciato', 'consigliato-con-riserva', 'consigliato', 'must-play' ), true ) ) {
 	$tag_obj = get_term_by( 'slug', $rating_slug, 'post_tag' );
 	if ( $tag_obj && ! is_wp_error( $tag_obj ) && $tag_obj instanceof WP_Term ) {
 		$tag_link    = get_term_link( $tag_obj );
