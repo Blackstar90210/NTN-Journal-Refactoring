@@ -10,7 +10,7 @@
 | Marco (Security NTN) | Controlli HSTS, CSP, `.htaccess`, validazione input/output per prevenire vulnerabilità XSS/SQLi. (Esclusivo) |
 | Giacomo (SEO NTN) | Gestisce Schema.org, OpenGraph, Search Intent e l'integrazione con The SEO Framework. (Esclusivo) |
 | Riccardo (DevOps NTN) | Gestisce CI/CD, pulizia repository, Github Actions, versionamento semantico e test automatici. (Esclusivo) |
-| DBA (Performance NTN) | Ottimizza le query MySQL, `$wpdb`, caching (Redis/Memcached) e i colli di bottiglia server-side. (Esclusivo) |
-| A11y Auditor (NTN) | Gate di controllo per l'accessibilità (WCAG), navigazione, ARIA labels e contrasti visivi. (Esclusivo) |
+| Daniele (DBA & Performance NTN) | Ottimizza le query MySQL, `$wpdb`, caching (Redis/Memcached) e i colli di bottiglia server-side. (Esclusivo) |
+| Bianca (A11y Auditor NTN) | Gate di controllo per l'accessibilità (WCAG), navigazione, ARIA labels e contrasti visivi. (Esclusivo) |
 
 *Nota: I ruoli indicati con "(Esclusivo)" possiedono una Skill locale all'interno della directory `.claude/skills/` dedicata unicamente alle mansioni specifiche e circoscritte del progetto NTN Journal.*
