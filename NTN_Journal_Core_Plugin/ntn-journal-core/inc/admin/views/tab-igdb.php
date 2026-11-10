@@ -3,7 +3,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 ?>
-<!-- Scanner IGDB Tab (v3.19.0: riquadri senza colori, solo nero, bianco e rosso; link al Catalogo) -->
+<!-- Scanner IGDB Tab (v4.34.0: ordine interruttore, associazione, scansione, riepilogo) -->
 <?php $ntn_catalog_url = get_post_type_archive_link( 'videogioco' ); ?>
 <div class="card" style="padding: 20px; box-sizing: border-box; max-width: 100%;">
 	<div style="display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 16px;">
@@ -45,86 +45,8 @@ endif;
 		<div class="notice notice-error" style="margin-left:0; margin-bottom: 20px;"><p><strong>Attenzione:</strong> Devi configurare Client ID e Client Secret di IGDB nella tab "Servizi API" per poter usare questa funzione.</p></div>
 	<?php endif; ?>
 
-	<?php
-	// Ottieni numero totale di articoli pubblicati
-	$total_posts = wp_count_posts( 'post' )->publish;
 
-	// Transients per query pesanti SQL
-	global $wpdb;
-
-	$posts_with_igdb = get_transient( 'ntn_igdb_post_count' );
-	if ( false === $posts_with_igdb ) {
-		// La query diretta è usata per ragioni di performance assolute, ma wrappata in un transitorio.
-		$posts_with_igdb = $wpdb->get_var( "SELECT COUNT(DISTINCT post_id) FROM {$wpdb->postmeta} WHERE meta_key = '_ntn_game_title' AND meta_value != ''" );
-		if ( ! $posts_with_igdb ) {
-			$posts_with_igdb = 0;
-		}
-		set_transient( 'ntn_igdb_post_count', $posts_with_igdb, 12 * HOUR_IN_SECONDS );
-	}
-
-	$tags_with_igdb = get_transient( 'ntn_igdb_tag_count' );
-	if ( false === $tags_with_igdb ) {
-		$tags_with_igdb = $wpdb->get_var( "SELECT COUNT(DISTINCT term_id) FROM {$wpdb->termmeta} WHERE meta_key = '_ntn_game_title' AND meta_value != ''" );
-		if ( ! $tags_with_igdb ) {
-			$tags_with_igdb = 0;
-		}
-		set_transient( 'ntn_igdb_tag_count', $tags_with_igdb, 12 * HOUR_IN_SECONDS );
-	}
-	?>
-	<div style="background: var(--nadm-surface); border: 1px solid var(--nadm-line-strong); padding: 15px; margin-bottom: 25px;">
-		<h3 style="margin-top:0;">Riepilogo Database</h3>
-		<ul style="margin:0; padding-left: 20px;">
-			<li><strong>Articoli Totali Pubblicati:</strong> <?php echo esc_html( $total_posts ); ?></li>
-			<li><strong>Articoli Collegati a IGDB:</strong> <?php echo esc_html( $posts_with_igdb ); ?></li>
-			<li><strong>Tag di Gioco Collegati a IGDB:</strong> <?php echo esc_html( $tags_with_igdb ); ?></li>
-		</ul>
-		<div style="margin-top: 15px;">
-			<button id="ntn-refresh-cache-btn" class="button button-secondary">Ricalcola Cache Dati</button>
-			<button id="ntn-clear-cache-btn" class="button button-secondary">Svuota Cache Dati</button>
-			<button id="ntn-repair-reconnect-btn" class="button button-primary" style="margin-left: 10px;">Ripristina & Riconnetti Metadati Orfani</button>
-			<span id="ntn-cache-status" style="margin-left: 10px; font-weight: bold;"></span>
-		</div>
-		<div style="margin-top: 15px;">
-			<button id="ntn-load-connections" class="button button-secondary" style="margin-right: 10px;">Visualizza Articoli Collegati</button>
-			<button id="ntn-load-tag-connections" class="button button-secondary" style="margin-right: 10px;">Visualizza Tag Collegati</button>
-			<button id="ntn-reset-scanner" class="button nadm-btn is-danger">Scollega tutti i dati IGDB (Reset)</button>
-		</div>
-	</div>
-
-	<?php require __DIR__ . '/igdb-tag-scanner.php'; // v4.15.0: lista dei tag da confermare ?>
-
-	<!-- Container per gli articoli collegati -->
-	<div id="ntn-connections-container" style="display:none; margin-bottom: 30px;">
-		<h3 style="margin-top: 0; display:flex; align-items:center; justify-content:space-between;">
-			<span>Articoli con Scheda Gioco</span>
-			<button onclick="document.getElementById('ntn-connections-container').style.display='none'; document.getElementById('ntn-load-connections').disabled=false;" class="button">Chiudi Tabella</button>
-		</h3>
-		<div id="ntn-connections-loading" style="padding: 10px; background: var(--nadm-surface); text-align:center;">Caricamento in corso...</div>
-		<div id="ntn-connections-table-wrapper"></div>
-	</div>
-	
-	<!-- Container per i tag collegati -->
-	<div id="ntn-tag-connections-container" style="display:none; margin-bottom: 30px;">
-		<h3 style="margin-top: 0; display:flex; align-items:center; justify-content:space-between;">
-			<span>Tag collegati a IGDB</span>
-			<div>
-				<button id="ntn-update-all-tags" class="button button-primary" style="display:none; margin-right:5px;">Aggiorna tutti</button>
-				<button id="ntn-unlink-all-tags" class="button nadm-btn is-danger" style="display:none; margin-right:10px;">Scollega tutti</button>
-				<button onclick="document.getElementById('ntn-tag-connections-container').style.display='none'; document.getElementById('ntn-load-tag-connections').disabled=false;" class="button">Chiudi Tabella</button>
-			</div>
-		</h3>
-		<div id="ntn-update-progress-container" style="display:none; margin-top: 10px; width: 100%;">
-			<div style="background: var(--nadm-line); height: 20px; width: 100%; overflow: hidden;">
-				<div id="ntn-update-progress-bar" style="background: var(--nadm-fg); height: 100%; width: 0%; transition: width 0.3s;"></div>
-			</div>
-			<div id="ntn-update-progress-text" style="text-align: center; font-size: 12px; margin-top: 5px; font-weight: bold;">0%</div>
-		</div>
-		<div id="ntn-tag-connections-loading" style="padding: 10px; background: var(--nadm-surface); text-align:center;">Caricamento in corso...</div>
-		<div id="ntn-tag-connections-table-wrapper"></div>
-	</div>
-
-	<hr style="margin: 30px 0; border: 0; border-top: 1px solid var(--nadm-line);">
-
+	<!-- 1. Associazione manuale: tag, gioco IGDB e articolo in evidenza -->
 	<div style="display: flex; flex-wrap: wrap; gap: 30px;">
 		
 		<!-- STEP 1: Trova Tag -->
@@ -166,9 +88,96 @@ endif;
 		</div>
 	</div>
 
-	<div style="margin-top: 30px;">
+	<div style="margin-top: 20px;">
 		<button id="ntn-save-tag-assoc-btn" class="button button-primary button-hero" disabled style="width: 100%; text-align: center;">Salva Associazione</button>
 		<div id="ntn-tag-assoc-status" style="margin-top: 15px; font-weight: bold; text-align: center;"></div>
+	</div>
+
+	<hr style="margin: 30px 0; border: 0; border-top: 1px solid var(--nadm-line);">
+
+	<!-- 2. Scansione dei tag senza gioco -->
+	<?php require __DIR__ . '/igdb-tag-scanner.php'; // v4.15.0: lista dei tag da confermare ?>
+
+	<!-- 3. Riepilogo del database e tabelle dei collegamenti -->
+	<?php
+	// Ottieni numero totale di articoli pubblicati
+	$total_posts = wp_count_posts( 'post' )->publish;
+
+	// Transients per query pesanti SQL
+	global $wpdb;
+
+	$posts_with_igdb = get_transient( 'ntn_igdb_post_count' );
+	if ( false === $posts_with_igdb ) {
+		// La query diretta è usata per ragioni di performance assolute, ma wrappata in un transitorio.
+		$posts_with_igdb = $wpdb->get_var( "SELECT COUNT(DISTINCT post_id) FROM {$wpdb->postmeta} WHERE meta_key = '_ntn_game_title' AND meta_value != ''" );
+		if ( ! $posts_with_igdb ) {
+			$posts_with_igdb = 0;
+		}
+		set_transient( 'ntn_igdb_post_count', $posts_with_igdb, 12 * HOUR_IN_SECONDS );
+	}
+
+	$tags_with_igdb = get_transient( 'ntn_igdb_tag_count' );
+	if ( false === $tags_with_igdb ) {
+		$tags_with_igdb = $wpdb->get_var( "SELECT COUNT(DISTINCT term_id) FROM {$wpdb->termmeta} WHERE meta_key = '_ntn_game_title' AND meta_value != ''" );
+		if ( ! $tags_with_igdb ) {
+			$tags_with_igdb = 0;
+		}
+		set_transient( 'ntn_igdb_tag_count', $tags_with_igdb, 12 * HOUR_IN_SECONDS );
+	}
+	?>
+	<div style="background: var(--nadm-surface); border: 1px solid var(--nadm-line-strong); padding: 15px; margin-bottom: 20px;">
+		<h3 style="margin-top:0;">Riepilogo Database</h3>
+		<ul style="margin:0; padding-left: 20px;">
+			<li><strong>Articoli Totali Pubblicati:</strong> <?php echo esc_html( $total_posts ); ?></li>
+			<li><strong>Articoli Collegati a IGDB:</strong> <?php echo esc_html( $posts_with_igdb ); ?></li>
+			<li><strong>Tag di Gioco Collegati a IGDB:</strong> <?php echo esc_html( $tags_with_igdb ); ?></li>
+		</ul>
+		<div style="margin-top: 15px;">
+			<button id="ntn-refresh-cache-btn" class="button button-secondary">Ricalcola Cache Dati</button>
+			<button id="ntn-clear-cache-btn" class="button button-secondary">Svuota Cache Dati</button>
+			<button id="ntn-repair-reconnect-btn" class="button button-primary" style="margin-left: 10px;">Ripristina & Riconnetti Metadati Orfani</button>
+			<span id="ntn-cache-status" style="margin-left: 10px; font-weight: bold;"></span>
+		</div>
+		<div style="margin-top: 15px;">
+			<button id="ntn-load-connections" class="button button-secondary" style="margin-right: 10px;">Visualizza Articoli Collegati</button>
+			<button id="ntn-load-tag-connections" class="button button-secondary" style="margin-right: 10px;">Visualizza Tag Collegati</button>
+			<button id="ntn-reset-scanner" class="button nadm-btn is-danger">Scollega tutti i dati IGDB (Reset)</button>
+		</div>
+		<div style="margin-top: 15px;">
+			<button id="ntn-core-update-changed-tags" class="button button-primary">Aggiorna solo i collegamenti con modifiche</button>
+			<span id="ntn-core-update-changed-status" role="status" style="margin-left: 10px; font-weight: bold;"></span>
+			<p class="description" style="margin: 6px 0 0;">Chiede a IGDB quali giochi collegati sono cambiati dall'ultima sincronizzazione e risincronizza solo quei tag.</p>
+		</div>
+	</div>
+
+	<!-- Container per gli articoli collegati -->
+	<div id="ntn-connections-container" style="display:none; margin-bottom: 30px;">
+		<h3 style="margin-top: 0; display:flex; align-items:center; justify-content:space-between;">
+			<span>Articoli con Scheda Gioco</span>
+			<button onclick="document.getElementById('ntn-connections-container').style.display='none'; document.getElementById('ntn-load-connections').disabled=false;" class="button">Chiudi Tabella</button>
+		</h3>
+		<div id="ntn-connections-loading" style="padding: 10px; background: var(--nadm-surface); text-align:center;">Caricamento in corso...</div>
+		<div id="ntn-connections-table-wrapper"></div>
+	</div>
+	
+	<!-- Container per i tag collegati -->
+	<div id="ntn-tag-connections-container" style="display:none; margin-bottom: 30px;">
+		<h3 style="margin-top: 0; display:flex; align-items:center; justify-content:space-between;">
+			<span>Tag collegati a IGDB</span>
+			<div>
+				<button id="ntn-update-all-tags" class="button button-primary" style="display:none; margin-right:5px;">Aggiorna tutti</button>
+				<button id="ntn-unlink-all-tags" class="button nadm-btn is-danger" style="display:none; margin-right:10px;">Scollega tutti</button>
+				<button onclick="document.getElementById('ntn-tag-connections-container').style.display='none'; document.getElementById('ntn-load-tag-connections').disabled=false;" class="button">Chiudi Tabella</button>
+			</div>
+		</h3>
+		<div id="ntn-update-progress-container" style="display:none; margin-top: 10px; width: 100%;">
+			<div style="background: var(--nadm-line); height: 20px; width: 100%; overflow: hidden;">
+				<div id="ntn-update-progress-bar" style="background: var(--nadm-fg); height: 100%; width: 0%; transition: width 0.3s;"></div>
+			</div>
+			<div id="ntn-update-progress-text" style="text-align: center; font-size: 12px; margin-top: 5px; font-weight: bold;">0%</div>
+		</div>
+		<div id="ntn-tag-connections-loading" style="padding: 10px; background: var(--nadm-surface); text-align:center;">Caricamento in corso...</div>
+		<div id="ntn-tag-connections-table-wrapper"></div>
 	</div>
 </div>
 

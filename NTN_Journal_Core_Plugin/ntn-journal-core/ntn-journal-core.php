@@ -3,7 +3,7 @@
  * Plugin Name: NTN Journal Core
  * Plugin URI: https://github.com/Blackstar90210/NTN-Journal-Refactoring
  * Description: Gestisce i Custom Post Type (Comunicato Stampa, Videogioco), Tassonomie, Meta Box IGDB e logiche di backend separate dal tema.
- * Version: 4.32.0
+ * Version: 4.34.0
  * Requires at least: 6.0
  * Requires PHP: 8.0
  * Text Domain: ntn-journal-core
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Definisco la costante di versione globale (deve coincidere con quella del commento header e dei temi!)
-define( 'NTN_JOURNAL_CORE_VERSION', '4.32.0' );
+define( 'NTN_JOURNAL_CORE_VERSION', '4.34.0' );
 define( 'NTN_JOURNAL_CORE_DIR', plugin_dir_path( __FILE__ ) );
 define( 'NTN_JOURNAL_CORE_URL', plugin_dir_url( __FILE__ ) );
 

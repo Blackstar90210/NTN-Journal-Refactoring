@@ -1655,24 +1655,24 @@ echo "\n--- 24. SEMVER SIMULTANEOUS 4-HEADER SYNCHRONIZATION ---\n";
 $parent_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $parent_css, $m_parent );
 $parent_ver = isset( $m_parent[1] ) ? trim( $m_parent[1] ) : '';
-assert_test( $parent_ver === '4.32.0', "24.1: Parent Theme style.css declares Version: 4.32.0(found: {$parent_ver})" );
+assert_test( $parent_ver === '4.34.0', "24.1: Parent Theme style.css declares Version: 4.34.0(found: {$parent_ver})" );
 
 $child_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $child_css, $m_child );
 $child_ver = isset( $m_child[1] ) ? trim( $m_child[1] ) : '';
-assert_test( $child_ver === '4.32.0', "24.2: Child Theme style.css declares Version: 4.32.0(found: {$child_ver})" );
+assert_test( $child_ver === '4.34.0', "24.2: Child Theme style.css declares Version: 4.34.0(found: {$child_ver})" );
 
 $core_php = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' );
 preg_match( '/\*\s*Version:\s*([0-9\.]+)/', $core_php, $m_core_hdr );
 $core_hdr_ver = isset( $m_core_hdr[1] ) ? trim( $m_core_hdr[1] ) : '';
-assert_test( $core_hdr_ver === '4.32.0', "24.3: Core Plugin header declares Version: 4.32.0(found: {$core_hdr_ver})" );
+assert_test( $core_hdr_ver === '4.34.0', "24.3: Core Plugin header declares Version: 4.34.0(found: {$core_hdr_ver})" );
 
 preg_match( "/define\(\s*'NTN_JOURNAL_CORE_VERSION',\s*'([^']+)'\s*\);/", $core_php, $m_core_const );
 $core_const_ver = isset( $m_core_const[1] ) ? trim( $m_core_const[1] ) : '';
-assert_test( $core_const_ver === '4.32.0', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.32.0(found: {$core_const_ver})" );
+assert_test( $core_const_ver === '4.34.0', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.34.0(found: {$core_const_ver})" );
 
 assert_test(
-	$parent_ver === '4.32.0' && $child_ver === '4.32.0' && $core_hdr_ver === '4.32.0' && $core_const_ver === '4.32.0',
+	$parent_ver === '4.34.0' && $child_ver === '4.34.0' && $core_hdr_ver === '4.34.0' && $core_const_ver === '4.34.0',
 	'24.5: All 4 version headers are 100% synchronized and atomic according to Rule 2 of GEMINI.md'
 );
 
@@ -1900,7 +1900,7 @@ $parent_style_ver = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( AB
 $child_style_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' ), $m2 ) ? $m2[1] : '';
 $core_plugin_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m3 ) ? $m3[1] : '';
 $core_const_ver   = preg_match( '/define\(\s*[\'"]NTN_JOURNAL_CORE_VERSION[\'"]\s*,\s*[\'"]([0-9\.]+)[\'"]\s*\)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m4 ) ? $m4[1] : '';
-assert_test( $parent_style_ver === '4.32.0' && $child_style_ver === '4.32.0' && $core_plugin_ver === '4.32.0' && $core_const_ver === '4.32.0', '29.1: All 4 version headers are synchronized to 4.32.0' );
+assert_test( $parent_style_ver === '4.34.0' && $child_style_ver === '4.34.0' && $core_plugin_ver === '4.34.0' && $core_const_ver === '4.34.0', '29.1: All 4 version headers are synchronized to 4.34.0' );
 
 // 29.2: single.php sequence is Google Feed -> Social CTA -> Bottom Related Posts
 $single_php = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/single.php' );
@@ -7011,7 +7011,7 @@ foreach ( $js_pairs as $js_action => $js_kind ) {
 	}
 }
 assert_test(
-	false === strpos( $js_file, '<?' ) && 14 === count( $js_pairs ) && 3 === substr_count( $js_file, 'ntnIgdbScanner.nonce' ) && 11 === substr_count( $js_file, 'ntnIgdbScanner.batchNonce' ) &&
+	false === strpos( $js_file, '<?' ) && 14 === count( $js_pairs ) && 3 === substr_count( $js_file, 'ntnIgdbScanner.nonce' ) && 13 === substr_count( $js_file, 'ntnIgdbScanner.batchNonce' ) /* 4.34.0: +2 per il pulsante dei soli tag cambiati, vedi 110.4 */ &&
 	14 === substr_count( $js_file, "data.append('_ajax_nonce'," ) && empty( $js_bad ),
 	'104.2: admin-igdb-scanner.js has no PHP, 14 requests send the nonce (3 + 11) and each sends the one its PHP handler checks (problems: ' . implode( ', ', $js_bad ) . ')'
 );
@@ -7139,6 +7139,64 @@ assert_test(
 	'109.2: admin-igdb-migration.js has no PHP, sends the nonce its two PHP handlers check (ntn_igdb_migrate_nonce) for migration and franchise sync, and is valid JavaScript (' . $mg_node . ')'
 );
 
+
+
+// --- TEST SUITE 110: scheda Scanner IGDB riordinata e "Aggiorna solo i collegamenti con modifiche" v4.34.0 ---
+echo "\n--- 110. SCHEDA SCANNER IGDB RIORDINATA E AGGIORNAMENTO DEI SOLI TAG CAMBIATI V4.34.0 ---\n";
+$sc_core = ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/';
+$sc_view = ntn_t_read( $sc_core . 'inc/admin/views/tab-igdb.php' );
+$sc_scan = ntn_t_read( $sc_core . 'inc/admin/views/igdb-tag-scanner.php' );
+$sc_js   = ntn_t_read( $sc_core . 'assets/js/admin-igdb-scanner.js' );
+$sc_tjs  = ntn_t_read( $sc_core . 'assets/js/admin-igdb-tag-scanner.js' );
+$sc_flat = ntn_t_flat( ntn_t_read( $sc_core . 'inc/admin/igdb-ajax-handlers.php' ) );
+$sc_jsf  = ntn_t_flat( $sc_js );
+$sc_node = trim( (string) shell_exec( 'node --check ' . escapeshellarg( $sc_core . 'assets/js/admin-igdb-tag-scanner.js' ) . ' 2>&1 && echo OK' ) );
+
+// 110.1: ordine dall'alto: interruttore, tre riquadri (+ Salva), scansione, riepilogo con le tabelle dei collegamenti
+$sc_pos = array(
+	strpos( $sc_view, 'name="ntn_igdb_scanner_active"' ),
+	strpos( $sc_view, 'id="ntn-tag-search-input"' ),
+	strpos( $sc_view, 'id="ntn-igdb-search-input"' ),
+	strpos( $sc_view, 'id="ntn-review-url-input"' ),
+	strpos( $sc_view, 'id="ntn-save-tag-assoc-btn"' ),
+	strpos( $sc_view, 'igdb-tag-scanner.php' ),
+	strpos( $sc_view, 'Riepilogo Database' ),
+	strpos( $sc_view, 'id="ntn-core-update-changed-tags"' ),
+	strpos( $sc_view, 'id="ntn-tag-connections-container"' ),
+);
+$sc_sorted = $sc_pos;
+sort( $sc_sorted );
+assert_test(
+	! in_array( false, $sc_pos, true ) && $sc_pos === $sc_sorted && 1 === substr_count( $sc_view, 'Riepilogo Database' ) && 1 === substr_count( $sc_view, 'id="ntn-save-tag-assoc-btn"' ),
+	'110.1: tab-igdb.php shows, top to bottom: the on/off switch, the three boxes (tag, IGDB search, featured article) with Save, the tag scan, then the database summary with the new button and the connection tables'
+);
+
+// 110.2: la tabella dei risultati della scansione si chiude e si riapre, lo stato si ricorda con try/catch
+assert_test(
+	false !== strpos( $sc_scan, 'id="ntn-scan-toggle"' ) && false !== strpos( $sc_scan, 'aria-controls="ntn-scan-results"' ) &&
+	1 === preg_match( '/id="ntn-scan-results".*id="ntn-scan-lists"/s', $sc_scan ) &&
+	false !== strpos( $sc_tjs, 'results.hidden = !open' ) && 2 === preg_match_all( '/try \{[^}]*window\.localStorage\.(get|set)Item/', $sc_tjs ) &&
+	false !== strpos( $sc_tjs, "setAttribute('aria-expanded'" ) && 'OK' === $sc_node,
+	'110.2: the scan results can be hidden and shown again (button with aria-expanded/aria-controls), the open/closed state is remembered in localStorage inside try/catch, valid JavaScript (' . $sc_node . ')'
+);
+
+// 110.3: il nuovo gestore (solo admin) controlla nonce e permessi, interroga IGDB a blocchi di 500 solo per id, updated_at, checksum
+assert_test(
+	false !== strpos( $sc_flat, "add_action( 'wp_ajax_ntn_core_igdb_changed_tags', 'ntn_core_ajax_igdb_changed_tags' )" ) &&
+	1 === preg_match( "/function ntn_core_ajax_igdb_changed_tags\( ?\) \{ check_ajax_referer\( 'ntn_batch_scan_igdb_nonce', '_ajax_nonce' \); if \( ! current_user_can\( 'manage_options' \) \)/", $sc_flat ) &&
+	false !== strpos( $sc_flat, 'array_chunk( array_keys( $by_game ), 500 )' ) && false !== strpos( $sc_flat, "'fields id, updated_at, checksum; where id = ('" ) &&
+	false === strpos( $sc_flat, 'wp_ajax_nopriv_ntn_core_igdb_changed_tags' ),
+	'110.3: ntn_core_igdb_changed_tags (admin only) checks nonce and manage_options and asks IGDB only for id, updated_at, checksum, 500 games per request'
+);
+
+// 110.4: la risincronizzazione del singolo tag salva l'impronta, il reset la cancella, il JS riusa la stessa azione
+assert_test(
+	false !== strpos( $sc_flat, "'fields id, updated_at, checksum, name, url," ) && false !== strpos( $sc_flat, 'ntn_core_igdb_save_fingerprint( $tag_id, $game );' ) &&
+	false !== strpos( $sc_flat, "'_ntn_core_igdb_fingerprint' );" ) && false !== strpos( $sc_flat, "update_term_meta( (int ) \$tag_id, '_ntn_core_igdb_fingerprint'," ) &&
+	false !== strpos( $sc_jsf, "action: 'ntn_core_igdb_changed_tags', _ajax_nonce: ntnIgdbScanner.batchNonce" ) &&
+	false !== strpos( $sc_jsf, "action: 'ntn_update_single_tag_igdb', _ajax_nonce: ntnIgdbScanner.batchNonce, tag_id: item.tag_id, igdb_id: item.igdb_id" ),
+	'110.4: single-tag resync stores the IGDB fingerprint (id, updated_at, checksum), the tag reset deletes it, and the JS runs the check and then the existing single-tag resync with the batch nonce'
+);
 
 echo "\n=======================================================================\n";
 echo " AUDIT SUMMARY: {$passed} PASSED, {$failed} FAILED\n";

@@ -241,3 +241,36 @@ document.addEventListener('DOMContentLoaded', function () {
 		});
 	});
 });
+
+/**
+ * v4.34.0: chiude e riapre la tabella dei risultati della scansione.
+ * Lo stato (aperta o chiusa) si ricorda nel browser; se il browser non lo permette, la tabella resta aperta.
+ * Quando si avvia una nuova scansione la tabella si riapre.
+ */
+document.addEventListener('DOMContentLoaded', function () {
+	const toggleBtn = document.getElementById('ntn-scan-toggle');
+	const results = document.getElementById('ntn-scan-results');
+	const startBtn = document.getElementById('ntn-scan-start');
+	const storageKey = 'ntnCoreScanResultsOpen';
+	if (!toggleBtn || !results) { return; }
+
+	function setOpen(open, remember) {
+		results.hidden = !open;
+		toggleBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+		toggleBtn.textContent = open ? 'Nascondi risultati' : 'Mostra risultati';
+		if (remember) {
+			try { window.localStorage.setItem(storageKey, open ? '1' : '0'); } catch (e) { /* stato non ricordato */ }
+		}
+	}
+
+	let saved = null;
+	try { saved = window.localStorage.getItem(storageKey); } catch (e) { saved = null; }
+	setOpen(saved !== '0', false);
+
+	toggleBtn.addEventListener('click', function () {
+		setOpen(results.hidden, true);
+	});
+	if (startBtn) {
+		startBtn.addEventListener('click', function () { setOpen(true, true); });
+	}
+});
