@@ -13,3 +13,17 @@ _da_valutare/
 .env.*
 *.pem
 *.key
+# Documenti di lavoro e note di rilascio: restano solo in locale
+docs/
+patch note/
+
+# Screenshot di lavoro e file temporanei
+_screenshots/
+*.tmp
+*.temp
+*.bak
+*.log
+*~
+.DS_Store
+Thumbs.db
+desktop.ini

@@ -5,7 +5,7 @@
 > **Autore:** Mario, CHRO & Chief Architect (Management Core)  
 > **Approvato da:** CEO (Utente) & COO/PM (Assistente)  
 > **Ultimo Aggiornamento:** 2026-10-16 (migrazione da `GEMINI.md` di Antigravity a Claude Code)  
-> **Workspace Root:** `c:\Users\Luca-Maiolini\Sviluppo-Antigravity\Ecosistema\Progetti\Divisione_WP\Temi\NTN Journal Refactoring`
+> **Workspace Root:** `%USERPROFILE%\Sviluppo-Antigravity\Ecosistema\Progetti\Divisione_WP\Temi\NTN Journal Refactoring`
 
 ---
 
@@ -29,7 +29,7 @@ Il progetto **NTN Journal** è un ecosistema editoriale WordPress di livello ent
 La catena di comando è quella dello statuto globale (`CLAUDE.md` dell'Ecosistema): `CEO → Adriano (COO globale, cioè Claude) → Nicola (Division Lead) → specialisti`. Regole locali e organigramma del progetto:
 
 @AGENTS.md
-@docs/SQUADRA_AGENTI.md
+@.claude/SQUADRA_AGENTI.md
 
 Le skill di Nicola e degli specialisti NTN sono in `.claude/skills/`. Mario, Francesca e Maria Grazia sono C-Level globali, con le skill in `Ecosistema/.claude/skills/`.
 
@@ -148,9 +148,10 @@ Nessun deliverable può essere consegnato al CEO (Utente) senza:
 ## 4. Alberatura del Workspace
 
 ```text
-c:\Users\Luca-Maiolini\Sviluppo-Antigravity\Ecosistema\Progetti\Divisione_WP\Temi\NTN Journal Refactoring\
+%USERPROFILE%\Sviluppo-Antigravity\Ecosistema\Progetti\Divisione_WP\Temi\NTN Journal Refactoring\
 │
 ├── .claude/
+│   ├── SQUADRA_AGENTI.md                   # Organigramma del progetto
 │   └── skills/                             # Skill di Nicola e degli specialisti NTN
 │
 ├── .agents/                                # Regole di dettaglio e archivio delle sessioni Antigravity
@@ -158,13 +159,13 @@ c:\Users\Luca-Maiolini\Sviluppo-Antigravity\Ecosistema\Progetti\Divisione_WP\Tem
 │   │   └── versioning-and-releases.md      # Regola di dettaglio SemVer & Packaging
 │   └── ... (sessioni e context agentici di Antigravity, solo storico)
 │
-├── archive/                                # Deposito storico delle release ZIP precedenti
+├── archive/                                # Deposito storico delle release ZIP precedenti (solo locale, non tracciato)
 │   ├── ntn-journal-parent-2.0.0.zip
 │   ├── ntn-journal-child-reloaded-2.0.0.zip
 │   ├── ntn-journal-core-2.0.0.zip
 │   └── ...
 │
-├── docs/                                   # Documentazione architetturale e proposte di feature
+├── docs/                                   # Documentazione architetturale e proposte di feature (solo locale, non tracciato)
 │   ├── Piano_Architetturale.md
 │   ├── feature_proposals.md
 │   ├── piano_implementazione_backup.md
@@ -191,6 +192,7 @@ c:\Users\Luca-Maiolini\Sviluppo-Antigravity\Ecosistema\Progetti\Divisione_WP\Tem
 ├── AGENTS.md                               # Statuto Aziendale e Governance Management Core
 ├── CLAUDE.md                               # Master Rules del Workspace (Questo documento)
 ├── audit_test_suite.php                    # Suite di collaudo e validazione funzionale PHP
+├── patch note/                             # Note di rilascio di ogni versione (solo locale, non tracciato)
 │
 ├── ntn-journal-parent-X.Y.Z.zip            # Deliverable ZIP Tema Parent (Versione Corrente)
 ├── ntn-journal-child-reloaded-X.Y.Z.zip    # Deliverable ZIP Tema Child (Versione Corrente)

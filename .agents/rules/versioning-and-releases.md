@@ -3,7 +3,7 @@
 
 > **Destinatari:** Francesca (CQO), Alessandro (CTO), Elena (Frontend), Mario (Architect), COO / PM  
 > **Applicazione:** Tassativa e obbligatoria per ogni singola modifica al codice  
-> **Workspace Root:** `c:\Users\Luca-Maiolini\Sviluppo-Antigravity\Ecosistema\Progetti\Divisione_WP\Temi\NTN Journal Refactoring`
+> **Workspace Root:** `%USERPROFILE%\Sviluppo-Antigravity\Ecosistema\Progetti\Divisione_WP\Temi\NTN Journal Refactoring`
 
 ---
 
@@ -157,7 +157,7 @@ param (
     [string]$Version
 )
 
-$WorkspaceRoot = "c:\Users\Luca-Maiolini\Sviluppo-Antigravity\Ecosistema\Progetti\Divisione_WP\Temi\NTN Journal Refactoring"
+$WorkspaceRoot = "$env:USERPROFILE\Sviluppo-Antigravity\Ecosistema\Progetti\Divisione_WP\Temi\NTN Journal Refactoring"
 Set-Location $WorkspaceRoot
 
 # 1. Housekeeping: Spostamento vecchi zip in archive/
