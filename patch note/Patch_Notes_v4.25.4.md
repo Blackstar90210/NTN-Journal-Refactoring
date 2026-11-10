@@ -15,11 +15,11 @@ Nuovo file `phpcs.xml.dist` nella radice del repository (non entra negli ZIP). D
 98 file PHP sistemati in automatico. Segnalazioni PHPCS con le stesse regole (`phpcs.xml.dist`): **da 4.149 a 1.521** (-63%). I 3.845 del report iniziale erano contati con le regole base di WordPress, senza prefissi e senza le funzioni del nonce.
 
 Controllo di equivalenza: ho confrontato il codice prima e dopo pezzo per pezzo (token PHP, senza spazi e commenti). Le sole differenze sono forme equivalenti:
-- virgola finale negli elenchi su più righe (152);
-- `$i++` da solo diventa `++$i` (25);
-- graffe aggiunte agli `if` su una riga (11);
+- virgola finale negli elenchi su più righe (253);
+- `$i++` da solo su una riga diventa `++$i` (29);
+- graffe aggiunte agli `if` su una riga (66 `if`, 132 graffe);
 - virgolette doppie diventate singole dove non c'erano variabili (19);
-- `else if` / `else { if` / `else : if … endif` diventati `elseif` (3, tra cui il logo testuale nell'header).
+- `else if` / `else { if` / `else : if … endif` diventati `elseif` (3, tra cui il logo testuale nell'header; uno degli `else : if` ha perso un `endif` che non serviva più).
 L'HTML stampato è invariato, a parte gli spazi.
 
 ### ✅ Test
