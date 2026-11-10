@@ -44,69 +44,14 @@ function ntn_igdb_migration_page_html() {
 		<div id="ntn-migration-results" style="margin-top:20px; padding:15px; background:#fff; border:1px solid #ccc; display:none;"></div>
 	</div>
 
-	<script>
-	jQuery(document).ready(function($) {
-		$('#ntn-run-migration').on('click', function(e) {
-			e.preventDefault();
-			var btn = $(this);
-			
-			if ( ! confirm("Sei sicuro di voler avviare la migrazione? Potrebbe richiedere qualche secondo.") ) {
-				return;
-			}
-			
-			btn.prop('disabled', true).text('Migrazione in corso...');
-			$('#ntn-migration-results').show().html('<p>Elaborazione in corso, attendere...</p>');
-
-			$.post(ajaxurl, {
-				action: 'ntn_migrate_tags_to_cpt',
-				_ajax_nonce: '<?php echo esc_js( wp_create_nonce( 'ntn_igdb_migrate_nonce' ) ); ?>'
-			}, function(response) {
-				if ( response.success ) {
-					$('#ntn-migration-results').html('<p style="color:green;"><strong>' + response.data.message + '</strong><br>Giochi migrati: ' + response.data.count + '</p>');
-				} else {
-					$('#ntn-migration-results').html('<p style="color:red;"><strong>Errore:</strong> ' + response.data + '</p>');
-				}
-				btn.prop('disabled', false).text('Esegui Migrazione Ora');
-			}).fail(function() {
-				$('#ntn-migration-results').html('<p style="color:red;"><strong>Errore di rete o timeout.</strong></p>');
-				btn.prop('disabled', false).text('Esegui Migrazione Ora');
-			});
-		});
-
-		function runFranchiseSync( offset ) {
-			$.post(ajaxurl, {
-				action: 'ntn_sync_franchises',
-				offset: offset,
-				_ajax_nonce: '<?php echo esc_js( wp_create_nonce( 'ntn_igdb_migrate_nonce' ) ); ?>'
-			}, function(response) {
-				if ( response.success ) {
-					if ( response.data.done ) {
-						$('#ntn-migration-results').append('<p style="color:green;"><strong>' + response.data.message + '</strong></p>');
-						$('#ntn-run-franchise-sync').prop('disabled', false).text('Sincronizza Franchise Mancanti');
-					} else {
-						$('#ntn-migration-results').append('<p>Elaborati ' + response.data.processed + ' giochi. Procedo con i successivi...</p>');
-						runFranchiseSync( response.data.next_offset );
-					}
-				} else {
-					$('#ntn-migration-results').append('<p style="color:red;"><strong>Errore:</strong> ' + response.data + '</p>');
-					$('#ntn-run-franchise-sync').prop('disabled', false).text('Sincronizza Franchise Mancanti');
-				}
-			}).fail(function() {
-				$('#ntn-migration-results').append('<p style="color:red;"><strong>Errore di rete o timeout.</strong></p>');
-				$('#ntn-run-franchise-sync').prop('disabled', false).text('Sincronizza Franchise Mancanti');
-			});
-		}
-
-		$('#ntn-run-franchise-sync').on('click', function(e) {
-			e.preventDefault();
-			var btn = $(this);
-			btn.prop('disabled', true).text('Sincronizzazione in corso...');
-			$('#ntn-migration-results').show().html('<p>Sincronizzazione Franchise avviata...</p>');
-			runFranchiseSync(0);
-		});
-	});
-	</script>
 	<?php
+	// Il codice della pagina sta in assets/js/admin-igdb-migration.js (dalla 4.32.0); qui solo il codice di sicurezza.
+	wp_enqueue_script( 'ntn-core-igdb-migration', NTN_JOURNAL_CORE_URL . 'assets/js/admin-igdb-migration.js', array( 'jquery' ), NTN_JOURNAL_CORE_VERSION, true );
+	wp_localize_script(
+		'ntn-core-igdb-migration',
+		'ntnIgdbMigration',
+		array( 'nonce' => wp_create_nonce( 'ntn_igdb_migrate_nonce' ) )
+	);
 }
 
 /**
