@@ -1655,24 +1655,24 @@ echo "\n--- 24. SEMVER SIMULTANEOUS 4-HEADER SYNCHRONIZATION ---\n";
 $parent_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $parent_css, $m_parent );
 $parent_ver = isset( $m_parent[1] ) ? trim( $m_parent[1] ) : '';
-assert_test( $parent_ver === '4.29.0', "24.1: Parent Theme style.css declares Version: 4.29.0(found: {$parent_ver})" );
+assert_test( $parent_ver === '4.30.0', "24.1: Parent Theme style.css declares Version: 4.30.0(found: {$parent_ver})" );
 
 $child_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $child_css, $m_child );
 $child_ver = isset( $m_child[1] ) ? trim( $m_child[1] ) : '';
-assert_test( $child_ver === '4.29.0', "24.2: Child Theme style.css declares Version: 4.29.0(found: {$child_ver})" );
+assert_test( $child_ver === '4.30.0', "24.2: Child Theme style.css declares Version: 4.30.0(found: {$child_ver})" );
 
 $core_php = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' );
 preg_match( '/\*\s*Version:\s*([0-9\.]+)/', $core_php, $m_core_hdr );
 $core_hdr_ver = isset( $m_core_hdr[1] ) ? trim( $m_core_hdr[1] ) : '';
-assert_test( $core_hdr_ver === '4.29.0', "24.3: Core Plugin header declares Version: 4.29.0(found: {$core_hdr_ver})" );
+assert_test( $core_hdr_ver === '4.30.0', "24.3: Core Plugin header declares Version: 4.30.0(found: {$core_hdr_ver})" );
 
 preg_match( "/define\(\s*'NTN_JOURNAL_CORE_VERSION',\s*'([^']+)'\s*\);/", $core_php, $m_core_const );
 $core_const_ver = isset( $m_core_const[1] ) ? trim( $m_core_const[1] ) : '';
-assert_test( $core_const_ver === '4.29.0', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.29.0(found: {$core_const_ver})" );
+assert_test( $core_const_ver === '4.30.0', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.30.0(found: {$core_const_ver})" );
 
 assert_test(
-	$parent_ver === '4.29.0' && $child_ver === '4.29.0' && $core_hdr_ver === '4.29.0' && $core_const_ver === '4.29.0',
+	$parent_ver === '4.30.0' && $child_ver === '4.30.0' && $core_hdr_ver === '4.30.0' && $core_const_ver === '4.30.0',
 	'24.5: All 4 version headers are 100% synchronized and atomic according to Rule 2 of GEMINI.md'
 );
 
@@ -1900,7 +1900,7 @@ $parent_style_ver = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( AB
 $child_style_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' ), $m2 ) ? $m2[1] : '';
 $core_plugin_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m3 ) ? $m3[1] : '';
 $core_const_ver   = preg_match( '/define\(\s*[\'"]NTN_JOURNAL_CORE_VERSION[\'"]\s*,\s*[\'"]([0-9\.]+)[\'"]\s*\)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m4 ) ? $m4[1] : '';
-assert_test( $parent_style_ver === '4.29.0' && $child_style_ver === '4.29.0' && $core_plugin_ver === '4.29.0' && $core_const_ver === '4.29.0', '29.1: All 4 version headers are synchronized to 4.29.0' );
+assert_test( $parent_style_ver === '4.30.0' && $child_style_ver === '4.30.0' && $core_plugin_ver === '4.30.0' && $core_const_ver === '4.30.0', '29.1: All 4 version headers are synchronized to 4.30.0' );
 
 // 29.2: single.php sequence is Google Feed -> Social CTA -> Bottom Related Posts
 $single_php = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/single.php' );
@@ -7067,6 +7067,21 @@ assert_test(
 	false !== strpos( $bk_php, "wp_ajax_ntn_backup_export" ) && false !== strpos( $bk_php, "wp_ajax_ntn_backup_import" ) &&
 	2 === substr_count( $bk_php, "check_ajax_referer( 'ntn_backup_nonce', '_ajax_nonce' )" ) && 'OK' === $bk_node,
 	'106.2: admin-backup.js has no PHP, sends export and import requests with the nonce their two PHP handlers check (ntn_backup_nonce), and is valid JavaScript (' . $bk_node . ')'
+);
+
+
+// --- TEST SUITE 107: stile della scheda Immagini nel foglio di stile v4.30.0 ---
+echo "\n--- 107. STILE DELLA SCHEDA IMMAGINI NEL FOGLIO DI STILE V4.30.0 ---\n";
+$im_core = ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/';
+$im_view = ntn_t_read( $im_core . 'inc/admin/views/tab-immagini.php' );
+$im_css  = ntn_t_flat( ntn_t_read( $im_core . 'assets/css/admin.css' ) );
+$im_page = ntn_t_flat( ntn_t_read( $im_core . 'inc/admin/admin-page.php' ) );
+assert_test(
+	false === strpos( $im_view, '<style' ) && false === strpos( $im_view, 'style=' ) && false !== strpos( $im_view, '<div class="card ntn-images-tab">' ) &&
+	false !== strpos( $im_css, '.card.ntn-images-tab { max-width: 100%; margin-top: 0; }' ) &&
+	false !== strpos( $im_css, '.card.ntn-images-tab > hr:first-of-type { display: none; }' ) &&
+	false !== strpos( $im_page, "wp_enqueue_style( 'ntn-core-admin', NTN_JOURNAL_CORE_URL . 'assets/css/admin.css'" ) && false !== strpos( $im_page, "'toplevel_page_ntn-journal-functions' !== \$hook" ),
+	'107.1: tab-immagini.php has no <style> block and no style attribute; the same three declarations (full width, no top margin, first rule hidden) are in admin.css, which loads on the whole NTN Journal Funzioni page'
 );
 
 

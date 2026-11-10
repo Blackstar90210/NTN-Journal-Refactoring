@@ -173,3 +173,8 @@
 .nadm-pager { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; padding-top: 8px; font-family: var(--nadm-mono); font-size: 11px; font-weight: 700; }
 .nadm-pager a, .nadm-pager span { display: inline-grid; place-items: center; min-width: 34px; height: 34px; padding: 0 10px; border: 1px solid var(--nadm-line); text-decoration: none; }
 .nadm-pager .is-cur { background: var(--nadm-fg); border-color: var(--nadm-fg); color: var(--nadm-bg); }
+
+/* Scheda Immagini (dalla 4.30.0, prima scritto dentro tab-immagini.php): il riquadro occupa tutta la larghezza
+   e non ha il primo filetto, perché i due strumenti ne hanno già uno. */
+.card.ntn-images-tab { max-width: 100%; margin-top: 0; }
+.card.ntn-images-tab > hr:first-of-type { display: none; }
