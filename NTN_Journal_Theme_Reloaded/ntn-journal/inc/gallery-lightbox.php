@@ -18,7 +18,16 @@ function ntn_enqueue_gallery_lightbox() {
 		wp_enqueue_style( 'glightbox', get_template_directory_uri() . '/assets/css/glightbox.min.css', array(), '3.3.0' );
 
 		// Enqueue JS
-		wp_enqueue_script( 'glightbox', get_template_directory_uri() . '/assets/js/glightbox.min.js', array(), '3.3.0', true );
+		wp_enqueue_script(
+			'glightbox',
+			get_template_directory_uri() . '/assets/js/glightbox.min.js',
+			array(),
+			'3.3.0',
+			array(
+				'in_footer' => true,
+				'strategy'  => 'defer',
+			)
+		);
 
 		// In-line JS per inizializzare il lightbox automaticamente
 		wp_add_inline_script(

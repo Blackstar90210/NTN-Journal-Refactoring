@@ -1655,24 +1655,24 @@ echo "\n--- 24. SEMVER SIMULTANEOUS 4-HEADER SYNCHRONIZATION ---\n";
 $parent_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $parent_css, $m_parent );
 $parent_ver = isset( $m_parent[1] ) ? trim( $m_parent[1] ) : '';
-assert_test( $parent_ver === '4.25.5', "24.1: Parent Theme style.css declares Version: 4.25.5(found: {$parent_ver})" );
+assert_test( $parent_ver === '4.26.0', "24.1: Parent Theme style.css declares Version: 4.26.0(found: {$parent_ver})" );
 
 $child_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $child_css, $m_child );
 $child_ver = isset( $m_child[1] ) ? trim( $m_child[1] ) : '';
-assert_test( $child_ver === '4.25.5', "24.2: Child Theme style.css declares Version: 4.25.5(found: {$child_ver})" );
+assert_test( $child_ver === '4.26.0', "24.2: Child Theme style.css declares Version: 4.26.0(found: {$child_ver})" );
 
 $core_php = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' );
 preg_match( '/\*\s*Version:\s*([0-9\.]+)/', $core_php, $m_core_hdr );
 $core_hdr_ver = isset( $m_core_hdr[1] ) ? trim( $m_core_hdr[1] ) : '';
-assert_test( $core_hdr_ver === '4.25.5', "24.3: Core Plugin header declares Version: 4.25.5(found: {$core_hdr_ver})" );
+assert_test( $core_hdr_ver === '4.26.0', "24.3: Core Plugin header declares Version: 4.26.0(found: {$core_hdr_ver})" );
 
 preg_match( "/define\(\s*'NTN_JOURNAL_CORE_VERSION',\s*'([^']+)'\s*\);/", $core_php, $m_core_const );
 $core_const_ver = isset( $m_core_const[1] ) ? trim( $m_core_const[1] ) : '';
-assert_test( $core_const_ver === '4.25.5', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.25.5(found: {$core_const_ver})" );
+assert_test( $core_const_ver === '4.26.0', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.26.0(found: {$core_const_ver})" );
 
 assert_test(
-	$parent_ver === '4.25.5' && $child_ver === '4.25.5' && $core_hdr_ver === '4.25.5' && $core_const_ver === '4.25.5',
+	$parent_ver === '4.26.0' && $child_ver === '4.26.0' && $core_hdr_ver === '4.26.0' && $core_const_ver === '4.26.0',
 	'24.5: All 4 version headers are 100% synchronized and atomic according to Rule 2 of GEMINI.md'
 );
 
@@ -1900,7 +1900,7 @@ $parent_style_ver = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( AB
 $child_style_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' ), $m2 ) ? $m2[1] : '';
 $core_plugin_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m3 ) ? $m3[1] : '';
 $core_const_ver   = preg_match( '/define\(\s*[\'"]NTN_JOURNAL_CORE_VERSION[\'"]\s*,\s*[\'"]([0-9\.]+)[\'"]\s*\)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m4 ) ? $m4[1] : '';
-assert_test( $parent_style_ver === '4.25.5' && $child_style_ver === '4.25.5' && $core_plugin_ver === '4.25.5' && $core_const_ver === '4.25.5', '29.1: All 4 version headers are synchronized to 4.25.5' );
+assert_test( $parent_style_ver === '4.26.0' && $child_style_ver === '4.26.0' && $core_plugin_ver === '4.26.0' && $core_const_ver === '4.26.0', '29.1: All 4 version headers are synchronized to 4.26.0' );
 
 // 29.2: single.php sequence is Google Feed -> Social CTA -> Bottom Related Posts
 $single_php = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/single.php' );
@@ -5730,7 +5730,6 @@ assert_test(
 // --- TEST SUITE 85: script del tema e preload dell'immagine in evidenza v4.16.3 ---
 echo "\n--- 85. DEFER SOLO AGLI SCRIPT DEL TEMA E PRELOAD LCP V4.16.3 ---\n";
 $lc_src = ntn_t_read( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/inc/performance.php' );
-preg_match( '/function ntn_journal_defer_scripts\(.*?\n}\n/s', $lc_src, $lc_defer );
 preg_match( '/function ntn_preload_lcp_image\(.*?\n}\n/s', $lc_src, $lc_preload );
 if ( ! function_exists( 'wp_get_attachment_image_srcset' ) ) {
 	function wp_get_attachment_image_srcset( $id, $size = 'medium' ) { return 'https://example.com/a-1024.jpg 1024w, https://example.com/a-768.jpg 768w'; }
@@ -5739,16 +5738,22 @@ if ( ! function_exists( 'wp_get_attachment_image_sizes' ) ) {
 	function wp_get_attachment_image_sizes( $id, $size = 'medium' ) { return '(max-width: 1024px) 100vw, 1024px'; }
 }
 function ntn_test_att_src( $id, $size = 'thumbnail' ) { return array( 'https://example.com/a-1024.jpg', 1024, 576 ); }
-eval( ( $lc_defer[0] ?? '' ) . str_replace( 'wp_get_attachment_image_src(', 'ntn_test_att_src(', $lc_preload[0] ?? '' ) );
+eval( str_replace( 'wp_get_attachment_image_src(', 'ntn_test_att_src(', $lc_preload[0] ?? '' ) );
 
 $lc_tag = '<script src="https://example.com/x.js"></script>';
+// 85.1 (riscritto in 4.26.0): il filtro script_loader_tag non c'è più; ogni script del tema dichiara 'strategy' => 'defer' da sé.
+$lc_enqueue  = ntn_t_flat( ntn_t_read( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/inc/enqueue.php' ) );
+$lc_lightbox = ntn_t_flat( ntn_t_read( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/inc/gallery-lightbox.php' ) );
+$lc_defer_ok = true;
+foreach ( array( 'ntn-lazy-video', 'ntn-live-search', 'ntn-catalog-filters' ) as $lc_handle ) {
+	$lc_defer_ok = $lc_defer_ok && 1 === preg_match( "/wp_enqueue_script\( '" . preg_quote( $lc_handle, '/' ) . "',[^;]*'strategy' => 'defer'/", $lc_enqueue );
+}
+$lc_defer_ok = $lc_defer_ok && 1 === preg_match( "/wp_enqueue_script\( 'glightbox',[^;]*'strategy' => 'defer'/", $lc_lightbox );
 assert_test(
-	! empty( $lc_defer[0] ) && ! empty( $lc_preload[0] ) &&
-	false !== strpos( ntn_journal_defer_scripts( $lc_tag, 'ntn-live-search', 'x' ), '<script defer="defer" ' ) &&
-	false !== strpos( ntn_journal_defer_scripts( $lc_tag, 'glightbox', 'x' ), 'defer' ) &&
-	$lc_tag === ntn_journal_defer_scripts( $lc_tag, 'jetpack-stats', 'x' ) && $lc_tag === ntn_journal_defer_scripts( $lc_tag, 'google-analytics', 'x' ) &&
-	$lc_tag === ntn_journal_defer_scripts( $lc_tag, 'jquery', 'x' ),
-	'85.1: Only the theme scripts get defer; scripts from other plugins and jQuery are left as they are'
+	! empty( $lc_preload[0] ) && $lc_defer_ok &&
+	false === strpos( ntn_t_flat( $lc_src ), "add_filter( 'script_loader_tag'" ) && false === strpos( $lc_src, 'function ntn_journal_defer_scripts' ) &&
+	false === strpos( $lc_enqueue, "add_filter( 'script_loader_tag'" ),
+	'85.1: The 4 theme scripts declare the native defer strategy; the old script_loader_tag filter is gone, other plugins\' scripts are never touched'
 );
 
 $mock_posts[9500] = new WP_Post( array( 'ID' => 9500, 'post_title' => 'LCP', 'post_name' => 'lcp', 'post_type' => 'post', 'post_status' => 'publish' ) );
@@ -5939,8 +5944,8 @@ foreach ( $so_moved as $so_n ) {
 }
 assert_test( empty( $so_left ), '90.1: The theme performance.php no longer holds the media, emoji, header, Gravatar and author-enumeration code (still there: ' . implode( ', ', $so_left ) . ')' );
 assert_test(
-	false !== strpos( $so_theme, 'function ntn_preload_lcp_image' ) && false !== strpos( $so_theme, 'function ntn_dns_prefetch_external_resources' ) && false !== strpos( $so_theme, 'function ntn_journal_defer_scripts' ),
-	'90.2: The theme keeps what belongs to its own pages: LCP preload, DNS prefetch, defer of theme scripts'
+	false !== strpos( $so_theme, 'function ntn_preload_lcp_image' ) && false !== strpos( $so_theme, 'function ntn_dns_prefetch_external_resources' ) && false === strpos( $so_theme, 'function ntn_journal_defer_scripts' ),
+	'90.2: The theme keeps what belongs to its own pages: LCP preload and DNS prefetch (defer is now native, see 85.1)'
 );
 assert_test(
 	false !== strpos( $so_plugin, 'function ntn_core_register_site_optimizations()' ) && false !== strpos( $so_plugin, "add_filter( 'big_image_size_threshold', '__return_false' )" ) &&
@@ -6845,6 +6850,126 @@ foreach ( array( 'png-thumbnail-repair.php', 'site-optimizations.php', 'image-re
 	}
 }
 assert_test( 3 === substr_count( $sc_tr, '/* translators:' ) && $sc_at_ok, '102.7: The three texts with a placeholder have a translators comment; every kept @ on a file call says why (the @ stay on purpose: broken image files must not print PHP warnings)' );
+
+
+// --- TEST SUITE 103: territorio (plugin / tema) e file del pacchetto v4.26.0 ---
+echo "\n--- 103. TERRITORIO E FILE DEL PACCHETTO V4.26.0 ---\n";
+$tp_core  = ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/';
+$tp_th    = ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/';
+$tp_child = ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/';
+
+// 103.1: XML-RPC e campi meta delle recensioni stanno nel plugin, non più nel tema
+$tp_so   = ntn_t_read( $tp_core . 'inc/site-optimizations.php' );
+$tp_theme_code = '';
+foreach ( array( $tp_th . 'functions.php', $tp_th . 'inc/setup.php', $tp_child . 'functions.php' ) as $tp_f ) {
+	$tp_theme_code .= ntn_t_flat( ntn_t_read( $tp_f ) );
+}
+preg_match( '/function ntn_core_allow_review_meta\(.*?\n}\n/s', $tp_so, $tp_fn );
+eval( $tp_fn[0] ?? '' );
+assert_test(
+	! empty( $tp_fn[0] ) &&
+	false !== strpos( ntn_t_flat( $tp_so ), "add_filter( 'xmlrpc_enabled', '__return_false' )" ) &&
+	false !== strpos( ntn_t_flat( $tp_so ), "add_filter( 'is_protected_meta', 'ntn_core_allow_review_meta', 10, 2 )" ) &&
+	false === strpos( $tp_theme_code, "add_filter( 'xmlrpc_enabled'" ) && false === strpos( $tp_theme_code, "add_filter( 'is_protected_meta'" ),
+	'103.1: XML-RPC off and the review meta unlock now live in the plugin (site-optimizations.php); the theme no longer registers them'
+);
+$tp_same = true;
+foreach ( array( '_thumbnail_id', 'rating', 'pros', 'cons', 'verdict', 'reviewed_item' ) as $tp_k ) {
+	$tp_same = $tp_same && false === ntn_core_allow_review_meta( true, $tp_k );
+}
+assert_test(
+	$tp_same && true === ntn_core_allow_review_meta( true, '_edit_lock' ) && true === ntn_core_allow_review_meta( true, '_ntn_secret' ) && false === ntn_core_allow_review_meta( false, 'title' ),
+	'103.2: The 6 review fields are unlocked, every other protected field stays protected, public fields stay public (same behaviour as the old closure)'
+);
+
+// 103.3: script del tema con strategy nativa (il test 85.1 controlla i 4 enqueue); nessun resto del vecchio filtro
+assert_test(
+	0 === preg_match( '/ntn_journal_deferred_script_handles/', ntn_t_read( $tp_th . 'inc/performance.php' ) . ntn_t_read( $tp_th . 'inc/enqueue.php' ) . ntn_t_read( $tp_th . 'inc/plugin-fallbacks.php' ) ),
+	'103.3: The old filter name ntn_journal_deferred_script_handles is gone from the theme'
+);
+
+// 103.4: uninstall.php, esegue davvero solo la pulizia delle memorie senza il consenso esplicito
+$tp_un = ntn_t_read( $tp_core . 'uninstall.php' );
+$tp_run = function ( $define_all ) use ( $tp_core ) {
+	$stub = "<?php\n\$GLOBALS['q'] = array(); \$GLOBALS['del'] = array(); \$GLOBALS['unsch'] = array();\n" .
+		"define( 'WP_UNINSTALL_PLUGIN', 'ntn-journal-core/ntn-journal-core.php' );\n" . ( $define_all ? "define( 'NTN_CORE_REMOVE_ALL_DATA', true );\n" : '' ) .
+		"class NTN103_DB { public \$options = 'wp_options'; public function esc_like( \$s ) { return addcslashes( \$s, '_%\\\\' ); }\n" .
+		"  public function prepare( \$q, \$a ) { return \$q . ' [' . \$a . ']'; }\n" .
+		"  public function query( \$q ) { \$GLOBALS['q'][] = \$q; return 1; } }\n\$wpdb = new NTN103_DB();\n" .
+		"function is_multisite() { return false; }\nfunction delete_option( \$o ) { \$GLOBALS['del'][] = \$o; return true; }\n" .
+		"function wp_unschedule_hook( \$h ) { \$GLOBALS['unsch'][] = \$h; return 1; }\n" .
+		"function get_sites() { return array(); }\n" .
+		"include " . var_export( $tp_core . 'uninstall.php', true ) . ";\n" .
+		"echo json_encode( array( 'q' => \$GLOBALS['q'], 'del' => \$GLOBALS['del'], 'unsch' => \$GLOBALS['unsch'] ) );\n";
+	$file = tempnam( sys_get_temp_dir(), 'ntn103' );
+	file_put_contents( $file, $stub );
+	$out = (string) shell_exec( escapeshellarg( PHP_BINARY ) . ' ' . escapeshellarg( $file ) . ' 2>&1' );
+	unlink( $file );
+	return json_decode( $out, true ) ?: array( 'error' => $out );
+};
+$tp_safe = $tp_run( false );
+$tp_all  = $tp_run( true );
+assert_test(
+	false !== strpos( $tp_un, "defined( 'WP_UNINSTALL_PLUGIN' )" ) && 2 === count( $tp_safe['q'] ?? array() ) && array() === ( $tp_safe['del'] ?? null ) &&
+	array( 'ntn_async_prefetch_oembed', 'ntn_core_youtube_date_lookup' ) === ( $tp_safe['unsch'] ?? null ) &&
+	false !== strpos( ( $tp_safe['q'][0] ?? '' ) . ( $tp_safe['q'][1] ?? '' ), '[\_transient\_ntn\_%]' ) && false !== strpos( $tp_safe['q'][1] ?? '', '[\_transient\_timeout\_ntn\_%]' ),
+	'103.4: By default uninstall.php only removes the ntn_ transients (and their timeouts) and the scheduled jobs; no settings are touched (' . json_encode( $tp_safe ) . ')'
+);
+assert_test(
+	in_array( 'ntn_igdb_client_secret', $tp_all['del'] ?? array(), true ) && in_array( 'ntn_youtube_api_key', $tp_all['del'] ?? array(), true ) && in_array( 'ntn_redirects_map', $tp_all['del'] ?? array(), true ) &&
+	4 === count( $tp_all['q'] ?? array() ) && 0 === preg_match( '/wp_delete_post|wp_delete_term|wp_posts|wp_terms|\$wpdb->posts|\$wpdb->terms|delete_post_meta/', $tp_un ),
+	'103.5: With NTN_CORE_REMOVE_ALL_DATA the settings and API keys go too, but posts, game sheets, press releases and terms are never deleted'
+);
+
+// 103.6: ogni opzione cancellata da uninstall.php esiste davvero nel plugin (nessun nome inventato)
+$tp_src_all = '';
+foreach ( new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $tp_core . 'inc', FilesystemIterator::SKIP_DOTS ) ) as $tp_file ) {
+	if ( 'php' === $tp_file->getExtension() ) {
+		$tp_src_all .= ntn_t_read( $tp_file->getPathname() );
+	}
+}
+$tp_missing = array();
+foreach ( $tp_all['del'] ?? array() as $tp_opt ) {
+	if ( false === strpos( $tp_src_all, "'" . $tp_opt . "'" ) ) {
+		$tp_missing[] = $tp_opt;
+	}
+}
+assert_test( ! empty( $tp_all['del'] ) && empty( $tp_missing ), '103.6: Every option removed by uninstall.php is used by the plugin code (unknown names: ' . implode( ', ', $tp_missing ) . ')' );
+
+// 103.7: licenza e indirizzi
+$tp_hdr = substr( ntn_t_read( $tp_core . 'ntn-journal-core.php' ), 0, 900 );
+$tp_chs = substr( ntn_t_read( $tp_child . 'style.css' ), 0, 900 );
+$tp_ths = substr( ntn_t_read( $tp_th . 'style.css' ), 0, 900 );
+assert_test(
+	false !== strpos( $tp_hdr, 'License: GPL-2.0-or-later' ) && false !== strpos( $tp_hdr, 'License URI: https://www.gnu.org/licenses/gpl-2.0.html' ) &&
+	false === strpos( $tp_hdr, 'Proprietary' ) && false === strpos( $tp_hdr, 'example.com' ) && false === strpos( $tp_hdr, '.local' ) &&
+	preg_match( '/Plugin URI: https:\/\/github\.com\//', $tp_hdr ) && preg_match( '/Author URI: https:\/\/github\.com\//', $tp_hdr ) &&
+	preg_match( '/License:\s+GNU General Public License v2 or later/', $tp_chs ) && preg_match( '/License URI:\s+https:\/\/www\.gnu\.org\/licenses\/gpl-2\.0\.html/', $tp_chs ) &&
+	false !== strpos( $tp_ths, 'GNU General Public License v2 or later' ),
+	'103.7: Plugin, parent and child declare a GPL license with a valid License URI; plugin URIs are real addresses'
+);
+
+// 103.8: screenshot.png (1200x900) nei due temi, readme.txt nei tre pacchetti, "Stable tag" del plugin = versione
+$tp_ok_img = true;
+foreach ( array( $tp_th, $tp_child ) as $tp_dir ) {
+	$tp_size   = file_exists( $tp_dir . 'screenshot.png' ) ? getimagesize( $tp_dir . 'screenshot.png' ) : false;
+	$tp_ok_img = $tp_ok_img && is_array( $tp_size ) && 1200 === $tp_size[0] && 900 === $tp_size[1] && IMAGETYPE_PNG === $tp_size[2] && filesize( $tp_dir . 'screenshot.png' ) < 1000000;
+}
+$tp_readme = ntn_t_read( $tp_core . 'readme.txt' );
+preg_match( '/^\s*\*\s*Version:\s*(\S+)/m', ntn_t_read( $tp_core . 'ntn-journal-core.php' ), $tp_v );
+preg_match( '/^Stable tag:\s*(\S+)/m', $tp_readme, $tp_st );
+assert_test(
+	$tp_ok_img && file_exists( $tp_th . 'readme.txt' ) && file_exists( $tp_child . 'readme.txt' ) && 1 === preg_match( '/^=== NTN Journal Core ===/', $tp_readme ) &&
+	! empty( $tp_v[1] ) && ( $tp_st[1] ?? '' ) === $tp_v[1] && false !== strpos( $tp_readme, 'NTN_CORE_REMOVE_ALL_DATA' ),
+	'103.8: screenshot.png is 1200x900 in both themes, the three readme.txt exist, and the plugin readme "Stable tag" matches the plugin version (' . ( $tp_st[1] ?? '?' ) . ' / ' . ( $tp_v[1] ?? '?' ) . ')'
+);
+
+// 103.9: il pacchetto non esclude i nuovi file (package_release.ps1 esclude solo build/ del parent)
+$tp_pkg = ntn_t_read( ABSPATH . 'package_release.ps1' );
+assert_test(
+	1 === preg_match_all( '/-excludeDirs\s+@\(/', $tp_pkg ) && false !== strpos( $tp_pkg, '-excludeDirs @("build")' ) && false === stripos( $tp_pkg, 'uninstall' ) && false === stripos( $tp_pkg, 'readme' ) && false === stripos( $tp_pkg, 'screenshot' ),
+	'103.9: package_release.ps1 leaves uninstall.php, readme.txt and screenshot.png in the ZIPs (only build/ is excluded)'
+);
 
 
 echo "\n=======================================================================\n";

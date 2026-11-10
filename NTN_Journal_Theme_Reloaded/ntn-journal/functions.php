@@ -35,13 +35,5 @@ require_once NTN_INC_DIR . 'category-hub-template.php';
 require_once NTN_INC_DIR . 'breaking-news.php';
 require_once NTN_INC_DIR . 'gallery-lightbox.php';
 
-// Consenti lettura dei campi meta protetti (es. _thumbnail_id) solo per quelli specifici
-add_filter(
-	'is_protected_meta',
-	function ( $protected, $meta_key ) {
-		$allowed = array( '_thumbnail_id', 'rating', 'pros', 'cons', 'verdict', 'reviewed_item' );
-		return in_array( $meta_key, $allowed, true ) ? false : $protected;
-	},
-	10,
-	2
-);
+// I campi meta protetti che le recensioni devono poter leggere (_thumbnail_id, rating, ...) li sblocca,
+// dalla 4.26.0, il plugin NTN Journal Core (inc/site-optimizations.php).
