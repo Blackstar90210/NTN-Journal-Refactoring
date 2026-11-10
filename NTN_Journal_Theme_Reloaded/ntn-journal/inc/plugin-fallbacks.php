@@ -84,3 +84,10 @@ if ( ! function_exists( 'ntn_get_game_featured_content' ) ) {
 		return false;
 	}
 }
+
+// Introiti stimati su Steam nell'intestazione della Hub: senza plugin nessun dato.
+if ( ! function_exists( 'ntn_journal_get_steam_revenue' ) ) {
+	function ntn_journal_get_steam_revenue( $term ) {
+		return array();
+	}
+}

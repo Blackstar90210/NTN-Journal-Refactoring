@@ -1229,3 +1229,26 @@ if ( ! function_exists( 'ntn_get_game_featured_content' ) ) :
 		return $result;
 	}
 endif;
+
+if ( ! function_exists( 'ntn_journal_get_steam_revenue' ) ) :
+	/**
+	 * Introiti stimati su Steam di un gioco, per l'intestazione della Hub.
+	 * Legge solo la stima salvata (inc/steam-revenue.php): nessuna richiesta a Steam mentre la pagina si carica.
+	 *
+	 * @param WP_Term|int $term Tag del gioco o il suo ID.
+	 * @return array Vuoto se non c'è una stima; altrimenti 'range' (es. "0,6-1,3 mld $"), 'min', 'max',
+	 *               'reviews', 'price', 'appid', 'updated'.
+	 */
+	function ntn_journal_get_steam_revenue( $term ) {
+		$term_id = $term instanceof WP_Term ? (int) $term->term_id : (int) $term;
+		if ( $term_id <= 0 || ! function_exists( 'ntn_core_steam_revenue' ) ) {
+			return array();
+		}
+		$revenue = ntn_core_steam_revenue( $term_id );
+		if ( ! $revenue ) {
+			return array();
+		}
+		$revenue['range'] = ntn_core_steam_range_short( $revenue['min'], $revenue['max'] );
+		return $revenue;
+	}
+endif;

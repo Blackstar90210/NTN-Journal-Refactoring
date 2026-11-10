@@ -7323,6 +7323,40 @@ assert_test(
 	'110.7: The IGDB tab table gets a read-only "Introiti Steam" column: short range with the full figures on hover, reviews, price, date and Steam id; for games without an estimate the reason (free, no price, not on Steam, few reviews, not found, not checked yet); no requests, unknown values never printed'
 );
 
+// 110.8: voce nell'intestazione della Hub (fase 2): dati salvati, riserva vuota nel tema, nessun dato per Google
+$st_th     = ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/';
+$st_hub    = ntn_t_read( $st_th . 'template-parts/hub-header.php' );
+$st_fall   = ntn_t_read( $st_th . 'inc/plugin-fallbacks.php' );
+$st_gd     = ntn_t_read( $st_core . 'inc/game-data.php' );
+$st_in     = ntn_t_read( $st_th . 'build/input.css' );
+$st_out    = ntn_t_read( $st_th . 'style-tailwind-output.css' );
+$st_schema = ntn_t_read( $st_core . 'inc/schema-markup.php' ) . ntn_t_read( $st_core . 'inc/hub-seo.php' ) . ntn_t_read( $st_core . 'inc/seo-extras.php' );
+$GLOBALS['yt_requests'] = array();
+$st_hub_ok   = ntn_journal_get_steam_revenue( 9620 );
+$st_hub_term = ntn_journal_get_steam_revenue( new WP_Term( (object) array( 'term_id' => 9620, 'name' => 'Cyberpunk 2077', 'slug' => 'cyberpunk-2077', 'taxonomy' => 'post_tag' ) ) );
+$st_hub_none = array( ntn_journal_get_steam_revenue( 9612 ), ntn_journal_get_steam_revenue( 0 ), ntn_journal_get_steam_revenue( null ) );
+$st_fb_tmp = tempnam( sys_get_temp_dir(), 'ntn110' ) . '.php';
+file_put_contents( $st_fb_tmp, "<?php\ndefine( 'ABSPATH', '/' );\nfunction get_the_title( \$id ) { return ''; }\nrequire " . var_export( $st_th . 'inc/plugin-fallbacks.php', true ) . ";\necho json_encode( ntn_journal_get_steam_revenue( 5 ) );\n" );
+$st_fb_out = trim( (string) shell_exec( escapeshellarg( PHP_BINARY ) . ' ' . escapeshellarg( $st_fb_tmp ) . ' 2>&1' ) );
+@unlink( $st_fb_tmp );
+assert_test(
+	'0,7-1,4 mld $' === ( $st_hub_ok['range'] ?? '' ) && 677422078 === ( $st_hub_ok['min'] ?? 0 ) && $st_hub_ok === $st_hub_term && array( array(), array(), array() ) === $st_hub_none && 0 === count( $GLOBALS['yt_requests'] ) &&
+	'95-191 mln $' === ntn_core_steam_range_short( 95259576, 190519153 ) && '4,2-8,4 mln $' === ntn_core_steam_range_short( 4200000, 8400000 ) && '86-172 mila $' === ntn_core_steam_range_short( 86224, 172449 ) && '600-900 $' === ntn_core_steam_range_short( 600, 900 ) &&
+	'[]' === $st_fb_out && false !== strpos( $st_fall, "if ( ! function_exists( 'ntn_journal_get_steam_revenue' ) ) {\n\tfunction ntn_journal_get_steam_revenue(" ) &&
+	strpos( $st_gd, "if ( ! function_exists( 'ntn_journal_get_steam_revenue' ) ) :" ) < strpos( $st_gd, 'function ntn_journal_get_steam_revenue(' ),
+	'110.8: The Hub header reads the saved estimate through ntn_journal_get_steam_revenue() (plugin, guarded) as one short range ("0,7-1,4 mld $"), never calling Steam; without an estimate or without the plugin (theme fallback) it gets nothing (' . $st_fb_out . ')'
+);
+assert_test(
+	false !== strpos( $st_hub, '$hub_steam = $hub_tag instanceof WP_Term ? ntn_journal_get_steam_revenue( $hub_tag ) : array();' ) &&
+	2 === substr_count( $st_hub, "<?php if ( ! empty( \$hub_steam['range'] ) ) : ?>" ) &&
+	false !== strpos( $st_hub, "<span class=\"ntn-gcounts-steam\"><b><?php echo esc_html( \$hub_steam['range'] ); ?></b>Introiti stimati su Steam*</span>" ) &&
+	false !== strpos( $st_hub, '<p class="ntn-gcounts-note">* Stima basata sulle recensioni Steam · solo versione PC · non è un dato ufficiale</p>' ) &&
+	false !== strpos( $st_in, '.ntn-gcounts .ntn-gcounts-steam b { color: var(--ntn-band-accent);' ) && false !== strpos( $st_in, '.ntn-gcounts-note {' ) &&
+	false !== strpos( $st_out, '.ntn-gcounts-note' ) && false !== strpos( $st_out, 'ntn-gcounts-steam' ) &&
+	0 === preg_match( '/steam/i', $st_schema ),
+	'110.8b: The Hub header shows "Introiti stimati su Steam*" in the counters row (red figure, escaped) with the footnote below, both only when there is an estimate; the compiled CSS has the new styles; nothing is added to the Google structured data'
+);
+
 
 echo "\n=======================================================================\n";
 echo " AUDIT SUMMARY: {$passed} PASSED, {$failed} FAILED\n";

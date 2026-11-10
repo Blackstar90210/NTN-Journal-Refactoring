@@ -102,6 +102,9 @@ if ( $hub_tag instanceof WP_Term ) {
 	}
 }
 
+// Introiti stimati su Steam: solo la stima già salvata dal plugin; niente stima, niente voce.
+$hub_steam = $hub_tag instanceof WP_Term ? ntn_journal_get_steam_revenue( $hub_tag ) : array();
+
 // Testo di presentazione automatico dai dati IGDB (v3.11.0): dà alla Hub un contenuto proprio per Google.
 // Sta nella scheda tecnica, come ultima cella a tutta larghezza. Se la redazione ha scritto un testo
 // nell'editor, quello compare come "// Panoramica" nel corpo e la cella non serve.
@@ -141,7 +144,13 @@ $release_text = ! empty( $igdb_info['release'] ) ? ntn_journal_release_label( $i
 						<?php if ( $hub_counts['latest'] ) : ?>
 							<span><b><?php echo esc_html( $hub_counts['latest'] ); ?></b>Ultimo articolo</span>
 						<?php endif; ?>
+						<?php if ( ! empty( $hub_steam['range'] ) ) : ?>
+							<span class="ntn-gcounts-steam"><b><?php echo esc_html( $hub_steam['range'] ); ?></b>Introiti stimati su Steam*</span>
+						<?php endif; ?>
 					</div>
+					<?php if ( ! empty( $hub_steam['range'] ) ) : ?>
+						<p class="ntn-gcounts-note">* Stima basata sulle recensioni Steam · solo versione PC · non è un dato ufficiale</p>
+					<?php endif; ?>
 				<?php endif; ?>
 
 				<!-- Scheda tecnica -->

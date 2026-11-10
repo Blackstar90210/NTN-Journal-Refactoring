@@ -1426,6 +1426,9 @@
     color: var(--ntn-band-muted);
   }
   .ntn-gcounts b { margin-right: 6px; font-size: 14px; color: var(--ntn-band-fg); font-variant-numeric: tabular-nums; }
+  /* Introiti stimati su Steam: cifra in rosso e dicitura sotto la riga dei contatori */
+  .ntn-gcounts .ntn-gcounts-steam b { color: var(--ntn-band-accent); white-space: nowrap; }
+  .ntn-gcounts-note { margin: 10px 0 0; font-family: var(--font-mono); font-size: 10px; line-height: 1.5; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ntn-band-muted); }
   .ntn-specs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 28px; border-top: 1px solid var(--ntn-band-line); }
   @media (min-width: 768px) { .ntn-specs { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
   .ntn-specs > div { min-width: 0; padding: 16px 16px 16px 0; border-bottom: 1px solid var(--ntn-band-line); }

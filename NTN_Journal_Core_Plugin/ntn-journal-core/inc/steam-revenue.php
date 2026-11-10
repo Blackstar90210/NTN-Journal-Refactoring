@@ -526,6 +526,35 @@ function ntn_core_steam_money_short( $dollars ) {
 }
 
 /**
+ * L'intervallo per l'intestazione della Hub, con una sola unità: "0,6-1,3 mld $", "95-191 mln $",
+ * "4,2-8,4 mln $", "86-172 mila $".
+ *
+ * @param int $min Dollari, minimo.
+ * @param int $max Dollari, massimo.
+ * @return string
+ */
+function ntn_core_steam_range_short( $min, $max ) {
+	$min = (int) $min;
+	$max = (int) $max;
+	if ( $max >= 1000000000 ) {
+		$div      = 1000000000;
+		$unit     = 'mld';
+		$decimals = 1;
+	} elseif ( $max >= 1000000 ) {
+		$div      = 1000000;
+		$unit     = 'mln';
+		$decimals = $max >= 10000000 ? 0 : 1;
+	} elseif ( $max >= 1000 ) {
+		$div      = 1000;
+		$unit     = 'mila';
+		$decimals = 0;
+	} else {
+		return number_format_i18n( $min ) . '-' . number_format_i18n( $max ) . ' $';
+	}
+	return number_format_i18n( $min / $div, $decimals ) . '-' . number_format_i18n( $max / $div, $decimals ) . ' ' . $unit . ' $';
+}
+
+/**
  * La cella "Introiti Steam (stima)" della tabella dei tag collegati, scheda IGDB del pannello.
  * Sola lettura: mostra i dati salvati, non fa richieste. Il testo è già protetto (escape).
  *
