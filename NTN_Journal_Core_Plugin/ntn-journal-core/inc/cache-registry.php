@@ -214,9 +214,12 @@ function ntn_core_cache_registry() {
  * @return array[]
  */
 function ntn_core_cache_registry_flushed() {
-	return array_filter( ntn_core_cache_registry(), static function ( $entry ) {
-		return ! empty( $entry['flush'] );
-	} );
+	return array_filter(
+		ntn_core_cache_registry(),
+		static function ( $entry ) {
+			return ! empty( $entry['flush'] );
+		}
+	);
 }
 
 /**
@@ -225,9 +228,12 @@ function ntn_core_cache_registry_flushed() {
  * @return array[]
  */
 function ntn_core_cache_registry_kept() {
-	return array_filter( ntn_core_cache_registry(), static function ( $entry ) {
-		return empty( $entry['flush'] ) && empty( $entry['hidden'] );
-	} );
+	return array_filter(
+		ntn_core_cache_registry(),
+		static function ( $entry ) {
+			return empty( $entry['flush'] ) && empty( $entry['hidden'] );
+		}
+	);
 }
 
 /**

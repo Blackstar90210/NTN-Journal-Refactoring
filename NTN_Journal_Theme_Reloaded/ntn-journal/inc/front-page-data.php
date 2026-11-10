@@ -76,7 +76,7 @@ function ntn_front_card_data( $post_id, $size = 'ntn-grid-thumb' ) {
  * @return array<int,array<string,mixed>>
  */
 function ntn_front_query_cards( $args, $size = 'ntn-grid-thumb' ) {
-	$args = wp_parse_args(
+	$args  = wp_parse_args(
 		$args,
 		array(
 			'post_type'           => 'post',
@@ -141,7 +141,7 @@ function ntn_front_page_data() {
 	$exclude = wp_list_pluck( $lead, 'id' );
 
 	// 2. Ultime notizie: lista compatta.
-	$news = ntn_front_query_cards(
+	$news    = ntn_front_query_cards(
 		array(
 			'category_name'  => 'notizia,notizie',
 			'posts_per_page' => 6,
@@ -194,8 +194,8 @@ function ntn_front_page_data() {
 			$release = (string) get_post_meta( $game->ID, '_ntn_game_release', true );
 			$time    = strtotime( $release );
 			// v3.21.0: solo le parti note della data ("2026" invece di "31.12.2026"); "a breve" solo con il giorno
-			$label   = ntn_journal_release_label( $release, (string) get_post_meta( $game->ID, '_ntn_game_release_precision', true ), 'd.m.Y' );
-			$platforms  = (string) get_post_meta( $game->ID, '_ntn_game_platforms', true );
+			$label     = ntn_journal_release_label( $release, (string) get_post_meta( $game->ID, '_ntn_game_release_precision', true ), 'd.m.Y' );
+			$platforms = (string) get_post_meta( $game->ID, '_ntn_game_platforms', true );
 			if ( '' !== $platforms && function_exists( 'ntn_core_schema_platform_names' ) ) {
 				// v4.14.1: "PC (Microsoft Windows)" diventa "PC", come negli Hub e nelle schede dei giochi
 				$platforms = implode( ', ', ntn_core_schema_platform_names( array_filter( array_map( 'trim', explode( ',', $platforms ) ), 'strlen' ) ) );

@@ -27,10 +27,18 @@ if ( ! function_exists( 'ntn_core_version_mismatches' ) ) {
 			return $rows;
 		}
 		if ( '' !== trim( (string) $parent ) && trim( (string) $parent ) !== $core ) {
-			$rows[] = array( 'label' => 'Tema parent (ntn-journal)', 'found' => trim( (string) $parent ), 'expected' => $core );
+			$rows[] = array(
+				'label'    => 'Tema parent (ntn-journal)',
+				'found'    => trim( (string) $parent ),
+				'expected' => $core,
+			);
 		}
 		if ( null !== $child && '' !== trim( (string) $child ) && trim( (string) $child ) !== $core ) {
-			$rows[] = array( 'label' => 'Tema child (ntn-journal-reloaded)', 'found' => trim( (string) $child ), 'expected' => $core );
+			$rows[] = array(
+				'label'    => 'Tema child (ntn-journal-reloaded)',
+				'found'    => trim( (string) $child ),
+				'expected' => $core,
+			);
 		}
 		return $rows;
 	}

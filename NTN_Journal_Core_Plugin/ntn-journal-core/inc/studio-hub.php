@@ -94,7 +94,10 @@ function ntn_core_studio_parent_hub( WP_Term $tag ): ?array {
 		$data = ntn_core_get_category_hub_data( $hub );
 		foreach ( ( $data['studios'] ?? array() ) as $studio ) {
 			if ( ntn_core_studio_key( (string) $studio['name'] ) === $key ) {
-				return array( 'label' => (string) $data['title'], 'url' => (string) $data['root']['url'] );
+				return array(
+					'label' => (string) $data['title'],
+					'url'   => (string) $data['root']['url'],
+				);
 			}
 		}
 	}
@@ -131,13 +134,20 @@ function ntn_core_get_studio_hub_data( $tag = null ): ?array {
 		if ( ! $game_tag instanceof WP_Term ) {
 			continue;
 		}
-		$hub_posts = get_posts( array( 'name' => $game_tag->slug, 'post_type' => 'videogioco', 'post_status' => 'publish', 'numberposts' => 1 ) );
+		$hub_posts = get_posts(
+			array(
+				'name'        => $game_tag->slug,
+				'post_type'   => 'videogioco',
+				'post_status' => 'publish',
+				'numberposts' => 1,
+			)
+		);
 		$hub_id    = ! empty( $hub_posts ) ? (int) $hub_posts[0]->ID : 0;
 		$meta      = static function ( $key ) use ( $hub_id, $game_tag ) {
 			$value = $hub_id ? get_post_meta( $hub_id, $key, true ) : '';
 			return '' !== (string) $value ? $value : get_term_meta( $game_tag->term_id, $key, true );
 		};
-		$cover = (string) $meta( '_ntn_game_cover' );
+		$cover     = (string) $meta( '_ntn_game_cover' );
 		if ( '' !== $cover && function_exists( 'ntn_normalize_game_cover_url' ) ) {
 			$cover = (string) ntn_normalize_game_cover_url( $cover );
 		}
@@ -156,17 +166,27 @@ function ntn_core_get_studio_hub_data( $tag = null ): ?array {
 		return null;
 	}
 	// Dal gioco più recente; quelli senza data in fondo
-	usort( $games, static function ( $a, $b ) {
-		if ( $a['release'] === $b['release'] ) {
-			return strnatcasecmp( $a['title'], $b['title'] );
+	usort(
+		$games,
+		static function ( $a, $b ) {
+			if ( $a['release'] === $b['release'] ) {
+				return strnatcasecmp( $a['title'], $b['title'] );
+			}
+			if ( '' === $a['release'] || '' === $b['release'] ) {
+				return '' === $a['release'] ? 1 : -1;
+			}
+			return strcmp( $b['release'], $a['release'] );
 		}
-		if ( '' === $a['release'] || '' === $b['release'] ) {
-			return '' === $a['release'] ? 1 : -1;
-		}
-		return strcmp( $b['release'], $a['release'] );
-	} );
+	);
 
-	$latest = get_posts( array( 'tag_id' => $tag->term_id, 'post_status' => 'publish', 'numberposts' => 1, 'fields' => 'ids' ) );
+	$latest = get_posts(
+		array(
+			'tag_id'      => $tag->term_id,
+			'post_status' => 'publish',
+			'numberposts' => 1,
+			'fields'      => 'ids',
+		)
+	);
 	$name   = trim( ntn_core_schema_plain_text( $tag->name ) );
 	$data   = array(
 		'name'        => $name,
@@ -211,7 +231,10 @@ function ntn_core_studio_hub_schema(): void {
 		$item = array(
 			'@type'    => 'ListItem',
 			'position' => $i + 1,
-			'item'     => array( '@type' => 'VideoGame', 'name' => $game['title'] ),
+			'item'     => array(
+				'@type' => 'VideoGame',
+				'name'  => $game['title'],
+			),
 		);
 		if ( '' !== $game['url'] ) {
 			$item['item']['url'] = $game['url'];
@@ -230,9 +253,10 @@ function ntn_core_studio_hub_schema(): void {
 }
 add_action( 'wp_footer', 'ntn_core_studio_hub_schema', 99 );
 
-/* ==========================================================================
-   Google e condivisioni (v3.22.3): percorso, sitemap e immagine della Hub dello studio
-   ========================================================================== */
+/*
+==========================================================================
+	Google e condivisioni (v3.22.3): percorso, sitemap e immagine della Hub dello studio
+	========================================================================== */
 
 /**
  * Tag dello studio a cui si riferiscono gli argomenti di The SEO Framework (null = pagina corrente).
@@ -268,12 +292,19 @@ function ntn_core_studio_breadcrumb_items( array $items, array $parent ): array 
 			return $items; // Già presente
 		}
 	}
-	array_splice( $items, 1, 0, array( array(
-		'@type'    => 'ListItem',
-		'position' => 2,
-		'item'     => $parent['url'],
-		'name'     => wp_strip_all_tags( $parent['label'] ),
-	) ) );
+	array_splice(
+		$items,
+		1,
+		0,
+		array(
+			array(
+				'@type'    => 'ListItem',
+				'position' => 2,
+				'item'     => $parent['url'],
+				'name'     => wp_strip_all_tags( $parent['label'] ),
+			),
+		)
+	);
 	foreach ( $items as $i => $item ) {
 		if ( is_array( $item ) ) {
 			$items[ $i ]['position'] = $i + 1;
@@ -321,7 +352,12 @@ function ntn_core_studio_hub_sitemap_urls( $custom_urls ) {
 	if ( empty( ntn_core_studio_index() ) ) {
 		return $custom_urls;
 	}
-	$tags = get_terms( array( 'taxonomy' => 'post_tag', 'hide_empty' => true ) );
+	$tags = get_terms(
+		array(
+			'taxonomy'   => 'post_tag',
+			'hide_empty' => true,
+		)
+	);
 	if ( ! is_array( $tags ) ) {
 		return $custom_urls;
 	}
@@ -336,7 +372,15 @@ function ntn_core_studio_hub_sitemap_urls( $custom_urls ) {
 		if ( ! is_string( $url ) ) {
 			continue;
 		}
-		$latest = get_posts( array( 'tag_id' => $tag->term_id, 'post_status' => 'publish', 'numberposts' => 1, 'fields' => 'ids', 'no_found_rows' => true ) );
+		$latest              = get_posts(
+			array(
+				'tag_id'        => $tag->term_id,
+				'post_status'   => 'publish',
+				'numberposts'   => 1,
+				'fields'        => 'ids',
+				'no_found_rows' => true,
+			)
+		);
 		$custom_urls[ $url ] = array( 'lastmod' => ! empty( $latest ) ? (string) get_post_field( 'post_modified_gmt', $latest[0] ) : '' );
 	}
 	return $custom_urls;
@@ -354,20 +398,28 @@ function ntn_core_studio_hub_social_image( WP_Term $tag ): array {
 	if ( isset( $cache[ $tag->term_id ] ) ) {
 		return $cache[ $tag->term_id ];
 	}
-	$image = array( 'url' => '', 'id' => 0 );
-	$ids   = get_posts( array(
-		'tag_id'        => $tag->term_id,
-		'post_status'   => 'publish',
-		'numberposts'   => 1,
-		'fields'        => 'ids',
-		'no_found_rows' => true,
-		'meta_key'      => '_thumbnail_id', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- un solo articolo, solo quelli con immagine.
-	) );
+	$image = array(
+		'url' => '',
+		'id'  => 0,
+	);
+	$ids   = get_posts(
+		array(
+			'tag_id'        => $tag->term_id,
+			'post_status'   => 'publish',
+			'numberposts'   => 1,
+			'fields'        => 'ids',
+			'no_found_rows' => true,
+			'meta_key'      => '_thumbnail_id', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- un solo articolo, solo quelli con immagine.
+		)
+	);
 	if ( ! empty( $ids ) ) {
 		$thumb_id = (int) get_post_thumbnail_id( $ids[0] );
 		$url      = $thumb_id ? (string) wp_get_attachment_image_url( $thumb_id, 'full' ) : '';
 		if ( '' !== $url ) {
-			$image = array( 'url' => $url, 'id' => $thumb_id );
+			$image = array(
+				'url' => $url,
+				'id'  => $thumb_id,
+			);
 		}
 	}
 	$cache[ $tag->term_id ] = $image;

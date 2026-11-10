@@ -1,11 +1,13 @@
 <?php
 
-if ( ! defined( 'ABSPATH' ) ) exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 /**
  * Get date formatted in Italian (e.g., 02.LUG.2026)
  */
 function ntn_journal_get_italian_date() {
-	$months = array(
+	$months    = array(
 		'Jan' => 'GEN',
 		'Feb' => 'FEB',
 		'Mar' => 'MAR',
@@ -17,13 +19,13 @@ function ntn_journal_get_italian_date() {
 		'Sep' => 'SET',
 		'Oct' => 'OTT',
 		'Nov' => 'NOV',
-		'Dec' => 'DIC'
+		'Dec' => 'DIC',
 	);
-	$eng_month = wp_date('M');
-	if (isset($months[$eng_month])) {
-		return wp_date('d') . '.' . $months[$eng_month] . '.' . wp_date('Y');
+	$eng_month = wp_date( 'M' );
+	if ( isset( $months[ $eng_month ] ) ) {
+		return wp_date( 'd' ) . '.' . $months[ $eng_month ] . '.' . wp_date( 'Y' );
 	}
-	return strtoupper(wp_date('d.M.Y'));
+	return strtoupper( wp_date( 'd.M.Y' ) );
 }
 
 /**

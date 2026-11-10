@@ -1,5 +1,7 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 /**
  * Intestazione degli archivi sulla fascia a matrice di punti (fase 6, v3.8.0).
  *

@@ -17,7 +17,13 @@ if ( ! function_exists( 'ntn_core_category_hubs' ) ) {
 $ntn_hubs    = ntn_core_category_hubs();
 $ntn_choices = ntn_core_category_hub_choices();
 $ntn_edit    = isset( $_GET['edit'] ) ? absint( $_GET['edit'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- solo apertura del modulo.
-$ntn_base    = add_query_arg( array( 'page' => 'ntn-journal-functions', 'tab' => 'hub' ), admin_url( 'admin.php' ) );
+$ntn_base    = add_query_arg(
+	array(
+		'page' => 'ntn-journal-functions',
+		'tab'  => 'hub',
+	),
+	admin_url( 'admin.php' )
+);
 $ntn_enabled = wp_list_pluck( $ntn_hubs, 'term_id' );
 ?>
 <div class="nadm-panel">
@@ -128,14 +134,14 @@ $ntn_enabled = wp_list_pluck( $ntn_hubs, 'term_id' );
 					<?php
 					wp_dropdown_categories(
 						array(
-							'taxonomy'         => 'category',
-							'name'             => 'ntn_hub_term',
-							'id'               => 'ntn_hub_new_term',
-							'hide_empty'       => false,
-							'hierarchical'     => true,
-							'orderby'          => 'name',
-							'exclude'          => $ntn_enabled,
-							'show_option_none' => 'Scegli una categoria',
+							'taxonomy'          => 'category',
+							'name'              => 'ntn_hub_term',
+							'id'                => 'ntn_hub_new_term',
+							'hide_empty'        => false,
+							'hierarchical'      => true,
+							'orderby'           => 'name',
+							'exclude'           => $ntn_enabled,
+							'show_option_none'  => 'Scegli una categoria',
 							'option_none_value' => '0',
 						)
 					);

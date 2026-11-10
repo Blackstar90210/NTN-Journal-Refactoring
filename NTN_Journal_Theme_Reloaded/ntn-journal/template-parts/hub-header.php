@@ -1,5 +1,7 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 /**
  * Header per la Hub Page Videogioco (CPT videogioco e archivio Tag con dati IGDB).
  *
@@ -57,28 +59,40 @@ if ( $hub_tag instanceof WP_Term ) {
 	$hub_counts = get_transient( 'ntn_hub_counts_' . $hub_tag->term_id );
 	if ( ! is_array( $hub_counts ) ) {
 		$hub_count_for = static function ( $category_slugs ) use ( $hub_tag ) {
-			$q = new WP_Query( array(
+			$q = new WP_Query(
+				array(
+					'post_type'      => 'post',
+					'post_status'    => 'publish',
+					'posts_per_page' => 1,
+					'fields'         => 'ids',
+					'tax_query'      => array(
+						'relation' => 'AND',
+						array(
+							'taxonomy' => 'post_tag',
+							'field'    => 'term_id',
+							'terms'    => $hub_tag->term_id,
+						),
+						array(
+							'taxonomy' => 'category',
+							'field'    => 'slug',
+							'terms'    => $category_slugs,
+						),
+					),
+				)
+			);
+			return (int) $q->found_posts;
+		};
+		$hub_latest    = get_posts(
+			array(
 				'post_type'      => 'post',
 				'post_status'    => 'publish',
 				'posts_per_page' => 1,
-				'fields'         => 'ids',
-				'tax_query'      => array(
-					'relation' => 'AND',
-					array( 'taxonomy' => 'post_tag', 'field' => 'term_id', 'terms' => $hub_tag->term_id ),
-					array( 'taxonomy' => 'category', 'field' => 'slug', 'terms' => $category_slugs ),
-				),
-			) );
-			return (int) $q->found_posts;
-		};
-		$hub_latest = get_posts( array(
-			'post_type'      => 'post',
-			'post_status'    => 'publish',
-			'posts_per_page' => 1,
-			'tag_id'         => $hub_tag->term_id,
-			'orderby'        => 'date',
-			'order'          => 'DESC',
-		) );
-		$hub_counts = array(
+				'tag_id'         => $hub_tag->term_id,
+				'orderby'        => 'date',
+				'order'          => 'DESC',
+			)
+		);
+		$hub_counts    = array(
 			'posts'    => (int) $hub_tag->count,
 			'reviews'  => $hub_count_for( array( 'recensioni', 'recensione' ) ),
 			'previews' => $hub_count_for( array( 'anteprime', 'anteprima' ) ),
@@ -150,7 +164,7 @@ $release_text = ! empty( $igdb_info['release'] ) ? ntn_journal_release_label( $i
 							<div class="ntn-plats">
 								<?php
 								$platforms_raw = $igdb_info['platforms'];
-								$platforms = is_array( $platforms_raw ) ? $platforms_raw : ( is_scalar( $platforms_raw ) ? explode( ',', (string) $platforms_raw ) : array() );
+								$platforms     = is_array( $platforms_raw ) ? $platforms_raw : ( is_scalar( $platforms_raw ) ? explode( ',', (string) $platforms_raw ) : array() );
 								if ( function_exists( 'ntn_core_schema_platform_names' ) ) {
 									$platforms = ntn_core_schema_platform_names( array_filter( $platforms, 'is_scalar' ) ); // v4.14.0: "PC (Microsoft Windows)" diventa "PC"
 								}

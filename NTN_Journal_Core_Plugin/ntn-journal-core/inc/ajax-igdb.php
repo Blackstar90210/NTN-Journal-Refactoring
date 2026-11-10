@@ -23,14 +23,17 @@ function ntn_get_igdb_token() {
 		return $cached_token;
 	}
 
-	$response = wp_remote_post( 'https://id.twitch.tv/oauth2/token', array(
-		'body' => array(
-			'client_id'     => $client_id,
-			'client_secret' => $client_secret,
-			'grant_type'    => 'client_credentials',
-		),
-		'timeout' => 10,
-	) );
+	$response = wp_remote_post(
+		'https://id.twitch.tv/oauth2/token',
+		array(
+			'body'    => array(
+				'client_id'     => $client_id,
+				'client_secret' => $client_secret,
+				'grant_type'    => 'client_credentials',
+			),
+			'timeout' => 10,
+		)
+	);
 
 	if ( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) !== 200 ) {
 		// v3.17.1: lo stato della chiave nella scheda "Servizi API"
@@ -75,15 +78,18 @@ if ( ! function_exists( 'ntn_core_igdb_request' ) ) {
 			return new WP_Error( 'ntn_igdb_credentials', 'Credenziali IGDB mancanti o errate' );
 		}
 
-		$response = wp_remote_post( 'https://api.igdb.com/v4/games', array(
-			'headers' => array(
-				'Client-ID'     => $client_id,
-				'Authorization' => 'Bearer ' . $token,
-				'Content-Type'  => 'text/plain',
-			),
-			'body'    => (string) $apicalypse,
-			'timeout' => (int) $timeout,
-		) );
+		$response = wp_remote_post(
+			'https://api.igdb.com/v4/games',
+			array(
+				'headers' => array(
+					'Client-ID'     => $client_id,
+					'Authorization' => 'Bearer ' . $token,
+					'Content-Type'  => 'text/plain',
+				),
+				'body'    => (string) $apicalypse,
+				'timeout' => (int) $timeout,
+			)
+		);
 
 		if ( is_wp_error( $response ) ) {
 			return new WP_Error( 'ntn_igdb_http', $response->get_error_message(), array( 'status' => 0 ) );
@@ -118,7 +124,13 @@ function ntn_igdb_release_precision( $game ) {
 	if ( ! is_array( $game ) || empty( $game['first_release_date'] ) || empty( $game['release_dates'] ) || ! is_array( $game['release_dates'] ) ) {
 		return '';
 	}
-	$rank  = array( 'tbd' => 0, 'year' => 1, 'quarter' => 2, 'month' => 3, 'day' => 4 );
+	$rank  = array(
+		'tbd'     => 0,
+		'year'    => 1,
+		'quarter' => 2,
+		'month'   => 3,
+		'day'     => 4,
+	);
 	$first = (int) $game['first_release_date'];
 	$best  = '';
 	foreach ( $game['release_dates'] as $entry ) {
@@ -245,19 +257,19 @@ function ntn_igdb_parse_game_data( $game ) {
 	$franchises = array_unique( array_filter( $franchises ) );
 
 	return array(
-		'title'       => isset( $game['name'] ) ? sanitize_text_field( $game['name'] ) : '',
-		'cover'       => $cover_url,
-		'release'     => $release,
+		'title'             => isset( $game['name'] ) ? sanitize_text_field( $game['name'] ) : '',
+		'cover'             => $cover_url,
+		'release'           => $release,
 		'release_precision' => ntn_igdb_release_precision( $game ),
-		'developer'   => implode( ', ', $developers ),
-		'publisher'   => implode( ', ', $publishers ),
-		'platforms'   => implode( ', ', $platforms ),
-		'genres'      => implode( ', ', $genres ),
-		'engine'      => implode( ', ', $engines ),
-		'franchise'   => implode( ', ', $franchises ),
-		'url'         => isset( $game['url'] ) ? esc_url_raw( $game['url'] ) : '',
-		'video'       => $video_id,
-		'screenshots' => implode( ',', $screenshots ),
+		'developer'         => implode( ', ', $developers ),
+		'publisher'         => implode( ', ', $publishers ),
+		'platforms'         => implode( ', ', $platforms ),
+		'genres'            => implode( ', ', $genres ),
+		'engine'            => implode( ', ', $engines ),
+		'franchise'         => implode( ', ', $franchises ),
+		'url'               => isset( $game['url'] ) ? esc_url_raw( $game['url'] ) : '',
+		'video'             => $video_id,
+		'screenshots'       => implode( ',', $screenshots ),
 	);
 }
 
@@ -287,7 +299,7 @@ function ntn_journal_ajax_search_igdb() {
 		$apicalypse  = 'fields id, name, cover.url, first_release_date; search "' . $safe_query . '"; limit 50;';
 	}
 
-	$transient_key = 'ntn_igdb_search_' . md5( $apicalypse );
+	$transient_key  = 'ntn_igdb_search_' . md5( $apicalypse );
 	$cached_results = get_transient( $transient_key );
 	if ( false !== $cached_results ) {
 		wp_send_json_success( $cached_results );
@@ -305,7 +317,7 @@ function ntn_journal_ajax_search_igdb() {
 	$results = array();
 	foreach ( $data as $game ) {
 		// Convert UNIX timestamp to YYYY-MM-DD
-		$release = isset( $game['first_release_date'] ) ? date( 'Y-m-d', $game['first_release_date'] ) : '';
+		$release   = isset( $game['first_release_date'] ) ? date( 'Y-m-d', $game['first_release_date'] ) : '';
 		$cover_url = '';
 		if ( isset( $game['cover']['url'] ) ) {
 			// Get high-res cover instead of thumb
@@ -319,7 +331,7 @@ function ntn_journal_ajax_search_igdb() {
 			'id'               => $game['id'],
 			'name'             => sanitize_text_field( $game['name'] ),
 			'background_image' => $cover_url,
-			'released'         => $release
+			'released'         => $release,
 		);
 	}
 
@@ -333,11 +345,11 @@ add_action( 'wp_ajax_ntn_search_igdb', 'ntn_journal_ajax_search_igdb' );
  */
 function ntn_get_igdb_game_details( $game_id ) {
 	$transient_key = 'ntn_igdb_game2_' . $game_id; // v3.19.1: "2" perché ora c'è anche la precisione della data
-	$cached = get_transient( $transient_key );
+	$cached        = get_transient( $transient_key );
 	if ( false !== $cached ) {
 		return $cached;
 	}
-	
+
 	$apicalypse = 'fields id, name, url, cover.url, first_release_date, release_dates.date, release_dates.human, platforms.name, involved_companies.company.name, involved_companies.developer, involved_companies.publisher, genres.name, game_engines.name, franchises.name, collections.name, videos.video_id, screenshots.image_id; where id = ' . intval( $game_id ) . '; limit 1;';
 
 	$data = ntn_core_igdb_request( $apicalypse );
@@ -348,9 +360,9 @@ function ntn_get_igdb_game_details( $game_id ) {
 		return new WP_Error( 'igdb_not_found', 'Gioco non trovato su IGDB' );
 	}
 
-	$game = $data[0];
+	$game    = $data[0];
 	$details = ntn_igdb_parse_game_data( $game );
-	
+
 	// Aggiungi l'ID grezzo e l'URL
 	$details['igdb_id'] = $game['id'];
 	if ( isset( $game['url'] ) ) {
@@ -379,7 +391,7 @@ function ntn_journal_ajax_get_igdb_details() {
 	if ( is_wp_error( $details ) ) {
 		wp_send_json_error( array( 'message' => $details->get_error_message() ) );
 	}
-	
+
 	wp_send_json_success( $details );
 }
 add_action( 'wp_ajax_ntn_get_igdb_details', 'ntn_journal_ajax_get_igdb_details' );
@@ -392,23 +404,25 @@ function ntn_ajax_search_wp_tags() {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		wp_send_json_error( 'Non autorizzato' );
 	}
-	
+
 	$query = isset( $_POST['query'] ) ? sanitize_text_field( wp_unslash( $_POST['query'] ) ) : '';
 	if ( empty( $query ) ) {
 		wp_send_json_error( 'Nessuna query' );
 	}
-	
-	$tags = get_terms( array(
-		'taxonomy'   => 'post_tag',
-		'name__like' => $query,
-		'hide_empty' => false,
-		'number'     => 10,
-	) );
-	
+
+	$tags = get_terms(
+		array(
+			'taxonomy'   => 'post_tag',
+			'name__like' => $query,
+			'hide_empty' => false,
+			'number'     => 10,
+		)
+	);
+
 	if ( is_wp_error( $tags ) || empty( $tags ) ) {
 		wp_send_json_success( array() );
 	}
-	
+
 	$results = array();
 	foreach ( $tags as $tag ) {
 		$results[] = array(
@@ -417,7 +431,7 @@ function ntn_ajax_search_wp_tags() {
 			'slug'    => $tag->slug,
 		);
 	}
-	
+
 	wp_send_json_success( $results );
 }
 add_action( 'wp_ajax_ntn_search_wp_tags', 'ntn_ajax_search_wp_tags' );
@@ -463,31 +477,37 @@ function ntn_igdb_link_tag_to_game( $tag_id, $igdb_id ) {
 	if ( isset( $details['raw_url'] ) ) {
 		update_term_meta( $tag_id, '_ntn_game_url', $details['raw_url'] );
 	}
-	
+
 	// Sincronizza con CPT "videogioco"
-	$cpt_post = get_posts( array(
-		'name'        => $tag_slug,
-		'post_type'   => 'videogioco',
-		'post_status' => 'any',
-		'numberposts' => 1
-	) );
-	
+	$cpt_post = get_posts(
+		array(
+			'name'        => $tag_slug,
+			'post_type'   => 'videogioco',
+			'post_status' => 'any',
+			'numberposts' => 1,
+		)
+	);
+
 	$post_id = 0;
 	if ( $cpt_post ) {
 		$post_id = $cpt_post[0]->ID;
-		wp_update_post( array(
-			'ID'         => $post_id,
-			'post_title' => $details['title']
-		) );
+		wp_update_post(
+			array(
+				'ID'         => $post_id,
+				'post_title' => $details['title'],
+			)
+		);
 	} else {
-		$post_id = wp_insert_post( array(
-			'post_title'  => $details['title'],
-			'post_name'   => $tag_slug,
-			'post_type'   => 'videogioco',
-			'post_status' => 'publish'
-		) );
+		$post_id = wp_insert_post(
+			array(
+				'post_title'  => $details['title'],
+				'post_name'   => $tag_slug,
+				'post_type'   => 'videogioco',
+				'post_status' => 'publish',
+			)
+		);
 	}
-	
+
 	if ( ! is_wp_error( $post_id ) && $post_id ) {
 		update_post_meta( $post_id, '_ntn_igdb_game_id', $details['igdb_id'] );
 		update_post_meta( $post_id, '_ntn_game_title', $details['title'] );
@@ -570,7 +590,7 @@ function ntn_ajax_save_tag_igdb_assoc() {
 		wp_send_json_error( 'Non autorizzato' );
 	}
 
-	$tag_id = isset( $_POST['tag_id'] ) ? intval( $_POST['tag_id'] ) : 0;
+	$tag_id  = isset( $_POST['tag_id'] ) ? intval( $_POST['tag_id'] ) : 0;
 	$igdb_id = isset( $_POST['igdb_id'] ) ? intval( $_POST['igdb_id'] ) : 0;
 
 	if ( ! $tag_id || ! $igdb_id ) {
@@ -585,29 +605,31 @@ function ntn_ajax_save_tag_igdb_assoc() {
 	if ( ! empty( $_POST['review_url'] ) && is_string( $_POST['review_url'] ) ) {
 		$input_val = trim( sanitize_text_field( wp_unslash( $_POST['review_url'] ) ) );
 		$review_id = 0;
-		
+
 		if ( is_numeric( $input_val ) ) {
 			$review_id = absint( $input_val );
 		} else {
 			$review_id = url_to_postid( esc_url_raw( $input_val ) );
 			if ( ! $review_id ) {
-				$path = parse_url( $input_val, PHP_URL_PATH );
-				$slug = trim( $path, '/' );
+				$path       = parse_url( $input_val, PHP_URL_PATH );
+				$slug       = trim( $path, '/' );
 				$slug_parts = explode( '/', $slug );
-				$last_slug = sanitize_title( end( $slug_parts ) );
-				
-				$found = get_posts( array(
-					'name'        => $last_slug,
-					'post_type'   => 'post',
-					'post_status' => 'publish',
-					'numberposts' => 1
-				) );
+				$last_slug  = sanitize_title( end( $slug_parts ) );
+
+				$found = get_posts(
+					array(
+						'name'        => $last_slug,
+						'post_type'   => 'post',
+						'post_status' => 'publish',
+						'numberposts' => 1,
+					)
+				);
 				if ( $found ) {
 					$review_id = $found[0]->ID;
 				}
 			}
 		}
-		
+
 		if ( $review_id ) {
 			update_term_meta( $tag_id, '_ntn_featured_review_id', $review_id );
 			if ( $post_id && ! is_wp_error( $post_id ) ) {
@@ -620,11 +642,11 @@ function ntn_ajax_save_tag_igdb_assoc() {
 			delete_post_meta( $post_id, '_ntn_featured_review_id' );
 		}
 	}
-	
+
 	if ( ob_get_length() ) {
 		ob_clean();
 	}
-	
+
 	wp_send_json_success( 'Associazione IGDB salvata con successo sul Tag' );
 }
 add_action( 'wp_ajax_ntn_save_tag_igdb_assoc', 'ntn_ajax_save_tag_igdb_assoc' );
@@ -635,13 +657,18 @@ add_action( 'wp_ajax_ntn_save_tag_igdb_assoc', 'ntn_ajax_save_tag_igdb_assoc' );
 function ntn_journal_admin_scripts( $hook ) {
 	global $post;
 	$post_type = get_post_type( $post );
-	if ( ! in_array( $post_type, array( 'post', 'videogioco' ) ) ) { return; }
-	
+	if ( ! in_array( $post_type, array( 'post', 'videogioco' ) ) ) {
+		return; }
+
 	if ( $hook === 'post-new.php' || $hook === 'post.php' ) {
 		wp_enqueue_script( 'ntn-admin-igdb-js', NTN_JOURNAL_CORE_URL . 'assets/js/admin-igdb.js', array( 'jquery' ), NTN_JOURNAL_CORE_VERSION, true );
-		wp_localize_script( 'ntn-admin-igdb-js', 'ntn_igdb_vars', array(
-			'nonce' => wp_create_nonce( 'ntn_igdb_nonce' )
-		) );
+		wp_localize_script(
+			'ntn-admin-igdb-js',
+			'ntn_igdb_vars',
+			array(
+				'nonce' => wp_create_nonce( 'ntn_igdb_nonce' ),
+			)
+		);
 	}
 }
 add_action( 'admin_enqueue_scripts', 'ntn_journal_admin_scripts' );

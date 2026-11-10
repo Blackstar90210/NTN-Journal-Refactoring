@@ -1,5 +1,7 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 /**
  * Hub dello studio (v3.21.0): la pagina del tag di uno studio che ha giochi nel catalogo (es. /tag/3dclouds/).
  * Testata a matrice di punti, poi "// Tutti gli articoli" e "// Giochi dello studio" (ordine scelto dal CEO).
@@ -61,7 +63,10 @@ $studio_row   = static function ( $post_id ) use ( $studio_games ) {
 
 				<dl class="ntn-chub-stats">
 					<?php foreach ( $studio['stats'] as $stat ) : ?>
-						<?php if ( '' === (string) $stat[1] ) { continue; } ?>
+						<?php
+						if ( '' === (string) $stat[1] ) {
+							continue; }
+						?>
 						<div><dt class="ntn-stat-k"><?php echo esc_html( $stat[0] ); ?></dt><dd class="ntn-stat-v<?php echo 'Ultimo articolo' === $stat[0] ? ' is-small' : ''; ?>"><?php echo esc_html( is_numeric( $stat[1] ) ? number_format_i18n( (int) $stat[1] ) : $stat[1] ); ?></dd></div>
 					<?php endforeach; ?>
 				</dl>
@@ -104,11 +109,13 @@ $studio_row   = static function ( $post_id ) use ( $studio_games ) {
 
 				<div class="ntn-pager-wrap">
 					<?php
-					the_posts_pagination( array(
-						'mid_size'  => 2,
-						'prev_text' => '&larr; Precedente',
-						'next_text' => 'Successivo &rarr;',
-					) );
+					the_posts_pagination(
+						array(
+							'mid_size'  => 2,
+							'prev_text' => '&larr; Precedente',
+							'next_text' => 'Successivo &rarr;',
+						)
+					);
 					?>
 				</div>
 			<?php else : ?>

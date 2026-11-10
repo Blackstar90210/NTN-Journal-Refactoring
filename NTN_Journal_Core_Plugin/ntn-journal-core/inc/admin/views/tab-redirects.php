@@ -4,4 +4,4 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 ?>
 <!-- Redirect Manager Tab -->
-<?php do_action('ntn_journal_render_redirects_tab'); ?>
+<?php do_action( 'ntn_journal_render_redirects_tab' ); ?>

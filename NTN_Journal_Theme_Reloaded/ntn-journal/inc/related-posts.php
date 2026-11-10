@@ -1,6 +1,8 @@
 <?php
 
-if ( ! defined( 'ABSPATH' ) ) exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 /**
  * ==============================================================================
@@ -81,7 +83,7 @@ function ntn_journal_suggest_break_points( $content ) {
 			if ( ! $self_closing ) {
 				$depth += '/' === $tags[ $tag_i ][1][0] ? -1 : 1;
 			}
-			$tag_i++;
+			++$tag_i;
 		}
 		$words   += ntn_journal_count_words( substr( $content, $last_end, $end - $last_end ) );
 		$last_end = $end;

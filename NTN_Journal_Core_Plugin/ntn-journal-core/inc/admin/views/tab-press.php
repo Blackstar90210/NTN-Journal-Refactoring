@@ -20,7 +20,13 @@ $ntn_press = new WP_Query(
 		's'              => $ntn_q,
 	)
 );
-$ntn_base = add_query_arg( array( 'page' => 'ntn-journal-functions', 'tab' => 'press' ), admin_url( 'admin.php' ) );
+$ntn_base  = add_query_arg(
+	array(
+		'page' => 'ntn-journal-functions',
+		'tab'  => 'press',
+	),
+	admin_url( 'admin.php' )
+);
 ?>
 <div class="nadm-panel">
 
@@ -64,12 +70,12 @@ $ntn_base = add_query_arg( array( 'page' => 'ntn-journal-functions', 'tab' => 'p
 								(string) get_post_meta( $ntn_id, 'ntn_press_agency', true ),
 							)
 						);
-						$ntn_source  = (string) get_post_meta( $ntn_id, 'ntn_press_source_link', true );
-						$ntn_assets  = (string) get_post_meta( $ntn_id, 'ntn_press_assets', true );
-						$ntn_embargo = (string) get_post_meta( $ntn_id, 'ntn_press_embargo', true );
-						$ntn_noindex = '1' === (string) get_post_meta( $ntn_id, 'ntn_press_noindex', true );
-						$ntn_row     = 'nadm-press-' . $ntn_id;
-						$ntn_status  = get_post_status_object( (string) get_post_status() );
+						$ntn_source   = (string) get_post_meta( $ntn_id, 'ntn_press_source_link', true );
+						$ntn_assets   = (string) get_post_meta( $ntn_id, 'ntn_press_assets', true );
+						$ntn_embargo  = (string) get_post_meta( $ntn_id, 'ntn_press_embargo', true );
+						$ntn_noindex  = '1' === (string) get_post_meta( $ntn_id, 'ntn_press_noindex', true );
+						$ntn_row      = 'nadm-press-' . $ntn_id;
+						$ntn_status   = get_post_status_object( (string) get_post_status() );
 						?>
 						<tr>
 							<td class="is-t">
@@ -114,7 +120,21 @@ $ntn_base = add_query_arg( array( 'page' => 'ntn-journal-functions', 'tab' => 'p
 					<?php if ( $ntn_p === $ntn_paged ) : ?>
 						<span class="is-cur" aria-current="page"><?php echo esc_html( (string) $ntn_p ); ?></span>
 					<?php else : ?>
-						<a href="<?php echo esc_url( add_query_arg( array_filter( array( 'q' => $ntn_q, 'pg' => $ntn_p ) ), $ntn_base ) ); ?>"><?php echo esc_html( (string) $ntn_p ); ?></a>
+						<a href="
+						<?php
+						echo esc_url(
+							add_query_arg(
+								array_filter(
+									array(
+										'q'  => $ntn_q,
+										'pg' => $ntn_p,
+									)
+								),
+								$ntn_base
+							)
+						);
+						?>
+									"><?php echo esc_html( (string) $ntn_p ); ?></a>
 					<?php endif; ?>
 				<?php endfor; ?>
 			</nav>

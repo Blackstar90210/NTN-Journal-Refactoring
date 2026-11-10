@@ -87,7 +87,8 @@ if ( ! empty( $release ) && function_exists( 'ntn_journal_game_card_date' ) ) {
 	</a>
 
 	<div class="ntn-game-cover">
-	<?php if ( $cover ) : 
+	<?php
+	if ( $cover ) :
 		$loading_attr = 'loading="lazy" decoding="async"';
 		$class_attr   = 'w-full h-full object-cover';
 
@@ -99,7 +100,7 @@ if ( ! empty( $release ) && function_exists( 'ntn_journal_game_card_date' ) ) {
 			$loading_attr = 'fetchpriority="high" loading="eager"';
 			$class_attr  .= ' skip-lazy no-lazy';
 		}
-	?>
+		?>
 		<img src="<?php echo esc_url( $cover ); ?>" alt="<?php the_title_attribute( array( 'post' => $post_id ) ); ?>" width="400" height="533" <?php echo $loading_attr; ?> class="<?php echo esc_attr( $class_attr ); ?>">
 	<?php else : ?>
 		<div class="ntn-game-nocover">NO COVER</div>

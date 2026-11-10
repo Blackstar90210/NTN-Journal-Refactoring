@@ -157,14 +157,27 @@ function ntn_core_seo_thin_game_ids(): array {
 		return array();
 	}
 	$counts = array();
-	$tags   = get_terms( array( 'taxonomy' => 'post_tag', 'hide_empty' => false ) );
+	$tags   = get_terms(
+		array(
+			'taxonomy'   => 'post_tag',
+			'hide_empty' => false,
+		)
+	);
 	if ( is_array( $tags ) ) {
 		foreach ( $tags as $tag ) {
 			$counts[ $tag->slug ] = (int) $tag->count;
 		}
 	}
 	$thin  = array();
-	$games = get_posts( array( 'post_type' => 'videogioco', 'post_status' => 'publish', 'numberposts' => -1, 'fields' => 'ids', 'no_found_rows' => true ) );
+	$games = get_posts(
+		array(
+			'post_type'     => 'videogioco',
+			'post_status'   => 'publish',
+			'numberposts'   => -1,
+			'fields'        => 'ids',
+			'no_found_rows' => true,
+		)
+	);
 	foreach ( $games as $game_id ) {
 		$slug = (string) get_post_field( 'post_name', $game_id );
 		if ( ( $counts[ $slug ] ?? 0 ) < $min ) {
@@ -216,7 +229,12 @@ function ntn_core_seo_thin_wp_sitemap_terms( $args, $taxonomy ) {
 		return $args;
 	}
 	$thin  = array();
-	$terms = get_terms( array( 'taxonomy' => $taxonomy, 'hide_empty' => true ) );
+	$terms = get_terms(
+		array(
+			'taxonomy'   => $taxonomy,
+			'hide_empty' => true,
+		)
+	);
 	if ( is_array( $terms ) ) {
 		foreach ( $terms as $term ) {
 			if ( ntn_core_seo_is_thin_term( $term ) ) {
@@ -242,9 +260,21 @@ function ntn_core_seo_thin_summary(): array {
 	if ( is_array( $cached ) ) {
 		return $cached;
 	}
-	$out = array( 'tags' => 0, 'categories' => 0, 'games' => count( ntn_core_seo_thin_game_ids() ) );
-	foreach ( array( 'post_tag' => 'tags', 'category' => 'categories' ) as $taxonomy => $slot ) {
-		$terms = get_terms( array( 'taxonomy' => $taxonomy, 'hide_empty' => true ) );
+	$out = array(
+		'tags'       => 0,
+		'categories' => 0,
+		'games'      => count( ntn_core_seo_thin_game_ids() ),
+	);
+	foreach ( array(
+		'post_tag' => 'tags',
+		'category' => 'categories',
+	) as $taxonomy => $slot ) {
+		$terms = get_terms(
+			array(
+				'taxonomy'   => $taxonomy,
+				'hide_empty' => true,
+			)
+		);
 		if ( ! is_array( $terms ) ) {
 			continue;
 		}

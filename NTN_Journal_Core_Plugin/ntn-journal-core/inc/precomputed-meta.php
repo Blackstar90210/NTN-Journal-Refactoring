@@ -32,8 +32,8 @@ function ntn_journal_precompute_meta_on_save( $post_id, $post, $update ) {
 	}
 
 	// _ntn_reading_time
-	$content = $post->post_content;
-	$word_count = str_word_count( wp_strip_all_tags( $content ) );
+	$content      = $post->post_content;
+	$word_count   = str_word_count( wp_strip_all_tags( $content ) );
 	$reading_time = max( 1, (int) ceil( $word_count / 200 ) );
 	update_post_meta( $post_id, '_ntn_reading_time', $reading_time );
 
@@ -48,7 +48,7 @@ function ntn_journal_precompute_meta_on_save( $post_id, $post, $update ) {
 	if ( preg_match_all( '/<(h[23])[^>]*>(.*?)<\/\1>/si', $content, $matches, PREG_SET_ORDER ) ) {
 		$toc_items = array();
 		foreach ( $matches as $m ) {
-			$text = wp_strip_all_tags( $m[2] );
+			$text        = wp_strip_all_tags( $m[2] );
 			$toc_items[] = array(
 				'tag'  => $m[1],
 				'text' => $text,
@@ -73,11 +73,11 @@ function ntn_journal_precompute_meta_on_save( $post_id, $post, $update ) {
 		$faq_items = array();
 		foreach ( $faq_matches as $match ) {
 			$question = wp_strip_all_tags( $match[2] );
-			$answer = wp_strip_all_tags( $match[3] );
+			$answer   = wp_strip_all_tags( $match[3] );
 			if ( str_ends_with( trim( $question ), '?' ) && ! empty( trim( $answer ) ) ) {
 				$faq_items[] = array(
 					'question' => trim( $question ),
-					'answer'   => trim( $answer )
+					'answer'   => trim( $answer ),
 				);
 			}
 		}

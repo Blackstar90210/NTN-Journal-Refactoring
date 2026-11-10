@@ -1,5 +1,7 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 /**
  * Template part for displaying posts
  *
@@ -20,11 +22,12 @@ if ( ! $post_img ) {
 
 // Calculate reading time
 $reading_time = (int) get_post_meta( get_the_ID(), '_ntn_reading_time', true );
-if ( ! $reading_time ) { $reading_time = 1; }
+if ( ! $reading_time ) {
+	$reading_time = 1; }
 $reading_time_str = $reading_time . ' MIN';
 
 // Rating
-$rating = get_post_meta( get_the_ID(), 'rating', true );
+$rating      = get_post_meta( get_the_ID(), 'rating', true );
 $is_featured = isset( $args['is_featured'] ) ? $args['is_featured'] : false;
 $hide_author = ! empty( $args['hide_author'] );
 $primary_cat = ntn_get_primary_category( get_the_ID() );
@@ -35,7 +38,18 @@ $primary_cat = ntn_get_primary_category( get_the_ID() );
 	<!-- Foto: nessun filtro, nessuno zoom -->
 	<div class="ntn-frame ntn-card-img">
 		<?php if ( has_post_thumbnail() ) : ?>
-			<?php echo wp_get_attachment_image( get_post_thumbnail_id(), $is_featured ? 'large' : 'medium_large', false, array( 'class' => 'absolute inset-0 w-full h-full object-cover', 'loading' => 'lazy', 'alt' => ntn_get_image_alt( get_the_ID() ) ) ); ?>
+			<?php
+			echo wp_get_attachment_image(
+				get_post_thumbnail_id(),
+				$is_featured ? 'large' : 'medium_large',
+				false,
+				array(
+					'class'   => 'absolute inset-0 w-full h-full object-cover',
+					'loading' => 'lazy',
+					'alt'     => ntn_get_image_alt( get_the_ID() ),
+				)
+			);
+			?>
 		<?php else : ?>
 			<img
 				src="<?php echo esc_url( $post_img ); ?>"

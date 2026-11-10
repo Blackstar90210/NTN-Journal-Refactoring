@@ -16,7 +16,8 @@ $backup_nonce = wp_create_nonce( 'ntn_backup_nonce' );
 $posts_with_core = get_transient( 'ntn_core_posts_count' );
 if ( false === $posts_with_core ) {
 	global $wpdb;
-	$posts_with_core = (int) $wpdb->get_var( "
+	$posts_with_core = (int) $wpdb->get_var(
+		"
 		SELECT COUNT(DISTINCT p.ID) 
 		FROM {$wpdb->posts} p
 		LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
@@ -24,14 +25,16 @@ if ( false === $posts_with_core ) {
 		   OR pm.meta_key LIKE '_ntn_%'
 		   OR pm.meta_key LIKE 'ntn_%'
 		   OR pm.meta_key IN ('rating', 'pros', 'cons', 'verdict', 'reviewed_item', 'ntn_review_source')
-	" );
+	"
+	);
 	set_transient( 'ntn_core_posts_count', $posts_with_core, 12 * HOUR_IN_SECONDS );
 }
 
 $terms_with_core = get_transient( 'ntn_core_terms_count' );
 if ( false === $terms_with_core ) {
 	global $wpdb;
-	$terms_with_core = (int) $wpdb->get_var( "
+	$terms_with_core = (int) $wpdb->get_var(
+		"
 		SELECT COUNT(DISTINCT t.term_id)
 		FROM {$wpdb->terms} t
 		INNER JOIN {$wpdb->term_taxonomy} tt ON t.term_id = tt.term_id
@@ -39,7 +42,8 @@ if ( false === $terms_with_core ) {
 		WHERE tt.taxonomy IN ('game_engine', 'game_franchise', 'game_developer', 'game_publisher', 'game_year')
 		   OR tm.meta_key LIKE '_ntn_%'
 		   OR tm.meta_key LIKE 'ntn_%'
-	" );
+	"
+	);
 	set_transient( 'ntn_core_terms_count', $terms_with_core, 12 * HOUR_IN_SECONDS );
 }
 ?>

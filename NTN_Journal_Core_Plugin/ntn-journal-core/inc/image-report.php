@@ -75,7 +75,11 @@ function ntn_core_image_report_total() {
 function ntn_core_image_report_sizes( $attachment_id ) {
 	$file = get_attached_file( $attachment_id );
 	if ( ! is_string( $file ) || '' === $file || ! file_exists( $file ) ) {
-		return array( 'exists' => false, 'original' => 0, 'total' => 0 );
+		return array(
+			'exists'   => false,
+			'original' => 0,
+			'total'    => 0,
+		);
 	}
 	$original = (int) @filesize( $file );
 	$total    = $original;
@@ -94,7 +98,11 @@ function ntn_core_image_report_sizes( $attachment_id ) {
 			}
 		}
 	}
-	return array( 'exists' => true, 'original' => $original, 'total' => $total );
+	return array(
+		'exists'   => true,
+		'original' => $original,
+		'total'    => $total,
+	);
 }
 
 /**
@@ -103,7 +111,12 @@ function ntn_core_image_report_sizes( $attachment_id ) {
 function ntn_core_image_report_push( array &$list, $id, $bytes ) {
 	$list[] = array( (int) $id, (int) $bytes );
 	if ( count( $list ) > NTN_IMAGE_REPORT_LIST_MAX * 2 ) {
-		usort( $list, static function ( $a, $b ) { return $b[1] <=> $a[1]; } );
+		usort(
+			$list,
+			static function ( $a, $b ) {
+				return $b[1] <=> $a[1];
+			}
+		);
 		$list = array_slice( $list, 0, NTN_IMAGE_REPORT_LIST_MAX );
 	}
 }
@@ -116,7 +129,12 @@ function ntn_core_image_report_push( array &$list, $id, $bytes ) {
  * @return array[]
  */
 function ntn_core_image_report_items( array $list, $limit = 30 ) {
-	usort( $list, static function ( $a, $b ) { return $b[1] <=> $a[1]; } );
+	usort(
+		$list,
+		static function ( $a, $b ) {
+			return $b[1] <=> $a[1];
+		}
+	);
 	$out = array();
 	foreach ( array_slice( $list, 0, $limit ) as $row ) {
 		$out[] = array(
@@ -133,30 +151,43 @@ function ntn_core_image_report_items( array $list, $limit = 30 ) {
  */
 function ntn_core_ajax_image_report_scan() {
 	ntn_core_image_report_guard();
-	$last = isset( $_POST['last_id'] ) ? absint( wp_unslash( $_POST['last_id'] ) ) : 0;
-	$new  = 0 === $last;
-	$scan = $new ? array() : (array) ( ntn_core_image_report_get()['scan'] ?? array() );
-	$scan += array( 'total' => 0, 'checked' => 0, 'bytes_all' => 0, 'bytes_originals' => 0, 'heavy' => array(), 'heavy_count' => 0, 'no_alt' => array(), 'no_alt_count' => 0, 'missing' => array(), 'missing_count' => 0, 'done' => false, 'at' => 0 );
+	$last  = isset( $_POST['last_id'] ) ? absint( wp_unslash( $_POST['last_id'] ) ) : 0;
+	$new   = 0 === $last;
+	$scan  = $new ? array() : (array) ( ntn_core_image_report_get()['scan'] ?? array() );
+	$scan += array(
+		'total'           => 0,
+		'checked'         => 0,
+		'bytes_all'       => 0,
+		'bytes_originals' => 0,
+		'heavy'           => array(),
+		'heavy_count'     => 0,
+		'no_alt'          => array(),
+		'no_alt_count'    => 0,
+		'missing'         => array(),
+		'missing_count'   => 0,
+		'done'            => false,
+		'at'              => 0,
+	);
 	if ( $new ) {
 		$scan['total'] = ntn_core_image_report_total();
 	}
 	$ids = ntn_core_image_report_next_ids( $last, NTN_IMAGE_REPORT_SCAN_BATCH );
 	foreach ( $ids as $id ) {
 		$sizes = ntn_core_image_report_sizes( $id );
-		$scan['checked']++;
+		++$scan['checked'];
 		if ( ! $sizes['exists'] ) {
-			$scan['missing_count']++;
+			++$scan['missing_count'];
 			ntn_core_image_report_push( $scan['missing'], $id, 0 );
 		} else {
 			$scan['bytes_all']       += $sizes['total'];
 			$scan['bytes_originals'] += $sizes['original'];
 			if ( $sizes['original'] > NTN_IMAGE_REPORT_HEAVY_BYTES ) {
-				$scan['heavy_count']++;
+				++$scan['heavy_count'];
 				ntn_core_image_report_push( $scan['heavy'], $id, $sizes['original'] );
 			}
 		}
 		if ( '' === trim( (string) get_post_meta( $id, '_wp_attachment_image_alt', true ) ) ) {
-			$scan['no_alt_count']++;
+			++$scan['no_alt_count'];
 			ntn_core_image_report_push( $scan['no_alt'], $id, $sizes['original'] );
 		}
 		$last = $id;
@@ -170,7 +201,15 @@ function ntn_core_ajax_image_report_scan() {
 	$report['scan'] = $scan;
 	ntn_core_image_report_set( $report );
 
-	wp_send_json_success( array_merge( ntn_core_image_report_scan_view( $scan ), array( 'last_id' => $last, 'done' => $done ) ) );
+	wp_send_json_success(
+		array_merge(
+			ntn_core_image_report_scan_view( $scan ),
+			array(
+				'last_id' => $last,
+				'done'    => $done,
+			)
+		)
+	);
 }
 add_action( 'wp_ajax_ntn_image_report_scan', 'ntn_core_ajax_image_report_scan' );
 
@@ -220,9 +259,9 @@ function ntn_core_image_report_usage( $attachment_id ) {
 		$places[] = 'nome del file non leggibile';
 		return $places;
 	}
-	$like = '%' . $wpdb->esc_like( $stem ) . '%';
+	$like    = '%' . $wpdb->esc_like( $stem ) . '%';
 	$id_like = '%' . $wpdb->esc_like( 'wp-image-' . $attachment_id ) . '%';
-	$checks = array(
+	$checks  = array(
 		'articoli e pagine' => array(
 			"SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type NOT IN ('attachment','revision') AND (post_content LIKE %s OR post_excerpt LIKE %s OR post_content LIKE %s)",
 			array( $like, $like, $id_like ),
@@ -252,19 +291,27 @@ function ntn_core_image_report_usage( $attachment_id ) {
  */
 function ntn_core_ajax_image_report_unused() {
 	ntn_core_image_report_guard();
-	$last   = isset( $_POST['last_id'] ) ? absint( wp_unslash( $_POST['last_id'] ) ) : 0;
-	$new    = 0 === $last;
-	$unused = $new ? array() : (array) ( ntn_core_image_report_get()['unused'] ?? array() );
-	$unused += array( 'total' => 0, 'checked' => 0, 'count' => 0, 'bytes' => 0, 'list' => array(), 'done' => false, 'at' => 0 );
+	$last    = isset( $_POST['last_id'] ) ? absint( wp_unslash( $_POST['last_id'] ) ) : 0;
+	$new     = 0 === $last;
+	$unused  = $new ? array() : (array) ( ntn_core_image_report_get()['unused'] ?? array() );
+	$unused += array(
+		'total'   => 0,
+		'checked' => 0,
+		'count'   => 0,
+		'bytes'   => 0,
+		'list'    => array(),
+		'done'    => false,
+		'at'      => 0,
+	);
 	if ( $new ) {
 		$unused['total'] = ntn_core_image_report_total();
 	}
 	$ids = ntn_core_image_report_next_ids( $last, NTN_IMAGE_REPORT_UNUSED_BATCH );
 	foreach ( $ids as $id ) {
-		$unused['checked']++;
+		++$unused['checked'];
 		if ( empty( ntn_core_image_report_usage( $id ) ) ) {
 			$sizes = ntn_core_image_report_sizes( $id );
-			$unused['count']++;
+			++$unused['count'];
 			$unused['bytes'] += $sizes['total'];
 			ntn_core_image_report_push( $unused['list'], $id, $sizes['total'] );
 		}
@@ -279,7 +326,15 @@ function ntn_core_ajax_image_report_unused() {
 	$report['unused'] = $unused;
 	ntn_core_image_report_set( $report );
 
-	wp_send_json_success( array_merge( ntn_core_image_report_unused_view( $unused ), array( 'last_id' => $last, 'done' => $done ) ) );
+	wp_send_json_success(
+		array_merge(
+			ntn_core_image_report_unused_view( $unused ),
+			array(
+				'last_id' => $last,
+				'done'    => $done,
+			)
+		)
+	);
 }
 add_action( 'wp_ajax_ntn_image_report_unused', 'ntn_core_ajax_image_report_unused' );
 

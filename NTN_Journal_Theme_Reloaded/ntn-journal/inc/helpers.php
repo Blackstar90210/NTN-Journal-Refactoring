@@ -1,6 +1,8 @@
 <?php
 
-if ( ! defined( 'ABSPATH' ) ) exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 /**
  * Percorso dell'immagine di copertina predefinita, inclusa localmente nel
  * tema, usata quando un articolo non ha un'immagine in evidenza.
@@ -28,7 +30,13 @@ function ntn_journal_author_avatar( $user_id, $name, $size = 112 ) {
 	$initials = function_exists( 'mb_strtoupper' ) ? mb_strtoupper( $initials ) : strtoupper( $initials );
 	$out      = '<span>' . esc_html( $initials ) . '</span>';
 
-	$url = ( $user_id && get_option( 'show_avatars', 1 ) ) ? get_avatar_url( (int) $user_id, array( 'size' => (int) $size, 'default' => '404' ) ) : '';
+	$url = ( $user_id && get_option( 'show_avatars', 1 ) ) ? get_avatar_url(
+		(int) $user_id,
+		array(
+			'size'    => (int) $size,
+			'default' => '404',
+		)
+	) : '';
 	if ( $url ) {
 		$out .= '<img src="' . esc_url( $url ) . '" alt="" width="' . (int) $size . '" height="' . (int) $size . '" loading="lazy" decoding="async" onerror="this.remove()">';
 	}
@@ -112,7 +120,9 @@ function ntn_link_companies_to_tags( $companies_string ) {
 			continue;
 		}
 		$company = trim( (string) $company );
-		if ( empty( $company ) ) continue;
+		if ( empty( $company ) ) {
+			continue;
+		}
 
 		// Cerca il tag per nome o per slug
 		$term = get_term_by( 'name', $company, 'post_tag' );
@@ -122,7 +132,7 @@ function ntn_link_companies_to_tags( $companies_string ) {
 
 		if ( $term && ! is_wp_error( $term ) && $term instanceof WP_Term ) {
 			// Se il tag esiste, crea il link
-			$link = get_term_link( $term );
+			$link           = get_term_link( $term );
 			$formatted_name = '// ' . strtoupper( $company );
 
 			if ( ! empty( $link ) && ! is_wp_error( $link ) && is_string( $link ) ) {
@@ -147,7 +157,7 @@ define( 'NTN_ENGINE_BADGE_CSS', 'font-mono text-[9px] text-zinc-300 border borde
 /**
  * Trasforma una stringa di motori grafici (es. "Unity, Unreal Engine 5") in badge cliccabili collegati all'archivio della tassonomia game_engine.
  *
- * @param mixed $engines_string Stringa o array di motori grafici.
+ * @param mixed  $engines_string Stringa o array di motori grafici.
  * @param string $badge_class Classe CSS opzionale per il badge.
  * @return string HTML dei badge linkati.
  */
@@ -172,7 +182,9 @@ function ntn_link_engines_to_terms( $engines_string, $badge_class = NTN_ENGINE_B
 			continue;
 		}
 		$eng_name = trim( (string) $eng );
-		if ( empty( $eng_name ) ) continue;
+		if ( empty( $eng_name ) ) {
+			continue;
+		}
 
 		// Cerca il termine nella tassonomia game_engine
 		$term = get_term_by( 'name', $eng_name, 'game_engine' );

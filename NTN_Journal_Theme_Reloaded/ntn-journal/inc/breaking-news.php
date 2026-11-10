@@ -9,26 +9,26 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 function ntn_journal_render_breaking_news() {
 	$is_active = get_option( 'ntn_breaking_news_active', 'no' );
-	
+
 	if ( $is_active !== 'yes' ) {
 		return;
 	}
-	
+
 	$label       = get_option( 'ntn_breaking_news_label', 'LIVE' );
 	$text        = get_option( 'ntn_breaking_news_text', '' );
 	$url         = get_option( 'ntn_breaking_news_url', '' );
 	$badge_color = get_option( 'ntn_breaking_news_badge_color', '#dc2626' ); // Default Tailwind red-600
 	$sticky      = get_option( 'ntn_breaking_news_sticky', 'no' ) === 'yes';
 	$dismissable = get_option( 'ntn_breaking_news_dismissable', 'no' ) === 'yes';
-	
+
 	if ( empty( $text ) ) {
 		return;
 	}
-	
+
 	$wrapper_classes = 'ntn-breaking-news-wrapper w-full bg-zinc-50 dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-900 text-zinc-900 dark:text-zinc-300 font-mono text-[12px] transition-all duration-300';
 	// Impostiamo sempre relative, se è sticky gestiamo con JS per via del contenitore header
 	$wrapper_classes .= ' relative z-[100]';
-	
+
 	?>
 	<div id="ntn-breaking-news-banner" class="<?php echo esc_attr( $wrapper_classes ); ?>">
 		<div class="max-w-7xl mx-auto px-6 md:px-12 py-2 flex items-center justify-between gap-4">

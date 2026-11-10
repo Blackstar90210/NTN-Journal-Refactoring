@@ -1,5 +1,7 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 /**
  * The template for displaying Tag archives.
  * Supporta sia i tag videogioco con Hero Header IGDB che i normali tag di WordPress.
@@ -22,9 +24,16 @@ $is_game_tag = ! empty( $igdb_info ) && (
 
 if ( $is_game_tag ) :
 	get_header();
-	
+
 	// Mostra l'Hero Header della Hub Page
-	get_template_part( 'template-parts/hub-header', null, array( 'object' => $current_tag, 'info' => $igdb_info ) );
+	get_template_part(
+		'template-parts/hub-header',
+		null,
+		array(
+			'object' => $current_tag,
+			'info'   => $igdb_info,
+		)
+	);
 	?>
 	<main id="primary" class="site-main ntn-main">
 		<div class="ntn-wrap ntn-hub-body">
@@ -39,17 +48,24 @@ if ( $is_game_tag ) :
 
 				<?php if ( have_posts() ) : ?>
 					<div class="ntn-cells ntn-cells--3">
-						<?php while ( have_posts() ) : the_post();
+						<?php
+						while ( have_posts() ) :
+							the_post();
 							get_template_part( 'template-parts/content' );
-						endwhile; ?>
+						endwhile;
+						?>
 					</div>
 
 					<div class="ntn-pager-wrap">
-						<?php the_posts_pagination( array(
-							'mid_size'  => 2,
-							'prev_text' => '&larr; Precedente',
-							'next_text' => 'Successivo &rarr;',
-						) ); ?>
+						<?php
+						the_posts_pagination(
+							array(
+								'mid_size'  => 2,
+								'prev_text' => '&larr; Precedente',
+								'next_text' => 'Successivo &rarr;',
+							)
+						);
+						?>
 					</div>
 				<?php else : ?>
 					<div class="ntn-empty">

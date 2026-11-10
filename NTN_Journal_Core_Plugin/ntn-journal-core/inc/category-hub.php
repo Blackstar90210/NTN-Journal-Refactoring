@@ -19,11 +19,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/* ==========================================================================
-   1. Impostazioni (v3.18.0: si governano dalla scheda "Hub" di NTN Journal Funzioni)
-   I dati restano dove erano (meta della categoria _ntn_hub_*): le Hub già accese
-   si ritrovano nella scheda così come sono.
-   ========================================================================== */
+/*
+==========================================================================
+	1. Impostazioni (v3.18.0: si governano dalla scheda "Hub" di NTN Journal Funzioni)
+	I dati restano dove erano (meta della categoria _ntn_hub_*): le Hub già accese
+	si ritrovano nella scheda così come sono.
+	========================================================================== */
 
 /**
  * Valori ammessi per le impostazioni della Hub.
@@ -33,20 +34,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 function ntn_core_category_hub_choices(): array {
 	return array(
 		'type'         => array(
-			'console' => 'Piattaforme: console, mobile, PC (marchi e dispositivi)',
-			'studi'   => 'Studi (indice degli sviluppatori)',
+			'console'     => 'Piattaforme: console, mobile, PC (marchi e dispositivi)',
+			'studi'       => 'Studi (indice degli sviluppatori)',
 			'statistiche' => 'Statistiche (i numeri della sezione)',
 		),
 		'illustration' => array(
-			'auto'     => 'Automatica',
-			'joycon'   => 'Joy-Con (Nintendo)',
+			'auto'      => 'Automatica',
+			'joycon'    => 'Joy-Con (Nintendo)',
 			'dualsense' => 'DualSense (PlayStation)',
-			'xbox'     => 'Controller Xbox',
-			'pc'       => 'Postazione PC (v3.22.0)',
-			'android'  => 'Telefono Android (v3.22.0)',
-			'ios'      => 'iPhone (v3.22.0)',
-			'italia'   => 'Italia a punti',
-			'none'     => 'Nessuna',
+			'xbox'      => 'Controller Xbox',
+			'pc'        => 'Postazione PC (v3.22.0)',
+			'android'   => 'Telefono Android (v3.22.0)',
+			'ios'       => 'iPhone (v3.22.0)',
+			'italia'    => 'Italia a punti',
+			'none'      => 'Nessuna',
 		),
 	);
 }
@@ -125,9 +126,12 @@ function ntn_core_category_hubs(): array {
 	if ( ! is_array( $terms ) ) {
 		return array();
 	}
-	usort( $terms, static function ( $a, $b ) {
-		return strnatcasecmp( $a->name, $b->name );
-	} );
+	usort(
+		$terms,
+		static function ( $a, $b ) {
+			return strnatcasecmp( $a->name, $b->name );
+		}
+	);
 	return $terms;
 }
 
@@ -140,7 +144,14 @@ function ntn_core_category_hub_fields( $term ): void {
 	if ( ! $term instanceof WP_Term || ! current_user_can( 'manage_options' ) ) {
 		return;
 	}
-	$url   = add_query_arg( array( 'page' => 'ntn-journal-functions', 'tab' => 'hub', 'edit' => (int) $term->term_id ), admin_url( 'admin.php' ) );
+	$url   = add_query_arg(
+		array(
+			'page' => 'ntn-journal-functions',
+			'tab'  => 'hub',
+			'edit' => (int) $term->term_id,
+		),
+		admin_url( 'admin.php' )
+	);
 	$state = ntn_core_category_hub_meta( (int) $term->term_id, 'enabled' ) ? 'Questa categoria è una Hub accesa.' : 'Questa categoria non è una Hub.';
 	?>
 	<tr class="form-field">
@@ -153,9 +164,10 @@ function ntn_core_category_hub_fields( $term ): void {
 }
 add_action( 'category_edit_form_fields', 'ntn_core_category_hub_fields' );
 
-/* ==========================================================================
-   2. Cache: una "versione" che cambia a ogni pubblicazione o modifica
-   ========================================================================== */
+/*
+==========================================================================
+	2. Cache: una "versione" che cambia a ogni pubblicazione o modifica
+	========================================================================== */
 
 /**
  * Invalida tutte le cache delle Hub di categoria.
@@ -169,9 +181,10 @@ add_action( 'created_category', 'ntn_core_category_hub_flush' );
 add_action( 'delete_category', 'ntn_core_category_hub_flush' );
 add_action( 'edited_post_tag', 'ntn_core_category_hub_flush' );
 
-/* ==========================================================================
-   3. Contesto: questa categoria è una Hub, o un marchio di una Hub Console?
-   ========================================================================== */
+/*
+==========================================================================
+	3. Contesto: questa categoria è una Hub, o un marchio di una Hub Console?
+	========================================================================== */
 
 /**
  * Contesto della Hub per una categoria.
@@ -261,9 +274,10 @@ function ntn_core_category_hub_illustration( WP_Term $term, string $type ): stri
 	return 'none';
 }
 
-/* ==========================================================================
-   4. Dati della Hub (in cache)
-   ========================================================================== */
+/*
+==========================================================================
+	4. Dati della Hub (in cache)
+	========================================================================== */
 
 /**
  * Figli diretti di una categoria, in ordine alfabetico per nome mostrato (scelta del CEO).
@@ -272,17 +286,22 @@ function ntn_core_category_hub_illustration( WP_Term $term, string $type ): stri
  * @return WP_Term[]
  */
 function ntn_core_category_hub_children( int $parent_id ): array {
-	$children = get_terms( array(
-		'taxonomy'   => 'category',
-		'parent'     => $parent_id,
-		'hide_empty' => false,
-	) );
+	$children = get_terms(
+		array(
+			'taxonomy'   => 'category',
+			'parent'     => $parent_id,
+			'hide_empty' => false,
+		)
+	);
 	if ( ! is_array( $children ) ) {
 		return array();
 	}
-	usort( $children, static function ( $a, $b ) {
-		return strnatcasecmp( ntn_core_category_hub_label( $a ), ntn_core_category_hub_label( $b ) );
-	} );
+	usort(
+		$children,
+		static function ( $a, $b ) {
+			return strnatcasecmp( ntn_core_category_hub_label( $a ), ntn_core_category_hub_label( $b ) );
+		}
+	);
 	return $children;
 }
 
@@ -339,7 +358,13 @@ function ntn_core_category_hub_post_ids( array $cat_ids, int $limit, array $excl
 		if ( ! $review_cat ) {
 			return array();
 		}
-		$args['tax_query'] = array( array( 'taxonomy' => 'category', 'field' => 'term_id', 'terms' => (int) $review_cat->term_id ) ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+		$args['tax_query'] = array(
+			array(
+				'taxonomy' => 'category',
+				'field'    => 'term_id',
+				'terms'    => (int) $review_cat->term_id,
+			),
+		); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 	}
 	$query = new WP_Query( $args );
 	return array_map( 'intval', (array) $query->posts );
@@ -377,14 +402,20 @@ function ntn_core_category_hub_games( array $post_ids ): array {
 				continue;
 			}
 			if ( ! isset( $games[ $tag->term_id ] ) ) {
-				$games[ $tag->term_id ] = array( 'term' => $tag, 'count' => 0 );
+				$games[ $tag->term_id ] = array(
+					'term'  => $tag,
+					'count' => 0,
+				);
 			}
-			$games[ $tag->term_id ]['count']++;
+			++$games[ $tag->term_id ]['count'];
 		}
 	}
-	uasort( $games, static function ( $a, $b ) {
-		return $b['count'] <=> $a['count'];
-	} );
+	uasort(
+		$games,
+		static function ( $a, $b ) {
+			return $b['count'] <=> $a['count'];
+		}
+	);
 	return array_values( $games );
 }
 
@@ -410,14 +441,16 @@ function ntn_core_category_hub_post_card( int $post_id ): array {
  * @return int
  */
 function ntn_core_category_hub_count( array $cat_ids ): int {
-	$query = new WP_Query( array(
-		'post_type'           => 'post',
-		'post_status'         => 'publish',
-		'posts_per_page'      => 1,
-		'fields'              => 'ids',
-		'ignore_sticky_posts' => true,
-		'category__in'        => array_map( 'intval', $cat_ids ),
-	) );
+	$query = new WP_Query(
+		array(
+			'post_type'           => 'post',
+			'post_status'         => 'publish',
+			'posts_per_page'      => 1,
+			'fields'              => 'ids',
+			'ignore_sticky_posts' => true,
+			'category__in'        => array_map( 'intval', $cat_ids ),
+		)
+	);
 	return (int) $query->found_posts;
 }
 
@@ -442,9 +475,9 @@ function ntn_core_get_category_hub_data( $term = null ): ?array {
 		return $cached;
 	}
 
-	$tree      = ntn_core_category_hub_tree( (int) $focus->term_id );
-	$recent    = ntn_core_category_hub_post_ids( $tree, 200 );
-	$intro     = trim( ntn_core_category_hub_meta( (int) $focus->term_id, 'intro' ) );
+	$tree   = ntn_core_category_hub_tree( (int) $focus->term_id );
+	$recent = ntn_core_category_hub_post_ids( $tree, 200 );
+	$intro  = trim( ntn_core_category_hub_meta( (int) $focus->term_id, 'intro' ) );
 	if ( '' === $intro && $selected ) {
 		$intro = trim( ntn_core_category_hub_meta( (int) $root->term_id, 'intro' ) );
 	}
@@ -454,8 +487,16 @@ function ntn_core_get_category_hub_data( $term = null ): ?array {
 
 	$data = array(
 		'type'         => $ctx['type'],
-		'root'         => array( 'id' => (int) $root->term_id, 'label' => ntn_core_category_hub_label( $root ), 'url' => (string) get_term_link( $root ) ),
-		'selected'     => $selected ? array( 'id' => (int) $selected->term_id, 'label' => ntn_core_category_hub_label( $selected ), 'url' => (string) get_term_link( $selected ) ) : null,
+		'root'         => array(
+			'id'    => (int) $root->term_id,
+			'label' => ntn_core_category_hub_label( $root ),
+			'url'   => (string) get_term_link( $root ),
+		),
+		'selected'     => $selected ? array(
+			'id'    => (int) $selected->term_id,
+			'label' => ntn_core_category_hub_label( $selected ),
+			'url'   => (string) get_term_link( $selected ),
+		) : null,
 		'title'        => ntn_core_category_hub_label( $focus ),
 		'intro'        => $intro,
 		'illustration' => array(),
@@ -470,7 +511,7 @@ function ntn_core_get_category_hub_data( $term = null ): ?array {
 	$posts_total = ntn_core_category_hub_count( $tree );
 	$latest_date = ! empty( $recent ) ? (string) get_the_date( 'd.m.Y', $recent[0] ) : '';
 	// v4.2.0: la voce "Giochi" conta tutti gli articoli, non solo gli ultimi 200 (scelta del CEO)
-	$hub_stats   = ntn_core_category_hub_stats_query( $tree, (int) wp_date( 'Y' ) );
+	$hub_stats = ntn_core_category_hub_stats_query( $tree, (int) wp_date( 'Y' ) );
 
 	if ( 'console' === $ctx['type'] ) {
 		// Marchi (figli della Hub) e piattaforme (figli dei marchi)
@@ -499,8 +540,8 @@ function ntn_core_get_category_hub_data( $term = null ): ?array {
 				$brand_platforms = array( $brand );
 			}
 			foreach ( $brand_platforms as $platform ) {
-				$platform_tree = ntn_core_category_hub_tree( (int) $platform->term_id );
-				$platform_ids  = ntn_core_category_hub_post_ids( $platform_tree, 20 );
+				$platform_tree       = ntn_core_category_hub_tree( (int) $platform->term_id );
+				$platform_ids        = ntn_core_category_hub_post_ids( $platform_tree, 20 );
 				$data['platforms'][] = array(
 					'id'     => (int) $platform->term_id,
 					'slug'   => $platform->slug,
@@ -509,9 +550,12 @@ function ntn_core_get_category_hub_data( $term = null ): ?array {
 					'url'    => (string) get_term_link( $platform ),
 					'path'   => (string) wp_parse_url( (string) get_term_link( $platform ), PHP_URL_PATH ),
 					'count'  => ntn_core_category_hub_count( $platform_tree ),
-					'games'  => array_map( static function ( $g ) {
-						return $g['term']->name;
-					}, array_slice( ntn_core_category_hub_games( $platform_ids ), 0, 3 ) ),
+					'games'  => array_map(
+						static function ( $g ) {
+							return $g['term']->name;
+						},
+						array_slice( ntn_core_category_hub_games( $platform_ids ), 0, 3 )
+					),
 					'latest' => ! empty( $platform_ids ) ? ntn_core_category_hub_post_card( $platform_ids[0] ) : null,
 				);
 			}
@@ -523,12 +567,16 @@ function ntn_core_get_category_hub_data( $term = null ): ?array {
 				$data['illustration'][] = $own;
 			}
 		}
-		$data['stats'] = array_values( array_filter( array(
-			$data['platforms'] ? array( 'Piattaforme', (string) count( $data['platforms'] ) ) : null,
-			array( 'Giochi', (string) $hub_stats['games'] ),
-			array( 'Articoli', (string) $posts_total ),
-			array( 'Aggiornato', $latest_date ),
-		) ) );
+		$data['stats'] = array_values(
+			array_filter(
+				array(
+					$data['platforms'] ? array( 'Piattaforme', (string) count( $data['platforms'] ) ) : null,
+					array( 'Giochi', (string) $hub_stats['games'] ),
+					array( 'Articoli', (string) $posts_total ),
+					array( 'Aggiornato', $latest_date ),
+				)
+			)
+		);
 	} elseif ( 'statistiche' === $ctx['type'] ) {
 		// v4.2.0: disegno e contatori essenziali. Il modello dedicato arriverà dopo.
 		$illu = ntn_core_category_hub_illustration( $root, 'statistiche' );
@@ -542,9 +590,14 @@ function ntn_core_get_category_hub_data( $term = null ): ?array {
 		);
 	} else {
 		// Studi: sviluppatore dei giochi del catalogo, nomi uniti senza spazi e maiuscole
-		$excluded = array_filter( array_map( static function ( $n ) {
-			return strtolower( preg_replace( '/[^a-z0-9]/i', '', $n ) );
-		}, explode( ',', ntn_core_category_hub_meta( (int) $root->term_id, 'excluded' ) ) ) );
+		$excluded = array_filter(
+			array_map(
+				static function ( $n ) {
+					return strtolower( preg_replace( '/[^a-z0-9]/i', '', $n ) );
+				},
+				explode( ',', ntn_core_category_hub_meta( (int) $root->term_id, 'excluded' ) )
+			)
+		);
 		$studios  = array();
 		foreach ( $recent as $post_id ) {
 			$tags = get_the_terms( $post_id, 'post_tag' );
@@ -569,10 +622,10 @@ function ntn_core_get_category_hub_data( $term = null ): ?array {
 							$studio_tag = get_term_by( 'slug', sanitize_title( $dev ), 'post_tag' );
 						}
 						$studios[ $key ] = array(
-							'name'   => $dev,
-							'url'    => $studio_tag instanceof WP_Term ? (string) get_term_link( $studio_tag ) : '',
-							'games'  => array(),
-							'posts'  => array(),
+							'name'  => $dev,
+							'url'   => $studio_tag instanceof WP_Term ? (string) get_term_link( $studio_tag ) : '',
+							'games' => array(),
+							'posts' => array(),
 						);
 					}
 					$studios[ $key ]['games'][ $tag->term_id ] = $tag->name;
@@ -581,19 +634,22 @@ function ntn_core_get_category_hub_data( $term = null ): ?array {
 			}
 		}
 		foreach ( $studios as $studio ) {
-			$post_ids               = array_keys( $studio['posts'] );
-			$data['studios'][]      = array(
-				'name'    => $studio['name'],
-				'url'     => $studio['url'],
-				'letter'  => ctype_digit( substr( $studio['name'], 0, 1 ) ) ? '#' : strtoupper( substr( remove_accents( $studio['name'] ), 0, 1 ) ),
-				'games'   => array_values( $studio['games'] ),
-				'count'   => count( $post_ids ),
-				'latest'  => ntn_core_category_hub_post_card( (int) $post_ids[0] ),
+			$post_ids          = array_keys( $studio['posts'] );
+			$data['studios'][] = array(
+				'name'   => $studio['name'],
+				'url'    => $studio['url'],
+				'letter' => ctype_digit( substr( $studio['name'], 0, 1 ) ) ? '#' : strtoupper( substr( remove_accents( $studio['name'] ), 0, 1 ) ),
+				'games'  => array_values( $studio['games'] ),
+				'count'  => count( $post_ids ),
+				'latest' => ntn_core_category_hub_post_card( (int) $post_ids[0] ),
 			);
 		}
-		usort( $data['studios'], static function ( $a, $b ) {
-			return strnatcasecmp( $a['name'], $b['name'] );
-		} );
+		usort(
+			$data['studios'],
+			static function ( $a, $b ) {
+				return strnatcasecmp( $a['name'], $b['name'] );
+			}
+		);
 		$illu = ntn_core_category_hub_illustration( $root, 'studi' );
 		if ( 'none' !== $illu ) {
 			$data['illustration'][] = $illu;
@@ -627,9 +683,10 @@ function ntn_core_get_category_hub_data( $term = null ): ?array {
 	return $data;
 }
 
-/* ==========================================================================
-   5. Filtro per console nella lista degli articoli (?console=slug)
-   ========================================================================== */
+/*
+==========================================================================
+	5. Filtro per console nella lista degli articoli (?console=slug)
+	========================================================================== */
 
 /**
  * Piattaforma scelta con il filtro, se appartiene alla Hub corrente.
@@ -665,7 +722,16 @@ function ntn_core_category_hub_pre_get_posts( $query ): void {
 	if ( $pick ) {
 		$query->set( 'cat', '' );
 		$query->set( 'category_name', '' );
-		$query->set( 'tax_query', array( array( 'taxonomy' => 'category', 'field' => 'term_id', 'terms' => ntn_core_category_hub_tree( (int) $pick['id'] ) ) ) ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+		$query->set(
+			'tax_query',
+			array(
+				array(
+					'taxonomy' => 'category',
+					'field'    => 'term_id',
+					'terms'    => ntn_core_category_hub_tree( (int) $pick['id'] ),
+				),
+			)
+		); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 	}
 }
 add_action( 'pre_get_posts', 'ntn_core_category_hub_pre_get_posts', 20 );
@@ -685,9 +751,10 @@ function ntn_core_category_hub_robots( $robots ) {
 }
 add_filter( 'wp_robots', 'ntn_core_category_hub_robots' );
 
-/* ==========================================================================
-   6. Dati strutturati: elenco delle piattaforme o degli studi
-   ========================================================================== */
+/*
+==========================================================================
+	6. Dati strutturati: elenco delle piattaforme o degli studi
+	========================================================================== */
 
 /**
  * ItemList delle piattaforme (Hub Console) o degli studi (Hub Studi).
@@ -703,11 +770,20 @@ function ntn_core_category_hub_schema(): void {
 	$items = array();
 	if ( 'console' === $data['type'] ) {
 		foreach ( $data['platforms'] as $i => $platform ) {
-			$items[] = array( '@type' => 'ListItem', 'position' => $i + 1, 'name' => $platform['label'], 'url' => $platform['url'] );
+			$items[] = array(
+				'@type'    => 'ListItem',
+				'position' => $i + 1,
+				'name'     => $platform['label'],
+				'url'      => $platform['url'],
+			);
 		}
 	} else {
 		foreach ( $data['studios'] as $i => $studio ) {
-			$item = array( '@type' => 'ListItem', 'position' => $i + 1, 'name' => $studio['name'] );
+			$item = array(
+				'@type'    => 'ListItem',
+				'position' => $i + 1,
+				'name'     => $studio['name'],
+			);
 			if ( '' !== $studio['url'] ) {
 				$item['url'] = $studio['url'];
 			}
@@ -729,9 +805,10 @@ function ntn_core_category_hub_schema(): void {
 }
 add_action( 'wp_footer', 'ntn_core_category_hub_schema', 99 );
 
-/* ==========================================================================
-   7. Google e condivisioni (v3.20.0): descrizione, immagine e sitemap delle Hub
-   ========================================================================== */
+/*
+==========================================================================
+	7. Google e condivisioni (v3.20.0): descrizione, immagine e sitemap delle Hub
+	========================================================================== */
 
 /**
  * Categoria a cui si riferiscono gli argomenti di The SEO Framework (null = pagina corrente).
@@ -900,16 +977,17 @@ function ntn_core_category_hub_sitemap_urls( $custom_urls ) {
 		if ( function_exists( 'ntn_core_seo_is_thin_term' ) && ntn_core_seo_is_thin_term( $term ) ) {
 			continue; // Sotto la soglia di articoli (seo-thin-pages.php): resta fuori finché non la raggiunge
 		}
-		$lastmod = (string) get_post_field( 'post_modified_gmt', $latest[0] );
+		$lastmod             = (string) get_post_field( 'post_modified_gmt', $latest[0] );
 		$custom_urls[ $url ] = array( 'lastmod' => $lastmod );
 	}
 	return $custom_urls;
 }
 add_filter( 'the_seo_framework_sitemap_additional_urls', 'ntn_core_category_hub_sitemap_urls' );
 
-/* ==========================================================================
-   Controllo copertura (v3.18.0, scheda "Hub" di NTN Journal Funzioni)
-   ========================================================================== */
+/*
+==========================================================================
+	Controllo copertura (v3.18.0, scheda "Hub" di NTN Journal Funzioni)
+	========================================================================== */
 
 /**
  * Problemi di una Hub, con un link per sistemarli.

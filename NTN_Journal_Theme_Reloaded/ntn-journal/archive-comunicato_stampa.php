@@ -1,5 +1,7 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 /**
  * The template for displaying the Comunicati Stampa archive
  *
@@ -30,23 +32,29 @@ get_template_part(
 
 		<?php if ( have_posts() ) : ?>
 			<div class="ntn-cells ntn-cells--3">
-				<?php while ( have_posts() ) : the_post();
+				<?php
+				while ( have_posts() ) :
+					the_post();
 					$publisher = get_post_meta( get_the_ID(), 'ntn_press_publisher', true );
 					$developer = get_post_meta( get_the_ID(), 'ntn_press_developer', true );
-					$agency = get_post_meta( get_the_ID(), 'ntn_press_agency', true );
+					$agency    = get_post_meta( get_the_ID(), 'ntn_press_agency', true );
 
 					$entities = array();
 					foreach ( array( $publisher, $developer, $agency ) as $meta_field ) {
-						if ( empty( $meta_field ) ) continue;
+						if ( empty( $meta_field ) ) {
+							continue;
+						}
 						if ( is_array( $meta_field ) ) {
 							$entities = array_merge( $entities, array_filter( array_map( 'trim', array_map( 'strval', $meta_field ) ) ) );
 						} elseif ( is_scalar( $meta_field ) ) {
 							$clean = trim( (string) $meta_field );
-							if ( '' !== $clean ) $entities[] = $clean;
+							if ( '' !== $clean ) {
+								$entities[] = $clean;
+							}
 						}
 					}
 					$da_text = implode( ' / ', $entities );
-				?>
+					?>
 					<a href="<?php the_permalink(); ?>" id="post-<?php the_ID(); ?>" <?php post_class( 'ntn-cell ntn-card ntn-press-card group' ); ?>>
 						<div class="ntn-meta">
 							<span class="ntn-chip ntn-chip--press">PR</span>
@@ -69,11 +77,13 @@ get_template_part(
 			<!-- Navigation pagination -->
 			<div class="ntn-pager-wrap">
 				<?php
-				the_posts_pagination( array(
-					'mid_size'  => 2,
-					'prev_text' => '&larr; Precedente',
-					'next_text' => 'Successivo &rarr;',
-				) );
+				the_posts_pagination(
+					array(
+						'mid_size'  => 2,
+						'prev_text' => '&larr; Precedente',
+						'next_text' => 'Successivo &rarr;',
+					)
+				);
 				?>
 			</div>
 

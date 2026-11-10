@@ -1,5 +1,7 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 /**
  * Hub di categoria (v3.14.0): "Console" (marchi e piattaforme) e "Studi" (sviluppatori italiani).
  * v3.22.0: lo stesso modello serve Mobile (Android e iOS come marchi) e PC Gaming (senza marchi).
@@ -18,9 +20,9 @@ if ( ! $hub ) {
 
 get_header();
 
-$hub_is_console = 'console' === $hub['type'];
-$hub_filter     = function_exists( 'ntn_core_category_hub_platform_filter' ) ? ntn_core_category_hub_platform_filter( $hub ) : null;
-$hub_base_url   = $hub['selected'] ? $hub['selected']['url'] : $hub['root']['url'];
+$hub_is_console   = 'console' === $hub['type'];
+$hub_filter       = function_exists( 'ntn_core_category_hub_platform_filter' ) ? ntn_core_category_hub_platform_filter( $hub ) : null;
+$hub_base_url     = $hub['selected'] ? $hub['selected']['url'] : $hub['root']['url'];
 $hub_platform_ids = wp_list_pluck( $hub['platforms'], 'label', 'id' );
 // v3.22.0: la stessa Hub serve anche Mobile (Android, iOS) e PC Gaming, quindi i testi non parlano solo di console
 $hub_is_consoles = false !== strpos( (string) wp_parse_url( $hub['root']['url'], PHP_URL_PATH ), 'console' );
@@ -73,7 +75,10 @@ $hub_row_tag = static function ( $post_id ) use ( $hub_is_console, $hub_platform
 
 				<dl class="ntn-chub-stats">
 					<?php foreach ( $hub['stats'] as $stat ) : ?>
-						<?php if ( '' === (string) $stat[1] ) { continue; } ?>
+						<?php
+						if ( '' === (string) $stat[1] ) {
+							continue; }
+						?>
 						<div><dt class="ntn-stat-k"><?php echo esc_html( $stat[0] ); ?></dt><dd class="ntn-stat-v<?php echo 'Aggiornato' === $stat[0] ? ' is-small' : ''; ?>"><?php echo esc_html( is_numeric( $stat[1] ) ? number_format_i18n( (int) $stat[1] ) : $stat[1] ); ?></dd></div>
 					<?php endforeach; ?>
 				</dl>
@@ -141,9 +146,12 @@ $hub_row_tag = static function ( $post_id ) use ( $hub_is_console, $hub_platform
 				<?php
 				// Stessa apertura della Home: un articolo grande e tre piccoli
 				$hub_main = ntn_front_card_data( (int) $hub['featured'], 'large' );
-				$hub_side = array_map( static function ( $side_id ) {
-					return ntn_front_card_data( (int) $side_id, 'large' );
-				}, $hub['side'] );
+				$hub_side = array_map(
+					static function ( $side_id ) {
+						return ntn_front_card_data( (int) $side_id, 'large' );
+					},
+					$hub['side']
+				);
 				?>
 				<div class="ntn-lead<?php echo empty( $hub_side ) ? ' ntn-lead--solo' : ''; ?>">
 					<a class="ntn-lead-main group" href="<?php echo esc_url( $hub_main['permalink'] ); ?>">
@@ -204,7 +212,16 @@ $hub_row_tag = static function ( $post_id ) use ( $hub_is_console, $hub_platform
 				</nav>
 			<?php endif; ?>
 
-			<?php get_template_part( 'template-parts/hub-article-feed', null, array( 'row_tag' => $hub_row_tag, 'empty' => 'Non ci sono ancora articoli in questa sezione.' ) ); ?>
+			<?php
+			get_template_part(
+				'template-parts/hub-article-feed',
+				null,
+				array(
+					'row_tag' => $hub_row_tag,
+					'empty'   => 'Non ci sono ancora articoli in questa sezione.',
+				)
+			);
+			?>
 		</section>
 
 		<?php if ( ! $hub_is_console && ! empty( $hub['studios'] ) ) : ?>

@@ -29,7 +29,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						</div>
 						
 						<label style="display: block; margin-bottom: 10px;">
-							<input type="checkbox" name="ntn_seo_cleanup_og_duplicates" value="1" <?php checked( get_option('ntn_seo_cleanup_og_duplicates', 'yes'), 'yes' ); ?>>
+							<input type="checkbox" name="ntn_seo_cleanup_og_duplicates" value="1" <?php checked( get_option( 'ntn_seo_cleanup_og_duplicates', 'yes' ), 'yes' ); ?>>
 							<strong>Pulizia conflitti Open Graph (Terze Parti)</strong>
 						</label>
 						<p class="description" style="margin-top: 0;">Blocca plugin come Jetpack o estensioni social dal generare <code>og:image</code> duplicati quando i Meta Tag di Base di NTN Journal sono attivi.</p>
@@ -47,7 +47,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</th>
 					<td style="padding-top: 20px; padding-bottom: 20px;">
 						<label style="display: block; margin-bottom: 10px;">
-							<input type="checkbox" name="ntn_seo_enable_review_schema" value="1" <?php checked( get_option('ntn_seo_enable_review_schema', 'yes'), 'yes' ); ?>>
+							<input type="checkbox" name="ntn_seo_enable_review_schema" value="1" <?php checked( get_option( 'ntn_seo_enable_review_schema', 'yes' ), 'yes' ); ?>>
 							<strong>Attiva i dati per Google (tutto lo Schema Markup del plugin)</strong>
 						</label>
 						<div class="notice notice-info inline" style="margin: 0; padding: 10px;">
@@ -65,7 +65,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</th>
 					<td style="padding-top: 20px; padding-bottom: 20px;">
 						<label>
-							<input type="checkbox" name="ntn_seo_enable_video_schema" value="1" <?php checked( get_option('ntn_seo_enable_video_schema', get_theme_mod('ntn_journal_enable_video_schema', true) ? 'yes' : 'no'), 'yes' ); ?>>
+							<input type="checkbox" name="ntn_seo_enable_video_schema" value="1" <?php checked( get_option( 'ntn_seo_enable_video_schema', get_theme_mod( 'ntn_journal_enable_video_schema', true ) ? 'yes' : 'no' ), 'yes' ); ?>>
 							<strong>Attiva Schema Video automatico</strong>
 						</label>
 					</td>
@@ -79,7 +79,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</th>
 					<td style="padding-top: 20px; padding-bottom: 20px;">
 						<label>
-							<input type="checkbox" name="ntn_seo_enable_faq_schema" value="1" <?php checked( get_option('ntn_seo_enable_faq_schema', get_theme_mod('ntn_journal_enable_faq_schema', true) ? 'yes' : 'no'), 'yes' ); ?>>
+							<input type="checkbox" name="ntn_seo_enable_faq_schema" value="1" <?php checked( get_option( 'ntn_seo_enable_faq_schema', get_theme_mod( 'ntn_journal_enable_faq_schema', true ) ? 'yes' : 'no' ), 'yes' ); ?>>
 							<strong>Attiva Schema FAQ automatico</strong>
 						</label>
 					</td>
@@ -93,7 +93,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</th>
 					<td style="padding-top: 20px; padding-bottom: 20px;">
 						<label>
-							<input type="checkbox" name="ntn_seo_enable_auto_toc" value="1" <?php checked( get_option('ntn_seo_enable_auto_toc', 'yes'), 'yes' ); ?>>
+							<input type="checkbox" name="ntn_seo_enable_auto_toc" value="1" <?php checked( get_option( 'ntn_seo_enable_auto_toc', 'yes' ), 'yes' ); ?>>
 							<strong>Attiva Indice Automatico (se ci sono almeno 2 sottotitoli H2/H3)</strong>
 						</label>
 						<p class="description">Se usi già un plugin per il TOC (come Easy Table of Contents), spegni questa opzione.</p>
@@ -130,7 +130,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</th>
 					<td style="padding-top: 20px;">
 						<label>
-							<input type="checkbox" name="ntn_seo_enable_news_sitemap" value="1" <?php checked( get_option('ntn_seo_enable_news_sitemap', 'yes'), 'yes' ); ?>>
+							<input type="checkbox" name="ntn_seo_enable_news_sitemap" value="1" <?php checked( get_option( 'ntn_seo_enable_news_sitemap', 'yes' ), 'yes' ); ?>>
 							<strong>Attiva Google News Sitemap nativa (/news-sitemap.xml)</strong>
 						</label>
 						<p class="description">Genera automaticamente la sitemap XML per Google News con articoli e comunicati pubblicati nelle ultime 48 ore. Se utilizzi un modulo News Sitemap in plugin SEO esterni (come Yoast News o Rank Math Pro), deseleziona questa opzione per evitare conflitti.</p>

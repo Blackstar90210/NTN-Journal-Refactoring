@@ -1,5 +1,7 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 /**
  * Hub di categoria di tipo "Statistiche" (v4.3.0): la fascia con il nome della sezione e quattro numeri.
  * v4.6.0: sotto la fascia, tutti gli articoli (variante scelta dal CEO): l'ultimo in grande nella prima pagina,
@@ -120,11 +122,13 @@ $stats_ago    = ( '' !== $stats_latest && function_exists( 'ntn_core_category_hu
 
 				<div class="ntn-pager-wrap">
 					<?php
-					the_posts_pagination( array(
-						'mid_size'  => 2,
-						'prev_text' => '&larr; Precedente',
-						'next_text' => 'Successivo &rarr;',
-					) );
+					the_posts_pagination(
+						array(
+							'mid_size'  => 2,
+							'prev_text' => '&larr; Precedente',
+							'next_text' => 'Successivo &rarr;',
+						)
+					);
 					?>
 				</div>
 			<?php else : ?>

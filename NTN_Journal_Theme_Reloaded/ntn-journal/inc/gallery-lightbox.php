@@ -13,15 +13,17 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function ntn_enqueue_gallery_lightbox() {
 	if ( ( is_singular() && ( has_block( 'core/gallery' ) || has_block( 'core/image' ) ) ) || is_tag() || is_singular( 'videogioco' ) ) {
-		
+
 		// Enqueue CSS
 		wp_enqueue_style( 'glightbox', get_template_directory_uri() . '/assets/css/glightbox.min.css', array(), '3.3.0' );
-		
+
 		// Enqueue JS
 		wp_enqueue_script( 'glightbox', get_template_directory_uri() . '/assets/js/glightbox.min.js', array(), '3.3.0', true );
 
 		// In-line JS per inizializzare il lightbox automaticamente
-		wp_add_inline_script( 'glightbox', "
+		wp_add_inline_script(
+			'glightbox',
+			"
 			document.addEventListener('DOMContentLoaded', function() {
 				var images = document.querySelectorAll('.wp-block-gallery img, .wp-block-image img');
 				var manualGlightbox = document.querySelectorAll('.glightbox');
@@ -103,7 +105,8 @@ function ntn_enqueue_gallery_lightbox() {
 					});
 				}
 			});
-		" );
+		"
+		);
 	}
 }
 add_action( 'wp_enqueue_scripts', 'ntn_enqueue_gallery_lightbox' );
@@ -124,7 +127,7 @@ function ntn_filter_accessible_gallery_links( $block_content, $block ) {
 		if ( preg_match( '/<a\s+([^>]*?)href=[\'"]([^\'"]+\.(?:jpe?g|png|gif|webp|svg|avif)(?:\?[^\'"]*)?)[\'"]([^>]*?)>/i', $block_content ) ) {
 			$block_content = preg_replace_callback(
 				'/<a\s+([^>]*?)href=[\'"]([^\'"]+\.(?:jpe?g|png|gif|webp|svg|avif)(?:\?[^\'"]*)?)[\'"]([^>]*?)>(.*?<\/a>)/is',
-				function( $matches ) {
+				function ( $matches ) {
 					$before = $matches[1];
 					$url    = $matches[2];
 					$after  = $matches[3];

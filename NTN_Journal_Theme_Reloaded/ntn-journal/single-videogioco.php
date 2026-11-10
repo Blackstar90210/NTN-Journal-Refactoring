@@ -1,5 +1,7 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 /**
  * The template for displaying specific CPT Videogioco.
  * Funge da Hub Page per il singolo videogioco.
@@ -36,7 +38,15 @@ if ( '' !== trim( wp_strip_all_tags( $hub_intro_raw ) ) ) {
 }
 
 // Hero Header (Copertina + Titolo + Contatori + Scheda Tecnica)
-get_template_part( 'template-parts/hub-header', null, array( 'id' => $post_id, 'info' => $igdb_info, 'has_intro' => '' !== $hub_intro ) );
+get_template_part(
+	'template-parts/hub-header',
+	null,
+	array(
+		'id'        => $post_id,
+		'info'      => $igdb_info,
+		'has_intro' => '' !== $hub_intro,
+	)
+);
 
 // Ricerca articolo in evidenza con priorità tassativa: Manuale > Recensioni > Anteprime > Editoriali > Notizie
 $featured_data = function_exists( 'ntn_get_game_featured_content' ) ? ntn_get_game_featured_content( $post_id ) : false;
@@ -86,7 +96,9 @@ if ( ! empty( $igdb_info['screenshots'] ) ) {
 			continue;
 		}
 		$scr_item = trim( (string) $scr_item );
-		if ( empty( $scr_item ) ) continue;
+		if ( empty( $scr_item ) ) {
+			continue;
+		}
 		if ( strpos( $scr_item, 'http' ) === 0 || strpos( $scr_item, '//' ) === 0 ) {
 			$thumb_url = preg_replace( '/\/t_[a-z0-9_]+\//', '/t_720p/', $scr_item );
 			$full_url  = preg_replace( '/\/t_[a-z0-9_]+\//', '/t_1080p/', $scr_item );
@@ -139,7 +151,8 @@ $has_screenshots = ! empty( $scr_array );
 					<?php endif; ?>
 				</div>
 
-				<?php if ( $featured_data && ! empty( $featured_data['post'] ) ) :
+				<?php
+				if ( $featured_data && ! empty( $featured_data['post'] ) ) :
 					global $post;
 					$post = $featured_data['post'];
 					setup_postdata( $post );
@@ -155,7 +168,7 @@ $has_screenshots = ! empty( $scr_array );
 					}
 
 					wp_reset_postdata();
-				?>
+					?>
 				<?php else : ?>
 					<div class="ntn-empty">
 						<span>// Nessun articolo //</span>
@@ -213,7 +226,7 @@ $has_screenshots = ! empty( $scr_array );
 
 			<?php
 			// Cerchiamo gli articoli con il tag avente lo stesso slug o nome del CPT
-			$game_slug = get_post_field( 'post_name', $post_id );
+			$game_slug    = get_post_field( 'post_name', $post_id );
 			$matching_tag = get_term_by( 'slug', $game_slug, 'post_tag' );
 			if ( ! $matching_tag || is_wp_error( $matching_tag ) ) {
 				$matching_tag = get_term_by( 'name', get_the_title( $post_id ), 'post_tag' );
@@ -229,34 +242,42 @@ $has_screenshots = ! empty( $scr_array );
 			// I template singoli in WP gestiscono la paginazione su "page"
 			$paged = ( get_query_var( 'page' ) ) ? intval( get_query_var( 'page' ) ) : ( get_query_var( 'paged' ) ? intval( get_query_var( 'paged' ) ) : 1 );
 
-			$articles_query = new WP_Query( array(
-				'post_type'      => 'post',
-				'post_status'    => 'publish',
-				'tag'            => $query_tag,
-				'paged'          => $paged,
-			) );
+			$articles_query = new WP_Query(
+				array(
+					'post_type'   => 'post',
+					'post_status' => 'publish',
+					'tag'         => $query_tag,
+					'paged'       => $paged,
+				)
+			);
 
-			if ( $articles_query->have_posts() ) : ?>
+			if ( $articles_query->have_posts() ) :
+				?>
 				<div class="ntn-cells ntn-cells--3">
-					<?php while ( $articles_query->have_posts() ) : $articles_query->the_post();
+					<?php
+					while ( $articles_query->have_posts() ) :
+						$articles_query->the_post();
 						get_template_part( 'template-parts/content' );
-					endwhile; ?>
+					endwhile;
+					?>
 				</div>
 
 				<?php
-				$big = 999999999;
-				$pagination_links = paginate_links( array(
-					'base'      => str_replace( $big, '%#%', esc_url( get_pagenum_link( $big ) ) ),
-					'format'    => '?page=%#%',
-					'current'   => max( 1, $paged ),
-					'total'     => $articles_query->max_num_pages,
-					'mid_size'  => 2,
-					'prev_text' => '&larr; Precedente',
-					'next_text' => 'Successivo &rarr;',
-					'type'      => 'plain',
-				) );
+				$big              = 999999999;
+				$pagination_links = paginate_links(
+					array(
+						'base'      => str_replace( $big, '%#%', esc_url( get_pagenum_link( $big ) ) ),
+						'format'    => '?page=%#%',
+						'current'   => max( 1, $paged ),
+						'total'     => $articles_query->max_num_pages,
+						'mid_size'  => 2,
+						'prev_text' => '&larr; Precedente',
+						'next_text' => 'Successivo &rarr;',
+						'type'      => 'plain',
+					)
+				);
 				if ( $pagination_links ) :
-				?>
+					?>
 				<div class="ntn-pager-wrap">
 					<nav class="navigation pagination" aria-label="<?php esc_attr_e( 'Paginazione articoli correlati', 'ntn-journal' ); ?>">
 						<h2 class="screen-reader-text"><?php esc_html_e( 'Paginazione degli articoli', 'ntn-journal' ); ?></h2>

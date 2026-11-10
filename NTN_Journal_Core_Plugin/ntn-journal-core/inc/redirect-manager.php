@@ -1,7 +1,7 @@
 <?php
 /**
  * NTN Journal - Gestore Redirect Interno
- * 
+ *
  * Gestisce redirect 301/302 ad alte prestazioni senza uso di tabelle custom,
  * utilizzando un array serializzato su wp_options.
  */
@@ -19,12 +19,12 @@ function ntn_get_redirects_map() {
 	if ( null !== $redirects_map ) {
 		return $redirects_map;
 	}
-	
+
 	$redirects_map = get_option( 'ntn_redirects_map', array() );
 	if ( ! is_array( $redirects_map ) ) {
 		$redirects_map = array();
 	}
-	
+
 	return $redirects_map;
 }
 
@@ -49,7 +49,7 @@ function ntn_journal_process_redirects() {
 	$paths_to_check = array(
 		$path,
 		untrailingslashit( $path ),
-		trailingslashit( $path )
+		trailingslashit( $path ),
 	);
 	$paths_to_check = array_unique( $paths_to_check );
 
@@ -57,19 +57,19 @@ function ntn_journal_process_redirects() {
 		$hash = md5( $check_path );
 		if ( isset( $redirects_map[ $hash ] ) && $redirects_map[ $hash ]['source'] === $check_path ) {
 			$redirect = $redirects_map[ $hash ];
-			$target = $redirect['target'];
-			$code   = isset( $redirect['code'] ) ? intval( $redirect['code'] ) : 301;
-			
+			$target   = $redirect['target'];
+			$code     = isset( $redirect['code'] ) ? intval( $redirect['code'] ) : 301;
+
 			// Incrementa i colpi (usando un transient per non intasare le scritture su DB)
 			// Oppure usiamo un batch counter come prima ma per il singolo redirect.
 			// Per un singolo redirect, salvare in DB ogni volta può essere oneroso, usiamo un option per batch
 			$batch_key = 'ntn_redir_batch_' . $hash;
-			$hits = get_option( $batch_key, 0 );
-			$hits++;
+			$hits      = get_option( $batch_key, 0 );
+			++$hits;
 			if ( $hits >= 10 ) {
-				$redirect['hits'] = ( isset( $redirect['hits'] ) ? $redirect['hits'] : 0 ) + $hits;
+				$redirect['hits']          = ( isset( $redirect['hits'] ) ? $redirect['hits'] : 0 ) + $hits;
 				$redirect['last_accessed'] = current_time( 'mysql' );
-				$redirects_map[ $hash ] = $redirect;
+				$redirects_map[ $hash ]    = $redirect;
 				update_option( 'ntn_redirects_map', $redirects_map, 'yes' );
 				delete_option( $batch_key );
 			} else {
@@ -96,17 +96,19 @@ function ntn_journal_migrate_redirects() {
 	global $wpdb;
 	$like_redir = $wpdb->esc_like( 'ntn_redir_' ) . '%';
 	$like_batch = $wpdb->esc_like( 'ntn_redir_batch_' ) . '%';
-	$results = $wpdb->get_results( $wpdb->prepare(
-		"SELECT option_name, option_value FROM {$wpdb->options} WHERE option_name LIKE %s AND option_name NOT LIKE %s",
-		$like_redir,
-		$like_batch
-	) );
-	
+	$results    = $wpdb->get_results(
+		$wpdb->prepare(
+			"SELECT option_name, option_value FROM {$wpdb->options} WHERE option_name LIKE %s AND option_name NOT LIKE %s",
+			$like_redir,
+			$like_batch
+		)
+	);
+
 	$redirects_map = get_option( 'ntn_redirects_map', array() );
 	if ( ! is_array( $redirects_map ) ) {
 		$redirects_map = array();
 	}
-	
+
 	if ( $results ) {
 		foreach ( $results as $row ) {
 			$val = maybe_unserialize( $row->option_value );
@@ -121,7 +123,7 @@ function ntn_journal_migrate_redirects() {
 		}
 		update_option( 'ntn_redirects_map', $redirects_map, 'yes' );
 	}
-	
+
 	update_option( 'ntn_redirects_migrated', '1' );
 }
 add_action( 'admin_init', 'ntn_journal_migrate_redirects' );
@@ -145,7 +147,7 @@ function ntn_journal_render_redirects_ui() {
 		$source = sanitize_text_field( wp_unslash( $_POST['redirect_source'] ) );
 		$target = esc_url_raw( wp_unslash( $_POST['redirect_target'] ) );
 		$code   = intval( $_POST['redirect_code'] );
-		
+
 		if ( $source !== '' && $target !== '' ) {
 			// Prevenzione Loop basica
 			if ( $source === $target || trailingslashit( $source ) === trailingslashit( $target ) ) {
@@ -160,25 +162,25 @@ function ntn_journal_render_redirects_ui() {
 					$source = '/' . $source;
 				}
 
-				$hash = md5( $source );
+				$hash     = md5( $source );
 				$existing = isset( $redirects_map[ $hash ] ) ? $redirects_map[ $hash ] : false;
 
 				$redirect_data = array(
 					'source'        => $source,
 					'target'        => $target,
 					'code'          => $code,
-					'hits'          => $existing ? ( isset($existing['hits']) ? $existing['hits'] : 0 ) : 0,
+					'hits'          => $existing ? ( isset( $existing['hits'] ) ? $existing['hits'] : 0 ) : 0,
 					'created_at'    => $existing ? $existing['created_at'] : current_time( 'mysql' ),
-					'last_accessed' => $existing ? $existing['last_accessed'] : ''
+					'last_accessed' => $existing ? $existing['last_accessed'] : '',
 				);
-				
+
 				$redirects_map[ $hash ] = $redirect_data;
 				update_option( 'ntn_redirects_map', $redirects_map, 'yes' );
 				echo '<div class="notice notice-success is-dismissible"><p>Redirect salvato con successo.</p></div>';
 			}
 		}
 	}
-	
+
 	// Eliminazione redirect (via POST hidden o GET con nonce)
 	if ( isset( $_POST['ntn_delete_redirect_nonce'] ) && wp_verify_nonce( $_POST['ntn_delete_redirect_nonce'], 'ntn_delete_redirect' ) ) {
 		$del_hash = sanitize_text_field( $_POST['delete_hash'] );
@@ -231,7 +233,7 @@ function ntn_journal_render_redirects_ui() {
 		
 		<hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
 		
-		<h3>Redirect Attivi (<?php echo count($redirects); ?>)</h3>
+		<h3>Redirect Attivi (<?php echo count( $redirects ); ?>)</h3>
 		
 		<table class="wp-list-table widefat fixed striped" style="margin-top: 10px;">
 			<thead>
@@ -249,25 +251,28 @@ function ntn_journal_render_redirects_ui() {
 				<tr>
 					<td colspan="6">Nessun redirect configurato al momento.</td>
 				</tr>
-				<?php else: ?>
-					<?php 
+				<?php else : ?>
+					<?php
 					// Ordiniamo per data creazione decrescente (ultimi aggiunti in cima)
-					usort( $redirects, function($a, $b) {
-						$ta = isset($a['created_at']) ? strtotime($a['created_at']) : 0;
-						$tb = isset($b['created_at']) ? strtotime($b['created_at']) : 0;
-						return $tb - $ta; // discendente
-					});
-					
-					foreach ( $redirects as $r ) : 
-					?>
+					usort(
+						$redirects,
+						function ( $a, $b ) {
+							$ta = isset( $a['created_at'] ) ? strtotime( $a['created_at'] ) : 0;
+							$tb = isset( $b['created_at'] ) ? strtotime( $b['created_at'] ) : 0;
+							return $tb - $ta; // discendente
+						}
+					);
+
+					foreach ( $redirects as $r ) :
+						?>
 					<tr>
 						<td><strong><?php echo esc_html( $r['source'] ); ?></strong></td>
 						<td><a href="<?php echo esc_url( $r['target'] ); ?>" target="_blank"><?php echo esc_html( $r['target'] ); ?></a></td>
 						<td><?php echo esc_html( $r['code'] ); ?></td>
 						<td><?php echo isset( $r['hits'] ) ? esc_html( $r['hits'] ) : 0; ?></td>
 						<td>
-							<?php 
-							echo !empty( $r['last_accessed'] ) ? esc_html( wp_date( get_option('date_format') . ' H:i', strtotime($r['last_accessed']) ) ) : 'Mai';
+							<?php
+							echo ! empty( $r['last_accessed'] ) ? esc_html( wp_date( get_option( 'date_format' ) . ' H:i', strtotime( $r['last_accessed'] ) ) ) : 'Mai';
 							?>
 						</td>
 						<td>
@@ -360,7 +365,10 @@ function ntn_redirect_folder_match( string $path, array $rules ): ?array {
 			);
 		}
 	}
-	return null === $best ? null : array( 'hash' => $best['hash'], 'path' => $best['path'] );
+	return null === $best ? null : array(
+		'hash' => $best['hash'],
+		'path' => $best['path'],
+	);
 }
 
 /**
@@ -458,13 +466,19 @@ function ntn_redirect_folder_suggestions( array $rules, string $category_base, s
 		}
 	}
 	$out = array();
-	foreach ( array( 'category' => $category_base, 'tag' => $tag_base ) as $old => $base ) {
+	foreach ( array(
+		'category' => $category_base,
+		'tag'      => $tag_base,
+	) as $old => $base ) {
 		$base   = trim( $base, '/' );
 		$source = $home_path . '/' . $old . '/';
 		if ( '' === $base || $old === $base || in_array( $source, $sources, true ) ) {
 			continue;
 		}
-		$out[] = array( 'source' => $source, 'target' => $home_path . '/' . $base . '/' );
+		$out[] = array(
+			'source' => $source,
+			'target' => $home_path . '/' . $base . '/',
+		);
 	}
 	return $out;
 }
@@ -569,7 +583,13 @@ function ntn_redirect_archive_exists( array $qv ): bool {
 	if ( ! empty( $qv['author_name'] ) ) {
 		return get_user_by( 'slug', (string) $qv['author_name'] ) instanceof WP_User;
 	}
-	foreach ( get_taxonomies( array( 'public' => true, '_builtin' => false ), 'objects' ) as $taxonomy ) {
+	foreach ( get_taxonomies(
+		array(
+			'public'   => true,
+			'_builtin' => false,
+		),
+		'objects'
+	) as $taxonomy ) {
 		if ( ! empty( $taxonomy->query_var ) && ! empty( $qv[ $taxonomy->query_var ] ) ) {
 			return get_term_by( 'slug', (string) $qv[ $taxonomy->query_var ], $taxonomy->name ) instanceof WP_Term;
 		}
@@ -644,7 +664,10 @@ function ntn_journal_folder_redirects_handle_post(): ?array {
 	if ( 'options' === $action ) {
 		update_option( 'ntn_redirect_paged_fallback', isset( $_POST['ntn_redirect_paged_fallback'] ) ? 'yes' : 'no' );
 		update_option( 'ntn_redirect_no_guess', isset( $_POST['ntn_redirect_no_guess'] ) ? 'yes' : 'no' );
-		return array( 'type' => 'success', 'text' => 'Opzioni salvate.' );
+		return array(
+			'type' => 'success',
+			'text' => 'Opzioni salvate.',
+		);
 	}
 
 	if ( 'add' === $action ) {
@@ -652,13 +675,25 @@ function ntn_journal_folder_redirects_handle_post(): ?array {
 		$target = ntn_redirect_folder_normalize( isset( $_POST['ntn_folder_target'] ) ? sanitize_text_field( wp_unslash( $_POST['ntn_folder_target'] ) ) : '', $host );
 		$error  = ntn_redirect_folder_validate( $source, $target, $rules );
 		if ( '' !== $error ) {
-			return array( 'type' => 'error', 'text' => $error );
+			return array(
+				'type' => 'error',
+				'text' => $error,
+			);
 		}
 		$key           = md5( $source );
 		$rule          = ntn_redirect_folder_new_rule( $source, $target );
-		$rules[ $key ] = isset( $rules[ $key ] ) ? array_merge( $rules[ $key ], array( 'target' => $target, 'enabled' => true ) ) : $rule;
+		$rules[ $key ] = isset( $rules[ $key ] ) ? array_merge(
+			$rules[ $key ],
+			array(
+				'target'  => $target,
+				'enabled' => true,
+			)
+		) : $rule;
 		update_option( 'ntn_redirect_folder_rules', $rules, true );
-		return array( 'type' => 'success', 'text' => 'Regola salvata: ' . $source . ' → ' . $target );
+		return array(
+			'type' => 'success',
+			'text' => 'Regola salvata: ' . $source . ' → ' . $target,
+		);
 	}
 
 	if ( 'suggested' === $action ) {
@@ -667,14 +702,20 @@ function ntn_journal_folder_redirects_handle_post(): ?array {
 		foreach ( ntn_redirect_folder_suggestions( $rules, (string) get_option( 'category_base', '' ), (string) get_option( 'tag_base', '' ), $home_path ) as $suggestion ) {
 			if ( '' === ntn_redirect_folder_validate( $suggestion['source'], $suggestion['target'], $rules ) ) {
 				$rules[ md5( $suggestion['source'] ) ] = ntn_redirect_folder_new_rule( $suggestion['source'], $suggestion['target'] );
-				$added[] = $suggestion['source'] . ' → ' . $suggestion['target'];
+				$added[]                               = $suggestion['source'] . ' → ' . $suggestion['target'];
 			}
 		}
 		if ( empty( $added ) ) {
-			return array( 'type' => 'error', 'text' => 'Nessuna regola suggerita da aggiungere.' );
+			return array(
+				'type' => 'error',
+				'text' => 'Nessuna regola suggerita da aggiungere.',
+			);
 		}
 		update_option( 'ntn_redirect_folder_rules', $rules, true );
-		return array( 'type' => 'success', 'text' => 'Regole aggiunte: ' . implode( ', ', $added ) );
+		return array(
+			'type' => 'success',
+			'text' => 'Regole aggiunte: ' . implode( ', ', $added ),
+		);
 	}
 
 	if ( '' === $hash || ! isset( $rules[ $hash ] ) ) {
@@ -684,17 +725,26 @@ function ntn_journal_folder_redirects_handle_post(): ?array {
 	if ( 'toggle' === $action ) {
 		$rules[ $hash ]['enabled'] = empty( $rules[ $hash ]['enabled'] );
 		if ( $rules[ $hash ]['enabled'] && ntn_redirect_folder_has_loop( $rules ) ) {
-			return array( 'type' => 'error', 'text' => 'Questa regola non si può riattivare: con le altre regole attive devierebbe il visitatore all\'infinito.' );
+			return array(
+				'type' => 'error',
+				'text' => 'Questa regola non si può riattivare: con le altre regole attive devierebbe il visitatore all\'infinito.',
+			);
 		}
 		update_option( 'ntn_redirect_folder_rules', $rules, true );
-		return array( 'type' => 'success', 'text' => $rules[ $hash ]['enabled'] ? 'Regola attivata.' : 'Regola disattivata: resta salvata, ma non devia più nessuno.' );
+		return array(
+			'type' => 'success',
+			'text' => $rules[ $hash ]['enabled'] ? 'Regola attivata.' : 'Regola disattivata: resta salvata, ma non devia più nessuno.',
+		);
 	}
 
 	if ( 'delete' === $action ) {
 		unset( $rules[ $hash ] );
 		update_option( 'ntn_redirect_folder_rules', $rules, true );
 		delete_option( 'ntn_folder_redir_batch_' . $hash );
-		return array( 'type' => 'success', 'text' => 'Regola eliminata.' );
+		return array(
+			'type' => 'success',
+			'text' => 'Regola eliminata.',
+		);
 	}
 
 	return null;
@@ -738,9 +788,12 @@ function ntn_journal_render_folder_redirects_ui() {
 	$rules       = ntn_get_folder_rules();
 	$home_path   = untrailingslashit( (string) wp_parse_url( home_url(), PHP_URL_PATH ) );
 	$suggestions = ntn_redirect_folder_suggestions( $rules, (string) get_option( 'category_base', '' ), (string) get_option( 'tag_base', '' ), $home_path );
-	uasort( $rules, function ( $a, $b ) {
-		return strcmp( (string) ( $a['source'] ?? '' ), (string) ( $b['source'] ?? '' ) );
-	} );
+	uasort(
+		$rules,
+		function ( $a, $b ) {
+			return strcmp( (string) ( $a['source'] ?? '' ), (string) ( $b['source'] ?? '' ) );
+		}
+	);
 	?>
 	<div class="card" style="padding: 20px; box-sizing: border-box; background: #fff; border: 1px solid #ccd0d4; border-radius: 4px; max-width: 100%; margin-top: 20px;">
 		<h2>Redirect per cartella</h2>

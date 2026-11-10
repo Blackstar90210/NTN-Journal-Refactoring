@@ -33,24 +33,24 @@ function ntn_get_catalog_query_args( array $params ): array {
 		$sort = 'title_asc';
 	}
 
-	$orderby = 'title';
-	$order   = 'ASC';
+	$orderby    = 'title';
+	$order      = 'ASC';
 	$meta_query = array();
 
 	if ( $sort === 'title_desc' ) {
 		$order = 'DESC';
 	} elseif ( $sort === 'year_desc' || $sort === 'year_asc' ) {
-		$order   = ( $sort === 'year_desc' ) ? 'DESC' : 'ASC';
-		
+		$order = ( $sort === 'year_desc' ) ? 'DESC' : 'ASC';
+
 		// Fix INNER JOIN escludendo i post senza anno, usiamo LEFT JOIN tramite EXISTS logic
 		// O meglio, definiamo una meta_query che ordini per _ntn_game_release
 		$meta_query['release_clause'] = array(
 			'key'     => '_ntn_game_release',
 			'compare' => 'EXISTS', // Garantiamo che possiamo usarla per l'ordinamento
 		);
-		$orderby = array(
+		$orderby                      = array(
 			'release_clause' => $order,
-			'title'          => 'ASC' // Fallback
+			'title'          => 'ASC', // Fallback
 		);
 		// v3.19.1: a parità di data, i giochi con il giorno esatto stanno accanto agli altri giochi datati (vedi ntn_catalog_precision_clauses)
 		$precision_sort = $order;
@@ -68,21 +68,41 @@ function ntn_get_catalog_query_args( array $params ): array {
 
 	$tax_query = array();
 	if ( $franchise ) {
-		$tax_query[] = array( 'taxonomy' => 'game_franchise', 'field' => 'slug', 'terms' => $franchise );
+		$tax_query[] = array(
+			'taxonomy' => 'game_franchise',
+			'field'    => 'slug',
+			'terms'    => $franchise,
+		);
 	}
 	if ( $developer ) {
-		$tax_query[] = array( 'taxonomy' => 'game_developer', 'field' => 'slug', 'terms' => $developer );
+		$tax_query[] = array(
+			'taxonomy' => 'game_developer',
+			'field'    => 'slug',
+			'terms'    => $developer,
+		);
 	}
 	if ( $publisher ) {
-		$tax_query[] = array( 'taxonomy' => 'game_publisher', 'field' => 'slug', 'terms' => $publisher );
+		$tax_query[] = array(
+			'taxonomy' => 'game_publisher',
+			'field'    => 'slug',
+			'terms'    => $publisher,
+		);
 	}
 	if ( $engine ) {
-		$tax_query[] = array( 'taxonomy' => 'game_engine', 'field' => 'slug', 'terms' => $engine );
+		$tax_query[] = array(
+			'taxonomy' => 'game_engine',
+			'field'    => 'slug',
+			'terms'    => $engine,
+		);
 	}
-	
+
 	// Filtro anno (sostituito meta_query con tax_query su game_year)
 	if ( $year > 0 ) {
-		$tax_query[] = array( 'taxonomy' => 'game_year', 'field' => 'slug', 'terms' => strval( $year ) );
+		$tax_query[] = array(
+			'taxonomy' => 'game_year',
+			'field'    => 'slug',
+			'terms'    => strval( $year ),
+		);
 	}
 
 	if ( ! empty( $tax_query ) ) {
@@ -129,7 +149,7 @@ function ntn_catalog_precision_clauses( $clauses, $query ) {
 	$clauses['join'] .= " LEFT JOIN {$wpdb->postmeta} AS ntn_rp ON ( ntn_rp.post_id = {$wpdb->posts}.ID AND ntn_rp.meta_key = '_ntn_game_release_precision' )";
 
 	// 4 giorno, 3 mese, 2 trimestre, 0 solo anno o da annunciare
-	$rank = "( CASE ntn_rp.meta_value WHEN 'day' THEN 4 WHEN 'month' THEN 3 WHEN 'quarter' THEN 2 ELSE 0 END )";
+	$rank               = "( CASE ntn_rp.meta_value WHEN 'day' THEN 4 WHEN 'month' THEN 3 WHEN 'quarter' THEN 2 ELSE 0 END )";
 	$clauses['orderby'] = implode(
 		', ',
 		array(

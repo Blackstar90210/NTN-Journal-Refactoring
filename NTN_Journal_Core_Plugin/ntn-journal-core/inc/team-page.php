@@ -1,5 +1,7 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 /**
  * Pagina "Redazione" (v3.17.0): Hub degli autori, divisa in gruppi personalizzati.
  *
@@ -15,9 +17,10 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 define( 'NTN_CORE_TEAM_TEMPLATE', 'page-redazione.php' );
 
-/* ==========================================================================
-   1. Gruppi: scritti nella pagina Redazione, uno per riga
-   ========================================================================== */
+/*
+==========================================================================
+	1. Gruppi: scritti nella pagina Redazione, uno per riga
+	========================================================================== */
 
 /**
  * La pagina che usa il modello "Redazione" (la prima, se sono più di una).
@@ -64,11 +67,12 @@ function ntn_core_team_groups( $page_id = 0 ) {
 	return $groups;
 }
 
-/* ==========================================================================
-   2. Salvataggio dalla scheda "Redazione" di NTN Journal Funzioni (v3.18.0)
-   Il riquadro nella pagina e la tendina nel profilo sono stati tolti: i dati restano
-   dove erano (gruppi nella pagina, gruppo di ogni persona nel suo profilo).
-   ========================================================================== */
+/*
+==========================================================================
+	2. Salvataggio dalla scheda "Redazione" di NTN Journal Funzioni (v3.18.0)
+	Il riquadro nella pagina e la tendina nel profilo sono stati tolti: i dati restano
+	dove erano (gruppi nella pagina, gruppo di ogni persona nel suo profilo).
+	========================================================================== */
 
 /**
  * Ordine delle persone dentro i gruppi.
@@ -109,7 +113,12 @@ function ntn_core_team_save( $page_id, array $groups, $order = 'alpha' ) {
 	}
 
 	// Chi non è più in nessun gruppo torna "Non mostrare"
-	foreach ( get_users( array( 'meta_key' => '_ntn_team_group', 'fields' => 'ID' ) ) as $user_id ) { // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- poche persone.
+	foreach ( get_users(
+		array(
+			'meta_key' => '_ntn_team_group',
+			'fields'   => 'ID',
+		)
+	) as $user_id ) { // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- poche persone.
 		if ( ! isset( $assigned[ (int) $user_id ] ) ) {
 			delete_user_meta( (int) $user_id, '_ntn_team_group' );
 			delete_user_meta( (int) $user_id, '_ntn_team_order' );
@@ -123,9 +132,10 @@ function ntn_core_team_save( $page_id, array $groups, $order = 'alpha' ) {
 	ntn_core_team_flush();
 }
 
-/* ==========================================================================
-   3. Dati della pagina (in cache)
-   ========================================================================== */
+/*
+==========================================================================
+	3. Dati della pagina (in cache)
+	========================================================================== */
 
 /**
  * Invalida la cache della pagina Redazione.
@@ -188,10 +198,10 @@ function ntn_core_get_team_data( $page_id ) {
 			)
 		);
 		$entry = array(
-			'id'   => (int) $user->ID,
-			'name' => (string) $user->display_name,
-			'url'  => (string) get_author_posts_url( $user->ID ),
-			'last' => null,
+			'id'    => (int) $user->ID,
+			'name'  => (string) $user->display_name,
+			'url'   => (string) get_author_posts_url( $user->ID ),
+			'last'  => null,
 			'order' => (int) get_user_meta( $user->ID, '_ntn_team_order', true ),
 			'posts' => (int) count_user_posts( $user->ID, 'post', true ),
 		);
@@ -201,7 +211,7 @@ function ntn_core_get_team_data( $page_id ) {
 				'url'   => (string) get_permalink( $last[0] ),
 				'date'  => (string) get_the_date( 'd.m.Y', $last[0] ),
 			);
-			$latest = max( $latest, (int) get_post_timestamp( $last[0] ) );
+			$latest        = max( $latest, (int) get_post_timestamp( $last[0] ) );
 		}
 		$by_group[ $group ][] = $entry;
 	}
@@ -227,7 +237,7 @@ function ntn_core_get_team_data( $page_id ) {
 			'name'   => (string) $name,
 			'people' => $people,
 		);
-		$data['count'] += count( $people );
+		$data['count']   += count( $people );
 	}
 	$data['updated'] = $latest ? (string) wp_date( 'd.m.Y', $latest ) : '';
 
@@ -235,9 +245,10 @@ function ntn_core_get_team_data( $page_id ) {
 	return $data;
 }
 
-/* ==========================================================================
-   4. Dati per Google: la redazione come elenco di persone
-   ========================================================================== */
+/*
+==========================================================================
+	4. Dati per Google: la redazione come elenco di persone
+	========================================================================== */
 
 /**
  * ItemList di Person sulla pagina Redazione.

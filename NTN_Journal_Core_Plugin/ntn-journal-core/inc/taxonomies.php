@@ -53,48 +53,48 @@ add_action( 'init', 'ntn_register_game_engine_taxonomy', 0 );
 function ntn_register_additional_game_taxonomies() {
 	$taxonomies = array(
 		'game_franchise' => array(
-			'name' => 'Franchise',
+			'name'     => 'Franchise',
 			'singular' => 'Franchise',
-			'slug' => 'franchise',
+			'slug'     => 'franchise',
 		),
 		'game_developer' => array(
-			'name' => 'Sviluppatori',
+			'name'     => 'Sviluppatori',
 			'singular' => 'Sviluppatore',
-			'slug' => 'sviluppatore',
+			'slug'     => 'sviluppatore',
 		),
 		'game_publisher' => array(
-			'name' => 'Editori',
+			'name'     => 'Editori',
 			'singular' => 'Editore',
-			'slug' => 'editore',
+			'slug'     => 'editore',
 		),
-		'game_year' => array(
-			'name' => 'Anno di Uscita',
+		'game_year'      => array(
+			'name'     => 'Anno di Uscita',
 			'singular' => 'Anno',
-			'slug' => 'anno-uscita',
+			'slug'     => 'anno-uscita',
 		),
 	);
 
 	foreach ( $taxonomies as $tax_key => $tax_data ) {
 		$labels = array(
-			'name'                       => $tax_data['name'],
-			'singular_name'              => $tax_data['singular'],
-			'search_items'               => 'Cerca ' . $tax_data['name'],
-			'all_items'                  => 'Tutti ' . $tax_data['name'],
-			'edit_item'                  => 'Modifica ' . $tax_data['singular'],
-			'update_item'                => 'Aggiorna ' . $tax_data['singular'],
-			'add_new_item'               => 'Aggiungi Nuovo ' . $tax_data['singular'],
-			'new_item_name'              => 'Nome Nuovo ' . $tax_data['singular'],
-			'menu_name'                  => $tax_data['name'],
+			'name'          => $tax_data['name'],
+			'singular_name' => $tax_data['singular'],
+			'search_items'  => 'Cerca ' . $tax_data['name'],
+			'all_items'     => 'Tutti ' . $tax_data['name'],
+			'edit_item'     => 'Modifica ' . $tax_data['singular'],
+			'update_item'   => 'Aggiorna ' . $tax_data['singular'],
+			'add_new_item'  => 'Aggiungi Nuovo ' . $tax_data['singular'],
+			'new_item_name' => 'Nome Nuovo ' . $tax_data['singular'],
+			'menu_name'     => $tax_data['name'],
 		);
 
 		$args = array(
-			'hierarchical'          => false,
-			'labels'                => $labels,
-			'show_ui'               => true,
-			'show_admin_column'     => true,
-			'query_var'             => true,
-			'show_in_rest'          => true,
-			'rewrite'               => array(
+			'hierarchical'      => false,
+			'labels'            => $labels,
+			'show_ui'           => true,
+			'show_admin_column' => true,
+			'query_var'         => true,
+			'show_in_rest'      => true,
+			'rewrite'           => array(
 				'slug'         => $tax_data['slug'],
 				'with_front'   => false,
 				'hierarchical' => false,
@@ -120,17 +120,19 @@ add_action( 'init', 'ntn_add_videogioco_rewrite_rule', 10 );
 
 function ntn_get_cpt_videogioco_link_by_slug( $slug ) {
 	$cache_key = 'ntn_vg_link_' . md5( $slug );
-	$link = get_transient( $cache_key );
+	$link      = get_transient( $cache_key );
 
 	if ( false === $link ) {
-		$posts = get_posts( array(
-			'name'           => $slug,
-			'post_type'      => 'videogioco',
-			'post_status'    => 'publish',
-			'posts_per_page' => 1,
-			'fields'         => 'ids',
-			'no_found_rows'  => true,
-		) );
+		$posts = get_posts(
+			array(
+				'name'           => $slug,
+				'post_type'      => 'videogioco',
+				'post_status'    => 'publish',
+				'posts_per_page' => 1,
+				'fields'         => 'ids',
+				'no_found_rows'  => true,
+			)
+		);
 
 		if ( ! empty( $posts ) ) {
 			$link = get_permalink( $posts[0] );
@@ -224,23 +226,25 @@ function ntn_game_engine_archive_query( $query ) {
 			$engine_name = $engine_term->name;
 
 			$cache_key = 'ntn_engine_tags_' . $engine_term->term_id;
-			$tag_ids = get_transient( $cache_key );
+			$tag_ids   = get_transient( $cache_key );
 
 			if ( false === $tag_ids ) {
 				$tag_ids = array();
-				
+
 				// Cerca tutti i tag che hanno questo motore grafico nel term meta
-				$tags = get_terms( array(
-					'taxonomy'   => 'post_tag',
-					'hide_empty' => false,
-					'meta_query' => array(
-						array(
-							'key'     => '_ntn_game_engine',
-							'value'   => $engine_name,
-							'compare' => 'LIKE',
+				$tags = get_terms(
+					array(
+						'taxonomy'   => 'post_tag',
+						'hide_empty' => false,
+						'meta_query' => array(
+							array(
+								'key'     => '_ntn_game_engine',
+								'value'   => $engine_name,
+								'compare' => 'LIKE',
+							),
 						),
-					),
-				) );
+					)
+				);
 
 				if ( ! is_wp_error( $tags ) && ! empty( $tags ) ) {
 					foreach ( $tags as $t ) {
@@ -249,21 +253,23 @@ function ntn_game_engine_archive_query( $query ) {
 				}
 
 				// Cerca anche i CPT videogioco che hanno questo motore grafico
-				$cpts = get_posts( array(
-					'post_type'              => 'videogioco',
-					'post_status'            => 'publish',
-					'posts_per_page'         => -1,
-					'no_found_rows'          => true,
-					'update_post_meta_cache' => false,
-					'update_post_term_cache' => false,
-					'tax_query'              => array(
-						array(
-							'taxonomy' => 'game_engine',
-							'field'    => 'term_id',
-							'terms'    => $engine_term->term_id,
+				$cpts = get_posts(
+					array(
+						'post_type'              => 'videogioco',
+						'post_status'            => 'publish',
+						'posts_per_page'         => -1,
+						'no_found_rows'          => true,
+						'update_post_meta_cache' => false,
+						'update_post_term_cache' => false,
+						'tax_query'              => array(
+							array(
+								'taxonomy' => 'game_engine',
+								'field'    => 'term_id',
+								'terms'    => $engine_term->term_id,
+							),
 						),
-					),
-				) );
+					)
+				);
 
 				if ( ! empty( $cpts ) ) {
 					foreach ( $cpts as $cpt_p ) {
@@ -276,12 +282,12 @@ function ntn_game_engine_archive_query( $query ) {
 						}
 					}
 				}
-				
+
 				set_transient( $cache_key, $tag_ids, 12 * HOUR_IN_SECONDS );
 			}
 
 			$query->set( 'game_engine', '' );
-			$tax_query = array( 'relation' => 'OR' );
+			$tax_query   = array( 'relation' => 'OR' );
 			$tax_query[] = array(
 				'taxonomy' => 'game_engine',
 				'field'    => 'term_id',

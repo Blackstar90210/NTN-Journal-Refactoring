@@ -1,5 +1,7 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 /**
  * Template part per la Sidebar IGDB Sticky su PC (Dati IGDB + Valutazione Finale)
  *
@@ -12,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  */
 
 $post_id = get_the_ID();
-$rating = ntn_get_post_rating( $post_id );
+$rating  = ntn_get_post_rating( $post_id );
 
 $final_rating = 0;
 $rating_label = '';
@@ -35,7 +37,7 @@ if ( $rating_label ) {
 	if ( in_array( $rating_slug, array( 'bocciato', 'consigliato-con-riserva', 'consigliato', 'must-play' ) ) ) {
 		$tag_obj = get_term_by( 'slug', $rating_slug, 'post_tag' );
 		if ( $tag_obj && ! is_wp_error( $tag_obj ) && $tag_obj instanceof WP_Term ) {
-			$tag_link = get_term_link( $tag_obj );
+			$tag_link    = get_term_link( $tag_obj );
 			$rating_link = ( ! empty( $tag_link ) && ! is_wp_error( $tag_link ) && is_string( $tag_link ) ) ? $tag_link : home_url( '/tag/' . $rating_slug . '/' );
 		} else {
 			$rating_link = home_url( '/tag/' . $rating_slug . '/' );
@@ -78,9 +80,9 @@ $render_kv = static function ( $game, $review_source ) {
 	if ( $platforms && function_exists( 'ntn_core_schema_platform_names' ) ) {
 		$platforms = ntn_core_schema_platform_names( array_filter( is_array( $platforms ) ? $platforms : explode( ',', (string) $platforms ), 'is_scalar' ) );
 	}
-	$release   = $game['release'];
-	$genres    = $game['genres'];
-	$engine    = $game['engine'];
+	$release = $game['release'];
+	$genres  = $game['genres'];
+	$engine  = $game['engine'];
 
 	// Data di uscita: solo le parti note (v3.21.0), es. "23/10/2026", "Q3 2027", "2028"
 	$release_text = $release ? ntn_journal_release_label( $release, $game['release_precision'] ) : '';

@@ -1,7 +1,9 @@
 <?php
 
 
-if ( ! defined( 'ABSPATH' ) ) exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 /**
  * Pannello "// Seguici" (v3.16.1, al posto del riquadro "Ti è piaciuto questo articolo?").
  *
@@ -12,12 +14,30 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  */
 function ntn_journal_social_cta_box() {
 	$all_socials = array(
-		'telegram'  => array( 'name' => 'Telegram', 'label' => 'TG' ),
-		'facebook'  => array( 'name' => 'Facebook', 'label' => 'FB' ),
-		'instagram' => array( 'name' => 'Instagram', 'label' => 'IG' ),
-		'x'         => array( 'name' => 'X', 'label' => 'X' ),
-		'bluesky'   => array( 'name' => 'Bluesky', 'label' => 'BSKY' ),
-		'mastodon'  => array( 'name' => 'Mastodon', 'label' => 'MASTO' ),
+		'telegram'  => array(
+			'name'  => 'Telegram',
+			'label' => 'TG',
+		),
+		'facebook'  => array(
+			'name'  => 'Facebook',
+			'label' => 'FB',
+		),
+		'instagram' => array(
+			'name'  => 'Instagram',
+			'label' => 'IG',
+		),
+		'x'         => array(
+			'name'  => 'X',
+			'label' => 'X',
+		),
+		'bluesky'   => array(
+			'name'  => 'Bluesky',
+			'label' => 'BSKY',
+		),
+		'mastodon'  => array(
+			'name'  => 'Mastodon',
+			'label' => 'MASTO',
+		),
 	);
 
 	$social_channels = array();
@@ -69,8 +89,8 @@ function ntn_journal_google_feed_box() {
 		$site_host = wp_parse_url( home_url(), PHP_URL_HOST );
 		$domain    = ! empty( $site_host ) ? $site_host : 'q-gin.info';
 		// Rimuove 'www.' per consentire a Google di rilevare l'editore/fonte esatta
-		$domain    = preg_replace( '/^www\./i', '', (string) $domain );
-		$feed_url  = 'https://www.google.com/preferences/source?q=' . rawurlencode( $domain );
+		$domain   = preg_replace( '/^www\./i', '', (string) $domain );
+		$feed_url = 'https://www.google.com/preferences/source?q=' . rawurlencode( $domain );
 	} else {
 		// Se un URL personalizzato preferences/source contiene q=www., ripuliscilo
 		$feed_url = preg_replace( '/([?&]q=)www\./i', '$1', (string) $feed_url );

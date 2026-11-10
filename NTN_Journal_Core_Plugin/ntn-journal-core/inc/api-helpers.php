@@ -1,7 +1,7 @@
 <?php
 /**
  * NTN Journal Core - API Helpers
- * 
+ *
  * Funzioni di supporto (View Models) per estrarre e formattare in modo pulito
  * i dati estratti da IGDB e memorizzati nei CPT o Tag.
  */
@@ -13,26 +13,26 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Restituisce un array strutturato con i dati IGDB associati a un Post o a un Term.
  * Costruisce il View Model pulito da usare nel frontend.
- * 
+ *
  * @param mixed $object L'oggetto da cui estrarre i dati (CPT videogioco o Tag, o ID)
  * @return array View Model con i dati formattati
  */
 function ntn_get_game_view_model( $object ) {
 	$data = array(
-		'title'       => '',
-		'cover'       => '',
-		'release'     => '',
-		'release_raw' => '', // v4.14.0: data come salvata (AAAA-MM-GG), per datePublished
+		'title'             => '',
+		'cover'             => '',
+		'release'           => '',
+		'release_raw'       => '', // v4.14.0: data come salvata (AAAA-MM-GG), per datePublished
 		'release_precision' => '',
-		'developer'   => array(),
-		'publisher'   => array(),
-		'platforms'   => array(),
-		'genres'      => array(),
-		'engine'      => array(),
-		'franchise'   => array(),
-		'url'         => '',
-		'video_url'   => '',
-		'screenshots' => array(),
+		'developer'         => array(),
+		'publisher'         => array(),
+		'platforms'         => array(),
+		'genres'            => array(),
+		'engine'            => array(),
+		'franchise'         => array(),
+		'url'               => '',
+		'video_url'         => '',
+		'screenshots'       => array(),
 	);
 
 	if ( ! $object ) {
@@ -40,20 +40,28 @@ function ntn_get_game_view_model( $object ) {
 	}
 
 	$is_term = ( $object instanceof WP_Term ) || ( is_array( $object ) && isset( $object['term_id'] ) );
-	$id = 0;
+	$id      = 0;
 
 	if ( $is_term ) {
 		$id = is_object( $object ) ? $object->term_id : ( isset( $object['term_id'] ) ? (int) $object['term_id'] : 0 );
-		if ( ! $id ) return $data;
-		$get_meta = function( $key ) use ( $id ) { return (string) get_term_meta( $id, $key, true ); };
+		if ( ! $id ) {
+			return $data;
+		}
+		$get_meta = function ( $key ) use ( $id ) {
+			return (string) get_term_meta( $id, $key, true );
+		};
 	} else {
 		$id = is_object( $object ) ? $object->ID : (int) $object;
-		if ( ! $id ) return $data;
-		$get_meta = function( $key ) use ( $id ) { return (string) get_post_meta( $id, $key, true ); };
+		if ( ! $id ) {
+			return $data;
+		}
+		$get_meta = function ( $key ) use ( $id ) {
+			return (string) get_post_meta( $id, $key, true );
+		};
 	}
 
 	$data['title'] = $get_meta( '_ntn_game_title' );
-	
+
 	// Cover
 	$cover = $get_meta( '_ntn_game_cover' );
 	if ( $cover && function_exists( 'ntn_normalize_game_cover_url' ) ) {
@@ -63,7 +71,7 @@ function ntn_get_game_view_model( $object ) {
 	}
 
 	// Release
-	$release_raw = $get_meta( '_ntn_game_release' );
+	$release_raw               = $get_meta( '_ntn_game_release' );
 	$data['release_raw']       = $release_raw;
 	$data['release_precision'] = $get_meta( '_ntn_game_release_precision' );
 	if ( $release_raw ) {
@@ -83,7 +91,7 @@ function ntn_get_game_view_model( $object ) {
 			$raw = ntn_translate_igdb_genres( $raw ); // v4.14.0: in italiano, come nella pagina
 		}
 		if ( $raw ) {
-			$arr = explode( ',', $raw );
+			$arr            = explode( ',', $raw );
 			$data[ $field ] = array_values( array_filter( array_map( 'trim', $arr ) ) );
 		}
 	}
@@ -212,9 +220,9 @@ function ntn_core_post_platform_names( $post_id, array $igdb_platforms = array()
 	$is_platform_hub = static function ( $term_id ) {
 		return function_exists( 'ntn_core_category_hub_meta' ) && ntn_core_category_hub_meta( (int) $term_id, 'enabled' ) && 'console' === ntn_core_category_hub_meta( (int) $term_id, 'type' );
 	};
-	$names = array();
+	$names           = array();
 	foreach ( $categories as $cat ) {
-		$marked = function_exists( 'ntn_core_category_is_platform' ) && ntn_core_category_is_platform( $cat->term_id );
+		$marked   = function_exists( 'ntn_core_category_is_platform' ) && ntn_core_category_is_platform( $cat->term_id );
 		$children = $marked ? array() : get_term_children( (int) $cat->term_id, 'category' );
 		if ( ! empty( $children ) && ! is_wp_error( $children ) ) {
 			continue; // un marchio o una Hub con sottocategorie: lo sono le sottocategorie
@@ -274,7 +282,7 @@ function ntn_core_schema_platform_names( array $platforms ) {
 		'windows'                => 'PC',
 		'microsoft windows'      => 'PC',
 	);
-	$out = array();
+	$out   = array();
 	foreach ( $platforms as $platform ) {
 		$key   = strtolower( trim( (string) $platform ) );
 		$out[] = isset( $names[ $key ] ) ? $names[ $key ] : $platform;

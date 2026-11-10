@@ -8,11 +8,12 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-    exit;
+	exit;
 }
 
 function ntn_journal_child_enqueue_styles() {
-	wp_enqueue_style( 'ntn-journal-child-style',
+	wp_enqueue_style(
+		'ntn-journal-child-style',
 		get_stylesheet_directory_uri() . '/style.css',
 		array( 'ntn-journal-tailwind' ),
 		wp_get_theme()->get( 'Version' )

@@ -1,5 +1,7 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 /**
  * Template part for the original review box.
  * Accepts an argument 'is_mobile' to change the ID and avoid duplicate DOM IDs when rendered twice.
@@ -11,19 +13,19 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  */
 
 $post_id = get_the_ID();
-$rating = ntn_get_post_rating( $post_id );
+$rating  = ntn_get_post_rating( $post_id );
 
 if ( empty( $rating ) ) {
 	return;
 }
 
 $is_mobile = isset( $args['is_mobile'] ) ? $args['is_mobile'] : false;
-$box_id = $is_mobile ? 'review-summary-card-mobile' : 'review-summary-card';
+$box_id    = $is_mobile ? 'review-summary-card-mobile' : 'review-summary-card';
 
-$final_rating = max( 1, min( 5, intval( $rating ) ) );
-$pros_meta = get_post_meta( $post_id, 'pros', true );
-$cons_meta = get_post_meta( $post_id, 'cons', true );
-$verdict_meta = get_post_meta( $post_id, 'verdict', true );
+$final_rating       = max( 1, min( 5, intval( $rating ) ) );
+$pros_meta          = get_post_meta( $post_id, 'pros', true );
+$cons_meta          = get_post_meta( $post_id, 'cons', true );
+$verdict_meta       = get_post_meta( $post_id, 'verdict', true );
 $review_source_meta = get_post_meta( $post_id, 'ntn_review_source', true );
 
 // Parse Pros: una voce per riga, le virgole restano nel testo (v3.22.4)
@@ -32,7 +34,7 @@ if ( ! empty( $pros_meta ) ) {
 	if ( is_array( $pros_meta ) ) {
 		$pros_arr = $pros_meta;
 	} else {
-		$pros_arr = array_filter( array_map( 'trim', explode( "\n", str_replace( "\r", "", $pros_meta ) ) ) );
+		$pros_arr = array_filter( array_map( 'trim', explode( "\n", str_replace( "\r", '', $pros_meta ) ) ) );
 	}
 }
 
@@ -42,7 +44,7 @@ if ( ! empty( $cons_meta ) ) {
 	if ( is_array( $cons_meta ) ) {
 		$cons_arr = $cons_meta;
 	} else {
-		$cons_arr = array_filter( array_map( 'trim', explode( "\n", str_replace( "\r", "", $cons_meta ) ) ) );
+		$cons_arr = array_filter( array_map( 'trim', explode( "\n", str_replace( "\r", '', $cons_meta ) ) ) );
 	}
 }
 
@@ -51,12 +53,12 @@ $verdict_text = ! empty( $verdict_meta ) ? $verdict_meta : '';
 
 // Giudizio e link al suo tag (Bocciato, Consigliato con riserva, Consigliato, Must Play)
 $rating_label = function_exists( 'ntn_get_rating_label' ) ? ntn_get_rating_label( $final_rating ) : (string) $final_rating;
-$rating_link = '';
-$rating_slug = sanitize_title( $rating_label );
+$rating_link  = '';
+$rating_slug  = sanitize_title( $rating_label );
 if ( in_array( $rating_slug, array( 'bocciato', 'consigliato-con-riserva', 'consigliato', 'must-play' ) ) ) {
 	$tag_obj = get_term_by( 'slug', $rating_slug, 'post_tag' );
 	if ( $tag_obj && ! is_wp_error( $tag_obj ) && $tag_obj instanceof WP_Term ) {
-		$tag_link = get_term_link( $tag_obj );
+		$tag_link    = get_term_link( $tag_obj );
 		$rating_link = ( ! empty( $tag_link ) && ! is_wp_error( $tag_link ) && is_string( $tag_link ) ) ? $tag_link : home_url( '/tag/' . $rating_slug . '/' );
 	} else {
 		$rating_link = home_url( '/tag/' . $rating_slug . '/' );

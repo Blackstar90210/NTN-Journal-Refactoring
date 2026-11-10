@@ -1,5 +1,7 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 /**
  * Elenco degli articoli delle Hub di categoria (v4.5.0): righe, paginazione e stato vuoto.
  * Legge la query principale della pagina, quindi la paginazione è quella della categoria.
@@ -37,11 +39,13 @@ $feed_empty   = isset( $args['empty'] ) ? (string) $args['empty'] : '';
 
 				<div class="ntn-pager-wrap">
 					<?php
-					the_posts_pagination( array(
-						'mid_size'  => 2,
-						'prev_text' => '&larr; Precedente',
-						'next_text' => 'Successivo &rarr;',
-					) );
+					the_posts_pagination(
+						array(
+							'mid_size'  => 2,
+							'prev_text' => '&larr; Precedente',
+							'next_text' => 'Successivo &rarr;',
+						)
+					);
 					?>
 				</div>
 			<?php else : ?>

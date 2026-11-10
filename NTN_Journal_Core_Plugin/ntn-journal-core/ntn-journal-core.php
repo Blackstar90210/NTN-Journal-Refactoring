@@ -3,7 +3,7 @@
  * Plugin Name: NTN Journal Core
  * Plugin URI: https://example.com/ntn-journal-core
  * Description: Gestisce i Custom Post Type (Comunicato Stampa, Videogioco), Tassonomie, Meta Box IGDB e logiche di backend separate dal tema.
- * Version: 4.25.3
+ * Version: 4.25.4
  * Requires at least: 6.0
  * Requires PHP: 8.0
  * Text Domain: ntn-journal-core
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Definisco la costante di versione globale (deve coincidere con quella del commento header e dei temi!)
-define( 'NTN_JOURNAL_CORE_VERSION', '4.25.3' );
+define( 'NTN_JOURNAL_CORE_VERSION', '4.25.4' );
 define( 'NTN_JOURNAL_CORE_DIR', plugin_dir_path( __FILE__ ) );
 define( 'NTN_JOURNAL_CORE_URL', plugin_dir_url( __FILE__ ) );
 
@@ -42,11 +42,14 @@ require_once NTN_JOURNAL_CORE_DIR . 'inc/cache-keys.php';
 if ( ntn_core_can_load_game_data() ) {
 	require_once NTN_JOURNAL_CORE_DIR . 'inc/game-data.php';
 } else {
-	add_action( 'admin_notices', function () {
-		if ( current_user_can( 'update_themes' ) ) {
-			echo '<div class="notice notice-warning"><p>' . esc_html__( 'NTN Journal Core: aggiorna il tema NTN Journal alla stessa versione del plugin. Finché il tema è sotto la 4.10.1, i dati dei giochi restano gestiti dal tema.', 'ntn-journal-core' ) . '</p></div>';
+	add_action(
+		'admin_notices',
+		function () {
+			if ( current_user_can( 'update_themes' ) ) {
+				echo '<div class="notice notice-warning"><p>' . esc_html__( 'NTN Journal Core: aggiorna il tema NTN Journal alla stessa versione del plugin. Finché il tema è sotto la 4.10.1, i dati dei giochi restano gestiti dal tema.', 'ntn-journal-core' ) . '</p></div>';
+			}
 		}
-	} );
+	);
 }
 
 /**

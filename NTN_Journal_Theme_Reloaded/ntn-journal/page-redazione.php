@@ -11,7 +11,9 @@
  * @package NTN_Journal
  */
 
-if ( ! defined( 'ABSPATH' ) ) exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 get_header();
 ?>
@@ -20,7 +22,11 @@ get_header();
 	<?php
 	while ( have_posts() ) :
 		the_post();
-		$ntn_team  = function_exists( 'ntn_core_get_team_data' ) ? ntn_core_get_team_data( get_the_ID() ) : array( 'groups' => array(), 'count' => 0, 'updated' => '' );
+		$ntn_team  = function_exists( 'ntn_core_get_team_data' ) ? ntn_core_get_team_data( get_the_ID() ) : array(
+			'groups'  => array(),
+			'count'   => 0,
+			'updated' => '',
+		);
 		$ntn_intro = has_excerpt() ? get_the_excerpt() : wp_trim_words( wp_strip_all_tags( (string) get_the_content() ), 60, '…' );
 		?>
 
@@ -79,7 +85,16 @@ get_header();
 							<h3 class="ntn-team-group-h">// <?php echo esc_html( $ntn_group['name'] ); ?> <span><?php echo esc_html( sprintf( 1 === $ntn_n ? '%d firma' : '%d firme', $ntn_n ) ); ?></span></h3>
 							<?php foreach ( $ntn_group['people'] as $ntn_person ) : ?>
 								<?php
-								$ntn_avatar   = get_avatar( $ntn_person['id'], 112, '', '', array( 'class' => 'w-full h-full object-cover', 'force_display' => false ) );
+								$ntn_avatar   = get_avatar(
+									$ntn_person['id'],
+									112,
+									'',
+									'',
+									array(
+										'class'         => 'w-full h-full object-cover',
+										'force_display' => false,
+									)
+								);
 								$ntn_words    = preg_split( '/\s+/', trim( $ntn_person['name'] ) );
 								$ntn_initials = '';
 								foreach ( array_slice( (array) $ntn_words, 0, 2 ) as $ntn_word ) {
