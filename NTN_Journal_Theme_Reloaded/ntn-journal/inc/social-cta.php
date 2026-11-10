@@ -103,7 +103,7 @@ function ntn_journal_google_feed_box() {
 	<div class="ntn-panel ntn-gfeed">
 		<div class="ntn-panel-h"><span>// Fonti preferite su Google</span></div>
 		<div class="ntn-gfeed-b">
-			<p><?php echo esc_html( sprintf( __( 'Aggiungi %s alle tue fonti preferite: le nostre notizie compariranno più spesso nelle "Notizie principali" di Google.', 'ntn-journal' ), $site_name ) ); ?></p>
+			<p><?php echo esc_html( sprintf( /* translators: %s: nome del sito. */ __( 'Aggiungi %s alle tue fonti preferite: le nostre notizie compariranno più spesso nelle "Notizie principali" di Google.', 'ntn-journal' ), $site_name ) ); ?></p>
 			<a href="<?php echo esc_url( $feed_url ); ?>" target="_blank" rel="noopener noreferrer" class="ntn-btn ntn-btn--solid ntn-gfeed-btn">Aggiungi su Google <span aria-hidden="true">↗</span></a>
 		</div>
 	</div>

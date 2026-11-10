@@ -252,7 +252,7 @@ function ntn_journal_header_platform_drop() {
 		$dots .= '1' === $on ? '<i class="is-on"></i>' : '<i></i>';
 	}
 	echo '<div class="ntn-nav-drop is-mega ntn-pdrop-wrap">';
-	echo '<button type="button" class="ntn-nav-drop-btn ntn-pdrop-tool" aria-haspopup="true" aria-expanded="false" aria-controls="ntn-pdrop"><span class="ntn-pdrop-icon is-mini" aria-hidden="true">' . $dots . '</span><span>Piattaforme</span><svg class="ntn-nav-drop-arrow" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="square" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></button>';
+	echo '<button type="button" class="ntn-nav-drop-btn ntn-pdrop-tool" aria-haspopup="true" aria-expanded="false" aria-controls="ntn-pdrop"><span class="ntn-pdrop-icon is-mini" aria-hidden="true">' . $dots . '</span><span>Piattaforme</span><svg class="ntn-nav-drop-arrow" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="square" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></button>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $dots è fatto solo di tag <i> fissi, il resto è testo scritto qui.
 	ntn_journal_platform_drop_panel();
 	echo '</div>';
 	echo '<span class="ntn-tools-sep" aria-hidden="true"></span>';

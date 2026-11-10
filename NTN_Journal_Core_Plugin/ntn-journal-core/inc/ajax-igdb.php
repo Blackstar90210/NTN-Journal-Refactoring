@@ -657,7 +657,7 @@ add_action( 'wp_ajax_ntn_save_tag_igdb_assoc', 'ntn_ajax_save_tag_igdb_assoc' );
 function ntn_journal_admin_scripts( $hook ) {
 	global $post;
 	$post_type = get_post_type( $post );
-	if ( ! in_array( $post_type, array( 'post', 'videogioco' ) ) ) {
+	if ( ! in_array( $post_type, array( 'post', 'videogioco' ), true ) ) {
 		return; }
 
 	if ( $hook === 'post-new.php' || $hook === 'post.php' ) {
@@ -682,13 +682,13 @@ function ntn_ajax_check_igdb_updates() {
 		wp_send_json_error( 'Non autorizzato' );
 	}
 
-	$igdb_ids = isset( $_POST['igdb_ids'] ) ? $_POST['igdb_ids'] : array();
-	if ( empty( $igdb_ids ) || ! is_array( $igdb_ids ) ) {
+	$igdb_ids = ( isset( $_POST['igdb_ids'] ) && is_array( $_POST['igdb_ids'] ) ) ? array_map( 'intval', wp_unslash( $_POST['igdb_ids'] ) ) : array();
+	if ( empty( $igdb_ids ) ) {
 		wp_send_json_error( 'Nessun ID fornito' );
 	}
 
 	// IGDB API accetta query con `where id = (1,2,3)`
-	$ids_string = implode( ',', array_map( 'intval', $igdb_ids ) );
+	$ids_string = implode( ',', $igdb_ids );
 	$apicalypse = 'fields id, updated_at; where id = (' . $ids_string . '); limit 500;';
 
 	$data = ntn_core_igdb_request( $apicalypse );

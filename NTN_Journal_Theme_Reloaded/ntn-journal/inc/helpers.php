@@ -64,7 +64,7 @@ function ntn_journal_game_review_row( array $game, $class, $panel_index = null )
 		?>
 		<div class="<?php echo esc_attr( $class ); ?> is-none"<?php echo $attributes; // phpcs:ignore WordPress.Security.EscapeOutput -- già sanificato qui sopra. ?>>
 			<span>// Non recensito</span>
-			<span class="ntn-leds" aria-hidden="true"><?php echo str_repeat( '<i class="ntn-led is-off"></i>', 5 ); ?></span>
+			<span class="ntn-leds" aria-hidden="true"><?php echo wp_kses_post( str_repeat( '<i class="ntn-led is-off"></i>', 5 ) ); ?></span>
 		</div>
 		<?php
 		return;

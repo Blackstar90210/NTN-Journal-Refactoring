@@ -277,7 +277,7 @@ function ntn_game_engine_archive_query( $query ) {
 						if ( ! $tag_match || is_wp_error( $tag_match ) ) {
 							$tag_match = get_term_by( 'name', $cpt_p->post_title, 'post_tag' );
 						}
-						if ( $tag_match && ! is_wp_error( $tag_match ) && ! in_array( $tag_match->term_id, $tag_ids ) ) {
+						if ( $tag_match && ! is_wp_error( $tag_match ) && ! in_array( (int) $tag_match->term_id, array_map( 'intval', $tag_ids ), true ) ) {
 							$tag_ids[] = $tag_match->term_id;
 						}
 					}

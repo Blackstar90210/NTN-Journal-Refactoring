@@ -12,7 +12,7 @@ function ntn_journal_news_sitemap() {
 	if ( get_option( 'ntn_seo_enable_news_sitemap', 'yes' ) !== 'yes' ) {
 		return;
 	}
-	$request_uri = $_SERVER['REQUEST_URI'] ?? '';
+	$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? (string) wp_unslash( $_SERVER['REQUEST_URI'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- solo cercata con strpos, mai stampata.
 	if ( strpos( $request_uri, '/news-sitemap.xml' ) !== false ) {
 		status_header( 200 );
 		header( 'Content-Type: text/xml; charset=utf-8' );
@@ -46,7 +46,7 @@ function ntn_journal_news_sitemap() {
 				foreach ( $query->posts as $post_id ) {
 					echo "\t<url>\n";
 					echo "\t\t<loc>" . esc_url( get_permalink( $post_id ) ) . "</loc>\n";
-					echo "\t\t<lastmod>" . get_the_modified_date( 'c', $post_id ) . "</lastmod>\n";
+					echo "\t\t<lastmod>" . esc_html( get_the_modified_date( 'c', $post_id ) ) . "</lastmod>\n";
 					echo "\t\t<news:news>\n";
 					echo "\t\t\t<news:publication>\n";
 					echo "\t\t\t\t<news:name>" . esc_html( $publisher_name ) . "</news:name>\n";
@@ -75,7 +75,7 @@ function ntn_journal_news_sitemap() {
 			set_transient( 'ntn_news_sitemap_cache', $cached_xml, 15 * MINUTE_IN_SECONDS );
 		}
 
-		echo $cached_xml;
+		echo $cached_xml; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- XML costruito qui sopra con esc_url / esc_html.
 		exit;
 	}
 }

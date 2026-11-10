@@ -59,7 +59,7 @@ function ntn_igdb_migration_page_html() {
 
 			$.post(ajaxurl, {
 				action: 'ntn_migrate_tags_to_cpt',
-				_ajax_nonce: '<?php echo wp_create_nonce( 'ntn_igdb_migrate_nonce' ); ?>'
+				_ajax_nonce: '<?php echo esc_js( wp_create_nonce( 'ntn_igdb_migrate_nonce' ) ); ?>'
 			}, function(response) {
 				if ( response.success ) {
 					$('#ntn-migration-results').html('<p style="color:green;"><strong>' + response.data.message + '</strong><br>Giochi migrati: ' + response.data.count + '</p>');
@@ -77,7 +77,7 @@ function ntn_igdb_migration_page_html() {
 			$.post(ajaxurl, {
 				action: 'ntn_sync_franchises',
 				offset: offset,
-				_ajax_nonce: '<?php echo wp_create_nonce( 'ntn_igdb_migrate_nonce' ); ?>'
+				_ajax_nonce: '<?php echo esc_js( wp_create_nonce( 'ntn_igdb_migrate_nonce' ) ); ?>'
 			}, function(response) {
 				if ( response.success ) {
 					if ( response.data.done ) {

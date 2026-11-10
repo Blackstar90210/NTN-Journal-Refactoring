@@ -130,7 +130,7 @@ function ntn_save_review_meta_box_data( $post_id ) {
 	if ( ! isset( $_POST['ntn_review_meta_nonce'] ) ) {
 		return;
 	}
-	if ( ! wp_verify_nonce( $_POST['ntn_review_meta_nonce'], 'ntn_save_review_meta' ) ) {
+	if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['ntn_review_meta_nonce'] ) ), 'ntn_save_review_meta' ) ) {
 		return;
 	}
 	if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {

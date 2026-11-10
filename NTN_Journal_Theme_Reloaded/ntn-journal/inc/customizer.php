@@ -308,7 +308,7 @@ function ntn_journal_customize_register( $wp_customize ) {
 		$wp_customize->add_control(
 			'ntn_social_' . $id,
 			array(
-				'label'   => sprintf( __( 'URL %s', 'ntn-journal' ), $label ),
+				'label'   => sprintf( /* translators: %s: nome del social network. */ __( 'URL %s', 'ntn-journal' ), $label ),
 				'section' => 'ntn_journal_social_section',
 				'type'    => 'url',
 			)

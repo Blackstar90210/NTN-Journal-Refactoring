@@ -923,7 +923,7 @@ function ntn_ajax_backup_import() {
 			wp_send_json_error( 'File temporaneo non trovato.' );
 		}
 	} else {
-		$file_path = $_FILES['ntn_backup_file']['tmp_name'];
+		$file_path = $_FILES['ntn_backup_file']['tmp_name']; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- percorso creato da PHP per il file caricato, non scritto dall'utente.
 	}
 
 	$filename = isset( $_FILES['ntn_backup_file']['name'] ) ? sanitize_file_name( wp_unslash( $_FILES['ntn_backup_file']['name'] ) ) : 'backup.jsonl';

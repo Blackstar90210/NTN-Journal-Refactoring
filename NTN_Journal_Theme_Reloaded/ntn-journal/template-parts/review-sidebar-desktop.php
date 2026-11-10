@@ -34,7 +34,7 @@ $review_source_meta = get_post_meta( $post_id, 'ntn_review_source', true );
 $rating_link = '';
 if ( $rating_label ) {
 	$rating_slug = sanitize_title( $rating_label );
-	if ( in_array( $rating_slug, array( 'bocciato', 'consigliato-con-riserva', 'consigliato', 'must-play' ) ) ) {
+	if ( in_array( $rating_slug, array( 'bocciato', 'consigliato-con-riserva', 'consigliato', 'must-play' ), true ) ) {
 		$tag_obj = get_term_by( 'slug', $rating_slug, 'post_tag' );
 		if ( $tag_obj && ! is_wp_error( $tag_obj ) && $tag_obj instanceof WP_Term ) {
 			$tag_link    = get_term_link( $tag_obj );

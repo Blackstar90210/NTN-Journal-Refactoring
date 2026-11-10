@@ -1655,24 +1655,24 @@ echo "\n--- 24. SEMVER SIMULTANEOUS 4-HEADER SYNCHRONIZATION ---\n";
 $parent_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $parent_css, $m_parent );
 $parent_ver = isset( $m_parent[1] ) ? trim( $m_parent[1] ) : '';
-assert_test( $parent_ver === '4.25.4', "24.1: Parent Theme style.css declares Version: 4.25.4(found: {$parent_ver})" );
+assert_test( $parent_ver === '4.25.5', "24.1: Parent Theme style.css declares Version: 4.25.5(found: {$parent_ver})" );
 
 $child_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $child_css, $m_child );
 $child_ver = isset( $m_child[1] ) ? trim( $m_child[1] ) : '';
-assert_test( $child_ver === '4.25.4', "24.2: Child Theme style.css declares Version: 4.25.4(found: {$child_ver})" );
+assert_test( $child_ver === '4.25.5', "24.2: Child Theme style.css declares Version: 4.25.5(found: {$child_ver})" );
 
 $core_php = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' );
 preg_match( '/\*\s*Version:\s*([0-9\.]+)/', $core_php, $m_core_hdr );
 $core_hdr_ver = isset( $m_core_hdr[1] ) ? trim( $m_core_hdr[1] ) : '';
-assert_test( $core_hdr_ver === '4.25.4', "24.3: Core Plugin header declares Version: 4.25.4(found: {$core_hdr_ver})" );
+assert_test( $core_hdr_ver === '4.25.5', "24.3: Core Plugin header declares Version: 4.25.5(found: {$core_hdr_ver})" );
 
 preg_match( "/define\(\s*'NTN_JOURNAL_CORE_VERSION',\s*'([^']+)'\s*\);/", $core_php, $m_core_const );
 $core_const_ver = isset( $m_core_const[1] ) ? trim( $m_core_const[1] ) : '';
-assert_test( $core_const_ver === '4.25.4', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.25.4(found: {$core_const_ver})" );
+assert_test( $core_const_ver === '4.25.5', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.25.5(found: {$core_const_ver})" );
 
 assert_test(
-	$parent_ver === '4.25.4' && $child_ver === '4.25.4' && $core_hdr_ver === '4.25.4' && $core_const_ver === '4.25.4',
+	$parent_ver === '4.25.5' && $child_ver === '4.25.5' && $core_hdr_ver === '4.25.5' && $core_const_ver === '4.25.5',
 	'24.5: All 4 version headers are 100% synchronized and atomic according to Rule 2 of GEMINI.md'
 );
 
@@ -1900,7 +1900,7 @@ $parent_style_ver = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( AB
 $child_style_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' ), $m2 ) ? $m2[1] : '';
 $core_plugin_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m3 ) ? $m3[1] : '';
 $core_const_ver   = preg_match( '/define\(\s*[\'"]NTN_JOURNAL_CORE_VERSION[\'"]\s*,\s*[\'"]([0-9\.]+)[\'"]\s*\)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m4 ) ? $m4[1] : '';
-assert_test( $parent_style_ver === '4.25.4' && $child_style_ver === '4.25.4' && $core_plugin_ver === '4.25.4' && $core_const_ver === '4.25.4', '29.1: All 4 version headers are synchronized to 4.25.4' );
+assert_test( $parent_style_ver === '4.25.5' && $child_style_ver === '4.25.5' && $core_plugin_ver === '4.25.5' && $core_const_ver === '4.25.5', '29.1: All 4 version headers are synchronized to 4.25.5' );
 
 // 29.2: single.php sequence is Google Feed -> Social CTA -> Bottom Related Posts
 $single_php = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/single.php' );
@@ -6752,6 +6752,100 @@ assert_test(
 	false === ntn_t_fpos( "wp_enqueue_script( 'ab' );", "wp_enqueue_script( 'a' );" ),
 	'101.3: Source checks ignore only line breaks, indentation, alignment and the trailing comma: different code still does not match'
 );
+
+// --- TEST SUITE 102: piccole correzioni dallo standard WordPress v4.25.5 ---
+echo "\n--- 102. PICCOLE CORREZIONI DALLO STANDARD WORDPRESS V4.25.5 ---\n";
+if ( ! function_exists( 'wp_unslash' ) ) {
+	function wp_unslash( $value ) {
+		return is_array( $value ) ? array_map( 'wp_unslash', $value ) : ( is_string( $value ) ? stripslashes( $value ) : $value );
+	}
+}
+$sc_core = ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/';
+$sc_th   = ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/';
+
+// 102.1: i quattro nonce letti dal modulo passano per wp_unslash e sanitize_text_field
+$sc_nonce_ok = true;
+foreach ( array( 'cpt-comunicati-stampa.php', 'review-meta.php', 'redirect-manager.php' ) as $sc_f ) {
+	$sc_src = ntn_t_read( $sc_core . $sc_f );
+	$sc_nonce_ok = $sc_nonce_ok && 0 === preg_match( '/wp_verify_nonce\(\s*\$_POST/', $sc_src ) && false !== strpos( $sc_src, 'wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST[' );
+}
+assert_test( $sc_nonce_ok, '102.1: The nonces of the press release box, the review box and the redirect forms are unslashed and cleaned before wp_verify_nonce' );
+
+// 102.2: i campi del modulo redirect hanno un valore di riserva e la stessa pulizia di prima; il codice redirect è un numero
+$sc_red = ntn_t_read( $sc_core . 'redirect-manager.php' );
+assert_test(
+	false !== strpos( $sc_red, "isset( \$_POST['redirect_source'] ) ? sanitize_text_field( wp_unslash( \$_POST['redirect_source'] ) ) : ''" ) &&
+	false !== strpos( $sc_red, "isset( \$_POST['redirect_target'] ) ? esc_url_raw( wp_unslash( \$_POST['redirect_target'] ) ) : ''" ) &&
+	false !== strpos( $sc_red, "isset( \$_POST['redirect_code'] ) ? intval( wp_unslash( \$_POST['redirect_code'] ) ) : 0" ) &&
+	false !== strpos( $sc_red, "isset( \$_POST['delete_hash'] ) ? sanitize_text_field( wp_unslash( \$_POST['delete_hash'] ) ) : ''" ) &&
+	false !== strpos( $sc_red, '(string) wp_unslash( $_SERVER[\'REQUEST_URI\'] )' ) && 0 === substr_count( $sc_red, "\$request_uri = \$_SERVER['REQUEST_URI'];" ),
+	'102.2: Redirect form fields and the requested address are read with a fallback and unslashed; the sanitizing is the same as before'
+);
+
+// 102.3: stesse risposte di prima per l'elenco ID IGDB e per il flag backup (prova con vecchia e nuova espressione)
+$sc_cases = array(
+	array(),
+	array( 'igdb_ids' => 'abc' ),
+	array( 'igdb_ids' => array() ),
+	array( 'igdb_ids' => array( '12', '7', 'x', '0' ) ),
+	array( 'backup' => '1' ),
+	array( 'backup' => '0' ),
+	array( 'backup' => '' ),
+	array( 'backup' => 'yes' ),
+	array( 'backup' => array( '1' ) ),
+);
+$sc_same = true;
+$sc_detail = array();
+foreach ( $sc_cases as $sc_post ) {
+	$_POST = $sc_post;
+	$old_ids = isset( $_POST['igdb_ids'] ) ? $_POST['igdb_ids'] : array();
+	$old_err = ( empty( $old_ids ) || ! is_array( $old_ids ) );
+	$old_str = $old_err ? '' : implode( ',', array_map( 'intval', $old_ids ) );
+	$new_ids = ( isset( $_POST['igdb_ids'] ) && is_array( $_POST['igdb_ids'] ) ) ? array_map( 'intval', wp_unslash( $_POST['igdb_ids'] ) ) : array();
+	$new_err = empty( $new_ids );
+	$new_str = $new_err ? '' : implode( ',', $new_ids );
+	$old_bk = ! empty( $_POST['backup'] ) && is_scalar( $_POST['backup'] ) && '1' === (string) $_POST['backup'];
+	$new_bk = isset( $_POST['backup'] ) && is_scalar( $_POST['backup'] ) && '1' === sanitize_text_field( wp_unslash( $_POST['backup'] ) );
+	if ( $old_err !== $new_err || $old_str !== $new_str || $old_bk !== $new_bk ) {
+		$sc_same = false;
+	}
+	$sc_detail[] = ( $new_err ? 'err' : $new_str ) . '/' . ( $new_bk ? 'bk' : 'no' );
+}
+$_POST = array();
+assert_test( $sc_same, '102.3: The IGDB id list and the backup flag give the same answers as before for 9 kinds of request (got: ' . implode( ' ', $sc_detail ) . ')' );
+$sc_png = ntn_t_read( $sc_core . 'png-thumbnail-repair.php' );
+assert_test( false !== strpos( $sc_png, "isset( \$_POST['backup'] ) && '1' === sanitize_text_field( wp_unslash( \$_POST['backup'] ) )" ), '102.4: The PNG repair purge reads the backup flag with isset, unslash and sanitize' );
+
+// 102.5: il valore nel JS dei nonce passa da esc_js; i comunicati usano esc_html_e; i fogli di stile del tema restano uguali
+$sc_js = ntn_t_read( $sc_core . 'admin/views/tab-igdb.php' ) . ntn_t_read( $sc_core . 'migrazione-igdb.php' );
+assert_test(
+	0 === preg_match( "/<\?php echo wp_create_nonce\(/", $sc_js ) && substr_count( $sc_js, 'esc_js( wp_create_nonce(' ) === 16 &&
+	0 === preg_match( '/<\?php _e\(/', ntn_t_read( $sc_core . 'cpt-comunicati-stampa.php' ) ) && substr_count( ntn_t_read( $sc_core . 'cpt-comunicati-stampa.php' ), 'esc_html_e(' ) === 7,
+	'102.5: Nonces printed inside scripts pass through esc_js (16), press release labels use esc_html_e (7)'
+);
+
+// 102.6: in_array stretto dove i valori sono testi o numeri interi
+$sc_strict = ntn_t_read( $sc_core . 'seo-extras.php' ) . ntn_t_read( $sc_core . 'ajax-igdb.php' ) . ntn_t_read( $sc_core . 'taxonomies.php' ) . ntn_t_read( $sc_th . 'template-parts/review-original-box.php' ) . ntn_t_read( $sc_th . 'template-parts/review-sidebar-desktop.php' );
+assert_test(
+	0 === preg_match( "/in_array\(\s*'(Article|NewsArticle|BlogPosting|WebPage)',\s*\\\$types\s*\)/", $sc_strict ) &&
+	false !== strpos( $sc_strict, "! in_array( \$post_type, array( 'post', 'videogioco' ), true )" ) &&
+	false !== strpos( $sc_strict, "in_array( (int) \$tag_match->term_id, array_map( 'intval', \$tag_ids ), true )" ) &&
+	2 === substr_count( $sc_strict, "'consigliato', 'must-play' ), true )" ),
+	'102.6: in_array is strict (true) for the schema types, the post type, the tag ids and the rating slugs'
+);
+
+// 102.7: commenti per i traduttori e @ annotate
+$sc_tr = ntn_t_read( $sc_th . 'inc/social-cta.php' ) . ntn_t_read( $sc_th . 'inc/customizer.php' ) . ntn_t_read( $sc_th . 'inc/related-posts.php' );
+$sc_at_ok = true;
+foreach ( array( 'png-thumbnail-repair.php', 'site-optimizations.php', 'image-report.php' ) as $sc_f ) {
+	foreach ( explode( "\n", ntn_t_read( $sc_core . $sc_f ) ) as $sc_line ) {
+		if ( preg_match( '/(?<![\w\'"$])@(getimagesize|file_put_contents|rmdir|filesize|filemtime|file_get_contents|imagecreatefrompng|rename|unlink)\(/', $sc_line ) && false === strpos( $sc_line, 'phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged --' ) ) {
+			$sc_at_ok = false;
+		}
+	}
+}
+assert_test( 3 === substr_count( $sc_tr, '/* translators:' ) && $sc_at_ok, '102.7: The three texts with a placeholder have a translators comment; every kept @ on a file call says why (the @ stay on purpose: broken image files must not print PHP warnings)' );
+
 
 echo "\n=======================================================================\n";
 echo " AUDIT SUMMARY: {$passed} PASSED, {$failed} FAILED\n";

@@ -99,7 +99,7 @@ function ntn_journal_performance_preloads() {
 		echo '<style id="ntn-local-fonts">' . "\n";
 		// Sostituiamo i percorsi relativi con URI assoluti altrimenti url('./font.woff2') non funziona dall'HTML root
 		$font_css = file_get_contents( $local_fonts_path );
-		echo str_replace( "url('./", "url('" . esc_url( $font_dir ), $font_css );
+		echo str_replace( "url('./", "url('" . esc_url( $font_dir ), $font_css ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- CSS del tema stesso, con solo l'indirizzo dei font già pulito con esc_url.
 		echo "\n" . '</style>' . "\n";
 	}
 }
