@@ -165,7 +165,8 @@ function ntn_core_ajax_get_igdb_tag_connections() {
 	);
 
 	$html  = '<table class="wp-list-table widefat fixed striped">';
-	$html .= '<thead><tr><th style="width: 80px;">ID Tag</th><th>Nome Tag</th><th>Slug</th><th>Collegamento IGDB</th><th style="width: 190px;">Azione</th></tr></thead><tbody>';
+	$steam_col = function_exists( 'ntn_core_steam_admin_cell' );
+	$html     .= '<thead><tr><th style="width: 80px;">ID Tag</th><th>Nome Tag</th><th>Slug</th><th>Collegamento IGDB</th>' . ( $steam_col ? '<th>Introiti Steam (stima netta)</th>' : '' ) . '<th style="width: 190px;">Azione</th></tr></thead><tbody>';
 
 	if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
 		foreach ( $terms as $term ) {
@@ -183,6 +184,9 @@ function ntn_core_ajax_get_igdb_tag_connections() {
 			$html .= '<td><strong>' . esc_html( $term_name ) . '</strong></td>';
 			$html .= '<td><code>' . esc_html( $term_slug ) . '</code></td>';
 			$html .= '<td>' . esc_html( $game_title ) . '</td>';
+			if ( $steam_col ) {
+				$html .= '<td>' . ntn_core_steam_admin_cell( $term->term_id ) . '</td>'; // Testo già protetto dalla funzione.
+			}
 			$html .= '<td>
 				<button class="button ntn-update-tag-igdb" data-id="' . esc_attr( $term->term_id ) . '" data-igdb-id="' . esc_attr( $igdb_id ) . '" data-last-sync="' . esc_attr( $last_sync ) . '" style="margin-right: 5px;">Aggiorna</button>
 				<button class="button nadm-btn is-danger ntn-remove-tag-igdb" data-id="' . esc_attr( $term->term_id ) . '">Scollega</button>
@@ -190,7 +194,7 @@ function ntn_core_ajax_get_igdb_tag_connections() {
 			$html .= '</tr>';
 		}
 	} else {
-		$html .= '<tr><td colspan="5">Nessun tag collegato a IGDB.</td></tr>';
+		$html .= '<tr><td colspan="' . ( $steam_col ? 6 : 5 ) . '">Nessun tag collegato a IGDB.</td></tr>';
 	}
 	$html .= '</tbody></table>';
 

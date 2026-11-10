@@ -7295,6 +7295,34 @@ assert_test(
 	'110.6: The theme reader returns the saved estimate only when it is valid and never calls Steam; a new Steam id drops the old estimate; an IGDB sync queues one background batch; the weekly job is scheduled once, from the admin only'
 );
 
+// 110.7: colonna di sola lettura nella scheda IGDB (tabella dei tag collegati)
+$GLOBALS['mock_termmeta'][9620] = array( '_ntn_core_steam_appid' => '1091500', '_ntn_core_steam_rev_status' => 'ok', '_ntn_core_steam_rev_min' => 677422078, '_ntn_core_steam_rev_max' => 1354844155, '_ntn_core_steam_reviews' => 903380, '_ntn_core_steam_price' => 5999, '_ntn_core_steam_rev_updated' => gmmktime( 12, 0, 0, 11, 10, 2026 ) );
+$GLOBALS['mock_termmeta'][9621] = array( '_ntn_core_steam_appid' => '3985330', '_ntn_core_steam_rev_status' => 'few_reviews', '_ntn_core_steam_reviews' => 12, '_ntn_core_steam_rev_updated' => gmmktime( 12, 0, 0, 11, 10, 2026 ) );
+$GLOBALS['mock_termmeta'][9622] = array( '_ntn_core_steam_appid' => 'none', '_ntn_core_steam_rev_status' => 'no_appid', '_ntn_core_steam_rev_updated' => 1 );
+$GLOBALS['mock_termmeta'][9623] = array( '_ntn_core_steam_rev_status' => '<script>x</script>' );
+$GLOBALS['yt_requests'] = array();
+$st_cells = array(
+	ntn_core_steam_admin_cell( 9620 ), ntn_core_steam_admin_cell( 9621 ), ntn_core_steam_admin_cell( 9622 ), ntn_core_steam_admin_cell( 9623 ),
+	ntn_core_steam_admin_cell( 9612 ), ntn_core_steam_admin_cell( 424243 ),
+);
+$st_free = $GLOBALS['mock_termmeta'][9612];
+$GLOBALS['mock_termmeta'][9612]['_ntn_core_steam_rev_status'] = 'free';
+$st_cell_free = ntn_core_steam_admin_cell( 9612 );
+$GLOBALS['mock_termmeta'][9612]['_ntn_core_steam_rev_status'] = 'no_price';
+$st_cell_np = ntn_core_steam_admin_cell( 9612 );
+$st_hand = ntn_t_read( $st_core . 'inc/admin/igdb-ajax-handlers.php' );
+assert_test(
+	false !== strpos( $st_cells[0], '<strong>$677,4 mln – $1,35 mld</strong>' ) && false !== strpos( $st_cells[0], 'title="$677.422.078 – $1.354.844.155 netti"' ) &&
+	false !== strpos( $st_cells[0], '903.380 recensioni · $59,99 · aggiornata il 10/11/2026 · Steam 1091500' ) &&
+	false !== strpos( $st_cells[1], 'Poche recensioni (12, ne servono 50)' ) && false !== strpos( $st_cells[2], 'Non su Steam' ) && false === strpos( $st_cells[2], 'Steam none' ) &&
+	false !== strpos( $st_cells[3], 'In attesa del primo controllo' ) && false === strpos( $st_cells[3], '<script' ) && false !== strpos( $st_cells[5], 'In attesa del primo controllo' ) &&
+	false !== strpos( $st_cell_free, 'Gratuito: nessuna stima' ) && false !== strpos( $st_cell_np, 'Senza prezzo su Steam' ) &&
+	'$86 mila' === ntn_core_steam_money_short( 86224 ) && '$95,3 mln' === ntn_core_steam_money_short( 95259576 ) && '$1,25 mld' === ntn_core_steam_money_short( 1253449057 ) && '$950' === ntn_core_steam_money_short( 950 ) &&
+	0 === count( $GLOBALS['yt_requests'] ) &&
+	false !== strpos( $st_hand, "'<th>Introiti Steam (stima netta)</th>'" ) && false !== strpos( $st_hand, "'<td>' . ntn_core_steam_admin_cell( \$term->term_id ) . '</td>'" ) && false !== strpos( $st_hand, "colspan=\"' . ( \$steam_col ? 6 : 5 ) . '\"" ),
+	'110.7: The IGDB tab table gets a read-only "Introiti Steam" column: short range with the full figures on hover, reviews, price, date and Steam id; for games without an estimate the reason (free, no price, not on Steam, few reviews, not found, not checked yet); no requests, unknown values never printed'
+);
+
 
 echo "\n=======================================================================\n";
 echo " AUDIT SUMMARY: {$passed} PASSED, {$failed} FAILED\n";

@@ -506,6 +506,74 @@ function ntn_core_steam_after_igdb_sync( $term_id, $appid ) {
 }
 
 /**
+ * Una cifra in dollari in forma breve, per il pannello: "$86 mila", "$95,3 mln", "$1,25 mld".
+ *
+ * @param int $dollars Dollari.
+ * @return string
+ */
+function ntn_core_steam_money_short( $dollars ) {
+	$dollars = (int) $dollars;
+	if ( $dollars >= 1000000000 ) {
+		return '$' . number_format_i18n( $dollars / 1000000000, 2 ) . ' mld';
+	}
+	if ( $dollars >= 1000000 ) {
+		return '$' . number_format_i18n( $dollars / 1000000, 1 ) . ' mln';
+	}
+	if ( $dollars >= 1000 ) {
+		return '$' . number_format_i18n( $dollars / 1000 ) . ' mila';
+	}
+	return '$' . number_format_i18n( $dollars );
+}
+
+/**
+ * La cella "Introiti Steam (stima)" della tabella dei tag collegati, scheda IGDB del pannello.
+ * Sola lettura: mostra i dati salvati, non fa richieste. Il testo è già protetto (escape).
+ *
+ * @param int $term_id ID del tag del gioco.
+ * @return string HTML.
+ */
+function ntn_core_steam_admin_cell( $term_id ) {
+	$term_id = (int) $term_id;
+	$status  = (string) get_term_meta( $term_id, '_ntn_core_steam_rev_status', true );
+	$updated = (int) get_term_meta( $term_id, '_ntn_core_steam_rev_updated', true );
+	$reviews = (int) get_term_meta( $term_id, '_ntn_core_steam_reviews', true );
+	$appid   = (string) get_term_meta( $term_id, '_ntn_core_steam_appid', true );
+	$reasons = array(
+		'free'        => 'Gratuito: nessuna stima',
+		'no_price'    => 'Senza prezzo su Steam (forse non ancora in vendita)',
+		'no_appid'    => 'Non su Steam (IGDB non ha una pagina Steam)',
+		'few_reviews' => 'Poche recensioni (' . number_format_i18n( $reviews ) . ', ne servono ' . ntn_core_steam_params()['min_reviews'] . ')',
+		'not_found'   => 'Steam non trova il gioco',
+	);
+
+	$revenue = ntn_core_steam_revenue( $term_id );
+	if ( $revenue ) {
+		$main  = '<strong>' . esc_html( ntn_core_steam_money_short( $revenue['min'] ) . ' – ' . ntn_core_steam_money_short( $revenue['max'] ) ) . '</strong>';
+		$title = '$' . number_format_i18n( $revenue['min'] ) . ' – $' . number_format_i18n( $revenue['max'] ) . ' netti';
+		$info  = number_format_i18n( $revenue['reviews'] ) . ' recensioni · $' . number_format_i18n( $revenue['price'], 2 );
+	} elseif ( isset( $reasons[ $status ] ) ) {
+		$main  = '<span style="opacity: .75;">' . esc_html( $reasons[ $status ] ) . '</span>';
+		$title = '';
+		$info  = '';
+	} else {
+		return '<span style="opacity: .6;">In attesa del primo controllo</span>';
+	}
+
+	$details = array();
+	if ( '' !== $info ) {
+		$details[] = $info;
+	}
+	if ( $updated > 0 ) {
+		$details[] = 'aggiornata il ' . wp_date( 'd/m/Y', $updated );
+	}
+	if ( ctype_digit( $appid ) ) {
+		$details[] = 'Steam ' . $appid;
+	}
+	return '<span' . ( '' !== $title ? ' title="' . esc_attr( $title ) . '"' : '' ) . '>' . $main . '</span>' .
+		( $details ? '<br><small style="opacity: .7;">' . esc_html( implode( ' · ', $details ) ) . '</small>' : '' );
+}
+
+/**
  * La stima salvata di un gioco, pronta da mostrare (per la fase 2, il riquadro nella Hub).
  * Non fa mai richieste esterne.
  *
