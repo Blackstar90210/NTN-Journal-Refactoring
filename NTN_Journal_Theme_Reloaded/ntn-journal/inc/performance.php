@@ -56,25 +56,10 @@ add_action( 'wp_head', 'ntn_dns_prefetch_external_resources', 2 );
 
 
 /**
- * ==============================================================================
- * JAVASCRIPT DEFERRING (FCP & TBT Optimization)
- * ==============================================================================
+ * Caricamento differito degli script (dalla 4.26.0).
+ *
+ * Il filtro script_loader_tag che aggiungeva "defer" agli script del tema non c'è più: ogni script dichiara
+ * da sé la strategia con l'argomento 'strategy' => 'defer' di wp_enqueue_script (inc/enqueue.php,
+ * inc/gallery-lightbox.php, inc/category-hub-template.php), come previsto da WordPress 6.3 in poi.
+ * Con WordPress 6.0-6.2 l'argomento viene ignorato e gli script restano in fondo alla pagina, senza defer.
  */
-function ntn_journal_defer_scripts( $tag, $handle, $src ) {
-	// Dalla 4.16.3 solo gli script del tema: prima il filtro metteva defer a tutti gli script del sito,
-	// anche a quelli di altri plugin, che a volte dipendono da script inline (ordine di esecuzione).
-	// Gli script con "strategy" nell'enqueue (main.js, front-page.js, dot-art.js) sono già gestiti da WordPress.
-	$own_handles = apply_filters( 'ntn_journal_deferred_script_handles', array( 'ntn-lazy-video', 'ntn-live-search', 'ntn-catalog-filters', 'glightbox' ) );
-	if ( is_admin() || ! in_array( $handle, (array) $own_handles, true ) ) {
-		return $tag;
-	}
-
-	// Se ha già defer o async, non toccarlo
-	if ( strpos( $tag, 'defer' ) !== false || strpos( $tag, 'async' ) !== false ) {
-		return $tag;
-	}
-
-	// Aggiunge defer
-	return str_replace( '<script ', '<script defer="defer" ', $tag );
-}
-add_filter( 'script_loader_tag', 'ntn_journal_defer_scripts', 10, 3 );

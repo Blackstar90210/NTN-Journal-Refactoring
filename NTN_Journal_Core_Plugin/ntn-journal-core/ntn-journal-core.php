@@ -1,15 +1,16 @@
 <?php
 /**
  * Plugin Name: NTN Journal Core
- * Plugin URI: https://example.com/ntn-journal-core
+ * Plugin URI: https://github.com/Blackstar90210/NTN-Journal-Refactoring
  * Description: Gestisce i Custom Post Type (Comunicato Stampa, Videogioco), Tassonomie, Meta Box IGDB e logiche di backend separate dal tema.
- * Version: 4.25.5
+ * Version: 4.26.0
  * Requires at least: 6.0
  * Requires PHP: 8.0
  * Text Domain: ntn-journal-core
  * Author: Luca Maiolini & Divisione_WP
- * Author URI: https://ntn-journal.local
- * License: Proprietary
+ * Author URI: https://github.com/Blackstar90210
+ * License: GPL-2.0-or-later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -17,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Definisco la costante di versione globale (deve coincidere con quella del commento header e dei temi!)
-define( 'NTN_JOURNAL_CORE_VERSION', '4.25.5' );
+define( 'NTN_JOURNAL_CORE_VERSION', '4.26.0' );
 define( 'NTN_JOURNAL_CORE_DIR', plugin_dir_path( __FILE__ ) );
 define( 'NTN_JOURNAL_CORE_URL', plugin_dir_url( __FILE__ ) );
 

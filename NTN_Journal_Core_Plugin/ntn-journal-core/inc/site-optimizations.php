@@ -4,8 +4,9 @@
  *
  * Prima stavano nel tema (inc/performance.php). Non sono presentazione: lavorano su caricamenti di immagini,
  * intestazioni, emoji, Gravatar e indirizzi degli autori, e devono funzionare anche se si cambia tema.
- * Nel tema restano solo le parti che riguardano le sue pagine (preload dell'immagine principale,
- * DNS prefetch, defer degli script del tema).
+ * Dalla 4.26.0 ci sono anche XML-RPC disattivato e i campi meta delle recensioni (prima nel tema).
+ * Nel tema restano solo le parti che riguardano le sue pagine (preload dell'immagine principale e
+ * DNS prefetch / preconnect).
  *
  * Il plugin viene caricato prima del tema. I temi fino alla 4.19.x hanno ancora queste ottimizzazioni
  * dentro performance.php: con quei temi il plugin non le attiva per non farle due volte
@@ -26,6 +27,22 @@ function ntn_core_owns_site_optimizations() {
 		return true;
 	}
 	return version_compare( (string) wp_get_theme( 'ntn-journal' )->get( 'Version' ), '4.20.0', '>=' );
+}
+
+/**
+ * Campi meta "protetti" che WordPress deve lasciar leggere (dalla 4.26.0, prima nel tema).
+ *
+ * I campi che iniziano con "_" sono nascosti all'editor e all'API. Questi servono alle recensioni
+ * (voto, pro, contro, verdetto, prodotto recensito) e all'immagine in evidenza: restano leggibili come prima,
+ * tutti gli altri campi protetti restano protetti.
+ *
+ * @param bool   $protected Se il campo è protetto.
+ * @param string $meta_key  Nome del campo.
+ * @return bool
+ */
+function ntn_core_allow_review_meta( $protected, $meta_key ) {
+	$allowed = array( '_thumbnail_id', 'rating', 'pros', 'cons', 'verdict', 'reviewed_item' );
+	return in_array( $meta_key, $allowed, true ) ? false : $protected;
 }
 
 /**
@@ -454,6 +471,8 @@ function ntn_core_register_site_optimizations() {
 	if ( ! ntn_core_owns_site_optimizations() ) {
 		return;
 	}
+	add_filter( 'xmlrpc_enabled', '__return_false' ); // v4.26.0: prima nel tema (inc/setup.php)
+	add_filter( 'is_protected_meta', 'ntn_core_allow_review_meta', 10, 2 ); // v4.26.0: prima nel tema (functions.php)
 	add_filter( 'get_avatar_class', 'ntn_core_gravatar_avatar_classes' );
 	add_filter( 'jetpack_is_hovercards_enabled', '__return_false', 99 );
 	add_action( 'wp_enqueue_scripts', 'ntn_core_gravatar_dequeue_script', 999 );

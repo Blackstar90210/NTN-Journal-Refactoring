@@ -77,10 +77,7 @@ if ( ! function_exists( 'ntn_journal_setup' ) ) :
 endif;
 add_action( 'after_setup_theme', 'ntn_journal_setup' );
 
-/**
- * Disabilita XML-RPC per sicurezza
- */
-add_filter( 'xmlrpc_enabled', '__return_false' );
+// XML-RPC disattivato: dalla 4.26.0 lo fa il plugin NTN Journal Core (inc/site-optimizations.php).
 
 
 

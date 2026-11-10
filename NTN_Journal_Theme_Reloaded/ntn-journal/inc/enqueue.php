@@ -18,7 +18,16 @@ function ntn_journal_scripts() {
 
 	// Enqueue Lazy Video Script for IGDB Trailer
 	if ( is_tag() || is_singular( 'videogioco' ) ) {
-		wp_enqueue_script( 'ntn-lazy-video', get_template_directory_uri() . '/assets/js/lazy-video.js', array(), $ver, true );
+		wp_enqueue_script(
+			'ntn-lazy-video',
+			get_template_directory_uri() . '/assets/js/lazy-video.js',
+			array(),
+			$ver,
+			array(
+				'in_footer' => true,
+				'strategy'  => 'defer',
+			)
+		);
 	}
 
 	// Auto-load compiled Tailwind CSS if present (Production Mode)
@@ -50,7 +59,16 @@ function ntn_journal_scripts() {
 	}
 
 	// Ricerca istantanea (v4.10.0, prima nel tema figlio): l'input di ricerca è nell'header di ogni pagina
-	wp_enqueue_script( 'ntn-live-search', get_template_directory_uri() . '/assets/js/live-search.js', array(), $ver, true );
+	wp_enqueue_script(
+		'ntn-live-search',
+		get_template_directory_uri() . '/assets/js/live-search.js',
+		array(),
+		$ver,
+		array(
+			'in_footer' => true,
+			'strategy'  => 'defer',
+		)
+	);
 
 	// Variabili per le chiamate REST del plugin (URL e nonce), lette da live-search.js e catalog-filters.js
 	wp_localize_script(
@@ -66,7 +84,16 @@ function ntn_journal_scripts() {
 
 	// Filtri del catalogo (v4.10.0, prima nel tema figlio): catalogo e archivi delle tassonomie dei giochi
 	if ( is_post_type_archive( 'videogioco' ) || is_tax( 'game_engine' ) || is_tax( 'game_franchise' ) || is_tax( 'game_developer' ) || is_tax( 'game_publisher' ) ) {
-		wp_enqueue_script( 'ntn-catalog-filters', get_template_directory_uri() . '/assets/js/catalog-filters.js', array( 'ntn-live-search' ), $ver, true );
+		wp_enqueue_script(
+			'ntn-catalog-filters',
+			get_template_directory_uri() . '/assets/js/catalog-filters.js',
+			array( 'ntn-live-search' ),
+			$ver,
+			array(
+				'in_footer' => true,
+				'strategy'  => 'defer',
+			)
+		);
 	}
 }
 add_action( 'wp_enqueue_scripts', 'ntn_journal_scripts' );
