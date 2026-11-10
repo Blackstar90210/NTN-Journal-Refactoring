@@ -64,7 +64,7 @@ function ntn_core_youtube_request_date( $video_id ) {
 			'timeout' => 8,
 		)
 	);
-	$reason = function_exists( 'ntn_core_api_error_reason' ) ? ntn_core_api_error_reason( $response ) : '';
+	$reason   = function_exists( 'ntn_core_api_error_reason' ) ? ntn_core_api_error_reason( $response ) : '';
 	if ( is_wp_error( $response ) || 200 !== (int) wp_remote_retrieve_response_code( $response ) ) {
 		return new WP_Error( 'ntn_yt_http', '' !== $reason ? $reason : 'YouTube non risponde.' );
 	}

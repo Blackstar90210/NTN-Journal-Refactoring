@@ -107,19 +107,19 @@ function ntn_core_disable_emojis() {
 function ntn_core_header_cleanup() {
 	// Rimuove la versione di WordPress dal codice sorgente (meta generator)
 	remove_action( 'wp_head', 'wp_generator' );
-	
+
 	// Rimuove Windows Live Writer manifest
 	remove_action( 'wp_head', 'wlwmanifest_link' );
-	
+
 	// Rimuove RSD link
 	remove_action( 'wp_head', 'rsd_link' );
-	
+
 	// Rimuove lo shortlink rel="shortlink"
 	remove_action( 'wp_head', 'wp_shortlink_wp_head', 10, 0 );
-	
+
 	// Rimuove l'URL dell'API REST dall'header (mantiene la funzionalità ma pulisce l'header)
 	remove_action( 'wp_head', 'rest_output_link_wp_head', 10 );
-	
+
 	// Rimuove oEmbed discovery links
 	remove_action( 'wp_head', 'wp_oembed_add_discovery_links', 10 );
 }
@@ -241,7 +241,7 @@ function ntn_core_png_has_transparency( $file_path ) {
 
 	// Il filtro dei formati chiama la funzione per ogni miniatura: il risultato si calcola una volta sola
 	static $cache = array();
-	$key = $file_path . '|' . (int) @filesize( $file_path ) . '|' . (int) @filemtime( $file_path );
+	$key          = $file_path . '|' . (int) @filesize( $file_path ) . '|' . (int) @filemtime( $file_path );
 	if ( ! isset( $cache[ $key ] ) ) {
 		$opaque        = ntn_core_png_is_fully_opaque( $file_path );
 		$cache[ $key ] = ( true !== $opaque ); // Se i pixel non si possono leggere, il PNG resta protetto
@@ -401,7 +401,7 @@ function ntn_core_optimize_upload_size_and_format( $upload ) {
 		}
 
 		$image_editor = wp_get_image_editor( $file_path );
-		
+
 		if ( ! is_wp_error( $image_editor ) ) {
 			// Impostiamo SEMPRE true per forzare la compressione su tutti i JPEG e PNG
 			$modified = true;
@@ -413,34 +413,34 @@ function ntn_core_optimize_upload_size_and_format( $upload ) {
 
 			if ( $modified ) {
 				// Assicuriamo l'estensione .jpg minuscola
-				$new_file_path  = preg_replace( '/\.(png|jpeg|jpg)$/i', '.jpg', $file_path );
-				
+				$new_file_path = preg_replace( '/\.(png|jpeg|jpg)$/i', '.jpg', $file_path );
+
 				// Salvataggio diretto sovrascrivendo il file o creandolo nuovo (sicuro in WP_Image_Editor)
 				$saved_image = $image_editor->save( $new_file_path, 'image/jpeg' );
-				
+
 				if ( ! is_wp_error( $saved_image ) ) {
 					// Rilascia la memoria dell'editor
 					unset( $image_editor );
-					
+
 					// Rimuove il file originale solo se il path differisce in modo sostanziale (es. da .png a .jpg).
 					// L'uso di strtolower previene la cancellazione accidentale su Windows per i file .JPG
-					if ( strtolower($new_file_path) !== strtolower($file_path) ) {
+					if ( strtolower( $new_file_path ) !== strtolower( $file_path ) ) {
 						@unlink( $file_path );
 					}
-					
+
 					// Aggiorna sempre i riferimenti se c'è stata una modifica testuale nel path (es. .JPG -> .jpg)
 					if ( $new_file_path !== $file_path ) {
 						$upload['file'] = $new_file_path;
 						$upload['url']  = preg_replace( '/\.(png|jpeg|jpg)$/i', '.jpg', $upload['url'] );
 					}
-					
+
 					// Assicura il corretto mime type
 					$upload['type'] = 'image/jpeg';
 				}
 			}
 		}
 	}
-	
+
 	return $upload;
 }
 

@@ -26,7 +26,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 function ntn_core_category_hub_stats_query( array $cat_ids, int $year ): array {
 	global $wpdb;
 
-	$stats   = array( 'total' => 0, 'in_year' => 0, 'latest' => '', 'author_id' => 0, 'author_count' => 0, 'games' => 0 );
+	$stats   = array(
+		'total'        => 0,
+		'in_year'      => 0,
+		'latest'       => '',
+		'author_id'    => 0,
+		'author_count' => 0,
+		'games'        => 0,
+	);
 	$cat_ids = array_values( array_unique( array_filter( array_map( 'intval', $cat_ids ) ) ) );
 	if ( empty( $cat_ids ) ) {
 		return $stats;

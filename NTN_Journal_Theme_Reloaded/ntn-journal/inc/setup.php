@@ -1,5 +1,7 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 if ( ! function_exists( 'ntn_journal_setup' ) ) :
 	/**
 	 * Sets up theme defaults and registers support for various WordPress features.
@@ -11,14 +13,17 @@ if ( ! function_exists( 'ntn_journal_setup' ) ) :
 		/*
 		 * Supporto per Logo Personalizzato.
 		 */
-		add_theme_support( 'custom-logo', array(
-			'height'               => 100,
-			'width'                => 300,
-			'flex-height'          => true,
-			'flex-width'           => true,
-			'header-text'          => array( 'site-title', 'site-description' ),
-			'unlink-homepage-logo' => true,
-		) );
+		add_theme_support(
+			'custom-logo',
+			array(
+				'height'               => 100,
+				'width'                => 300,
+				'flex-height'          => true,
+				'flex-width'           => true,
+				'header-text'          => array( 'site-title', 'site-description' ),
+				'unlink-homepage-logo' => true,
+			)
+		);
 
 		/*
 		 * Let WordPress manage the document title.
@@ -83,8 +88,8 @@ add_filter( 'xmlrpc_enabled', '__return_false' );
  * Performance: Preload Critical Assets (LCP & FCP)
  */
 function ntn_journal_performance_preloads() {
-    $font_dir = get_template_directory_uri() . '/assets/fonts/';
-    
+	$font_dir = get_template_directory_uri() . '/assets/fonts/';
+
 	// 1. Preload Critical Font (Inter Variable) per migliorare FCP e ridurre FOIT
 	echo '<link rel="preload" as="font" type="font/woff2" href="' . esc_url( $font_dir . 'inter-variable.woff2' ) . '" crossorigin="anonymous">' . "\n";
 
@@ -99,4 +104,3 @@ function ntn_journal_performance_preloads() {
 	}
 }
 add_action( 'wp_head', 'ntn_journal_performance_preloads', 1 );
-

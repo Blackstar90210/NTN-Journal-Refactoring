@@ -1,6 +1,8 @@
 <?php
 
-if ( ! defined( 'ABSPATH' ) ) exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 /**
  * Contesto del menu nella testata: 'desktop' (riga della testata) o 'mobile' (pannello da telefono).
  * v3.12.0: lo stesso menu viene stampato due volte, una per contesto.
@@ -67,7 +69,7 @@ function ntn_journal_menu_link_atts( $atts, $item, $args, $depth = 0 ) {
 				$atts['aria-expanded'] = 'false';
 			}
 			if ( 'menu-contenuti' === $args->theme_location || 'menu-1' === $args->theme_location ) {
-				$is_current = in_array( 'current-menu-item', $item_classes, true ) || in_array( 'current_page_item', $item_classes, true );
+				$is_current    = in_array( 'current-menu-item', $item_classes, true ) || in_array( 'current_page_item', $item_classes, true );
 				$atts['class'] = $is_current ? 'ntn-nav-link is-current' : 'ntn-nav-link';
 				if ( $is_current ) {
 					$atts['aria-current'] = 'page';
@@ -119,10 +121,10 @@ function ntn_journal_inject_arrow_start_el( $item_output, $item, $depth, $args )
 		// Rimuove vecchi pallini rossi inseriti manualmente dall'utente per fare spazio alla freccetta
 		$item_output = preg_replace( '/<span[^>]*bg-red-600[^>]*><\/span>/i', '', $item_output );
 		$item_output = str_replace( '🔴', '', (string) $item_output ); // Rimuove eventuali emoji inserite a mano
-		
+
 		// L'SVG della freccetta dinamica (animazione pulse e stile Nothing OS)
 		$arrow = '<svg class="w-3 h-3 ml-1 text-red-600 group-hover:-rotate-180 transition-transform duration-300 shrink-0" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="square" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg>';
-		
+
 		// Inserisce la freccetta appena prima della chiusura del link
 		$item_output = str_replace( '</a>', $arrow . '</a>', (string) $item_output );
 	}
@@ -171,7 +173,15 @@ function ntn_journal_header_menus( $context = 'desktop' ) {
 		echo '<p class="ntn-mobile-nav-label">Articoli</p>';
 	}
 	if ( has_nav_menu( 'menu-contenuti' ) ) {
-		wp_nav_menu( array_merge( $base_args, array( 'theme_location' => 'menu-contenuti', 'menu_class' => 'ntn-nav-list' ) ) );
+		wp_nav_menu(
+			array_merge(
+				$base_args,
+				array(
+					'theme_location' => 'menu-contenuti',
+					'menu_class'     => 'ntn-nav-list',
+				)
+			)
+		);
 	} else {
 		$ntn_cat_link   = static function ( $slug ) {
 			$cat  = get_category_by_slug( $slug );
@@ -197,7 +207,15 @@ function ntn_journal_header_menus( $context = 'desktop' ) {
 	// 2. Piattaforme: gruppo nel pannello da telefono; da computer è un pulsante a destra, tra gli strumenti (v3.22.0)
 	if ( has_nav_menu( 'menu-piattaforme' ) && $is_mobile ) {
 		echo '<div class="ntn-nav-group"><p class="ntn-mobile-nav-label">Piattaforme</p>';
-		wp_nav_menu( array_merge( $base_args, array( 'theme_location' => 'menu-piattaforme', 'menu_class' => 'ntn-nav-list' ) ) );
+		wp_nav_menu(
+			array_merge(
+				$base_args,
+				array(
+					'theme_location' => 'menu-piattaforme',
+					'menu_class'     => 'ntn-nav-list',
+				)
+			)
+		);
 		echo '</div>';
 	}
 
@@ -207,7 +225,15 @@ function ntn_journal_header_menus( $context = 'desktop' ) {
 		if ( $is_mobile ) {
 			echo '<p class="ntn-mobile-nav-label">Altro</p>';
 		}
-		wp_nav_menu( array_merge( $base_args, array( 'theme_location' => 'menu-1', 'menu_class' => 'ntn-nav-list' ) ) );
+		wp_nav_menu(
+			array_merge(
+				$base_args,
+				array(
+					'theme_location' => 'menu-1',
+					'menu_class'     => 'ntn-nav-list',
+				)
+			)
+		);
 		echo '</div>';
 	}
 }
@@ -371,5 +397,3 @@ function ntn_journal_platform_drop_flush() {
 add_action( 'wp_update_nav_menu', 'ntn_journal_platform_drop_flush' );
 
 /* Rimosso filtro ntn_journal_custom_menu_link_atts poiché ridondante con ntn_journal_menu_link_atts */
-
-

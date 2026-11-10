@@ -40,37 +40,39 @@ function ntn_register_cpt_videogioco() {
 	);
 
 	$args = array(
-		'label'                 => __( 'Videogioco', 'ntn-journal-core' ),
-		'description'           => __( 'Catalogo dei videogiochi trattati su NTN Journal', 'ntn-journal-core' ),
-		'labels'                => $labels,
-		'supports'              => array( 'title', 'editor', 'thumbnail', 'excerpt' ),
-		'taxonomies'            => array( 'game_engine', 'game_franchise', 'game_developer', 'game_publisher', 'post_tag' ),
-		'hierarchical'          => false,
-		'public'                => true,
-		'show_ui'               => true,
-		'show_in_menu'          => true,
-		'menu_position'         => 5,
-		'menu_icon'             => 'dashicons-games',
-		'show_in_admin_bar'     => true,
-		'show_in_nav_menus'     => true,
-		'can_export'            => true,
-		'has_archive'           => true,
-		'exclude_from_search'   => false,
-		'publicly_queryable'    => true,
-		'capability_type'       => 'post',
-		'show_in_rest'          => true,
-		'rewrite'               => array( 'slug' => 'videogioco', 'with_front' => false ),
+		'label'               => __( 'Videogioco', 'ntn-journal-core' ),
+		'description'         => __( 'Catalogo dei videogiochi trattati su NTN Journal', 'ntn-journal-core' ),
+		'labels'              => $labels,
+		'supports'            => array( 'title', 'editor', 'thumbnail', 'excerpt' ),
+		'taxonomies'          => array( 'game_engine', 'game_franchise', 'game_developer', 'game_publisher', 'post_tag' ),
+		'hierarchical'        => false,
+		'public'              => true,
+		'show_ui'             => true,
+		'show_in_menu'        => true,
+		'menu_position'       => 5,
+		'menu_icon'           => 'dashicons-games',
+		'show_in_admin_bar'   => true,
+		'show_in_nav_menus'   => true,
+		'can_export'          => true,
+		'has_archive'         => true,
+		'exclude_from_search' => false,
+		'publicly_queryable'  => true,
+		'capability_type'     => 'post',
+		'show_in_rest'        => true,
+		'rewrite'             => array(
+			'slug'       => 'videogioco',
+			'with_front' => false,
+		),
 	);
 
 	register_post_type( 'videogioco', $args );
-
 }
 add_action( 'init', 'ntn_register_cpt_videogioco', 0 );
 
 /**
- * Disabilita il redirect canonico per permettere la paginazione 
+ * Disabilita il redirect canonico per permettere la paginazione
  * degli articoli correlati all'interno della hub page 'videogioco'.
- * 
+ *
  * @param string $redirect_url L'URL di redirect calcolato.
  * @param string $requested_url L'URL inizialmente richiesto.
  * @return string|false

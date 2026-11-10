@@ -18,7 +18,13 @@ foreach ( (array) $ntn_mp_all->posts as $ntn_mp_pid ) {
 		++$ntn_mp_prop;
 	}
 }
-$ntn_mp_base = add_query_arg( array( 'page' => 'ntn-journal-functions', 'tab' => 'reviews' ), admin_url( 'admin.php' ) );
+$ntn_mp_base = add_query_arg(
+	array(
+		'page' => 'ntn-journal-functions',
+		'tab'  => 'reviews',
+	),
+	admin_url( 'admin.php' )
+);
 ?>
 <div class="nadm-panel">
 	<div class="nadm-sec"><h2>// Recensioni senza voto</h2><span class="nadm-aside"><?php echo esc_html( number_format_i18n( $ntn_mp_total ) . ' senza voto · ' . number_format_i18n( $ntn_mp_prop ) . ' con un voto proposto' ); ?></span></div>

@@ -38,27 +38,27 @@ function ntn_journal_register_cpt_comunicato() {
 		'items_list_navigation' => __( 'Navigazione lista comunicati', 'ntn-journal-core' ),
 		'filter_items_list'     => __( 'Filtra lista comunicati', 'ntn-journal-core' ),
 	);
-	$args = array(
-		'label'                 => __( 'Comunicato Stampa', 'ntn-journal-core' ),
-		'description'           => __( 'Comunicati Stampa ufficiali da aziende e PR', 'ntn-journal-core' ),
-		'labels'                => $labels,
-		'supports'              => array( 'title', 'editor', 'thumbnail', 'excerpt' ),
-		'taxonomies'            => array( 'category', 'post_tag' ), // Usa stesse categorie per facilità
-		'hierarchical'          => false,
-		'public'                => true,
-		'show_ui'               => true,
-		'show_in_menu'          => true,
-		'menu_position'         => 5,
-		'menu_icon'             => 'dashicons-megaphone',
-		'show_in_admin_bar'     => true,
-		'show_in_nav_menus'     => true,
-		'can_export'            => true,
-		'has_archive'           => 'comunicato-stampa', // Slug dell'archivio (uguale per coerenza)
-		'exclude_from_search'   => false,
-		'publicly_queryable'    => true,
-		'capability_type'       => 'post',
-		'show_in_rest'          => true, // Abilita Gutenberg
-		'rewrite'               => array( 'slug' => 'comunicato-stampa' ), // Slug singolo post
+	$args   = array(
+		'label'               => __( 'Comunicato Stampa', 'ntn-journal-core' ),
+		'description'         => __( 'Comunicati Stampa ufficiali da aziende e PR', 'ntn-journal-core' ),
+		'labels'              => $labels,
+		'supports'            => array( 'title', 'editor', 'thumbnail', 'excerpt' ),
+		'taxonomies'          => array( 'category', 'post_tag' ), // Usa stesse categorie per facilità
+		'hierarchical'        => false,
+		'public'              => true,
+		'show_ui'             => true,
+		'show_in_menu'        => true,
+		'menu_position'       => 5,
+		'menu_icon'           => 'dashicons-megaphone',
+		'show_in_admin_bar'   => true,
+		'show_in_nav_menus'   => true,
+		'can_export'          => true,
+		'has_archive'         => 'comunicato-stampa', // Slug dell'archivio (uguale per coerenza)
+		'exclude_from_search' => false,
+		'publicly_queryable'  => true,
+		'capability_type'     => 'post',
+		'show_in_rest'        => true, // Abilita Gutenberg
+		'rewrite'             => array( 'slug' => 'comunicato-stampa' ), // Slug singolo post
 	);
 	register_post_type( 'comunicato_stampa', $args );
 }
@@ -83,13 +83,13 @@ if ( is_admin() ) {
 function ntn_journal_comunicato_meta_callback( $post ) {
 	wp_nonce_field( 'ntn_comunicato_save_meta', 'ntn_comunicato_nonce' );
 
-	$publisher = get_post_meta( $post->ID, 'ntn_press_publisher', true );
-	$developer = get_post_meta( $post->ID, 'ntn_press_developer', true );
-	$agency = get_post_meta( $post->ID, 'ntn_press_agency', true );
+	$publisher   = get_post_meta( $post->ID, 'ntn_press_publisher', true );
+	$developer   = get_post_meta( $post->ID, 'ntn_press_developer', true );
+	$agency      = get_post_meta( $post->ID, 'ntn_press_agency', true );
 	$source_link = get_post_meta( $post->ID, 'ntn_press_source_link', true );
-	$embargo = get_post_meta( $post->ID, 'ntn_press_embargo', true );
-	$assets = get_post_meta( $post->ID, 'ntn_press_assets', true );
-	$noindex = get_post_meta( $post->ID, 'ntn_press_noindex', true );
+	$embargo     = get_post_meta( $post->ID, 'ntn_press_embargo', true );
+	$assets      = get_post_meta( $post->ID, 'ntn_press_assets', true );
+	$noindex     = get_post_meta( $post->ID, 'ntn_press_noindex', true );
 
 	?>
 	<div style="margin-bottom: 15px;">
@@ -207,9 +207,9 @@ function ntn_journal_rss_publisher_author( $author_name ) {
 	}
 
 	$publisher = get_post_meta( get_the_ID(), 'ntn_press_publisher', true );
-	$agency = get_post_meta( get_the_ID(), 'ntn_press_agency', true );
+	$agency    = get_post_meta( get_the_ID(), 'ntn_press_agency', true );
 	$developer = get_post_meta( get_the_ID(), 'ntn_press_developer', true );
-	
+
 	if ( ! empty( $publisher ) ) {
 		return sanitize_text_field( $publisher );
 	} elseif ( ! empty( $developer ) ) {
@@ -217,7 +217,7 @@ function ntn_journal_rss_publisher_author( $author_name ) {
 	} elseif ( ! empty( $agency ) ) {
 		return sanitize_text_field( $agency );
 	}
-	
+
 	return $author_name;
 }
 add_filter( 'the_author', 'ntn_journal_rss_publisher_author' );

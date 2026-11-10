@@ -32,20 +32,23 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<?php if ( $scanner_active !== 'yes' ) : ?>
 		<div class="notice notice-warning" style="margin-left: 0;"><p>Lo Scanner IGDB è attualmente <strong>disattivato</strong>. Spunta la casella sopra e salva per riattivarlo.</p></div>
 </div>
-	<?php return; endif; ?>
+		<?php
+		return;
+endif;
+	?>
 
 	<?php
-	$client_id = get_option( 'ntn_igdb_client_id', '' );
+	$client_id     = get_option( 'ntn_igdb_client_id', '' );
 	$client_secret = get_option( 'ntn_igdb_client_secret', '' );
-	if ( empty($client_id) || empty($client_secret) ) :
-	?>
+	if ( empty( $client_id ) || empty( $client_secret ) ) :
+		?>
 		<div class="notice notice-error" style="margin-left:0; margin-bottom: 20px;"><p><strong>Attenzione:</strong> Devi configurare Client ID e Client Secret di IGDB nella tab "Servizi API" per poter usare questa funzione.</p></div>
 	<?php endif; ?>
 
 	<?php
 	// Ottieni numero totale di articoli pubblicati
 	$total_posts = wp_count_posts( 'post' )->publish;
-	
+
 	// Transients per query pesanti SQL
 	global $wpdb;
 
@@ -53,23 +56,27 @@ if ( ! defined( 'ABSPATH' ) ) {
 	if ( false === $posts_with_igdb ) {
 		// La query diretta è usata per ragioni di performance assolute, ma wrappata in un transitorio.
 		$posts_with_igdb = $wpdb->get_var( "SELECT COUNT(DISTINCT post_id) FROM {$wpdb->postmeta} WHERE meta_key = '_ntn_game_title' AND meta_value != ''" );
-		if ( ! $posts_with_igdb ) $posts_with_igdb = 0;
+		if ( ! $posts_with_igdb ) {
+			$posts_with_igdb = 0;
+		}
 		set_transient( 'ntn_igdb_post_count', $posts_with_igdb, 12 * HOUR_IN_SECONDS );
 	}
-	
+
 	$tags_with_igdb = get_transient( 'ntn_igdb_tag_count' );
 	if ( false === $tags_with_igdb ) {
 		$tags_with_igdb = $wpdb->get_var( "SELECT COUNT(DISTINCT term_id) FROM {$wpdb->termmeta} WHERE meta_key = '_ntn_game_title' AND meta_value != ''" );
-		if ( ! $tags_with_igdb ) $tags_with_igdb = 0;
+		if ( ! $tags_with_igdb ) {
+			$tags_with_igdb = 0;
+		}
 		set_transient( 'ntn_igdb_tag_count', $tags_with_igdb, 12 * HOUR_IN_SECONDS );
 	}
 	?>
 	<div style="background: var(--nadm-surface); border: 1px solid var(--nadm-line-strong); padding: 15px; margin-bottom: 25px;">
 		<h3 style="margin-top:0;">Riepilogo Database</h3>
 		<ul style="margin:0; padding-left: 20px;">
-			<li><strong>Articoli Totali Pubblicati:</strong> <?php echo esc_html($total_posts); ?></li>
-			<li><strong>Articoli Collegati a IGDB:</strong> <?php echo esc_html($posts_with_igdb); ?></li>
-			<li><strong>Tag di Gioco Collegati a IGDB:</strong> <?php echo esc_html($tags_with_igdb); ?></li>
+			<li><strong>Articoli Totali Pubblicati:</strong> <?php echo esc_html( $total_posts ); ?></li>
+			<li><strong>Articoli Collegati a IGDB:</strong> <?php echo esc_html( $posts_with_igdb ); ?></li>
+			<li><strong>Tag di Gioco Collegati a IGDB:</strong> <?php echo esc_html( $tags_with_igdb ); ?></li>
 		</ul>
 		<div style="margin-top: 15px;">
 			<button id="ntn-refresh-cache-btn" class="button button-secondary">Ricalcola Cache Dati</button>
@@ -218,7 +225,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				
 				const data = new URLSearchParams();
 				data.append('action', 'ntn_search_wp_tags');
-				data.append('_ajax_nonce', '<?php echo wp_create_nonce("ntn_igdb_nonce"); ?>');
+				data.append('_ajax_nonce', '<?php echo wp_create_nonce( 'ntn_igdb_nonce' ); ?>');
 				data.append('query', val);
 				
 				fetch(ajaxurl, { method: 'POST', body: data })
@@ -262,7 +269,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			
 			const data = new URLSearchParams();
 			data.append('action', 'ntn_search_igdb');
-			data.append('_ajax_nonce', '<?php echo wp_create_nonce("ntn_igdb_nonce"); ?>');
+			data.append('_ajax_nonce', '<?php echo wp_create_nonce( 'ntn_igdb_nonce' ); ?>');
 			data.append('query', val);
 			
 			fetch(ajaxurl, { method: 'POST', body: data })
@@ -320,7 +327,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			
 			const data = new URLSearchParams();
 			data.append('action', 'ntn_save_tag_igdb_assoc');
-			data.append('_ajax_nonce', '<?php echo wp_create_nonce("ntn_igdb_nonce"); ?>');
+			data.append('_ajax_nonce', '<?php echo wp_create_nonce( 'ntn_igdb_nonce' ); ?>');
 			data.append('tag_id', selectedTag);
 			data.append('igdb_id', selectedIgdbGameId);
 			
@@ -382,7 +389,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				
 				const data = new URLSearchParams();
 				data.append('action', 'ntn_reset_igdb_data');
-				data.append('_ajax_nonce', '<?php echo wp_create_nonce( "ntn_batch_scan_igdb_nonce" ); ?>');
+				data.append('_ajax_nonce', '<?php echo wp_create_nonce( 'ntn_batch_scan_igdb_nonce' ); ?>');
 				
 				fetch(ajaxurl, {
 					method: 'POST',
@@ -417,7 +424,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				
 				const data = new URLSearchParams();
 				data.append('action', 'ntn_get_igdb_connections');
-				data.append('_ajax_nonce', '<?php echo wp_create_nonce( "ntn_batch_scan_igdb_nonce" ); ?>');
+				data.append('_ajax_nonce', '<?php echo wp_create_nonce( 'ntn_batch_scan_igdb_nonce' ); ?>');
 				
 				fetch(ajaxurl, {
 					method: 'POST',
@@ -453,7 +460,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					
 					const data = new URLSearchParams();
 					data.append('action', 'ntn_reset_single_igdb');
-					data.append('_ajax_nonce', '<?php echo wp_create_nonce( "ntn_batch_scan_igdb_nonce" ); ?>');
+					data.append('_ajax_nonce', '<?php echo wp_create_nonce( 'ntn_batch_scan_igdb_nonce' ); ?>');
 					data.append('post_id', postId);
 					
 					fetch(ajaxurl, {
@@ -490,7 +497,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				
 				const data = new URLSearchParams();
 				data.append('action', 'ntn_get_igdb_tag_connections');
-				data.append('_ajax_nonce', '<?php echo wp_create_nonce( "ntn_batch_scan_igdb_nonce" ); ?>');
+				data.append('_ajax_nonce', '<?php echo wp_create_nonce( 'ntn_batch_scan_igdb_nonce' ); ?>');
 				
 				fetch(ajaxurl, { method: 'POST', body: data })
 				.then(response => response.json())
@@ -523,7 +530,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					
 					const data = new URLSearchParams();
 					data.append('action', 'ntn_reset_tag_igdb');
-					data.append('_ajax_nonce', '<?php echo wp_create_nonce( "ntn_batch_scan_igdb_nonce" ); ?>');
+					data.append('_ajax_nonce', '<?php echo wp_create_nonce( 'ntn_batch_scan_igdb_nonce' ); ?>');
 					data.append('tag_id', termId);
 					
 					fetch(ajaxurl, { method: 'POST', body: data })
@@ -564,7 +571,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					
 					const data = new URLSearchParams();
 					data.append('action', 'ntn_update_single_tag_igdb');
-					data.append('_ajax_nonce', '<?php echo wp_create_nonce( "ntn_batch_scan_igdb_nonce" ); ?>');
+					data.append('_ajax_nonce', '<?php echo wp_create_nonce( 'ntn_batch_scan_igdb_nonce' ); ?>');
 					data.append('tag_id', termId);
 					data.append('igdb_id', igdbId);
 					
@@ -610,7 +617,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					if (igdbIds.length > 0) {
 						const data = new URLSearchParams();
 						data.append('action', 'ntn_check_igdb_updates');
-						data.append('_ajax_nonce', '<?php echo wp_create_nonce( "ntn_batch_scan_igdb_nonce" ); ?>');
+						data.append('_ajax_nonce', '<?php echo wp_create_nonce( 'ntn_batch_scan_igdb_nonce' ); ?>');
 						igdbIds.forEach(id => data.append('igdb_ids[]', id));
 						
 						fetch(ajaxurl, { method: 'POST', body: data })
@@ -654,7 +661,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				
 				const data = new URLSearchParams();
 				data.append('action', 'ntn_unlink_all_tags_igdb');
-				data.append('_ajax_nonce', '<?php echo wp_create_nonce( "ntn_batch_scan_igdb_nonce" ); ?>');
+				data.append('_ajax_nonce', '<?php echo wp_create_nonce( 'ntn_batch_scan_igdb_nonce' ); ?>');
 				
 				fetch(ajaxurl, { method: 'POST', body: data })
 				.then(response => response.json())
@@ -721,7 +728,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				
 				const data = new URLSearchParams();
 				data.append('action', 'ntn_igdb_refresh_cache');
-				data.append('_ajax_nonce', '<?php echo wp_create_nonce( "ntn_batch_scan_igdb_nonce" ); ?>');
+				data.append('_ajax_nonce', '<?php echo wp_create_nonce( 'ntn_batch_scan_igdb_nonce' ); ?>');
 				
 				fetch(ajaxurl, { method: 'POST', body: data })
 				.then(r => r.json())
@@ -752,7 +759,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				
 				const data = new URLSearchParams();
 				data.append('action', 'ntn_igdb_clear_cache');
-				data.append('_ajax_nonce', '<?php echo wp_create_nonce( "ntn_batch_scan_igdb_nonce" ); ?>');
+				data.append('_ajax_nonce', '<?php echo wp_create_nonce( 'ntn_batch_scan_igdb_nonce' ); ?>');
 				
 				fetch(ajaxurl, { method: 'POST', body: data })
 				.then(r => r.json())
@@ -786,7 +793,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				
 				const data = new URLSearchParams();
 				data.append('action', 'ntn_repair_reconnect_igdb_tags');
-				data.append('_ajax_nonce', '<?php echo wp_create_nonce( "ntn_batch_scan_igdb_nonce" ); ?>');
+				data.append('_ajax_nonce', '<?php echo wp_create_nonce( 'ntn_batch_scan_igdb_nonce' ); ?>');
 				
 				fetch(ajaxurl, { method: 'POST', body: data })
 				.then(r => r.json())

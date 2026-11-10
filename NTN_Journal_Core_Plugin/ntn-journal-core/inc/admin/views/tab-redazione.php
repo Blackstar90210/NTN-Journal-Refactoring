@@ -37,7 +37,12 @@ $ntn_order  = ntn_core_team_order_mode();
 
 // Persone di ogni gruppo, nell'ordine salvato (a mano) o alfabetico
 $ntn_members = array_fill_keys( $ntn_groups, array() );
-foreach ( get_users( array( 'meta_key' => '_ntn_team_group', 'fields' => array( 'ID', 'display_name' ) ) ) as $ntn_user ) { // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- poche persone.
+foreach ( get_users(
+	array(
+		'meta_key' => '_ntn_team_group',
+		'fields'   => array( 'ID', 'display_name' ),
+	)
+) as $ntn_user ) { // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- poche persone.
 	$ntn_group = (string) get_user_meta( $ntn_user->ID, '_ntn_team_group', true );
 	if ( isset( $ntn_members[ $ntn_group ] ) ) {
 		$ntn_members[ $ntn_group ][] = array(
@@ -49,14 +54,23 @@ foreach ( get_users( array( 'meta_key' => '_ntn_team_group', 'fields' => array( 
 	}
 }
 foreach ( $ntn_members as $ntn_group => $ntn_people ) {
-	usort( $ntn_people, static function ( $a, $b ) {
-		return $a['order'] !== $b['order'] ? $a['order'] <=> $b['order'] : strnatcasecmp( $a['name'], $b['name'] );
-	} );
+	usort(
+		$ntn_people,
+		static function ( $a, $b ) {
+			return $a['order'] !== $b['order'] ? $a['order'] <=> $b['order'] : strnatcasecmp( $a['name'], $b['name'] );
+		}
+	);
 	$ntn_members[ $ntn_group ] = $ntn_people;
 }
 
 // Chi può comparire: chi scrive sul sito
-$ntn_writers = get_users( array( 'capability' => 'edit_posts', 'orderby' => 'display_name', 'fields' => array( 'ID', 'display_name' ) ) );
+$ntn_writers = get_users(
+	array(
+		'capability' => 'edit_posts',
+		'orderby'    => 'display_name',
+		'fields'     => array( 'ID', 'display_name' ),
+	)
+);
 
 /**
  * Una persona dentro un gruppo (anche come modello per admin-screen.js).

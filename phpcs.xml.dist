@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<ruleset name="NTN Journal">
+	<description>Regole di stile WordPress per plugin NTN Journal Core e temi NTN Journal (dalla 4.25.4).</description>
+
+	<!-- Cosa si controlla: solo il PHP del plugin e dei temi. -->
+	<file>NTN_Journal_Core_Plugin/ntn-journal-core</file>
+	<file>NTN_Journal_Theme_Reloaded/ntn-journal</file>
+	<file>NTN_Journal_Theme_Reloaded/ntn-journal-reloaded</file>
+	<arg name="extensions" value="php"/>
+	<exclude-pattern>*/node_modules/*</exclude-pattern>
+	<exclude-pattern>*/vendor/*</exclude-pattern>
+	<exclude-pattern>*/build/*</exclude-pattern>
+
+	<arg value="sp"/>
+	<arg name="colors"/>
+	<arg name="parallel" value="8"/>
+
+	<!-- Versioni minime dichiarate negli header. -->
+	<config name="minimum_wp_version" value="6.0"/>
+	<config name="testVersion" value="8.0-"/>
+
+	<rule ref="WordPress"/>
+
+	<!-- Domini di testo dei tre pacchetti. -->
+	<rule ref="WordPress.WP.I18n">
+		<properties>
+			<property name="text_domain" type="array">
+				<element value="ntn-journal-core"/>
+				<element value="ntn-journal"/>
+				<element value="ntn-journal-reloaded"/>
+			</property>
+		</properties>
+	</rule>
+
+	<!-- Prefissi: il codice nuovo del plugin usa ntn_core_ (vedi AGENTS.md); i nomi esistenti restano. -->
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+		<properties>
+			<property name="prefixes" type="array">
+				<element value="ntn_"/>
+				<element value="_ntn_"/>
+				<element value="NTN_"/>
+			</property>
+		</properties>
+	</rule>
+
+	<!-- Funzioni del progetto che verificano il nonce (cosi' PHPCS non segnala falsi allarmi). -->
+	<rule ref="WordPress.Security.NonceVerification">
+		<properties>
+			<property name="customNonceVerificationFunctions" type="array">
+				<element value="ntn_journal_core_admin_nonce_ok"/>
+				<element value="ntn_igdb_scan_guard"/>
+				<element value="ntn_core_png_repair_guard"/>
+				<element value="ntn_core_image_report_guard"/>
+			</property>
+		</properties>
+	</rule>
+</ruleset>

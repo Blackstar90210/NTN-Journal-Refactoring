@@ -1,5 +1,7 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 /**
  * The template for displaying the footer
  *
@@ -23,14 +25,16 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 			<div class="ntn-footer-center">
 				<?php
 				if ( has_nav_menu( 'menu-footer' ) ) {
-					wp_nav_menu( array(
-						'theme_location'  => 'menu-footer',
-						'container'       => 'nav',
-						'container_class' => 'footer-navigation',
-						'menu_class'      => 'ntn-footer-menu',
-						'fallback_cb'     => false,
-						'depth'           => 1,
-					) );
+					wp_nav_menu(
+						array(
+							'theme_location'  => 'menu-footer',
+							'container'       => 'nav',
+							'container_class' => 'footer-navigation',
+							'menu_class'      => 'ntn-footer-menu',
+							'fallback_cb'     => false,
+							'depth'           => 1,
+						)
+					);
 				} else {
 					?>
 					<span>Tema by <?php echo esc_html( wp_get_theme()->get( 'Author' ) ); ?></span>

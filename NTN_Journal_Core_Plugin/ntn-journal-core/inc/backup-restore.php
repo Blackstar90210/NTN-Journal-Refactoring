@@ -85,21 +85,25 @@ function ntn_ajax_backup_export() {
 
 	// Fase 1: Inizializzazione - Header + Opzioni Core + Conteggi
 	if ( 'init' === $phase ) {
-		$jsonl_lines[] = wp_json_encode( array(
-			'type'      => 'header',
-			'subtype'   => 'ntn_journal_unified',
-			'timestamp' => current_time( 'mysql' ),
-			'version'   => defined( 'NTN_JOURNAL_CORE_VERSION' ) ? NTN_JOURNAL_CORE_VERSION : '3.1.0',
-		) );
+		$jsonl_lines[] = wp_json_encode(
+			array(
+				'type'      => 'header',
+				'subtype'   => 'ntn_journal_unified',
+				'timestamp' => current_time( 'mysql' ),
+				'version'   => defined( 'NTN_JOURNAL_CORE_VERSION' ) ? NTN_JOURNAL_CORE_VERSION : '3.1.0',
+			)
+		);
 
 		foreach ( ntn_get_core_backup_options_keys() as $opt ) {
 			$val = get_option( $opt );
 			if ( false !== $val && null !== $val ) {
-				$jsonl_lines[] = wp_json_encode( array(
-					'type'  => 'option',
-					'key'   => $opt,
-					'value' => $val,
-				) );
+				$jsonl_lines[] = wp_json_encode(
+					array(
+						'type'  => 'option',
+						'key'   => $opt,
+						'value' => $val,
+					)
+				);
 			}
 		}
 
@@ -108,20 +112,27 @@ function ntn_ajax_backup_export() {
 			$team_page = ntn_core_team_page();
 			if ( $team_page ) {
 				$members = array();
-				foreach ( get_users( array( 'meta_key' => '_ntn_team_group', 'fields' => array( 'ID', 'user_login' ) ) ) as $member ) { // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- poche persone.
+				foreach ( get_users(
+					array(
+						'meta_key' => '_ntn_team_group',
+						'fields'   => array( 'ID', 'user_login' ),
+					)
+				) as $member ) { // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- poche persone.
 					$members[] = array(
 						'login' => (string) $member->user_login,
 						'group' => (string) get_user_meta( $member->ID, '_ntn_team_group', true ),
 						'order' => (int) get_user_meta( $member->ID, '_ntn_team_order', true ),
 					);
 				}
-				$jsonl_lines[] = wp_json_encode( array(
-					'type'      => 'team',
-					'page_slug' => (string) $team_page->post_name,
-					'groups'    => ntn_core_team_groups( (int) $team_page->ID ),
-					'order'     => ntn_core_team_order_mode(),
-					'members'   => $members,
-				) );
+				$jsonl_lines[] = wp_json_encode(
+					array(
+						'type'      => 'team',
+						'page_slug' => (string) $team_page->post_name,
+						'groups'    => ntn_core_team_groups( (int) $team_page->ID ),
+						'order'     => ntn_core_team_order_mode(),
+						'members'   => $members,
+					)
+				);
 			}
 		}
 
@@ -135,12 +146,14 @@ function ntn_ajax_backup_export() {
 			   OR pm.meta_key LIKE %s
 			   OR pm.meta_key IN ('rating', 'pros', 'cons', 'verdict', 'reviewed_item', 'ntn_review_source', '_ntn_featured_review_id', '_ntn_review_url', '_ntn_ai_summary')
 		";
-		$total_posts = (int) $wpdb->get_var( $wpdb->prepare(
-			$post_count_sql,
-			$wpdb->esc_like( '_ntn_game_' ) . '%',
-			$wpdb->esc_like( '_ntn_igdb_' ) . '%',
-			$wpdb->esc_like( 'ntn_press_' ) . '%'
-		) );
+		$total_posts    = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				$post_count_sql,
+				$wpdb->esc_like( '_ntn_game_' ) . '%',
+				$wpdb->esc_like( '_ntn_igdb_' ) . '%',
+				$wpdb->esc_like( 'ntn_press_' ) . '%'
+			)
+		);
 
 		$term_count_sql = "
 			SELECT COUNT(DISTINCT t.term_id)
@@ -153,30 +166,35 @@ function ntn_ajax_backup_export() {
 			   OR tm.meta_key LIKE %s
 			   OR tm.meta_key IN ('_ntn_featured_review_id', '_ntn_review_url')
 		";
-		$total_terms = (int) $wpdb->get_var( $wpdb->prepare(
-			$term_count_sql,
-			$wpdb->esc_like( '_ntn_game_' ) . '%',
-			$wpdb->esc_like( '_ntn_igdb_' ) . '%',
-			$wpdb->esc_like( '_ntn_hub_' ) . '%'
-		) );
+		$total_terms    = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				$term_count_sql,
+				$wpdb->esc_like( '_ntn_game_' ) . '%',
+				$wpdb->esc_like( '_ntn_igdb_' ) . '%',
+				$wpdb->esc_like( '_ntn_hub_' ) . '%'
+			)
+		);
 
 		$has_posts = $total_posts > 0;
 		$has_terms = $total_terms > 0;
 
-		wp_send_json_success( array(
-			'lines'       => implode( "\n", $jsonl_lines ) . ( ! empty( $jsonl_lines ) ? "\n" : '' ),
-			'total_posts' => $total_posts,
-			'total_terms' => $total_terms,
-			'next_phase'  => $has_posts ? 'posts' : ( $has_terms ? 'terms' : 'done' ),
-			'offset'      => 0,
-			'phase_done'  => true,
-			'done'        => ( ! $has_posts && ! $has_terms ),
-		) );
+		wp_send_json_success(
+			array(
+				'lines'       => implode( "\n", $jsonl_lines ) . ( ! empty( $jsonl_lines ) ? "\n" : '' ),
+				'total_posts' => $total_posts,
+				'total_terms' => $total_terms,
+				'next_phase'  => $has_posts ? 'posts' : ( $has_terms ? 'terms' : 'done' ),
+				'offset'      => 0,
+				'phase_done'  => true,
+				'done'        => ( ! $has_posts && ! $has_terms ),
+			)
+		);
 	}
 
 	// Fase 2: Esportazione Contenuti Core (CPT, Recensioni, IGDB)
 	if ( 'posts' === $phase ) {
-		$post_ids_query = $wpdb->prepare( "
+		$post_ids_query = $wpdb->prepare(
+			"
 			SELECT DISTINCT p.ID
 			FROM {$wpdb->posts} p
 			LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
@@ -187,7 +205,13 @@ function ntn_ajax_backup_export() {
 			   OR pm.meta_key IN ('rating', 'pros', 'cons', 'verdict', 'reviewed_item', 'ntn_review_source', '_ntn_featured_review_id', '_ntn_review_url', '_ntn_ai_summary')
 			ORDER BY p.ID ASC
 			LIMIT %d OFFSET %d
-		", $wpdb->esc_like( '_ntn_game_' ) . '%', $wpdb->esc_like( '_ntn_igdb_' ) . '%', $wpdb->esc_like( 'ntn_press_' ) . '%', $batch_size, $offset );
+		",
+			$wpdb->esc_like( '_ntn_game_' ) . '%',
+			$wpdb->esc_like( '_ntn_igdb_' ) . '%',
+			$wpdb->esc_like( 'ntn_press_' ) . '%',
+			$batch_size,
+			$offset
+		);
 
 		$post_ids = $wpdb->get_col( $post_ids_query );
 
@@ -221,19 +245,21 @@ function ntn_ajax_backup_export() {
 					}
 				}
 
-				$jsonl_lines[] = wp_json_encode( array(
-					'type'         => 'post',
-					'post_id'      => (int) $post->ID,
-					'post_name'    => (string) $post->post_name,
-					'post_title'   => (string) $post->post_title,
-					'post_type'    => (string) $post->post_type,
-					'post_status'  => (string) $post->post_status,
-					'post_date'    => (string) $post->post_date,
-					'post_content' => (string) $post->post_content,
-					'post_excerpt' => (string) $post->post_excerpt,
-					'metas'        => $core_metas,
-					'taxonomies'   => $post_taxes,
-				) );
+				$jsonl_lines[] = wp_json_encode(
+					array(
+						'type'         => 'post',
+						'post_id'      => (int) $post->ID,
+						'post_name'    => (string) $post->post_name,
+						'post_title'   => (string) $post->post_title,
+						'post_type'    => (string) $post->post_type,
+						'post_status'  => (string) $post->post_status,
+						'post_date'    => (string) $post->post_date,
+						'post_content' => (string) $post->post_content,
+						'post_excerpt' => (string) $post->post_excerpt,
+						'metas'        => $core_metas,
+						'taxonomies'   => $post_taxes,
+					)
+				);
 			}
 		}
 
@@ -241,18 +267,21 @@ function ntn_ajax_backup_export() {
 		$new_offset    = $offset + $fetched_count;
 		$posts_done    = $fetched_count < $batch_size;
 
-		wp_send_json_success( array(
-			'lines'      => implode( "\n", $jsonl_lines ) . ( ! empty( $jsonl_lines ) ? "\n" : '' ),
-			'offset'     => $posts_done ? 0 : $new_offset,
-			'phase_done' => $posts_done,
-			'done'       => false,
-			'next_phase' => $posts_done ? 'terms' : 'posts',
-		) );
+		wp_send_json_success(
+			array(
+				'lines'      => implode( "\n", $jsonl_lines ) . ( ! empty( $jsonl_lines ) ? "\n" : '' ),
+				'offset'     => $posts_done ? 0 : $new_offset,
+				'phase_done' => $posts_done,
+				'done'       => false,
+				'next_phase' => $posts_done ? 'terms' : 'posts',
+			)
+		);
 	}
 
 	// Fase 3: Esportazione Tassonomie & Hub Page
 	if ( 'terms' === $phase ) {
-		$term_ids_query = $wpdb->prepare( "
+		$term_ids_query = $wpdb->prepare(
+			"
 			SELECT DISTINCT t.term_id
 			FROM {$wpdb->terms} t
 			INNER JOIN {$wpdb->term_taxonomy} tt ON t.term_id = tt.term_id
@@ -264,7 +293,13 @@ function ntn_ajax_backup_export() {
 			   OR tm.meta_key IN ('_ntn_featured_review_id', '_ntn_review_url')
 			ORDER BY t.term_id ASC
 			LIMIT %d OFFSET %d
-		", $wpdb->esc_like( '_ntn_game_' ) . '%', $wpdb->esc_like( '_ntn_igdb_' ) . '%', $wpdb->esc_like( '_ntn_hub_' ) . '%', $batch_size, $offset );
+		",
+			$wpdb->esc_like( '_ntn_game_' ) . '%',
+			$wpdb->esc_like( '_ntn_igdb_' ) . '%',
+			$wpdb->esc_like( '_ntn_hub_' ) . '%',
+			$batch_size,
+			$offset
+		);
 
 		$term_ids = $wpdb->get_col( $term_ids_query );
 
@@ -285,15 +320,17 @@ function ntn_ajax_backup_export() {
 					}
 				}
 
-				$jsonl_lines[] = wp_json_encode( array(
-					'type'        => 'termmeta',
-					'term_id'     => (int) $term->term_id,
-					'term_slug'   => (string) $term->slug,
-					'term_name'   => (string) $term->name,
-					'taxonomy'    => (string) $term->taxonomy,
-					'description' => (string) $term->description,
-					'metas'       => $term_metas,
-				) );
+				$jsonl_lines[] = wp_json_encode(
+					array(
+						'type'        => 'termmeta',
+						'term_id'     => (int) $term->term_id,
+						'term_slug'   => (string) $term->slug,
+						'term_name'   => (string) $term->name,
+						'taxonomy'    => (string) $term->taxonomy,
+						'description' => (string) $term->description,
+						'metas'       => $term_metas,
+					)
+				);
 			}
 		}
 
@@ -301,13 +338,15 @@ function ntn_ajax_backup_export() {
 		$new_offset    = $offset + $fetched_count;
 		$terms_done    = $fetched_count < $batch_size;
 
-		wp_send_json_success( array(
-			'lines'      => implode( "\n", $jsonl_lines ) . ( ! empty( $jsonl_lines ) ? "\n" : '' ),
-			'offset'     => $terms_done ? 0 : $new_offset,
-			'phase_done' => $terms_done,
-			'done'       => $terms_done,
-			'next_phase' => $terms_done ? 'done' : 'terms',
-		) );
+		wp_send_json_success(
+			array(
+				'lines'      => implode( "\n", $jsonl_lines ) . ( ! empty( $jsonl_lines ) ? "\n" : '' ),
+				'offset'     => $terms_done ? 0 : $new_offset,
+				'phase_done' => $terms_done,
+				'done'       => $terms_done,
+				'next_phase' => $terms_done ? 'done' : 'terms',
+			)
+		);
 	}
 
 	wp_send_json_error( 'Fase di esportazione non valida.' );
@@ -340,17 +379,17 @@ function _ntn_restore_option( $key, $value ) {
 
 	if ( 'ntn_journal_redirects' === $key ) {
 		$sanitized_redirects = array();
-		$map = get_option( 'ntn_redirects_map', array() );
+		$map                 = get_option( 'ntn_redirects_map', array() );
 		if ( ! is_array( $map ) ) {
 			$map = array();
 		}
 		if ( is_array( $value ) ) {
 			foreach ( $value as $red ) {
 				if ( is_array( $red ) && ! empty( $red['source'] ) && is_scalar( $red['source'] ) ) {
-					$source = sanitize_text_field( (string) $red['source'] );
-					$target = isset( $red['target'] ) && is_scalar( $red['target'] ) ? esc_url_raw( (string) $red['target'] ) : '';
-					$code   = isset( $red['code'] ) && is_numeric( $red['code'] ) ? absint( $red['code'] ) : 301;
-					$entry  = array(
+					$source                = sanitize_text_field( (string) $red['source'] );
+					$target                = isset( $red['target'] ) && is_scalar( $red['target'] ) ? esc_url_raw( (string) $red['target'] ) : '';
+					$code                  = isset( $red['code'] ) && is_numeric( $red['code'] ) ? absint( $red['code'] ) : 301;
+					$entry                 = array(
 						'source' => $source,
 						'target' => $target,
 						'code'   => $code,
@@ -379,14 +418,14 @@ function _ntn_restore_option( $key, $value ) {
 					$hits   = isset( $red['hits'] ) && is_numeric( $red['hits'] ) ? absint( $red['hits'] ) : 0;
 					$last   = isset( $red['last_accessed'] ) && is_scalar( $red['last_accessed'] ) ? sanitize_text_field( (string) $red['last_accessed'] ) : '';
 
-					$entry = array(
+					$entry                  = array(
 						'source'        => $source,
 						'target'        => $target,
 						'code'          => $code,
 						'hits'          => $hits,
 						'last_accessed' => $last,
 					);
-					$hash  = ( is_string( $k ) && 32 === strlen( $k ) ) ? $k : md5( $source );
+					$hash                   = ( is_string( $k ) && 32 === strlen( $k ) ) ? $k : md5( $source );
 					$sanitized_map[ $hash ] = $entry;
 				}
 			}
@@ -421,24 +460,28 @@ function _ntn_restore_option( $key, $value ) {
 		if ( is_numeric( $value ) ) {
 			update_option( $key, min( 100, absint( $value ) ) );
 		}
-	} elseif ( in_array( $key, array(
-		'ntn_breaking_news_active',
-		'ntn_breaking_news_sticky',
-		'ntn_breaking_news_dismissable',
-		'ntn_igdb_scanner_active',
-		'ntn_journal_enable_videogame_links',
-		'ntn_journal_enable_hub_cache',
-		'ntn_seo_enable_base',
-		'ntn_seo_enable_auto_toc',
-		'ntn_seo_enable_faq_schema',
-		'ntn_seo_enable_news_sitemap',
-		'ntn_seo_enable_review_schema',
-		'ntn_seo_enable_video_schema',
-		'ntn_seo_cleanup_og_duplicates',
-		'ntn_journal_enable_comments',
-		'ntn_redirect_paged_fallback',
-		'ntn_redirect_no_guess',
-	), true ) ) {
+	} elseif ( in_array(
+		$key,
+		array(
+			'ntn_breaking_news_active',
+			'ntn_breaking_news_sticky',
+			'ntn_breaking_news_dismissable',
+			'ntn_igdb_scanner_active',
+			'ntn_journal_enable_videogame_links',
+			'ntn_journal_enable_hub_cache',
+			'ntn_seo_enable_base',
+			'ntn_seo_enable_auto_toc',
+			'ntn_seo_enable_faq_schema',
+			'ntn_seo_enable_news_sitemap',
+			'ntn_seo_enable_review_schema',
+			'ntn_seo_enable_video_schema',
+			'ntn_seo_cleanup_og_duplicates',
+			'ntn_journal_enable_comments',
+			'ntn_redirect_paged_fallback',
+			'ntn_redirect_no_guess',
+		),
+		true
+	) ) {
 		update_option( $key, ( 'yes' === $value || true === $value || '1' === (string) $value ) ? 'yes' : 'no' );
 	} elseif ( 'ntn_breaking_news_url' === $key ) {
 		update_option( $key, is_scalar( $value ) ? esc_url_raw( (string) $value ) : '' );
@@ -446,15 +489,19 @@ function _ntn_restore_option( $key, $value ) {
 		update_option( $key, is_scalar( $value ) ? sanitize_hex_color( (string) $value ) : '' );
 	} elseif ( 'ntn_press_disclaimer' === $key ) {
 		update_option( $key, is_scalar( $value ) ? sanitize_textarea_field( (string) $value ) : '' );
-	} elseif ( in_array( $key, array(
-		'ntn_igdb_client_id',
-		'ntn_igdb_client_secret',
-		'ntn_gemini_api_key',
-		'ntn_groq_api_key',
-		'ntn_youtube_api_key',
-		'ntn_breaking_news_label',
-		'ntn_breaking_news_text',
-	), true ) ) {
+	} elseif ( in_array(
+		$key,
+		array(
+			'ntn_igdb_client_id',
+			'ntn_igdb_client_secret',
+			'ntn_gemini_api_key',
+			'ntn_groq_api_key',
+			'ntn_youtube_api_key',
+			'ntn_breaking_news_label',
+			'ntn_breaking_news_text',
+		),
+		true
+	) ) {
 		update_option( $key, is_scalar( $value ) ? sanitize_text_field( (string) $value ) : '' );
 	}
 }
@@ -478,14 +525,16 @@ function _ntn_resolve_post_id( $post_data, $post_id_map = array() ) {
 	if ( isset( $post_data['metas']['_ntn_igdb_id'] ) && is_scalar( $post_data['metas']['_ntn_igdb_id'] ) ) {
 		$igdb_id = sanitize_text_field( (string) $post_data['metas']['_ntn_igdb_id'] );
 		if ( ! empty( $igdb_id ) ) {
-			$by_igdb = get_posts( array(
-				'post_type'   => $post_type,
-				'post_status' => 'any',
-				'meta_key'    => '_ntn_igdb_id',
-				'meta_value'  => $igdb_id,
-				'numberposts' => 1,
-				'fields'      => 'ids',
-			) );
+			$by_igdb = get_posts(
+				array(
+					'post_type'   => $post_type,
+					'post_status' => 'any',
+					'meta_key'    => '_ntn_igdb_id',
+					'meta_value'  => $igdb_id,
+					'numberposts' => 1,
+					'fields'      => 'ids',
+				)
+			);
 			if ( ! empty( $by_igdb ) ) {
 				$matched_post = $by_igdb[0];
 				return ( $matched_post instanceof WP_Post ) ? (int) $matched_post->ID : (int) $matched_post;
@@ -495,25 +544,29 @@ function _ntn_resolve_post_id( $post_data, $post_id_map = array() ) {
 
 	// 3. Risoluzione tramite slug (post_name) e post_type
 	if ( ! empty( $post_name ) ) {
-		$posts = get_posts( array(
-			'name'        => $post_name,
-			'post_type'   => $post_type,
-			'post_status' => 'any',
-			'numberposts' => 1,
-			'fields'      => 'ids',
-		) );
+		$posts = get_posts(
+			array(
+				'name'        => $post_name,
+				'post_type'   => $post_type,
+				'post_status' => 'any',
+				'numberposts' => 1,
+				'fields'      => 'ids',
+			)
+		);
 		if ( ! empty( $posts ) ) {
 			$matched_post = $posts[0];
 			return ( $matched_post instanceof WP_Post ) ? (int) $matched_post->ID : (int) $matched_post;
 		}
 		if ( 'post' !== $post_type ) {
-			$posts = get_posts( array(
-				'name'        => $post_name,
-				'post_type'   => 'any',
-				'post_status' => 'any',
-				'numberposts' => 1,
-				'fields'      => 'ids',
-			) );
+			$posts = get_posts(
+				array(
+					'name'        => $post_name,
+					'post_type'   => 'any',
+					'post_status' => 'any',
+					'numberposts' => 1,
+					'fields'      => 'ids',
+				)
+			);
 			if ( ! empty( $posts ) ) {
 				$matched_post = $posts[0];
 				return ( $matched_post instanceof WP_Post ) ? (int) $matched_post->ID : (int) $matched_post;
@@ -523,13 +576,15 @@ function _ntn_resolve_post_id( $post_data, $post_id_map = array() ) {
 
 	// 4. Risoluzione tramite titolo esatto se fornito
 	if ( ! empty( $post_title ) ) {
-		$posts = get_posts( array(
-			'title'       => $post_title,
-			'post_type'   => $post_type,
-			'post_status' => 'any',
-			'numberposts' => 1,
-			'fields'      => 'ids',
-		) );
+		$posts = get_posts(
+			array(
+				'title'       => $post_title,
+				'post_type'   => $post_type,
+				'post_status' => 'any',
+				'numberposts' => 1,
+				'fields'      => 'ids',
+			)
+		);
 		if ( ! empty( $posts ) ) {
 			$matched_post = $posts[0];
 			return ( $matched_post instanceof WP_Post ) ? (int) $matched_post->ID : (int) $matched_post;
@@ -619,7 +674,7 @@ function _ntn_restore_post( $post_data, &$post_id_map ) {
 			'post_excerpt' => $post_excerpt,
 			'post_date'    => $post_date,
 		);
-		$new_id = wp_insert_post( $insert_args );
+		$new_id      = wp_insert_post( $insert_args );
 		if ( ! is_wp_error( $new_id ) && $new_id > 0 ) {
 			$resolved_id = (int) $new_id;
 			if ( $old_post_id > 0 ) {
@@ -779,18 +834,24 @@ function _ntn_restore_team( $row ) {
 	if ( function_exists( 'ntn_core_team_page' ) && ntn_core_team_page() ) {
 		$page_id = (int) ntn_core_team_page()->ID;
 	} elseif ( ! empty( $row['page_slug'] ) ) {
-		$page = get_page_by_path( sanitize_title( (string) $row['page_slug'] ) );
+		$page    = get_page_by_path( sanitize_title( (string) $row['page_slug'] ) );
 		$page_id = $page instanceof WP_Post ? (int) $page->ID : 0;
 	}
 
 	$groups = array();
 	foreach ( $row['groups'] as $name ) {
-		$groups[ (string) $name ] = array( 'name' => (string) $name, 'people' => array() );
+		$groups[ (string) $name ] = array(
+			'name'   => (string) $name,
+			'people' => array(),
+		);
 	}
 	$members = isset( $row['members'] ) && is_array( $row['members'] ) ? $row['members'] : array();
-	usort( $members, static function ( $a, $b ) {
-		return (int) ( $a['order'] ?? 0 ) <=> (int) ( $b['order'] ?? 0 );
-	} );
+	usort(
+		$members,
+		static function ( $a, $b ) {
+			return (int) ( $a['order'] ?? 0 ) <=> (int) ( $b['order'] ?? 0 );
+		}
+	);
 	foreach ( $members as $member ) {
 		$user = isset( $member['login'] ) ? get_user_by( 'login', sanitize_user( (string) $member['login'] ) ) : false;
 		$name = isset( $member['group'] ) ? (string) $member['group'] : '';
@@ -828,10 +889,12 @@ function _ntn_clear_all_backup_caches() {
 	);
 
 	foreach ( $like_patterns as $pattern ) {
-		$wpdb->query( $wpdb->prepare(
-			"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s",
-			$pattern
-		) );
+		$wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s",
+				$pattern
+			)
+		);
 	}
 
 	ntn_core_request_rewrite_flush();
@@ -867,11 +930,14 @@ function ntn_ajax_backup_import() {
 
 	// Mappa ID per post migrati
 	global $wpdb;
-	$migrated_posts = $wpdb->get_results( $wpdb->prepare(
-		"SELECT post_id, meta_value FROM {$wpdb->postmeta} WHERE meta_key = %s",
-		'_slow_migration_source_post_id'
-	), ARRAY_A );
-	$post_id_map = array();
+	$migrated_posts = $wpdb->get_results(
+		$wpdb->prepare(
+			"SELECT post_id, meta_value FROM {$wpdb->postmeta} WHERE meta_key = %s",
+			'_slow_migration_source_post_id'
+		),
+		ARRAY_A
+	);
+	$post_id_map    = array();
 	if ( ! empty( $migrated_posts ) ) {
 		foreach ( $migrated_posts as $row ) {
 			$post_id_map[ $row['meta_value'] ] = $row['post_id'];
@@ -897,35 +963,43 @@ function ntn_ajax_backup_import() {
 		if ( isset( $data['options'] ) && is_array( $data['options'] ) ) {
 			foreach ( $data['options'] as $key => $value ) {
 				_ntn_restore_option( $key, $value );
-				$imported_count++;
+				++$imported_count;
 			}
 		}
 
 		// 2. Ripristina Post / Postmeta
 		if ( isset( $data['postmeta'] ) && is_array( $data['postmeta'] ) ) {
 			foreach ( $data['postmeta'] as $old_post_id => $metas ) {
-				$post_data = is_array( $metas ) && isset( $metas['post_name'] ) ? $metas : array( 'post_id' => $old_post_id, 'metas' => $metas );
+				$post_data = is_array( $metas ) && isset( $metas['post_name'] ) ? $metas : array(
+					'post_id' => $old_post_id,
+					'metas'   => $metas,
+				);
 				_ntn_restore_post( $post_data, $post_id_map );
-				$imported_count++;
+				++$imported_count;
 			}
 		}
 
 		// 3. Ripristina Term Meta
 		if ( isset( $data['termmeta'] ) && is_array( $data['termmeta'] ) ) {
 			foreach ( $data['termmeta'] as $term_key => $metas ) {
-				$term_data = is_array( $metas ) && ( isset( $metas['term_slug'] ) || isset( $metas['term_id'] ) ) ? $metas : array( 'term_id' => $term_key, 'metas' => $metas );
+				$term_data = is_array( $metas ) && ( isset( $metas['term_slug'] ) || isset( $metas['term_id'] ) ) ? $metas : array(
+					'term_id' => $term_key,
+					'metas'   => $metas,
+				);
 				_ntn_restore_termmeta_row( $term_data, $post_id_map );
-				$imported_count++;
+				++$imported_count;
 			}
 		}
 
 		_ntn_clear_all_backup_caches();
 
-		wp_send_json_success( array(
-			'done'     => true,
-			'imported' => $imported_count,
-			'message'  => 'Importazione completata con successo (formato Legacy JSON)!',
-		) );
+		wp_send_json_success(
+			array(
+				'done'     => true,
+				'imported' => $imported_count,
+				'message'  => 'Importazione completata con successo (formato Legacy JSON)!',
+			)
+		);
 	}
 
 	// Formato JSONL in streaming a batch
@@ -968,24 +1042,24 @@ function ntn_ajax_backup_import() {
 			case 'option':
 				if ( isset( $row['key'], $row['value'] ) ) {
 					_ntn_restore_option( $row['key'], $row['value'] );
-					$count++;
+					++$count;
 				}
 				break;
 
 			case 'post':
 			case 'postmeta':
 				_ntn_restore_post( $row, $post_id_map );
-				$count++;
+				++$count;
 				break;
 
 			case 'termmeta':
 				_ntn_restore_termmeta_row( $row, $post_id_map );
-				$count++;
+				++$count;
 				break;
 
 			case 'team':
 				_ntn_restore_team( $row );
-				$count++;
+				++$count;
 				break;
 		}
 	}
@@ -1001,11 +1075,13 @@ function ntn_ajax_backup_import() {
 		}
 	}
 
-	wp_send_json_success( array(
-		'imported'  => $count,
-		'offset'    => $new_offset,
-		'done'      => $done,
-		'file_path' => basename( $file_path ),
-	) );
+	wp_send_json_success(
+		array(
+			'imported'  => $count,
+			'offset'    => $new_offset,
+			'done'      => $done,
+			'file_path' => basename( $file_path ),
+		)
+	);
 }
 add_action( 'wp_ajax_ntn_backup_import', 'ntn_ajax_backup_import' );

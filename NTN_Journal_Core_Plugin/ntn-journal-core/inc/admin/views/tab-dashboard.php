@@ -7,7 +7,13 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Riferimento visivo: mockup, pagina "Amministrazione", scheda Dashboard.
  */
 $ntn_tab = static function ( $tab ) {
-	return add_query_arg( array( 'page' => 'ntn-journal-functions', 'tab' => $tab ), admin_url( 'admin.php' ) );
+	return add_query_arg(
+		array(
+			'page' => 'ntn-journal-functions',
+			'tab'  => $tab,
+		),
+		admin_url( 'admin.php' )
+	);
 };
 
 // Hub accese e problemi del controllo copertura (in memoria finché le Hub non cambiano)
@@ -27,7 +33,10 @@ if ( $ntn_hubs && function_exists( 'ntn_core_category_hub_coverage' ) ) {
 
 // Redazione
 $ntn_team_page = function_exists( 'ntn_core_team_page' ) ? ntn_core_team_page() : null;
-$ntn_team      = ( $ntn_team_page && function_exists( 'ntn_core_get_team_data' ) ) ? ntn_core_get_team_data( (int) $ntn_team_page->ID ) : array( 'groups' => array(), 'count' => 0 );
+$ntn_team      = ( $ntn_team_page && function_exists( 'ntn_core_get_team_data' ) ) ? ntn_core_get_team_data( (int) $ntn_team_page->ID ) : array(
+	'groups' => array(),
+	'count'  => 0,
+);
 
 // Recensioni
 $ntn_reviews = new WP_Query(
@@ -36,16 +45,35 @@ $ntn_reviews = new WP_Query(
 		'post_status'    => 'publish',
 		'posts_per_page' => 1,
 		'fields'         => 'ids',
-		'meta_query'     => array( array( 'key' => 'rating', 'value' => '', 'compare' => '!=' ) ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- conteggio in amministrazione.
+		'meta_query'     => array(
+			array(
+				'key'     => 'rating',
+				'value'   => '',
+				'compare' => '!=',
+			),
+		), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- conteggio in amministrazione.
 	)
 );
 
 // Comunicati
 $ntn_press_count = wp_count_posts( 'comunicato_stampa' );
-$ntn_press_last  = get_posts( array( 'post_type' => 'comunicato_stampa', 'posts_per_page' => 1, 'fields' => 'ids' ) );
+$ntn_press_last  = get_posts(
+	array(
+		'post_type'      => 'comunicato_stampa',
+		'posts_per_page' => 1,
+		'fields'         => 'ids',
+	)
+);
 
 // Scanner IGDB: giochi collegati
-$ntn_games = get_terms( array( 'taxonomy' => 'post_tag', 'hide_empty' => false, 'fields' => 'count', 'meta_key' => '_ntn_igdb_game_id' ) ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- conteggio in amministrazione.
+$ntn_games = get_terms(
+	array(
+		'taxonomy'   => 'post_tag',
+		'hide_empty' => false,
+		'fields'     => 'count',
+		'meta_key'   => '_ntn_igdb_game_id',
+	)
+); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- conteggio in amministrazione.
 
 // Redirect
 $ntn_redirects = get_option( 'ntn_redirects_map', array() );
@@ -54,10 +82,20 @@ $ntn_redirects = get_option( 'ntn_redirects_map', array() );
 $ntn_api = array();
 if ( function_exists( 'ntn_core_api_services' ) ) {
 	foreach ( ntn_core_api_services() as $ntn_service => $ntn_info ) {
-		$ntn_api[ $ntn_service ] = array( 'label' => $ntn_info['label'], 'status' => ntn_core_api_status_get( $ntn_service ) );
+		$ntn_api[ $ntn_service ] = array(
+			'label'  => $ntn_info['label'],
+			'status' => ntn_core_api_status_get( $ntn_service ),
+		);
 	}
 }
-$ntn_api_active = count( array_filter( $ntn_api, static function ( $s ) { return 'active' === $s['status']['state']; } ) );
+$ntn_api_active = count(
+	array_filter(
+		$ntn_api,
+		static function ( $s ) {
+			return 'active' === $s['status']['state'];
+		}
+	)
+);
 ?>
 <div class="nadm-panel">
 	<div class="nadm-sec"><h2>// Lo stato del sito</h2><span class="nadm-aside">Aggiornato ora</span></div>
@@ -139,7 +177,12 @@ $ntn_api_active = count( array_filter( $ntn_api, static function ( $s ) { return
 
 		<div class="nadm-cell">
 			<span class="ntn-adm-k">// Immagini</span>
-			<?php $ntn_img = function_exists( 'ntn_core_image_report_dashboard_summary' ) ? ntn_core_image_report_dashboard_summary() : array( 'count' => '—', 'lines' => array( 'Strumenti non disponibili' ) ); ?>
+			<?php
+			$ntn_img = function_exists( 'ntn_core_image_report_dashboard_summary' ) ? ntn_core_image_report_dashboard_summary() : array(
+				'count' => '—',
+				'lines' => array( 'Strumenti non disponibili' ),
+			);
+			?>
 			<span class="nadm-v"><?php echo esc_html( $ntn_img['count'] ); ?></span>
 			<span class="nadm-s">
 				<?php foreach ( $ntn_img['lines'] as $ntn_img_line ) : ?>
@@ -154,7 +197,10 @@ $ntn_api_active = count( array_filter( $ntn_api, static function ( $s ) { return
 			<?php $ntn_schema = function_exists( 'ntn_core_schema_enabled' ) ? ntn_core_schema_enabled() : true; ?>
 			<span class="nadm-v<?php echo $ntn_schema ? '' : ' nadm-red'; ?>"><?php echo $ntn_schema ? 'On' : 'Off'; ?></span>
 			<span class="nadm-s"><?php echo esc_html( $ntn_schema ? 'Dati per Google accesi' : 'Dati per Google spenti (freno d\'emergenza tirato)' ); ?></span>
-			<?php if ( function_exists( 'ntn_core_seo_thin_summary' ) ) : $ntn_thin = ntn_core_seo_thin_summary(); ?>
+			<?php
+			if ( function_exists( 'ntn_core_seo_thin_summary' ) ) :
+				$ntn_thin = ntn_core_seo_thin_summary();
+				?>
 				<span class="nadm-s"><?php echo esc_html( sprintf( 'Nascoste a Google per pochi articoli: %1$s tag, %2$s categorie, %3$s Hub dei giochi', number_format_i18n( $ntn_thin['tags'] ), number_format_i18n( $ntn_thin['categories'] ), number_format_i18n( $ntn_thin['games'] ) ) ); ?></span>
 			<?php endif; ?>
 			<a class="nadm-go" href="<?php echo esc_url( $ntn_tab( 'seo' ) ); ?>">Apri →</a>

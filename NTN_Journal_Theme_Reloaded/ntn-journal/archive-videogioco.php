@@ -1,5 +1,7 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 /**
  * L'Hub Centrale / Catalogo di tutti i Videogiochi.
  *
@@ -21,11 +23,11 @@ $developer = ( isset( $_GET['developer'] ) && is_string( $_GET['developer'] ) ) 
 $publisher = ( isset( $_GET['publisher'] ) && is_string( $_GET['publisher'] ) ) ? sanitize_key( wp_unslash( $_GET['publisher'] ) ) : '';
 $engine    = ( isset( $_GET['engine'] ) && is_string( $_GET['engine'] ) ) ? sanitize_key( wp_unslash( $_GET['engine'] ) ) : '';
 
-$year_val  = ( isset( $_GET['year'] ) && is_numeric( $_GET['year'] ) ) ? absint( wp_unslash( $_GET['year'] ) ) : 0;
-$year      = ( $year_val >= 1950 && $year_val <= 2100 ) ? $year_val : '';
+$year_val = ( isset( $_GET['year'] ) && is_numeric( $_GET['year'] ) ) ? absint( wp_unslash( $_GET['year'] ) ) : 0;
+$year     = ( $year_val >= 1950 && $year_val <= 2100 ) ? $year_val : '';
 
-$search    = ( isset( $_GET['search'] ) && is_string( $_GET['search'] ) ) ? sanitize_text_field( wp_unslash( $_GET['search'] ) ) : '';
-$page      = ( isset( $_GET['page'] ) && is_numeric( $_GET['page'] ) ) ? max( 1, absint( wp_unslash( $_GET['page'] ) ) ) : 1;
+$search = ( isset( $_GET['search'] ) && is_string( $_GET['search'] ) ) ? sanitize_text_field( wp_unslash( $_GET['search'] ) ) : '';
+$page   = ( isset( $_GET['page'] ) && is_numeric( $_GET['page'] ) ) ? max( 1, absint( wp_unslash( $_GET['page'] ) ) ) : 1;
 
 $params = array(
 	'page'      => $page,
@@ -101,59 +103,75 @@ get_template_part(
 		</div>
 		<div class="ntn-field">
 			<label for="filter_franchise" class="ntn-field-label">Franchise</label>
-			<?php wp_dropdown_categories( array(
-				'show_option_all' => 'Tutti',
-				'taxonomy'        => 'game_franchise',
-				'name'            => 'filter_franchise',
-				'id'              => 'filter_franchise',
-				'class'           => 'ntn-field-input',
-				'value_field'     => 'slug',
-				'orderby'         => 'name',
-				'order'           => 'ASC',
-				'selected'        => $params['franchise'],
-			) ); ?>
+			<?php
+			wp_dropdown_categories(
+				array(
+					'show_option_all' => 'Tutti',
+					'taxonomy'        => 'game_franchise',
+					'name'            => 'filter_franchise',
+					'id'              => 'filter_franchise',
+					'class'           => 'ntn-field-input',
+					'value_field'     => 'slug',
+					'orderby'         => 'name',
+					'order'           => 'ASC',
+					'selected'        => $params['franchise'],
+				)
+			);
+			?>
 		</div>
 		<div class="ntn-field">
 			<label for="filter_developer" class="ntn-field-label">Sviluppatore</label>
-			<?php wp_dropdown_categories( array(
-				'show_option_all' => 'Tutti',
-				'taxonomy'        => 'game_developer',
-				'name'            => 'filter_developer',
-				'id'              => 'filter_developer',
-				'class'           => 'ntn-field-input',
-				'value_field'     => 'slug',
-				'orderby'         => 'name',
-				'order'           => 'ASC',
-				'selected'        => $params['developer'],
-			) ); ?>
+			<?php
+			wp_dropdown_categories(
+				array(
+					'show_option_all' => 'Tutti',
+					'taxonomy'        => 'game_developer',
+					'name'            => 'filter_developer',
+					'id'              => 'filter_developer',
+					'class'           => 'ntn-field-input',
+					'value_field'     => 'slug',
+					'orderby'         => 'name',
+					'order'           => 'ASC',
+					'selected'        => $params['developer'],
+				)
+			);
+			?>
 		</div>
 		<div class="ntn-field">
 			<label for="filter_publisher" class="ntn-field-label">Editore</label>
-			<?php wp_dropdown_categories( array(
-				'show_option_all' => 'Tutti',
-				'taxonomy'        => 'game_publisher',
-				'name'            => 'filter_publisher',
-				'id'              => 'filter_publisher',
-				'class'           => 'ntn-field-input',
-				'value_field'     => 'slug',
-				'orderby'         => 'name',
-				'order'           => 'ASC',
-				'selected'        => $params['publisher'],
-			) ); ?>
+			<?php
+			wp_dropdown_categories(
+				array(
+					'show_option_all' => 'Tutti',
+					'taxonomy'        => 'game_publisher',
+					'name'            => 'filter_publisher',
+					'id'              => 'filter_publisher',
+					'class'           => 'ntn-field-input',
+					'value_field'     => 'slug',
+					'orderby'         => 'name',
+					'order'           => 'ASC',
+					'selected'        => $params['publisher'],
+				)
+			);
+			?>
 		</div>
 		<div class="ntn-field">
 			<label for="filter_engine" class="ntn-field-label">Motore Grafico</label>
-			<?php wp_dropdown_categories( array(
-				'show_option_all' => 'Tutti',
-				'taxonomy'        => 'game_engine',
-				'name'            => 'filter_engine',
-				'id'              => 'filter_engine',
-				'class'           => 'ntn-field-input',
-				'value_field'     => 'slug',
-				'orderby'         => 'name',
-				'order'           => 'ASC',
-				'selected'        => $params['engine'],
-			) ); ?>
+			<?php
+			wp_dropdown_categories(
+				array(
+					'show_option_all' => 'Tutti',
+					'taxonomy'        => 'game_engine',
+					'name'            => 'filter_engine',
+					'id'              => 'filter_engine',
+					'class'           => 'ntn-field-input',
+					'value_field'     => 'slug',
+					'orderby'         => 'name',
+					'order'           => 'ASC',
+					'selected'        => $params['engine'],
+				)
+			);
+			?>
 		</div>
 		<div class="ntn-field ntn-field--short">
 			<label for="filter_year" class="ntn-field-label">Anno</label>
@@ -179,7 +197,14 @@ get_template_part(
 			if ( $query->have_posts() ) {
 				while ( $query->have_posts() ) {
 					$query->the_post();
-					get_template_part( 'template-parts/content', 'game-card', array( 'position' => (int) $query->current_post, 'first_page' => absint( get_query_var( 'paged' ) ) <= 1 ) );
+					get_template_part(
+						'template-parts/content',
+						'game-card',
+						array(
+							'position'   => (int) $query->current_post,
+							'first_page' => absint( get_query_var( 'paged' ) ) <= 1,
+						)
+					);
 				}
 				// Passa max_pages al JS
 				echo '<script>window.ntn_ssr_max_pages = ' . intval( $query->max_num_pages ) . ';</script>';

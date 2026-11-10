@@ -1,5 +1,7 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 /**
  * Template part per la Scheda Tecnica Rapida su Mobile (IGDB)
  *
@@ -12,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  */
 
 $post_id = get_the_ID();
-$rating = ntn_get_post_rating( $post_id );
+$rating  = ntn_get_post_rating( $post_id );
 
 $games      = ntn_get_post_games( $post_id );
 $game_count = count( $games );
@@ -49,7 +51,7 @@ $render_body = static function ( $game, $label, $show_verdict, $lazy = false ) u
 	if ( $platforms && function_exists( 'ntn_core_schema_platform_names' ) ) {
 		$platforms = ntn_core_schema_platform_names( array_filter( is_array( $platforms ) ? $platforms : explode( ',', (string) $platforms ), 'is_scalar' ) );
 	}
-	$release       = $game['release'];
+	$release = $game['release'];
 
 	// Data di uscita: solo le parti note (v3.21.0)
 	$release_text = $release ? ntn_journal_release_label( $release, $game['release_precision'] ) : '';

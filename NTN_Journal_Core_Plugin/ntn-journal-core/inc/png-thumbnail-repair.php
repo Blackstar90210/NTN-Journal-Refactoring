@@ -213,7 +213,10 @@ function ntn_core_ajax_png_repair_scan() {
 	ntn_core_png_repair_guard();
 	global $wpdb;
 	$offset = isset( $_POST['offset'] ) ? max( 0, (int) $_POST['offset'] ) : 0;
-	$state  = 0 === $offset ? array( 'found' => array(), 'unreadable' => array() ) : ntn_core_png_repair_get( 'scan' );
+	$state  = 0 === $offset ? array(
+		'found'      => array(),
+		'unreadable' => array(),
+	) : ntn_core_png_repair_get( 'scan' );
 	$total  = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'attachment' AND post_mime_type = 'image/png'" );
 	$ids    = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_type = 'attachment' AND post_mime_type = 'image/png' ORDER BY ID ASC LIMIT %d OFFSET %d", NTN_PNG_REPAIR_SCAN_BATCH, $offset ) );
 
@@ -230,7 +233,10 @@ function ntn_core_ajax_png_repair_scan() {
 			continue;
 		}
 		if ( ntn_core_png_has_transparency( $file ) ) {
-			$state['found'][ $id ] = array( 'name' => $name, 'jpg' => count( $jpgs ) );
+			$state['found'][ $id ] = array(
+				'name' => $name,
+				'jpg'  => count( $jpgs ),
+			);
 		}
 	}
 
@@ -239,15 +245,17 @@ function ntn_core_ajax_png_repair_scan() {
 	$state['time'] = time();
 	ntn_core_png_repair_set( 'scan', $state );
 
-	wp_send_json_success( array(
-		'total'      => $total,
-		'next'       => $next,
-		'done'       => $state['done'],
-		'found'      => count( $state['found'] ),
-		'unreadable' => count( $state['unreadable'] ),
-		'list'       => $state['done'] ? array_values( wp_list_pluck( $state['found'], 'name' ) ) : array(),
-		'skipped'    => $state['done'] ? array_values( $state['unreadable'] ) : array(),
-	) );
+	wp_send_json_success(
+		array(
+			'total'      => $total,
+			'next'       => $next,
+			'done'       => $state['done'],
+			'found'      => count( $state['found'] ),
+			'unreadable' => count( $state['unreadable'] ),
+			'list'       => $state['done'] ? array_values( wp_list_pluck( $state['found'], 'name' ) ) : array(),
+			'skipped'    => $state['done'] ? array_values( $state['unreadable'] ) : array(),
+		)
+	);
 }
 add_action( 'wp_ajax_ntn_png_repair_scan', 'ntn_core_ajax_png_repair_scan' );
 
@@ -258,25 +266,50 @@ function ntn_core_png_repair_fix_one( $attachment_id ) {
 	$file = get_attached_file( $attachment_id );
 	$name = $file ? basename( $file ) : '#' . $attachment_id;
 	if ( ! $file || ! is_readable( $file ) ) {
-		return array( 'name' => $name, 'stato' => 'saltato', 'motivo' => 'file originale non leggibile', 'vecchi_file' => array() );
+		return array(
+			'name'        => $name,
+			'stato'       => 'saltato',
+			'motivo'      => 'file originale non leggibile',
+			'vecchi_file' => array(),
+		);
 	}
 	if ( ! ntn_core_png_repair_memory_ok( $file ) ) {
-		return array( 'name' => $name, 'stato' => 'saltato', 'motivo' => 'memoria del server insufficiente', 'vecchi_file' => array() );
+		return array(
+			'name'        => $name,
+			'stato'       => 'saltato',
+			'motivo'      => 'memoria del server insufficiente',
+			'vecchi_file' => array(),
+		);
 	}
 	$old = array_values( ntn_core_png_repair_jpg_sizes( $attachment_id ) );
 	if ( empty( $old ) ) {
-		return array( 'name' => $name, 'stato' => 'già a posto', 'motivo' => '', 'vecchi_file' => array() );
+		return array(
+			'name'        => $name,
+			'stato'       => 'già a posto',
+			'motivo'      => '',
+			'vecchi_file' => array(),
+		);
 	}
 
 	// I vecchi file si registrano prima di rifare, così il passo 3 li ritrova anche se qualcosa va storto
 	$log                   = ntn_core_png_repair_get( 'log' );
-	$log[ $attachment_id ] = array( 'name' => $name, 'stato' => 'in corso', 'motivo' => '', 'vecchi_file' => $old );
+	$log[ $attachment_id ] = array(
+		'name'        => $name,
+		'stato'       => 'in corso',
+		'motivo'      => '',
+		'vecchi_file' => $old,
+	);
 	ntn_core_png_repair_set( 'log', $log );
 
 	require_once ABSPATH . 'wp-admin/includes/image.php';
 	$meta = wp_generate_attachment_metadata( $attachment_id, $file );
 	if ( empty( $meta ) || ! is_array( $meta ) ) {
-		return array( 'name' => $name, 'stato' => 'saltato', 'motivo' => 'WordPress non è riuscito a rifare le miniature', 'vecchi_file' => $old );
+		return array(
+			'name'        => $name,
+			'stato'       => 'saltato',
+			'motivo'      => 'WordPress non è riuscito a rifare le miniature',
+			'vecchi_file' => $old,
+		);
 	}
 	wp_update_attachment_metadata( $attachment_id, $meta );
 
@@ -301,8 +334,8 @@ function ntn_core_ajax_png_repair_fix() {
 	if ( empty( $scan['done'] ) ) {
 		wp_send_json_error( 'Prima esegui il passo 1 (Controlla) fino alla fine.' );
 	}
-	$log   = ntn_core_png_repair_get( 'log' );
-	$todo  = array();
+	$log  = ntn_core_png_repair_get( 'log' );
+	$todo = array();
 	foreach ( array_keys( $scan['found'] ) as $id ) {
 		if ( ! isset( $log[ $id ] ) || 'in corso' === $log[ $id ]['stato'] ) {
 			$todo[] = (int) $id;
@@ -323,13 +356,15 @@ function ntn_core_ajax_png_repair_fix() {
 			$skipped[] = $row['name'] . ': ' . $row['motivo'];
 		}
 	}
-	wp_send_json_success( array(
-		'total'   => count( $scan['found'] ),
-		'left'    => $left,
-		'done'    => 0 === $left,
-		'fixed'   => (int) ( $counts['riparato'] ?? 0 ),
-		'skipped' => $skipped,
-	) );
+	wp_send_json_success(
+		array(
+			'total'   => count( $scan['found'] ),
+			'left'    => $left,
+			'done'    => 0 === $left,
+			'fixed'   => (int) ( $counts['riparato'] ?? 0 ),
+			'skipped' => $skipped,
+		)
+	);
 }
 add_action( 'wp_ajax_ntn_png_repair_fix', 'ntn_core_ajax_png_repair_fix' );
 
@@ -382,7 +417,11 @@ function ntn_core_ajax_png_repair_quarantine() {
 	ntn_core_png_repair_guard();
 	$pending = ntn_core_png_repair_pending_old_files();
 	$q       = ntn_core_png_repair_get( 'quarantine' );
-	$q      += array( 'created' => 0, 'files' => array(), 'kept' => array() );
+	$q      += array(
+		'created' => 0,
+		'files'   => array(),
+		'kept'    => array(),
+	);
 	$kept    = (array) $q['kept'];
 	$pending = array_values( array_diff( $pending, array_keys( $kept ) ) );
 	$dir     = ntn_core_png_repair_quarantine_dir();
@@ -398,7 +437,11 @@ function ntn_core_ajax_png_repair_quarantine() {
 		wp_mkdir_p( dirname( $to ) );
 		$size = (int) @filesize( $from );
 		if ( @rename( $from, $to ) ) {
-			$q['files'][] = array( 'from' => $rel, 'to' => NTN_PNG_REPAIR_QUARANTINE_DIR . '/' . $rel, 'size' => $size );
+			$q['files'][] = array(
+				'from' => $rel,
+				'to'   => NTN_PNG_REPAIR_QUARANTINE_DIR . '/' . $rel,
+				'size' => $size,
+			);
 			$q['created'] = time(); // i 7 giorni contano dall'ultimo file spostato
 		} else {
 			$kept[ $rel ] = 'spostamento non riuscito';
@@ -408,13 +451,20 @@ function ntn_core_ajax_png_repair_quarantine() {
 	ntn_core_png_repair_set( 'quarantine', $q );
 
 	$left = max( 0, count( $pending ) - NTN_PNG_REPAIR_MOVE_BATCH );
-	wp_send_json_success( array(
-		'left'  => $left,
-		'done'  => 0 === $left,
-		'moved' => count( $q['files'] ),
-		'bytes' => array_sum( wp_list_pluck( $q['files'], 'size' ) ),
-		'kept'  => 0 === $left ? array_map( static function ( $rel, $why ) { return $rel . ' (' . $why . ')'; }, array_keys( $kept ), $kept ) : array(),
-	) );
+	wp_send_json_success(
+		array(
+			'left'  => $left,
+			'done'  => 0 === $left,
+			'moved' => count( $q['files'] ),
+			'bytes' => array_sum( wp_list_pluck( $q['files'], 'size' ) ),
+			'kept'  => 0 === $left ? array_map(
+				static function ( $rel, $why ) {
+					return $rel . ' (' . $why . ')'; },
+				array_keys( $kept ),
+				$kept
+			) : array(),
+		)
+	);
 }
 add_action( 'wp_ajax_ntn_png_repair_quarantine', 'ntn_core_ajax_png_repair_quarantine' );
 
@@ -429,12 +479,19 @@ function ntn_core_png_repair_restore_all() {
 		$from = ntn_core_png_repair_absolute( $row['to'] );
 		$to   = ntn_core_png_repair_absolute( $row['from'] );
 		if ( '' !== $from && '' !== $to && file_exists( $from ) && ! file_exists( $to ) && @rename( $from, $to ) ) {
-			$restored++;
+			++$restored;
 		} else {
 			$left[] = $row;
 		}
 	}
-	ntn_core_png_repair_set( 'quarantine', array( 'created' => $left ? (int) $q['created'] : 0, 'files' => $left, 'kept' => array() ) );
+	ntn_core_png_repair_set(
+		'quarantine',
+		array(
+			'created' => $left ? (int) $q['created'] : 0,
+			'files'   => $left,
+			'kept'    => array(),
+		)
+	);
 	ntn_core_png_repair_prune_dirs();
 	return array( $restored, count( $left ) );
 }
@@ -442,7 +499,12 @@ function ntn_core_png_repair_restore_all() {
 function ntn_core_ajax_png_repair_restore() {
 	ntn_core_png_repair_guard();
 	list( $restored, $left ) = ntn_core_png_repair_restore_all();
-	wp_send_json_success( array( 'restored' => $restored, 'left' => $left ) );
+	wp_send_json_success(
+		array(
+			'restored' => $restored,
+			'left'     => $left,
+		)
+	);
 }
 add_action( 'wp_ajax_ntn_png_repair_restore', 'ntn_core_ajax_png_repair_restore' );
 
@@ -475,13 +537,25 @@ function ntn_core_ajax_png_repair_purge() {
 	foreach ( (array) $q['files'] as $row ) {
 		$path = ntn_core_png_repair_absolute( $row['to'] );
 		if ( '' !== $path && 0 === strpos( ntn_core_png_repair_relative( $path ), NTN_PNG_REPAIR_QUARANTINE_DIR . '/' ) && file_exists( $path ) && @unlink( $path ) ) {
-			$deleted++;
+			++$deleted;
 			$bytes += (int) $row['size'];
 		}
 	}
-	ntn_core_png_repair_set( 'quarantine', array( 'created' => 0, 'files' => array(), 'kept' => array() ) );
+	ntn_core_png_repair_set(
+		'quarantine',
+		array(
+			'created' => 0,
+			'files'   => array(),
+			'kept'    => array(),
+		)
+	);
 	ntn_core_png_repair_prune_dirs();
-	wp_send_json_success( array( 'deleted' => $deleted, 'bytes' => $bytes ) );
+	wp_send_json_success(
+		array(
+			'deleted' => $deleted,
+			'bytes'   => $bytes,
+		)
+	);
 }
 add_action( 'wp_ajax_ntn_png_repair_purge', 'ntn_core_ajax_png_repair_purge' );
 

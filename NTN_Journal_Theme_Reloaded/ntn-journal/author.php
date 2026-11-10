@@ -1,5 +1,7 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 /**
  * The template for displaying author archive pages
  *
@@ -12,29 +14,32 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 get_header();
 
 // Get the queried author object
-$author = get_queried_object();
-$author_id = ( $author && isset( $author->ID ) ) ? intval( $author->ID ) : get_queried_object_id();
+$author      = get_queried_object();
+$author_id   = ( $author && isset( $author->ID ) ) ? intval( $author->ID ) : get_queried_object_id();
 $author_name = ( $author && isset( $author->display_name ) ) ? $author->display_name : 'Autore';
-$author_bio = ( $author && isset( $author->description ) ) ? $author->description : '';
-$author_url = ( $author && isset( $author->user_url ) ) ? $author->user_url : '';
-$post_count = $author_id ? count_user_posts( $author_id ) : 0;
+$author_bio  = ( $author && isset( $author->description ) ) ? $author->description : '';
+$author_url  = ( $author && isset( $author->user_url ) ) ? $author->user_url : '';
+$post_count  = $author_id ? count_user_posts( $author_id ) : 0;
 
 // Helper to calculate total reading time of author's posts (cached for 12 hours)
-$transient_key = 'ntn_author_reading_time_' . $author_id;
+$transient_key      = 'ntn_author_reading_time_' . $author_id;
 $total_reading_time = get_transient( $transient_key );
 
 if ( false === $total_reading_time ) {
 	$total_reading_time = 0;
-	$author_posts = new WP_Query( array(
-		'author'         => $author_id,
-		'posts_per_page' => 100, // Limit to recent 100 posts for performance, instead of -1
-		'fields'         => 'ids'
-	) );
+	$author_posts       = new WP_Query(
+		array(
+			'author'         => $author_id,
+			'posts_per_page' => 100, // Limit to recent 100 posts for performance, instead of -1
+			'fields'         => 'ids',
+		)
+	);
 	if ( $author_posts->have_posts() ) {
 		update_meta_cache( 'post', $author_posts->posts );
 		foreach ( $author_posts->posts as $p_id ) {
 			$reading_time = (int) get_post_meta( $p_id, '_ntn_reading_time', true );
-			if ( ! $reading_time ) { $reading_time = 1; }
+			if ( ! $reading_time ) {
+				$reading_time = 1; }
 			$total_reading_time += $reading_time;
 		}
 		wp_reset_postdata();
@@ -62,7 +67,7 @@ if ( ! is_array( $author_stats ) ) {
 				'fields'         => 'ids',
 			)
 		);
-		$author_reviews = (int) $author_review_query->found_posts;
+		$author_reviews      = (int) $author_review_query->found_posts;
 	}
 	$author_registered = (string) get_the_author_meta( 'user_registered', $author_id );
 	$author_stats      = array(
@@ -173,11 +178,13 @@ $social_keys = array(
 
 				<div class="ntn-pager-wrap">
 					<?php
-					the_posts_pagination( array(
-						'mid_size'  => 2,
-						'prev_text' => '&larr; Precedente',
-						'next_text' => 'Successivo &rarr;',
-					) );
+					the_posts_pagination(
+						array(
+							'mid_size'  => 2,
+							'prev_text' => '&larr; Precedente',
+							'next_text' => 'Successivo &rarr;',
+						)
+					);
 					?>
 				</div>
 

@@ -24,9 +24,21 @@ if ( ! isset( $ntn_filters[ $ntn_filter ] ) ) {
 	$ntn_filter = '';
 }
 
-$ntn_meta = array( array( 'key' => 'rating', 'value' => '', 'compare' => '!=' ) );
+$ntn_meta = array(
+	array(
+		'key'     => 'rating',
+		'value'   => '',
+		'compare' => '!=',
+	),
+);
 if ( $ntn_filters[ $ntn_filter ][1] ) {
-	$ntn_meta = array( array( 'key' => 'rating', 'value' => $ntn_filters[ $ntn_filter ][1], 'compare' => 'IN' ) );
+	$ntn_meta = array(
+		array(
+			'key'     => 'rating',
+			'value'   => $ntn_filters[ $ntn_filter ][1],
+			'compare' => 'IN',
+		),
+	);
 }
 $ntn_reviews = new WP_Query(
 	array(
@@ -39,12 +51,30 @@ $ntn_reviews = new WP_Query(
 	)
 );
 
-$ntn_base = add_query_arg( array( 'page' => 'ntn-journal-functions', 'tab' => 'reviews' ), admin_url( 'admin.php' ) );
+$ntn_base = add_query_arg(
+	array(
+		'page' => 'ntn-journal-functions',
+		'tab'  => 'reviews',
+	),
+	admin_url( 'admin.php' )
+);
 $ntn_url  = static function ( $args ) use ( $ntn_base, $ntn_q, $ntn_filter ) {
-	return add_query_arg( array_filter( array_merge( array( 'q' => $ntn_q, 'giudizio' => $ntn_filter ), $args ) ), $ntn_base );
+	return add_query_arg(
+		array_filter(
+			array_merge(
+				array(
+					'q'        => $ntn_q,
+					'giudizio' => $ntn_filter,
+				),
+				$args
+			)
+		),
+		$ntn_base
+	);
 };
 ?>
-<?php // v4.16.0: voti alle vecchie recensioni
+<?php
+// v4.16.0: voti alle vecchie recensioni
 if ( function_exists( 'ntn_core_reviews_without_rating_query' ) ) {
 	require __DIR__ . '/reviews-missing-rating.php';
 }
@@ -56,14 +86,28 @@ if ( function_exists( 'ntn_core_reviews_without_rating_query' ) ) {
 		<form method="get" action="<?php echo esc_url( admin_url( 'admin.php' ) ); ?>" class="nadm-actions" role="search">
 			<input type="hidden" name="page" value="ntn-journal-functions">
 			<input type="hidden" name="tab" value="reviews">
-			<?php if ( $ntn_filter ) : ?><input type="hidden" name="giudizio" value="<?php echo esc_attr( $ntn_filter ); ?>"><?php endif; ?>
+			<?php
+			if ( $ntn_filter ) :
+				?>
+				<input type="hidden" name="giudizio" value="<?php echo esc_attr( $ntn_filter ); ?>"><?php endif; ?>
 			<label class="screen-reader-text" for="nadm-rev-q">Cerca una recensione</label>
 			<input type="search" id="nadm-rev-q" name="q" value="<?php echo esc_attr( $ntn_q ); ?>" placeholder="Cerca una recensione…">
 			<button type="submit" class="nadm-btn is-sm">Cerca</button>
 		</form>
 		<nav class="nadm-filter" aria-label="Filtra per giudizio">
 			<?php foreach ( $ntn_filters as $ntn_key => $ntn_item ) : ?>
-				<a href="<?php echo esc_url( $ntn_url( array( 'giudizio' => $ntn_key, 'pg' => '' ) ) ); ?>"<?php echo $ntn_key === $ntn_filter ? ' aria-current="true"' : ''; ?>><?php echo esc_html( $ntn_item[0] ); ?></a>
+				<a href="
+				<?php
+				echo esc_url(
+					$ntn_url(
+						array(
+							'giudizio' => $ntn_key,
+							'pg'       => '',
+						)
+					)
+				);
+				?>
+							"<?php echo $ntn_key === $ntn_filter ? ' aria-current="true"' : ''; ?>><?php echo esc_html( $ntn_item[0] ); ?></a>
 			<?php endforeach; ?>
 		</nav>
 	</div>
@@ -115,8 +159,16 @@ if ( function_exists( 'ntn_core_reviews_without_rating_query' ) ) {
 						<tr id="<?php echo esc_attr( $ntn_row ); ?>" hidden>
 							<td colspan="5">
 								<div class="nadm-pc">
-									<div><h4>// Pro</h4><ul class="is-plus"><?php foreach ( array_filter( array_map( 'trim', preg_split( '/\r\n|\r|\n/', $ntn_pros ) ) ) as $ntn_line ) : ?><li><?php echo esc_html( $ntn_line ); ?></li><?php endforeach; ?></ul></div>
-									<div><h4>// Contro</h4><ul class="is-minus"><?php foreach ( array_filter( array_map( 'trim', preg_split( '/\r\n|\r|\n/', $ntn_cons ) ) ) as $ntn_line ) : ?><li><?php echo esc_html( $ntn_line ); ?></li><?php endforeach; ?></ul></div>
+									<div><h4>// Pro</h4><ul class="is-plus">
+									<?php
+									foreach ( array_filter( array_map( 'trim', preg_split( '/\r\n|\r|\n/', $ntn_pros ) ) ) as $ntn_line ) :
+										?>
+										<li><?php echo esc_html( $ntn_line ); ?></li><?php endforeach; ?></ul></div>
+									<div><h4>// Contro</h4><ul class="is-minus">
+									<?php
+									foreach ( array_filter( array_map( 'trim', preg_split( '/\r\n|\r|\n/', $ntn_cons ) ) ) as $ntn_line ) :
+										?>
+										<li><?php echo esc_html( $ntn_line ); ?></li><?php endforeach; ?></ul></div>
 								</div>
 								<?php if ( '' !== trim( $ntn_verdict ) ) : ?>
 									<p class="nadm-verdict"><?php echo esc_html( wp_trim_words( $ntn_verdict, 60, '…' ) ); ?></p>

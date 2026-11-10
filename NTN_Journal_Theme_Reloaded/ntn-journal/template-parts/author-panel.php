@@ -1,5 +1,7 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 /**
  * Firma dell'autore nella testata dell'articolo (v3.6.1, variante A scelta dal CEO).
  *
@@ -39,7 +41,7 @@ if ( ! is_array( $ntn_ap_stats ) ) {
 				'fields'         => 'ids',
 			)
 		);
-		$ntn_ap_reviews = (int) $ntn_ap_review_query->found_posts;
+		$ntn_ap_reviews      = (int) $ntn_ap_review_query->found_posts;
 	}
 	$ntn_ap_registered = (string) get_the_author_meta( 'user_registered', $ntn_ap_id );
 	$ntn_ap_stats      = array(
@@ -59,8 +61,8 @@ $ntn_ap_socials = array(
 	'facebook'  => 'FB',
 	'user_url'  => 'WEB',
 );
-$ntn_ap_avatar = get_avatar( $ntn_ap_id, 112, '', $ntn_ap_name, array( 'class' => 'w-full h-full object-cover' ) );
-$ntn_ap_text   = '' !== trim( $ntn_ap_bio ) ? wp_trim_words( $ntn_ap_bio, 28, '…' ) : sprintf( 'Redattore per %s.', get_bloginfo( 'name' ) );
+$ntn_ap_avatar  = get_avatar( $ntn_ap_id, 112, '', $ntn_ap_name, array( 'class' => 'w-full h-full object-cover' ) );
+$ntn_ap_text    = '' !== trim( $ntn_ap_bio ) ? wp_trim_words( $ntn_ap_bio, 28, '…' ) : sprintf( 'Redattore per %s.', get_bloginfo( 'name' ) );
 ?>
 <section class="ntn-byline" aria-label="<?php esc_attr_e( 'Autore dell\'articolo', 'ntn-journal' ); ?>">
 	<a class="ntn-author-avatar" href="<?php echo esc_url( $ntn_ap_url ); ?>" rel="author" tabindex="-1" aria-hidden="true">

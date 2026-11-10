@@ -1,5 +1,7 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 /**
  * The template for displaying all single Comunicati Stampa
  *
@@ -93,7 +95,16 @@ $press_facts = array_filter(
 					<?php if ( has_post_thumbnail() ) : ?>
 						<figure class="ntn-art-hero">
 							<div class="ntn-art-hero-img">
-								<?php the_post_thumbnail( 'large', array( 'class' => 'w-full h-full object-cover', 'fetchpriority' => 'high', 'loading' => 'eager' ) ); ?>
+								<?php
+								the_post_thumbnail(
+									'large',
+									array(
+										'class'         => 'w-full h-full object-cover',
+										'fetchpriority' => 'high',
+										'loading'       => 'eager',
+									)
+								);
+								?>
 							</div>
 						</figure>
 					<?php endif; ?>

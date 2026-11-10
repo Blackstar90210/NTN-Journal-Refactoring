@@ -1,5 +1,7 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 /**
  * The template for displaying all single posts
  *
@@ -23,8 +25,8 @@ get_header();
 	while ( have_posts() ) :
 		the_post();
 		$primary_category = ntn_get_primary_category( get_the_ID() );
-		$cat_name = $primary_category ? $primary_category->name : 'ARTICLE';
-		$rating   = ntn_get_post_rating( get_the_ID() );
+		$cat_name         = $primary_category ? $primary_category->name : 'ARTICLE';
+		$rating           = ntn_get_post_rating( get_the_ID() );
 
 		$game_title  = ntn_get_igdb_data( get_the_ID(), '_ntn_game_title' );
 		$game_cover  = ntn_get_igdb_data( get_the_ID(), '_ntn_game_cover' );
@@ -62,7 +64,7 @@ get_header();
 		$show_updated = $modified_ts && $published_ts && ( $modified_ts - $published_ts ) > DAY_IN_SECONDS;
 
 		// L'autore non è nella riga dei dati: lo mostra la firma subito sotto
-		$rating_label   = ( $rating && function_exists( 'ntn_get_rating_label' ) ) ? ntn_get_rating_label( $rating ) : '';
+		$rating_label = ( $rating && function_exists( 'ntn_get_rating_label' ) ) ? ntn_get_rating_label( $rating ) : '';
 		?>
 
 	<article id="post-<?php the_ID(); ?>" <?php post_class( 'ntn-article' ); ?>>
@@ -81,7 +83,8 @@ get_header();
 
 				<div class="ntn-art-head">
 					<div class="flex flex-wrap gap-2">
-						<?php if ( ! empty( $primary_category ) && isset( $primary_category->term_id ) ) :
+						<?php
+						if ( ! empty( $primary_category ) && isset( $primary_category->term_id ) ) :
 							$cat_link = get_category_link( $primary_category->term_id );
 							$cat_url  = ( ! empty( $cat_link ) && ! is_wp_error( $cat_link ) && is_string( $cat_link ) ) ? $cat_link : '#';
 							?>
@@ -124,7 +127,16 @@ get_header();
 					<?php $ntn_caption = wp_get_attachment_caption( get_post_thumbnail_id() ); ?>
 					<figure class="ntn-art-hero">
 						<div class="ntn-art-hero-img">
-							<?php the_post_thumbnail( 'large', array( 'class' => 'w-full h-full object-cover', 'fetchpriority' => 'high', 'loading' => 'eager' ) ); ?>
+							<?php
+							the_post_thumbnail(
+								'large',
+								array(
+									'class'         => 'w-full h-full object-cover',
+									'fetchpriority' => 'high',
+									'loading'       => 'eager',
+								)
+							);
+							?>
 							<?php if ( get_theme_mod( 'ntn_journal_enable_watermark', true ) ) : ?>
 								<div class="ntn-art-watermark">
 									<span><?php echo esc_html( '// ' . get_theme_mod( 'ntn_journal_main_logo_text', 'NOME-SITO' ) ); ?></span>
@@ -250,7 +262,7 @@ get_header();
 
 	</article>
 
-	<?php
+		<?php
 	endwhile; // End of the loop.
 	?>
 </main>

@@ -13,13 +13,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 add_action( 'wp_ajax_ntn_reset_igdb_data', 'ntn_core_ajax_reset_igdb_data' );
 function ntn_core_ajax_reset_igdb_data() {
 	check_ajax_referer( 'ntn_batch_scan_igdb_nonce', '_ajax_nonce' );
-	
+
 	if ( ! current_user_can( 'manage_options' ) ) {
 		wp_send_json_error( 'Permessi insufficienti' );
 	}
-	
+
 	global $wpdb;
-	
+
 	// Delete all post meta keys related to IGDB
 	$keys = array(
 		'_ntn_game_title',
@@ -34,14 +34,14 @@ function ntn_core_ajax_reset_igdb_data() {
 		'_ntn_game_video',
 		'_ntn_game_screenshots',
 		'_ntn_game_url',
-		'_ntn_igdb_not_found'
+		'_ntn_igdb_not_found',
 	);
-	
+
 	// Sostituito $wpdb diretto con funzione nativa per preservare la object cache
 	foreach ( $keys as $key ) {
 		delete_post_meta_by_key( $key );
 	}
-	
+
 	wp_send_json_success( 'Reset completato.' );
 }
 
@@ -51,13 +51,13 @@ function ntn_core_ajax_reset_igdb_data() {
 add_action( 'wp_ajax_ntn_get_igdb_connections', 'ntn_core_ajax_get_igdb_connections' );
 function ntn_core_ajax_get_igdb_connections() {
 	check_ajax_referer( 'ntn_batch_scan_igdb_nonce', '_ajax_nonce' );
-	
+
 	if ( ! current_user_can( 'manage_options' ) ) {
 		wp_send_json_error( 'Permessi insufficienti' );
 	}
-	
+
 	global $wpdb;
-	
+
 	$query_args = array(
 		'post_type'      => 'any',
 		'posts_per_page' => 1000, // Limite di sicurezza invece di -1
@@ -71,18 +71,18 @@ function ntn_core_ajax_get_igdb_connections() {
 			),
 		),
 	);
-	$post_ids = get_posts( $query_args );
-	
-	$html = '<table class="wp-list-table widefat fixed striped">';
+	$post_ids   = get_posts( $query_args );
+
+	$html  = '<table class="wp-list-table widefat fixed striped">';
 	$html .= '<thead><tr><th style="width: 80px;">ID</th><th>Articolo</th><th>Collegamento IGDB</th><th style="width: 190px;">Azione</th></tr></thead><tbody>';
-	
+
 	if ( ! empty( $post_ids ) ) {
 		foreach ( $post_ids as $post_id ) {
 			$post_title = get_the_title( $post_id );
-			$edit_url = get_edit_post_link( $post_id );
-			$view_url = get_permalink( $post_id );
+			$edit_url   = get_edit_post_link( $post_id );
+			$view_url   = get_permalink( $post_id );
 			$game_title = get_post_meta( $post_id, '_ntn_game_title', true );
-			
+
 			$html .= '<tr>';
 			$html .= '<td>' . esc_html( $post_id ) . '</td>';
 			$html .= '<td><strong><a href="' . esc_url( $edit_url ) . '" target="_blank">' . esc_html( $post_title ) . '</a></strong><br><a href="' . esc_url( $view_url ) . '" target="_blank" style="font-size: 11px;">Visualizza</a></td>';
@@ -94,7 +94,7 @@ function ntn_core_ajax_get_igdb_connections() {
 		$html .= '<tr><td colspan="4">Nessun articolo collegato a IGDB.</td></tr>';
 	}
 	$html .= '</tbody></table>';
-	
+
 	wp_send_json_success( $html );
 }
 
@@ -104,16 +104,16 @@ function ntn_core_ajax_get_igdb_connections() {
 add_action( 'wp_ajax_ntn_reset_single_igdb', 'ntn_core_ajax_reset_single_igdb' );
 function ntn_core_ajax_reset_single_igdb() {
 	check_ajax_referer( 'ntn_batch_scan_igdb_nonce', '_ajax_nonce' );
-	
+
 	if ( ! current_user_can( 'manage_options' ) ) {
 		wp_send_json_error( 'Permessi insufficienti' );
 	}
-	
+
 	$post_id = isset( $_POST['post_id'] ) ? intval( $_POST['post_id'] ) : 0;
 	if ( ! $post_id ) {
 		wp_send_json_error( 'ID non valido' );
 	}
-	
+
 	$keys = array(
 		'_ntn_game_title',
 		'_ntn_game_cover',
@@ -127,13 +127,13 @@ function ntn_core_ajax_reset_single_igdb() {
 		'_ntn_game_video',
 		'_ntn_game_screenshots',
 		'_ntn_game_url',
-		'_ntn_igdb_not_found'
+		'_ntn_igdb_not_found',
 	);
-	
+
 	foreach ( $keys as $key ) {
 		delete_post_meta( $post_id, $key );
 	}
-	
+
 	wp_send_json_success( 'Scollegato' );
 }
 
@@ -143,37 +143,41 @@ function ntn_core_ajax_reset_single_igdb() {
 add_action( 'wp_ajax_ntn_get_igdb_tag_connections', 'ntn_core_ajax_get_igdb_tag_connections' );
 function ntn_core_ajax_get_igdb_tag_connections() {
 	check_ajax_referer( 'ntn_batch_scan_igdb_nonce', '_ajax_nonce' );
-	
+
 	if ( ! current_user_can( 'manage_options' ) ) {
 		wp_send_json_error( 'Permessi insufficienti' );
 	}
-	
+
 	global $wpdb;
-	
-	$terms = get_terms( array(
-		'taxonomy'   => get_taxonomies(),
-		'hide_empty' => false,
-		'meta_query' => array(
-			array(
-				'key'     => '_ntn_game_title',
-				'value'   => '',
-				'compare' => '!=',
+
+	$terms = get_terms(
+		array(
+			'taxonomy'   => get_taxonomies(),
+			'hide_empty' => false,
+			'meta_query' => array(
+				array(
+					'key'     => '_ntn_game_title',
+					'value'   => '',
+					'compare' => '!=',
+				),
 			),
-		),
-	) );
-	
-	$html = '<table class="wp-list-table widefat fixed striped">';
+		)
+	);
+
+	$html  = '<table class="wp-list-table widefat fixed striped">';
 	$html .= '<thead><tr><th style="width: 80px;">ID Tag</th><th>Nome Tag</th><th>Slug</th><th>Collegamento IGDB</th><th style="width: 190px;">Azione</th></tr></thead><tbody>';
-	
+
 	if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
 		foreach ( $terms as $term ) {
-			$term_name = $term->name;
-			$term_slug = $term->slug;
+			$term_name  = $term->name;
+			$term_slug  = $term->slug;
 			$game_title = get_term_meta( $term->term_id, '_ntn_game_title', true );
-			$igdb_id = get_term_meta( $term->term_id, '_ntn_igdb_game_id', true );
-			$last_sync = get_term_meta( $term->term_id, '_ntn_igdb_last_sync', true );
-			if ( ! $last_sync ) $last_sync = 0;
-			
+			$igdb_id    = get_term_meta( $term->term_id, '_ntn_igdb_game_id', true );
+			$last_sync  = get_term_meta( $term->term_id, '_ntn_igdb_last_sync', true );
+			if ( ! $last_sync ) {
+				$last_sync = 0;
+			}
+
 			$html .= '<tr>';
 			$html .= '<td>' . esc_html( $term->term_id ) . '</td>';
 			$html .= '<td><strong>' . esc_html( $term_name ) . '</strong></td>';
@@ -189,7 +193,7 @@ function ntn_core_ajax_get_igdb_tag_connections() {
 		$html .= '<tr><td colspan="5">Nessun tag collegato a IGDB.</td></tr>';
 	}
 	$html .= '</tbody></table>';
-	
+
 	wp_send_json_success( $html );
 }
 
@@ -199,16 +203,16 @@ function ntn_core_ajax_get_igdb_tag_connections() {
 add_action( 'wp_ajax_ntn_reset_tag_igdb', 'ntn_core_ajax_reset_tag_igdb' );
 function ntn_core_ajax_reset_tag_igdb() {
 	check_ajax_referer( 'ntn_batch_scan_igdb_nonce', '_ajax_nonce' );
-	
+
 	if ( ! current_user_can( 'manage_options' ) ) {
 		wp_send_json_error( 'Permessi insufficienti' );
 	}
-	
+
 	$tag_id = isset( $_POST['tag_id'] ) ? intval( $_POST['tag_id'] ) : 0;
 	if ( ! $tag_id ) {
 		wp_send_json_error( 'ID non valido' );
 	}
-	
+
 	$keys = array(
 		'_ntn_igdb_game_id',
 		'_ntn_game_title',
@@ -223,13 +227,13 @@ function ntn_core_ajax_reset_tag_igdb() {
 		'_ntn_game_video',
 		'_ntn_game_screenshots',
 		'_ntn_game_url',
-		'_ntn_featured_review_id'
+		'_ntn_featured_review_id',
 	);
-	
+
 	foreach ( $keys as $key ) {
 		delete_term_meta( $tag_id, $key );
 	}
-	
+
 	wp_send_json_success( 'Scollegato' );
 }
 
@@ -242,14 +246,14 @@ function ntn_core_ajax_update_single_tag_igdb() {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		wp_send_json_error( 'Permessi insufficienti' );
 	}
-	
-	$tag_id = isset( $_POST['tag_id'] ) ? intval( $_POST['tag_id'] ) : 0;
+
+	$tag_id  = isset( $_POST['tag_id'] ) ? intval( $_POST['tag_id'] ) : 0;
 	$igdb_id = isset( $_POST['igdb_id'] ) ? intval( $_POST['igdb_id'] ) : 0;
-	
+
 	if ( ! $tag_id || ! $igdb_id ) {
 		wp_send_json_error( 'Dati mancanti' );
 	}
-	
+
 	$apicalypse = 'fields id, name, url, cover.url, first_release_date, release_dates.date, release_dates.human, platforms.name, involved_companies.company.name, involved_companies.developer, involved_companies.publisher, genres.name, game_engines.name, videos.video_id, screenshots.image_id; where id = ' . $igdb_id . '; limit 1;';
 
 	$data = ntn_core_igdb_request( $apicalypse );
@@ -261,7 +265,7 @@ function ntn_core_ajax_update_single_tag_igdb() {
 	}
 
 	$game = $data[0];
-	
+
 	// Extract Developers and Publishers
 	$developers = array();
 	$publishers = array();
@@ -301,7 +305,7 @@ function ntn_core_ajax_update_single_tag_igdb() {
 
 	$cover_url = '';
 	if ( isset( $game['cover']['url'] ) ) {
-		$raw_cover  = $game['cover']['url'];
+		$raw_cover = $game['cover']['url'];
 		$cover_url = function_exists( 'ntn_normalize_game_cover_url' ) ? ntn_normalize_game_cover_url( $raw_cover ) : str_replace( 't_thumb', 't_1080p', esc_url_raw( $raw_cover ) );
 	}
 
@@ -322,7 +326,7 @@ function ntn_core_ajax_update_single_tag_igdb() {
 			}
 		}
 	}
-	
+
 	update_term_meta( $tag_id, '_ntn_igdb_game_id', $game['id'] );
 	update_term_meta( $tag_id, '_ntn_game_title', sanitize_text_field( $game['name'] ) );
 	update_term_meta( $tag_id, '_ntn_game_cover', $cover_url );
@@ -339,22 +343,26 @@ function ntn_core_ajax_update_single_tag_igdb() {
 	if ( isset( $game['url'] ) ) {
 		update_term_meta( $tag_id, '_ntn_game_url', esc_url_raw( $game['url'] ) );
 	}
-	
+
 	// Sincronizza anche con il CPT videogioco corrispondente se esiste
 	$tag = get_term( $tag_id, 'post_tag' );
 	if ( $tag && ! is_wp_error( $tag ) ) {
-		$cpt_post = get_posts( array(
-			'name'        => $tag->slug,
-			'post_type'   => 'videogioco',
-			'post_status' => 'any',
-			'numberposts' => 1,
-		) );
+		$cpt_post = get_posts(
+			array(
+				'name'        => $tag->slug,
+				'post_type'   => 'videogioco',
+				'post_status' => 'any',
+				'numberposts' => 1,
+			)
+		);
 		if ( ! empty( $cpt_post ) ) {
 			$post_id = $cpt_post[0]->ID;
-			wp_update_post( array(
-				'ID'         => $post_id,
-				'post_title' => sanitize_text_field( $game['name'] ),
-			) );
+			wp_update_post(
+				array(
+					'ID'         => $post_id,
+					'post_title' => sanitize_text_field( $game['name'] ),
+				)
+			);
 			update_post_meta( $post_id, '_ntn_igdb_game_id', $game['id'] );
 			update_post_meta( $post_id, '_ntn_game_title', sanitize_text_field( $game['name'] ) );
 			update_post_meta( $post_id, '_ntn_game_cover', $cover_url );
@@ -381,7 +389,7 @@ function ntn_core_ajax_update_single_tag_igdb() {
 			}
 		}
 	}
-	
+
 	wp_send_json_success( 'Aggiornato' );
 }
 
@@ -394,9 +402,9 @@ function ntn_core_ajax_unlink_all_tags_igdb() {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		wp_send_json_error( 'Permessi insufficienti' );
 	}
-	
+
 	global $wpdb;
-	
+
 	$keys = array(
 		'_ntn_igdb_game_id',
 		'_ntn_game_title',
@@ -410,14 +418,14 @@ function ntn_core_ajax_unlink_all_tags_igdb() {
 		'_ntn_game_publisher',
 		'_ntn_game_video',
 		'_ntn_game_screenshots',
-		'_ntn_game_url'
+		'_ntn_game_url',
 	);
-	
+
 	foreach ( $keys as $key ) {
 		// delete_metadata con $delete_all=true rimuove per tutti i term (gestendo la cache)
 		delete_metadata( 'term', 0, $key, '', true );
 	}
-	
+
 	wp_send_json_success( 'Scollegati tutti i tag' );
 }
 
@@ -430,17 +438,21 @@ function ntn_core_ajax_igdb_refresh_cache() {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		wp_send_json_error( 'Permessi insufficienti' );
 	}
-	
+
 	global $wpdb;
-	
+
 	$posts_with_igdb = $wpdb->get_var( "SELECT COUNT(DISTINCT post_id) FROM {$wpdb->postmeta} WHERE meta_key = '_ntn_game_title' AND meta_value != ''" );
-	if ( ! $posts_with_igdb ) $posts_with_igdb = 0;
+	if ( ! $posts_with_igdb ) {
+		$posts_with_igdb = 0;
+	}
 	set_transient( 'ntn_igdb_post_count', $posts_with_igdb, 12 * HOUR_IN_SECONDS );
-	
+
 	$tags_with_igdb = $wpdb->get_var( "SELECT COUNT(DISTINCT term_id) FROM {$wpdb->termmeta} WHERE meta_key = '_ntn_game_title' AND meta_value != ''" );
-	if ( ! $tags_with_igdb ) $tags_with_igdb = 0;
+	if ( ! $tags_with_igdb ) {
+		$tags_with_igdb = 0;
+	}
 	set_transient( 'ntn_igdb_tag_count', $tags_with_igdb, 12 * HOUR_IN_SECONDS );
-	
+
 	wp_send_json_success( 'Cache rinfrescata' );
 }
 
@@ -453,10 +465,10 @@ function ntn_core_ajax_igdb_clear_cache() {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		wp_send_json_error( 'Permessi insufficienti' );
 	}
-	
+
 	delete_transient( 'ntn_igdb_post_count' );
 	delete_transient( 'ntn_igdb_tag_count' );
-	
+
 	wp_send_json_success( 'Cache svuotata' );
 }
 
@@ -472,23 +484,27 @@ function ntn_core_ajax_repair_reconnect_igdb_tags() {
 
 	global $wpdb;
 	$reconnected = 0;
-	$merged = 0;
+	$merged      = 0;
 
 	// 1. Riconnetti record orfani di wp_termmeta
-	$orphaned_metas = $wpdb->get_results( "
+	$orphaned_metas = $wpdb->get_results(
+		"
 		SELECT tm.term_id as old_term_id, tm.meta_key, tm.meta_value
 		FROM {$wpdb->termmeta} tm
 		LEFT JOIN {$wpdb->terms} t ON tm.term_id = t.term_id
 		WHERE t.term_id IS NULL AND tm.meta_key = '_ntn_game_title'
-	" );
+	"
+	);
 
 	foreach ( $orphaned_metas as $item ) {
-		$game_title = $item->meta_value;
-		$old_id = $item->old_term_id;
+		$game_title  = $item->meta_value;
+		$old_id      = $item->old_term_id;
 		$clean_title = html_entity_decode( $game_title, ENT_QUOTES, 'UTF-8' );
-		$slug = sanitize_title( $clean_title );
-		
-		$live_tag = $wpdb->get_row( $wpdb->prepare( "
+		$slug        = sanitize_title( $clean_title );
+
+		$live_tag = $wpdb->get_row(
+			$wpdb->prepare(
+				"
 			SELECT t.term_id, t.name, t.slug 
 			FROM {$wpdb->terms} t
 			INNER JOIN {$wpdb->term_taxonomy} tt ON t.term_id = tt.term_id AND tt.taxonomy = 'post_tag'
@@ -498,34 +514,51 @@ function ntn_core_ajax_repair_reconnect_igdb_tags() {
 			   OR LOWER(t.name) = LOWER(%s)
 			ORDER BY tt.count DESC
 			LIMIT 1
-		", $game_title, $slug, sanitize_title( $game_title ), $clean_title ) );
-		
+		",
+				$game_title,
+				$slug,
+				sanitize_title( $game_title ),
+				$clean_title
+			)
+		);
+
 		if ( ! $live_tag ) {
-			$live_tag = $wpdb->get_row( $wpdb->prepare( "
+			$live_tag = $wpdb->get_row(
+				$wpdb->prepare(
+					"
 				SELECT t.term_id, t.name, t.slug 
 				FROM {$wpdb->terms} t
 				INNER JOIN {$wpdb->term_taxonomy} tt ON t.term_id = tt.term_id AND tt.taxonomy = 'post_tag'
 				WHERE t.slug LIKE %s
 				ORDER BY tt.count DESC
 				LIMIT 1
-			", $slug . '%' ) );
+			",
+					$slug . '%'
+				)
+			);
 		}
-		
+
 		if ( $live_tag ) {
-			$all_old_metas = $wpdb->get_results( $wpdb->prepare( "
+			$all_old_metas = $wpdb->get_results(
+				$wpdb->prepare(
+					"
 				SELECT meta_key, meta_value FROM {$wpdb->termmeta} WHERE term_id = %d
-			", $old_id ) );
-			
+			",
+					$old_id
+				)
+			);
+
 			foreach ( $all_old_metas as $m ) {
 				update_term_meta( $live_tag->term_id, $m->meta_key, maybe_unserialize( $m->meta_value ) );
 			}
 			$wpdb->delete( $wpdb->termmeta, array( 'term_id' => $old_id ) );
-			$reconnected++;
+			++$reconnected;
 		}
 	}
 
 	// 2. Unifica tag duplicati con suffisso numerico
-	$duplicate_tags = $wpdb->get_results( "
+	$duplicate_tags = $wpdb->get_results(
+		"
 		SELECT t1.term_id as duplicate_id, t1.name as duplicate_name, t1.slug as duplicate_slug,
 			   t2.term_id as master_id, t2.name as master_name, t2.slug as master_slug
 		FROM {$wpdb->terms} t1
@@ -533,7 +566,8 @@ function ntn_core_ajax_repair_reconnect_igdb_tags() {
 		INNER JOIN {$wpdb->terms} t2 ON t2.slug = REGEXP_REPLACE(t1.slug, '-\\d+$', '') AND t1.term_id != t2.term_id
 		INNER JOIN {$wpdb->term_taxonomy} tt2 ON t2.term_id = tt2.term_id AND tt2.taxonomy = 'post_tag'
 		WHERE t1.slug REGEXP '-\\d+$'
-	" );
+	"
+	);
 
 	foreach ( $duplicate_tags as $dup ) {
 		$dup_metas = $wpdb->get_results( $wpdb->prepare( "SELECT meta_key, meta_value FROM {$wpdb->termmeta} WHERE term_id = %d", $dup->duplicate_id ) );
@@ -543,32 +577,37 @@ function ntn_core_ajax_repair_reconnect_igdb_tags() {
 				update_term_meta( $dup->master_id, $dm->meta_key, maybe_unserialize( $dm->meta_value ) );
 			}
 		}
-		
-		$dup_tt_id = $wpdb->get_var( $wpdb->prepare( "SELECT term_taxonomy_id FROM {$wpdb->term_taxonomy} WHERE term_id = %d AND taxonomy = 'post_tag'", $dup->duplicate_id ) );
+
+		$dup_tt_id    = $wpdb->get_var( $wpdb->prepare( "SELECT term_taxonomy_id FROM {$wpdb->term_taxonomy} WHERE term_id = %d AND taxonomy = 'post_tag'", $dup->duplicate_id ) );
 		$master_tt_id = $wpdb->get_var( $wpdb->prepare( "SELECT term_taxonomy_id FROM {$wpdb->term_taxonomy} WHERE term_id = %d AND taxonomy = 'post_tag'", $dup->master_id ) );
-		
+
 		if ( $dup_tt_id && $master_tt_id ) {
 			$post_ids = $wpdb->get_col( $wpdb->prepare( "SELECT object_id FROM {$wpdb->term_relationships} WHERE term_taxonomy_id = %d", $dup_tt_id ) );
 			foreach ( $post_ids as $pid ) {
-				$wpdb->replace( $wpdb->term_relationships, array(
-					'object_id' => $pid,
-					'term_taxonomy_id' => $master_tt_id,
-					'term_order' => 0
-				) );
+				$wpdb->replace(
+					$wpdb->term_relationships,
+					array(
+						'object_id'        => $pid,
+						'term_taxonomy_id' => $master_tt_id,
+						'term_order'       => 0,
+					)
+				);
 			}
 			$wpdb->delete( $wpdb->term_relationships, array( 'term_taxonomy_id' => $dup_tt_id ) );
 			wp_delete_term( $dup->duplicate_id, 'post_tag' );
 			wp_update_term_count_now( array( $master_tt_id ), 'post_tag' );
-			$merged++;
+			++$merged;
 		}
 	}
 
 	delete_transient( 'ntn_igdb_post_count' );
 	delete_transient( 'ntn_igdb_tag_count' );
 
-	wp_send_json_success( array(
-		'message' => "Operazione completata: $reconnected metadati riconnessi, $merged tag unificati.",
-		'reconnected' => $reconnected,
-		'merged' => $merged
-	) );
+	wp_send_json_success(
+		array(
+			'message'     => "Operazione completata: $reconnected metadati riconnessi, $merged tag unificati.",
+			'reconnected' => $reconnected,
+			'merged'      => $merged,
+		)
+	);
 }

@@ -103,8 +103,15 @@ function ntn_core_reviews_without_rating_query( $paged = 1, $per_page = NTN_RATI
 		'order'               => 'DESC',
 		'meta_query'          => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- elenco in amministrazione.
 			'relation' => 'OR',
-			array( 'key' => 'rating', 'compare' => 'NOT EXISTS' ),
-			array( 'key' => 'rating', 'value' => '', 'compare' => '=' ),
+			array(
+	'key'     => 'rating',
+	'compare' => 'NOT EXISTS',
+		),
+			array(
+		'key'     => 'rating',
+		'value'   => '',
+		'compare' => '=',
+		),
 		),
 	);
 	if ( $paged > 0 ) {

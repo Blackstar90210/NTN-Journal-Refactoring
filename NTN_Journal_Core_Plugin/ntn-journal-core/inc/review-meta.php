@@ -1,6 +1,8 @@
 <?php
 
-if ( ! defined( 'ABSPATH' ) ) exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 /**
  * Register Custom Meta Box for Review Details.
  */
@@ -18,10 +20,10 @@ add_action( 'add_meta_boxes', 'ntn_add_review_meta_box' );
 
 function ntn_render_review_meta_box( $post ) {
 	// Retrieve current values
-	$rating = get_post_meta( $post->ID, 'rating', true );
-	$pros = get_post_meta( $post->ID, 'pros', true );
-	$cons = get_post_meta( $post->ID, 'cons', true );
-	$verdict = get_post_meta( $post->ID, 'verdict', true );
+	$rating        = get_post_meta( $post->ID, 'rating', true );
+	$pros          = get_post_meta( $post->ID, 'pros', true );
+	$cons          = get_post_meta( $post->ID, 'cons', true );
+	$verdict       = get_post_meta( $post->ID, 'verdict', true );
 	$reviewed_item = get_post_meta( $post->ID, 'reviewed_item', true );
 	$review_source = get_post_meta( $post->ID, 'ntn_review_source', true );
 
@@ -50,7 +52,7 @@ function ntn_render_review_meta_box( $post ) {
 			<select id="ntn_review_source" name="ntn_review_source" style="width: 100%; max-width: 600px; padding: 8px 12px; font-size: 14px; border-radius: 0;">
 				<option value="" <?php selected( $review_source, '' ); ?>>Non specificata</option>
 				<option value="Fornito dall'editore" <?php selected( $review_source, "Fornito dall'editore" ); ?>>Fornito dall'editore</option>
-				<option value="Fornito dallo studio di sviluppo" <?php selected( $review_source, "Fornito dallo studio di sviluppo" ); ?>>Fornito dallo studio di sviluppo</option>
+				<option value="Fornito dallo studio di sviluppo" <?php selected( $review_source, 'Fornito dallo studio di sviluppo' ); ?>>Fornito dallo studio di sviluppo</option>
 				<option value="Acquistato dall'autore" <?php selected( $review_source, "Acquistato dall'autore" ); ?>>Acquistato dall'autore</option>
 			</select>
 			<p class="description" style="margin: 6px 0 0; font-size: 12px;">Indica come è stato ottenuto il gioco (verrà mostrato nel box recensione).</p>

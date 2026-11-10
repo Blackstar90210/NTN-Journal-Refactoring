@@ -103,7 +103,12 @@ function ntn_release_phrase( $release, $precision ): string {
 		$when   = 'a ' . $months[ $month - 1 ] . ' ' . $year;
 	} elseif ( 'quarter' === $effective ) {
 		$quarter = (int) ceil( $month / 3 );
-		$names   = array( 1 => 'primo', 2 => 'secondo', 3 => 'terzo', 4 => 'quarto' );
+		$names   = array(
+			1 => 'primo',
+			2 => 'secondo',
+			3 => 'terzo',
+			4 => 'quarto',
+		);
 		$end     = (int) gmmktime( 23, 59, 59, $quarter * 3 + 1, 0, $year );
 		$when    = 'nel ' . $names[ $quarter ] . ' trimestre del ' . $year;
 	} else {
@@ -120,7 +125,7 @@ function ntn_release_phrase( $release, $precision ): string {
  * @return array<int, string>
  */
 function ntn_hub_names( $value ): array {
-	$list = is_array( $value ) ? $value : ( is_scalar( $value ) ? explode( ',', (string) $value ) : array() );
+	$list  = is_array( $value ) ? $value : ( is_scalar( $value ) ? explode( ',', (string) $value ) : array() );
 	$names = array();
 	foreach ( $list as $item ) {
 		if ( is_scalar( $item ) ) {
@@ -227,19 +232,28 @@ function ntn_get_hub_videogame_entity( int $post_id ): array {
 	}
 
 	if ( ! empty( $info['cover'] ) && is_string( $info['cover'] ) ) {
-		$cover = function_exists( 'ntn_normalize_game_cover_url' ) ? ntn_normalize_game_cover_url( $info['cover'] ) : $info['cover'];
+		$cover           = function_exists( 'ntn_normalize_game_cover_url' ) ? ntn_normalize_game_cover_url( $info['cover'] ) : $info['cover'];
 		$entity['image'] = esc_url_raw( $cover );
 	}
 
 	$developers = ntn_hub_names( $info['developer'] ?? array() );
 	if ( $developers ) {
-		$entity['author'] = array_map( static function ( $name ) {
-			return array( '@type' => 'Organization', 'name' => $name );
-		}, array_slice( $developers, 0, 3 ) );
+		$entity['author'] = array_map(
+			static function ( $name ) {
+				return array(
+					'@type' => 'Organization',
+					'name'  => $name,
+				);
+			},
+			array_slice( $developers, 0, 3 )
+		);
 	}
 	$publishers = ntn_hub_names( $info['publisher'] ?? array() );
 	if ( $publishers ) {
-		$entity['publisher'] = array( '@type' => 'Organization', 'name' => $publishers[0] );
+		$entity['publisher'] = array(
+			'@type' => 'Organization',
+			'name'  => $publishers[0],
+		);
 	}
 
 	$genres = ntn_hub_names( $info['genres'] ?? array() );
@@ -298,7 +312,10 @@ function ntn_hub_collection_schema(): void {
 		$page['description'] = $game['description'];
 	}
 	if ( ! empty( $game['image'] ) ) {
-		$page['primaryImageOfPage'] = array( '@type' => 'ImageObject', 'url' => $game['image'] );
+		$page['primaryImageOfPage'] = array(
+			'@type' => 'ImageObject',
+			'url'   => $game['image'],
+		);
 	}
 
 	echo '<!-- SEO: Schema Markup della Hub -->';
@@ -394,19 +411,29 @@ function ntn_hub_has_review( int $post_id ): bool {
 	$tag  = $slug ? get_term_by( 'slug', $slug, 'post_tag' ) : false;
 	$has  = false;
 	if ( $tag instanceof WP_Term ) {
-		$query = new WP_Query( array(
-			'post_type'      => 'post',
-			'post_status'    => 'publish',
-			'posts_per_page' => 1,
-			'fields'         => 'ids',
-			'no_found_rows'  => true,
-			'tax_query'      => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+		$query = new WP_Query(
+			array(
+				'post_type'      => 'post',
+				'post_status'    => 'publish',
+				'posts_per_page' => 1,
+				'fields'         => 'ids',
+				'no_found_rows'  => true,
+				'tax_query'      => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 				'relation' => 'AND',
-				array( 'taxonomy' => 'post_tag', 'field' => 'term_id', 'terms' => $tag->term_id ),
-				array( 'taxonomy' => 'category', 'field' => 'slug', 'terms' => array( 'recensioni', 'recensione' ) ),
-			),
-		) );
-		$has = ! empty( $query->posts );
+				array(
+			'taxonomy' => 'post_tag',
+			'field'    => 'term_id',
+			'terms'    => $tag->term_id,
+				),
+				array(
+				'taxonomy' => 'category',
+				'field'    => 'slug',
+				'terms'    => array( 'recensioni', 'recensione' ),
+				),
+				),
+			)
+		);
+		$has   = ! empty( $query->posts );
 	}
 	set_transient( 'ntn_hub_has_review_' . $post_id, $has ? '1' : '0', HOUR_IN_SECONDS );
 	return $has;

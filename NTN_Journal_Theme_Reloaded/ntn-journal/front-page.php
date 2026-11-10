@@ -1,5 +1,7 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 /**
  * Home (fase 3 del restyling, v3.4.0).
  *
@@ -252,7 +254,12 @@ $ntn_hub_map  = (bool) get_theme_mod( 'ntn_journal_front_hub_map', true );
 				<h2 id="ntn-h-video" class="ntn-sec-title">// Live e video</h2>
 			</div>
 			<div class="ntn-cells ntn-cells--2">
-				<?php foreach ( array( 'sidebar-home-twitch' => 'Twitch live', 'sidebar-home-youtube' => 'YouTube' ) as $ntn_sidebar => $ntn_label ) : ?>
+				<?php
+				foreach ( array(
+					'sidebar-home-twitch'  => 'Twitch live',
+					'sidebar-home-youtube' => 'YouTube',
+				) as $ntn_sidebar => $ntn_label ) :
+					?>
 					<?php if ( is_active_sidebar( $ntn_sidebar ) ) : ?>
 						<div class="ntn-cell">
 							<div class="ntn-meta mb-3"><span class="ntn-entity"><span class="ntn-dot" aria-hidden="true"></span><?php echo esc_html( $ntn_label ); ?></span></div>

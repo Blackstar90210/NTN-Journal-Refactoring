@@ -1,6 +1,8 @@
 <?php
 
-if ( ! defined( 'ABSPATH' ) ) exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 /**
  * ==============================================================================
  * SEO OTTIMIZZAZIONI: BREADCRUMB E TABLE OF CONTENTS
@@ -40,7 +42,9 @@ if ( ! function_exists( 'ntn_core_other_seo_plugin_active' ) ) {
  * Genera il Breadcrumb con JSON-LD
  */
 function ntn_journal_breadcrumb() {
-	if ( is_front_page() || is_home() ) return;
+	if ( is_front_page() || is_home() ) {
+		return;
+	}
 
 	$home_url = home_url( '/' );
 
@@ -50,83 +54,83 @@ function ntn_journal_breadcrumb() {
 	echo '<span class="text-zinc-300 dark:text-zinc-700">//</span>';
 
 	$schema = array(
-		'@context' => 'https://schema.org',
-		'@type' => 'BreadcrumbList',
-		'name' => 'Breadcrumb',
+		'@context'        => 'https://schema.org',
+		'@type'           => 'BreadcrumbList',
+		'name'            => 'Breadcrumb',
 		'itemListElement' => array(
 			array(
-				'@type' => 'ListItem',
+				'@type'    => 'ListItem',
 				'position' => 1,
-				'name' => 'Home',
-				'item' => $home_url
-			)
-		)
+				'name'     => 'Home',
+				'item'     => $home_url,
+			),
+		),
 	);
-	$pos = 2;
+	$pos    = 2;
 
 	if ( is_single() ) {
 		global $post;
-		$queried = function_exists( 'get_queried_object' ) ? get_queried_object() : null;
-		$post_id = ( $post instanceof WP_Post ) ? $post->ID : ( ( $queried instanceof WP_Post ) ? $queried->ID : get_the_ID() );
+		$queried          = function_exists( 'get_queried_object' ) ? get_queried_object() : null;
+		$post_id          = ( $post instanceof WP_Post ) ? $post->ID : ( ( $queried instanceof WP_Post ) ? $queried->ID : get_the_ID() );
 		$primary_category = ntn_get_primary_category( $post_id );
-		$cat_name = $primary_category ? $primary_category->name : 'Article';
-		$cat_url = $primary_category ? get_category_link( $primary_category->term_id ) : '#';
+		$cat_name         = $primary_category ? $primary_category->name : 'Article';
+		$cat_url          = $primary_category ? get_category_link( $primary_category->term_id ) : '#';
 		if ( is_wp_error( $cat_url ) || ! is_string( $cat_url ) ) {
 			$cat_url = '#';
 		}
 		$post_title = get_the_title( $post_id );
-		$post_url = get_permalink( $post_id );
+		$post_url   = get_permalink( $post_id );
 
 		// Comunicati, videogiochi e altri tipi con archivio: il passaggio intermedio è la loro sezione, non una categoria (v3.10.0)
 		$post_type = get_post_type( $post_id );
 		if ( $post_type && 'post' !== $post_type ) {
-			$type_object  = get_post_type_object( $post_type );
-			$type_archive = get_post_type_archive_link( $post_type );
+			$type_object      = get_post_type_object( $post_type );
+			$type_archive     = get_post_type_archive_link( $post_type );
 			$primary_category = null;
 			if ( $type_object && is_string( $type_archive ) && '' !== $type_archive ) {
 				$primary_category = true;
-				$cat_name = $type_object->labels->name;
-				$cat_url  = $type_archive;
+				$cat_name         = $type_object->labels->name;
+				$cat_url          = $type_archive;
 			}
 		}
 
 		if ( $primary_category ) {
 			echo '<a href="' . esc_url( $cat_url ) . '" class="hover:text-zinc-950 dark:hover:text-white transition-colors">' . esc_html( $cat_name ) . '</a>';
 			echo '<span class="text-zinc-300 dark:text-zinc-700">//</span>';
-			
+
 			$schema['itemListElement'][] = array(
-				'@type' => 'ListItem',
+				'@type'    => 'ListItem',
 				'position' => $pos,
-				'name' => $cat_name,
-				'item' => $cat_url
+				'name'     => $cat_name,
+				'item'     => $cat_url,
 			);
-			$pos++;
+			++$pos;
 		}
-		
+
 		echo '<span class="text-zinc-900 dark:text-zinc-300 font-bold truncate max-w-[200px] sm:max-w-xs md:max-w-md">' . esc_html( $post_title ) . '</span>';
-		
+
 		$schema['itemListElement'][] = array(
-			'@type' => 'ListItem',
+			'@type'    => 'ListItem',
 			'position' => $pos,
-			'name' => wp_strip_all_tags( $post_title ),
-			'item' => $post_url
+			'name'     => wp_strip_all_tags( $post_title ),
+			'item'     => $post_url,
 		);
 
 	} elseif ( is_page() ) {
 		$post_title = get_the_title();
-		$post_url = get_permalink();
+		$post_url   = get_permalink();
 		echo '<span class="text-zinc-900 dark:text-zinc-300 font-bold truncate max-w-[200px] sm:max-w-xs md:max-w-md">' . esc_html( $post_title ) . '</span>';
-		
+
 		$schema['itemListElement'][] = array(
-			'@type' => 'ListItem',
+			'@type'    => 'ListItem',
 			'position' => $pos,
-			'name' => wp_strip_all_tags( $post_title ),
-			'item' => $post_url
+			'name'     => wp_strip_all_tags( $post_title ),
+			'item'     => $post_url,
 		);
 	} elseif ( is_category() || is_tag() || is_tax() ) {
-		$term = get_queried_object();
+		$term      = get_queried_object();
 		$term_name = ( $term && isset( $term->name ) ) ? $term->name : 'Archivio';
-		$term_url = ( $term && ! is_wp_error( $term ) ) ? get_term_link( $term ) : home_url( '/' );
+		$term_url  = ( $term && ! is_wp_error( $term ) ) ? get_term_link( $term ) : home_url( '/' );
 		if ( is_wp_error( $term_url ) || ! is_string( $term_url ) ) {
 			$term_url = home_url( '/' );
 		}
@@ -151,7 +155,7 @@ function ntn_journal_breadcrumb() {
 					'name'     => wp_strip_all_tags( $crumb_label( $ancestor ) ),
 					'item'     => $anc_url,
 				);
-				$pos++;
+				++$pos;
 			}
 		}
 		// Hub dello studio (v3.21.0): prima la Hub "Sviluppatori italiani" che lo elenca, es. Home // Sviluppatori italiani // 3DClouds
@@ -166,48 +170,48 @@ function ntn_journal_breadcrumb() {
 					'name'     => wp_strip_all_tags( $studio['parent']['label'] ),
 					'item'     => $studio['parent']['url'],
 				);
-				$pos++;
+				++$pos;
 			}
 		}
 		if ( $term instanceof WP_Term ) {
 			$term_name = $crumb_label( $term );
 		}
 		echo '<span class="text-zinc-900 dark:text-zinc-300 font-bold truncate max-w-[200px] sm:max-w-xs md:max-w-md">' . esc_html( $term_name ) . '</span>';
-		
+
 		$schema['itemListElement'][] = array(
-			'@type' => 'ListItem',
+			'@type'    => 'ListItem',
 			'position' => $pos,
-			'name' => wp_strip_all_tags( $term_name ),
-			'item' => $term_url
+			'name'     => wp_strip_all_tags( $term_name ),
+			'item'     => $term_url,
 		);
 	} elseif ( is_post_type_archive() ) {
-		$qv_pt = get_query_var( 'post_type' );
-		$pt_slug = is_array( $qv_pt ) ? reset( $qv_pt ) : $qv_pt;
+		$qv_pt     = get_query_var( 'post_type' );
+		$pt_slug   = is_array( $qv_pt ) ? reset( $qv_pt ) : $qv_pt;
 		$post_type = get_post_type_object( $pt_slug );
-		$pt_name = ( $post_type && isset( $post_type->labels ) && isset( $post_type->labels->name ) ) ? $post_type->labels->name : 'Archivio';
-		$pt_url = get_post_type_archive_link( $pt_slug );
+		$pt_name   = ( $post_type && isset( $post_type->labels ) && isset( $post_type->labels->name ) ) ? $post_type->labels->name : 'Archivio';
+		$pt_url    = get_post_type_archive_link( $pt_slug );
 		if ( is_wp_error( $pt_url ) || ! is_string( $pt_url ) ) {
 			$pt_url = home_url( '/' );
 		}
 		echo '<span class="text-zinc-900 dark:text-zinc-300 font-bold truncate max-w-[200px] sm:max-w-xs md:max-w-md">' . esc_html( $pt_name ) . '</span>';
-		
+
 		$schema['itemListElement'][] = array(
-			'@type' => 'ListItem',
+			'@type'    => 'ListItem',
 			'position' => $pos,
-			'name' => wp_strip_all_tags( $pt_name ),
-			'item' => $pt_url
+			'name'     => wp_strip_all_tags( $pt_name ),
+			'item'     => $pt_url,
 		);
 	} elseif ( is_author() ) {
-		$author = get_queried_object();
+		$author      = get_queried_object();
 		$author_name = $author->display_name;
-		$author_url = get_author_posts_url( $author->ID );
+		$author_url  = get_author_posts_url( $author->ID );
 		echo '<span class="text-zinc-900 dark:text-zinc-300 font-bold truncate max-w-[200px] sm:max-w-xs md:max-w-md">' . esc_html( $author_name ) . '</span>';
-		
+
 		$schema['itemListElement'][] = array(
-			'@type' => 'ListItem',
+			'@type'    => 'ListItem',
 			'position' => $pos,
-			'name' => wp_strip_all_tags( $author_name ),
-			'item' => $author_url
+			'name'     => wp_strip_all_tags( $author_name ),
+			'item'     => $author_url,
 		);
 	} elseif ( is_search() ) {
 		// v3.19.0: nella pagina dei risultati il percorso dice "Ricerca", non "Archivio" (nessun dato per Google)
@@ -265,7 +269,7 @@ function ntn_journal_auto_toc( $content = '' ) {
 			$used_slugs[ $base_slug ] = 1;
 			return $base_slug;
 		}
-		$used_slugs[ $base_slug ]++;
+		++$used_slugs[ $base_slug ];
 		return $base_slug . '-' . $used_slugs[ $base_slug ];
 	};
 
@@ -357,7 +361,7 @@ function ntn_core_toc_markup( $items, $modifier = '' ) {
 	$sections = 0;
 	foreach ( $items as $item ) {
 		if ( isset( $item['level'] ) && 2 === (int) $item['level'] ) {
-			$sections++;
+			++$sections;
 		}
 	}
 	if ( 0 === $sections ) {
@@ -461,7 +465,7 @@ if ( ! function_exists( 'ntn_get_social_preview_image' ) ) {
 		}
 
 		static $cache = array();
-		$cache_key = '';
+		$cache_key    = '';
 		if ( is_numeric( $post_or_term ) ) {
 			$cache_key = 'id_' . $post_or_term;
 		} elseif ( $post_or_term instanceof WP_Post ) {
@@ -545,19 +549,25 @@ if ( ! function_exists( 'ntn_get_social_preview_image' ) ) {
 				$image_url = preg_replace( '/\/t_[a-z0-9_]+\//', '/t_1080p/', $image_url );
 			}
 			$result = esc_url_raw( $image_url );
-			if ( $cache_key ) $cache[ $cache_key ] = $result;
+			if ( $cache_key ) {
+				$cache[ $cache_key ] = $result;
+			}
 			return $result;
 		}
 
 		// 5. Fallback Globale Immagine Predefinita
 		if ( function_exists( 'ntn_journal_default_cover_url' ) ) {
 			$result = ntn_journal_default_cover_url();
-			if ( $cache_key ) $cache[ $cache_key ] = $result;
+			if ( $cache_key ) {
+				$cache[ $cache_key ] = $result;
+			}
 			return $result;
 		}
 
 		$result = get_template_directory_uri() . '/assets/images/default-cover.png';
-		if ( $cache_key ) $cache[ $cache_key ] = $result;
+		if ( $cache_key ) {
+			$cache[ $cache_key ] = $result;
+		}
 		return $result;
 	}
 }
@@ -585,24 +595,30 @@ function ntn_init_seo_plugin_hooks() {
 	add_filter( 'rank_math/opengraph/twitter/image', 'ntn_seo_plugin_social_image_fallback', 10, 2 );
 	add_filter( 'seopress_social_og_thumb', 'ntn_seo_plugin_social_image_fallback', 10, 2 );
 	add_filter( 'seopress_social_twitter_card_thumb', 'ntn_seo_plugin_social_image_fallback', 10, 2 );
-	add_filter( 'aioseo_facebook_tags', function( $tags ) {
-		if ( empty( $tags['og:image'] ) ) {
-			$social_img = ntn_get_social_preview_image();
-			if ( ! empty( $social_img ) && strpos( $social_img, 'default-cover.png' ) === false ) {
-				$tags['og:image'] = $social_img;
+	add_filter(
+		'aioseo_facebook_tags',
+		function ( $tags ) {
+			if ( empty( $tags['og:image'] ) ) {
+				$social_img = ntn_get_social_preview_image();
+				if ( ! empty( $social_img ) && strpos( $social_img, 'default-cover.png' ) === false ) {
+					$tags['og:image'] = $social_img;
+				}
 			}
+			return $tags;
 		}
-		return $tags;
-	} );
-	add_filter( 'aioseo_twitter_tags', function( $tags ) {
-		if ( empty( $tags['twitter:image'] ) ) {
-			$social_img = ntn_get_social_preview_image();
-			if ( ! empty( $social_img ) && strpos( $social_img, 'default-cover.png' ) === false ) {
-				$tags['twitter:image'] = $social_img;
+	);
+	add_filter(
+		'aioseo_twitter_tags',
+		function ( $tags ) {
+			if ( empty( $tags['twitter:image'] ) ) {
+				$social_img = ntn_get_social_preview_image();
+				if ( ! empty( $social_img ) && strpos( $social_img, 'default-cover.png' ) === false ) {
+					$tags['twitter:image'] = $social_img;
+				}
 			}
+			return $tags;
 		}
-		return $tags;
-	} );
+	);
 }
 add_action( 'init', 'ntn_init_seo_plugin_hooks', 20 );
 
@@ -620,16 +636,22 @@ add_action( 'init', 'ntn_init_seo_plugin_hooks', 20 );
  */
 function ntn_get_social_image_dimensions( $url ) {
 	static $cache = array();
-	$url = (string) $url;
+	$url          = (string) $url;
 	if ( isset( $cache[ $url ] ) ) {
 		return $cache[ $url ];
 	}
-	$dims          = array( 'width' => 0, 'height' => 0 );
+	$dims          = array(
+		'width'  => 0,
+		'height' => 0,
+	);
 	$attachment_id = '' !== $url ? attachment_url_to_postid( $url ) : 0;
 	if ( $attachment_id ) {
 		$src = wp_get_attachment_image_src( $attachment_id, 'full' );
 		if ( is_array( $src ) ) {
-			$dims = array( 'width' => (int) $src[1], 'height' => (int) $src[2] );
+			$dims = array(
+				'width'  => (int) $src[1],
+				'height' => (int) $src[2],
+			);
 		}
 	}
 	$cache[ $url ] = $dims;
@@ -760,9 +782,9 @@ function ntn_journal_open_graph_tags() {
 
 	// SEO Fallback Logic
 	if ( is_post_type_archive() ) {
-		$post_type = get_query_var( 'post_type' );
-		$pt_slug = is_array( $post_type ) ? reset( $post_type ) : $post_type;
-		$ntn_og_url = get_post_type_archive_link( $pt_slug );
+		$post_type   = get_query_var( 'post_type' );
+		$pt_slug     = is_array( $post_type ) ? reset( $post_type ) : $post_type;
+		$ntn_og_url  = get_post_type_archive_link( $pt_slug );
 		$ntn_og_type = 'website';
 		if ( $pt_slug === 'videogioco' ) {
 			$ntn_og_description = 'Catalogo e hub centrale di tutti i videogiochi trattati su NTN Journal.';
@@ -770,7 +792,7 @@ function ntn_journal_open_graph_tags() {
 			$ntn_og_description = get_bloginfo( 'description' );
 		}
 	} elseif ( is_singular() ) {
-		$ntn_og_url = get_permalink();
+		$ntn_og_url  = get_permalink();
 		$ntn_og_type = ( is_single() && ! is_singular( 'videogioco' ) ) ? 'article' : 'website';
 
 		$precomputed_og = get_post_meta( get_the_ID(), '_ntn_og_description', true );
@@ -790,8 +812,8 @@ function ntn_journal_open_graph_tags() {
 			}
 		}
 	} elseif ( is_tag() || is_category() || is_tax() ) {
-		$term = get_queried_object();
-		$ntn_og_url = ( $term && ! is_wp_error( $term ) ) ? get_term_link( $term ) : home_url( '/' );
+		$term        = get_queried_object();
+		$ntn_og_url  = ( $term && ! is_wp_error( $term ) ) ? get_term_link( $term ) : home_url( '/' );
 		$ntn_og_type = 'website';
 		if ( ! empty( $term->description ) ) {
 			$ntn_og_description = wp_strip_all_tags( $term->description );
@@ -804,8 +826,8 @@ function ntn_journal_open_graph_tags() {
 			}
 		}
 	} else {
-		$ntn_og_url = home_url( '/' );
-		$ntn_og_type = 'website';
+		$ntn_og_url         = home_url( '/' );
+		$ntn_og_type        = 'website';
 		$ntn_og_description = get_bloginfo( 'description' );
 	}
 
@@ -815,7 +837,7 @@ function ntn_journal_open_graph_tags() {
 	if ( is_wp_error( $ntn_og_image ) || ! is_string( $ntn_og_image ) ) {
 		$ntn_og_image = '';
 	}
-	
+
 	// Gestione dinamica Robots (noindex per comunicati stampa)
 	$robots_meta = 'index, follow';
 	if ( is_singular( 'comunicato_stampa' ) ) {
@@ -828,9 +850,10 @@ function ntn_journal_open_graph_tags() {
 
 	<!-- SEO: meta description di base. Se attivi un plugin SEO (Yoast,
 	Rank Math, The SEO Framework, ecc.) questi tag vengono bypassati per evitare duplicati. -->
-	<?php 
+	<?php
 	$enable_base = get_option( 'ntn_seo_enable_base', 'yes' );
-	if ( $enable_base === 'yes' && ! ntn_core_other_seo_plugin_active() ) : ?>
+	if ( $enable_base === 'yes' && ! ntn_core_other_seo_plugin_active() ) :
+		?>
 		<meta name="description" content="<?php echo esc_attr( $ntn_og_description ); ?>">
 		<meta name="robots" content="<?php echo esc_attr( $robots_meta ); ?>">
 
@@ -858,12 +881,13 @@ function ntn_journal_open_graph_tags() {
 				'@type'       => 'WebSite',
 				'name'        => get_bloginfo( 'name' ),
 				'url'         => home_url( '/' ),
-				'description' => get_bloginfo( 'description' )
+				'description' => get_bloginfo( 'description' ),
 			);
 			echo '<script type="application/ld+json">' . wp_json_encode( $schema ) . '</script>' . "\n";
 		}
 		?>
-	<?php endif;
+		<?php
+	endif;
 }
 add_action( 'wp_head', 'ntn_journal_open_graph_tags', 5 );
 
@@ -872,7 +896,7 @@ add_action( 'wp_head', 'ntn_journal_open_graph_tags', 5 );
  * se la funzionalità SEO base di NTN Journal è attiva e se l'opzione di pulizia è abilitata.
  */
 function ntn_journal_cleanup_third_party_og() {
-	// 1. Controllo base: se la nostra SEO è disattivata (o sovrascritta da Yoast/RankMath), 
+	// 1. Controllo base: se la nostra SEO è disattivata (o sovrascritta da Yoast/RankMath),
 	// non tocchiamo nulla dei plugin esterni, lasciamo che se la vedano tra loro.
 	$enable_base = get_option( 'ntn_seo_enable_base', 'yes' );
 	if ( $enable_base !== 'yes' || ntn_core_other_seo_plugin_active() ) {
@@ -884,11 +908,11 @@ function ntn_journal_cleanup_third_party_og() {
 	if ( $cleanup_enabled === 'yes' ) {
 		// A. Disattiva Open Graph di Jetpack per evitare duplicati
 		add_filter( 'jetpack_enable_open_graph', '__return_false' );
-		
+
 		// B. Rimuove altre action comuni (es. vecchi plugin Jetpack o social sharing generici)
 		// che si agganciano a wp_head per stampare l'og:image
 		remove_action( 'wp_head', 'jetpack_og_tags' );
-		
+
 		// C. Supporto per altri plugin popolari se presenti
 		// Web Stories (Google) spesso inietta og:image, lo blocchiamo per evitare duplicati nei post normali
 		add_filter( 'web_stories_enable_open_graph', '__return_false' );
@@ -960,12 +984,14 @@ function ntn_core_schema_pick_games( $post_id ) {
 	}
 
 	$post_id = (int) $post_id;
-	$games   = array_values( array_filter(
-		ntn_get_post_games( $post_id ),
-		static function ( $game ) {
-			return ! empty( $game['title'] ) && is_string( $game['title'] );
-		}
-	) );
+	$games   = array_values(
+		array_filter(
+			ntn_get_post_games( $post_id ),
+			static function ( $game ) {
+				return ! empty( $game['title'] ) && is_string( $game['title'] );
+			}
+		)
+	);
 
 	if ( count( $games ) > 1 ) {
 		$contains = static function ( $haystack, $needle ) {
@@ -1090,7 +1116,7 @@ function ntn_core_schema_multi_game_entity( array $game, $post_id ) {
 		$entity['url'] = esc_url( $url );
 	}
 	if ( ! empty( $game['cover'] ) ) {
-		$cover = function_exists( 'ntn_normalize_game_cover_url' ) ? ntn_normalize_game_cover_url( $game['cover'] ) : $game['cover'];
+		$cover           = function_exists( 'ntn_normalize_game_cover_url' ) ? ntn_normalize_game_cover_url( $game['cover'] ) : $game['cover'];
 		$entity['image'] = esc_url( $cover );
 	}
 
@@ -1098,7 +1124,7 @@ function ntn_core_schema_multi_game_entity( array $game, $post_id ) {
 	$view_model = ( $term && function_exists( 'ntn_get_game_view_model' ) ) ? ntn_get_game_view_model( $term ) : null;
 
 	if ( ! empty( $game['developer'] ) ) {
-		$developer = is_array( $game['developer'] ) ? implode( ', ', $game['developer'] ) : $game['developer'];
+		$developer        = is_array( $game['developer'] ) ? implode( ', ', $game['developer'] ) : $game['developer'];
 		$entity['author'] = array(
 			'@type' => 'Organization',
 			'name'  => ntn_core_schema_plain_text( $developer ),
@@ -1151,15 +1177,15 @@ function ntn_core_schema_multi_game_entity( array $game, $post_id ) {
  */
 function ntn_core_schema_single_game_entity( $post_id ) {
 	// 1. Troviamo le informazioni sul gioco (Hub IGDB o meta)
-	$game_title = '';
-	$game_url = '';
-	$game_image = '';
+	$game_title     = '';
+	$game_url       = '';
+	$game_image     = '';
 	$game_developer = '';
 
 	$hub_info = ntn_get_hub_igdb_info( $post_id );
 	if ( is_array( $hub_info ) && ! empty( $hub_info['title'] ) ) {
 		$game_title = $hub_info['title'];
-		$game_url = ! empty( $hub_info['url'] ) ? $hub_info['url'] : '';
+		$game_url   = ! empty( $hub_info['url'] ) ? $hub_info['url'] : '';
 		$game_image = ! empty( $hub_info['cover'] ) ? $hub_info['cover'] : '';
 		if ( ! empty( $hub_info['developer'] ) ) {
 			$game_developer = is_array( $hub_info['developer'] ) ? implode( ', ', $hub_info['developer'] ) : $hub_info['developer'];
@@ -1175,9 +1201,9 @@ function ntn_core_schema_single_game_entity( $post_id ) {
 				$hub_title = get_term_meta( $tag->term_id, '_ntn_game_title', true );
 				if ( ! empty( $hub_title ) ) {
 					$game_title = $hub_title;
-					$game_url = get_term_link( $tag );
+					$game_url   = get_term_link( $tag );
 					$game_image = get_term_meta( $tag->term_id, '_ntn_game_cover', true );
-					$found_tag = $tag;
+					$found_tag  = $tag;
 					break;
 				}
 			}
@@ -1192,8 +1218,8 @@ function ntn_core_schema_single_game_entity( $post_id ) {
 
 	// 2. Costruiamo l'entità VideoGame tramite API Helper (se disponibile)
 	$target_object = $found_tag ? $found_tag : $post_id;
-	$view_model = function_exists( 'ntn_get_game_view_model' ) ? ntn_get_game_view_model( $target_object ) : null;
-	
+	$view_model    = function_exists( 'ntn_get_game_view_model' ) ? ntn_get_game_view_model( $target_object ) : null;
+
 	$videogame_entity = array(
 		'@type'               => 'VideoGame',
 		'@id'                 => $game_schema_id,
@@ -1204,7 +1230,7 @@ function ntn_core_schema_single_game_entity( $post_id ) {
 	if ( ! empty( $game_url ) && ! is_wp_error( $game_url ) ) {
 		$videogame_entity['url'] = esc_url( $game_url );
 	}
-	
+
 	if ( ! empty( $game_image ) ) {
 		if ( function_exists( 'ntn_normalize_game_cover_url' ) ) {
 			$game_image = ntn_normalize_game_cover_url( $game_image );
@@ -1215,7 +1241,7 @@ function ntn_core_schema_single_game_entity( $post_id ) {
 	if ( ! empty( $game_developer ) ) {
 		$videogame_entity['author'] = array(
 			'@type' => 'Organization',
-			'name'  => ntn_core_schema_plain_text( $game_developer ?? '' )
+			'name'  => ntn_core_schema_plain_text( $game_developer ?? '' ),
 		);
 	}
 
@@ -1224,7 +1250,7 @@ function ntn_core_schema_single_game_entity( $post_id ) {
 		if ( ! empty( $view_model['publisher'] ) ) {
 			$videogame_entity['publisher'] = array(
 				'@type' => 'Organization',
-				'name'  => ntn_core_schema_plain_text( $view_model['publisher'][0] ?? '' )
+				'name'  => ntn_core_schema_plain_text( $view_model['publisher'][0] ?? '' ),
 			);
 		}
 
@@ -1252,14 +1278,14 @@ function ntn_core_schema_single_game_entity( $post_id ) {
 
 		// Trailer
 		if ( ! empty( $view_model['video_url'] ) ) {
-			$video_id = str_replace( 'https://www.youtube.com/watch?v=', '', $view_model['video_url'] );
+			$video_id                    = str_replace( 'https://www.youtube.com/watch?v=', '', $view_model['video_url'] );
 			$videogame_entity['trailer'] = array(
 				'@type'        => 'VideoObject',
 				'name'         => 'Trailer di ' . ntn_core_schema_plain_text( $game_title ?? '' ),
 				'description'  => 'Guarda il trailer ufficiale di ' . ntn_core_schema_plain_text( $game_title ?? '' ),
 				'thumbnailUrl' => 'https://img.youtube.com/vi/' . $video_id . '/hqdefault.jpg',
 				'embedUrl'     => 'https://www.youtube.com/embed/' . $video_id,
-				'uploadDate'   => ntn_core_youtube_upload_date( (string) $video_id, get_the_date( 'c', $post_id ) )
+				'uploadDate'   => ntn_core_youtube_upload_date( (string) $video_id, get_the_date( 'c', $post_id ) ),
 			);
 		}
 
@@ -1269,7 +1295,7 @@ function ntn_core_schema_single_game_entity( $post_id ) {
 			foreach ( $view_model['screenshots'] as $screenshot ) {
 				$videogame_entity['screenshot'][] = array(
 					'@type' => 'ImageObject',
-					'url'   => esc_url_raw( $screenshot )
+					'url'   => esc_url_raw( $screenshot ),
 				);
 			}
 		}
@@ -1344,103 +1370,117 @@ function ntn_tsf_add_videogame_schema( $data, $context = array() ) {
 			if ( is_array( $entity ) && isset( $entity['@type'] ) ) {
 				$types = (array) $entity['@type'];
 				if ( in_array( 'Article', $types ) || in_array( 'NewsArticle', $types ) || in_array( 'BlogPosting', $types ) || in_array( 'WebPage', $types ) ) {
-					
+
 					// Upgrade WebPage to NewsArticle if it's missing the Article nature
 					if ( in_array( 'WebPage', $types ) && count( array_intersect( array( 'Article', 'NewsArticle', 'BlogPosting' ), $types ) ) === 0 ) {
-						$data[$key]['@type'] = array( 'WebPage', 'NewsArticle' );
+						$data[ $key ]['@type'] = array( 'WebPage', 'NewsArticle' );
 					}
 
 					// Fix for Google Rich Results requirements on Article/NewsArticle/Review
-					$current_types = (array) $data[$key]['@type'];
+					$current_types = (array) $data[ $key ]['@type'];
 					if ( count( array_intersect( array( 'Article', 'NewsArticle', 'BlogPosting', 'Review' ), $current_types ) ) > 0 ) {
-						if ( empty( $data[$key]['headline'] ) ) {
-							$data[$key]['headline'] = ntn_core_schema_plain_text( get_the_title( $post_id ) );
+						if ( empty( $data[ $key ]['headline'] ) ) {
+							$data[ $key ]['headline'] = ntn_core_schema_plain_text( get_the_title( $post_id ) );
 						}
-						
-						if ( empty( $data[$key]['image'] ) ) {
+
+						if ( empty( $data[ $key ]['image'] ) ) {
 							$thumbnail_id = get_post_thumbnail_id( $post_id );
 							if ( $thumbnail_id ) {
 								$image_url = wp_get_attachment_image_url( $thumbnail_id, 'full' );
 								if ( $image_url ) {
-									$data[$key]['image'] = array(
+									$data[ $key ]['image'] = array(
 										'@type' => 'ImageObject',
-										'url'   => esc_url( $image_url )
+										'url'   => esc_url( $image_url ),
 									);
 								}
 							}
 						}
-						
-						if ( empty( $data[$key]['publisher'] ) ) {
-							$data[$key]['publisher'] = array(
-								'@id' => home_url( '/#/schema/Organization' )
+
+						if ( empty( $data[ $key ]['publisher'] ) ) {
+							$data[ $key ]['publisher'] = array(
+								'@id' => home_url( '/#/schema/Organization' ),
 							);
 						}
 
 						// Fix date timezones (Google Rich Results recommends ISO 8601 with timezone)
-						$data[$key]['datePublished'] = get_the_time( 'c', $post_id );
-						$data[$key]['dateModified']  = get_the_modified_time( 'c', $post_id );
+						$data[ $key ]['datePublished'] = get_the_time( 'c', $post_id );
+						$data[ $key ]['dateModified']  = get_the_modified_time( 'c', $post_id );
 
 						// Fix missing author URL
-						if ( isset( $data[$key]['author'] ) && is_array( $data[$key]['author'] ) ) {
-							if ( empty( $data[$key]['author']['url'] ) ) {
-								$author_id = get_post_field( 'post_author', $post_id );
-								$data[$key]['author']['url'] = esc_url( get_author_posts_url( $author_id ) );
+						if ( isset( $data[ $key ]['author'] ) && is_array( $data[ $key ]['author'] ) ) {
+							if ( empty( $data[ $key ]['author']['url'] ) ) {
+								$author_id                     = get_post_field( 'post_author', $post_id );
+								$data[ $key ]['author']['url'] = esc_url( get_author_posts_url( $author_id ) );
 							}
 						}
 					}
-					
+
 					$rating = get_post_meta( $post_id, 'rating', true );
 					// v4.15.1: una Review dice quale gioco recensisce; con più giochi e nessuno scelto resta un articolo normale (about), senza voto
 					if ( ! empty( $rating ) && 1 === count( $game_schema_ids ) && get_option( 'ntn_seo_enable_review_schema', 'yes' ) === 'yes' ) {
 						// Upgrade Article to Review
-						$data[$key]['@type'] = array( 'WebPage', 'Review' );
-						$data[$key]['reviewRating'] = array(
+						$data[ $key ]['@type']        = array( 'WebPage', 'Review' );
+						$data[ $key ]['reviewRating'] = array(
 							'@type'       => 'Rating',
 							'ratingValue' => intval( $rating ),
 							'bestRating'  => '5',
-							'worstRating' => '1'
+							'worstRating' => '1',
 						);
-						
+
 						$verdict = get_post_meta( $post_id, 'verdict', true );
 						if ( ! empty( $verdict ) ) {
-							$data[$key]['reviewBody'] = wp_strip_all_tags( wp_trim_words( $verdict, 150 ) );
+							$data[ $key ]['reviewBody'] = wp_strip_all_tags( wp_trim_words( $verdict, 150 ) );
 						}
-						
+
 						$pros = get_post_meta( $post_id, 'pros', true );
 						if ( ! empty( $pros ) ) {
 							$pros_arr = is_array( $pros ) ? $pros : array_filter( array_map( 'trim', explode( "\n", $pros ) ) );
 							if ( ! empty( $pros_arr ) ) {
-								$data[$key]['positiveNotes'] = array( '@type' => 'ItemList', 'itemListElement' => array() );
-								$i = 1;
+								$data[ $key ]['positiveNotes'] = array(
+									'@type'           => 'ItemList',
+									'itemListElement' => array(),
+								);
+								$i                             = 1;
 								foreach ( $pros_arr as $pro ) {
-									$data[$key]['positiveNotes']['itemListElement'][] = array( '@type' => 'ListItem', 'position' => $i++, 'name' => wp_strip_all_tags( $pro ) );
+									$data[ $key ]['positiveNotes']['itemListElement'][] = array(
+										'@type'    => 'ListItem',
+										'position' => $i++,
+										'name'     => wp_strip_all_tags( $pro ),
+									);
 								}
 							}
 						}
-						
+
 						$cons = get_post_meta( $post_id, 'cons', true );
 						if ( ! empty( $cons ) ) {
 							$cons_arr = is_array( $cons ) ? $cons : array_filter( array_map( 'trim', explode( "\n", $cons ) ) );
 							if ( ! empty( $cons_arr ) ) {
-								$data[$key]['negativeNotes'] = array( '@type' => 'ItemList', 'itemListElement' => array() );
-								$j = 1;
+								$data[ $key ]['negativeNotes'] = array(
+									'@type'           => 'ItemList',
+									'itemListElement' => array(),
+								);
+								$j                             = 1;
 								foreach ( $cons_arr as $con ) {
-									$data[$key]['negativeNotes']['itemListElement'][] = array( '@type' => 'ListItem', 'position' => $j++, 'name' => wp_strip_all_tags( $con ) );
+									$data[ $key ]['negativeNotes']['itemListElement'][] = array(
+										'@type'    => 'ListItem',
+										'position' => $j++,
+										'name'     => wp_strip_all_tags( $con ),
+									);
 								}
 							}
 						}
-						
+
 						// Link to VideoGame via itemReviewed
-						$data[$key]['itemReviewed'] = array( '@id' => $game_schema_ids[0] );
+						$data[ $key ]['itemReviewed'] = array( '@id' => $game_schema_ids[0] );
 					} elseif ( ! empty( $game_schema_ids ) ) {
 						// Normal Article -> about -> VideoGame
-						if ( ! isset( $data[$key]['about'] ) ) {
-							$data[$key]['about'] = array();
+						if ( ! isset( $data[ $key ]['about'] ) ) {
+							$data[ $key ]['about'] = array();
 						}
-						
+
 						$is_numeric = true;
-						if ( is_array( $data[$key]['about'] ) ) {
-							foreach ( array_keys( $data[$key]['about'] ) as $k ) {
+						if ( is_array( $data[ $key ]['about'] ) ) {
+							foreach ( array_keys( $data[ $key ]['about'] ) as $k ) {
 								if ( ! is_int( $k ) ) {
 									$is_numeric = false;
 									break;
@@ -1450,25 +1490,25 @@ function ntn_tsf_add_videogame_schema( $data, $context = array() ) {
 							$is_numeric = false;
 						}
 
-						if ( empty( $data[$key]['about'] ) || $is_numeric ) {
-							if ( ! is_array( $data[$key]['about'] ) ) {
-								$data[$key]['about'] = array( $data[$key]['about'] );
+						if ( empty( $data[ $key ]['about'] ) || $is_numeric ) {
+							if ( ! is_array( $data[ $key ]['about'] ) ) {
+								$data[ $key ]['about'] = array( $data[ $key ]['about'] );
 							}
-							if ( count( $data[$key]['about'] ) === 1 && empty( $data[$key]['about'][0] ) ) {
-								$data[$key]['about'] = array();
+							if ( count( $data[ $key ]['about'] ) === 1 && empty( $data[ $key ]['about'][0] ) ) {
+								$data[ $key ]['about'] = array();
 							}
 							foreach ( $game_schema_ids as $game_schema_id ) {
-								$data[$key]['about'][] = array( '@id' => $game_schema_id );
+								$data[ $key ]['about'][] = array( '@id' => $game_schema_id );
 							}
 						} else {
-							$existing_about = $data[$key]['about'];
-							$data[$key]['about'] = array( $existing_about );
+							$existing_about        = $data[ $key ]['about'];
+							$data[ $key ]['about'] = array( $existing_about );
 							foreach ( $game_schema_ids as $game_schema_id ) {
-								$data[$key]['about'][] = array( '@id' => $game_schema_id );
+								$data[ $key ]['about'][] = array( '@id' => $game_schema_id );
 							}
 						}
 					}
-					
+
 					$article_found = true;
 					break;
 				}

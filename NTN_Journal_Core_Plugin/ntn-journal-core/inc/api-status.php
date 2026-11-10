@@ -1,5 +1,7 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 /**
  * Stato delle chiavi API (v3.17.1, scelta del CEO).
  *
@@ -21,15 +23,15 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  */
 function ntn_core_api_services() {
 	return array(
-		'gemini' => array(
+		'gemini'  => array(
 			'label'   => 'Google Gemini',
 			'options' => array( 'ntn_gemini_api_key' => 'API Key' ),
 		),
-		'groq'   => array(
+		'groq'    => array(
 			'label'   => 'Groq (riserva)',
 			'options' => array( 'ntn_groq_api_key' => 'API Key' ),
 		),
-		'igdb'   => array(
+		'igdb'    => array(
 			'label'   => 'IGDB (Twitch)',
 			'options' => array(
 				'ntn_igdb_client_id'     => 'Client ID',
@@ -83,17 +85,32 @@ function ntn_core_api_status_reset( $service ) {
 function ntn_core_api_status_get( $service ) {
 	$services = ntn_core_api_services();
 	if ( ! isset( $services[ $service ] ) ) {
-		return array( 'state' => 'missing', 'label' => 'Mancante', 'message' => '', 'time' => 0 );
+		return array(
+			'state'   => 'missing',
+			'label'   => 'Mancante',
+			'message' => '',
+			'time'    => 0,
+		);
 	}
 	foreach ( array_keys( $services[ $service ]['options'] ) as $option ) {
 		if ( '' === trim( (string) get_option( $option, '' ) ) ) {
-			return array( 'state' => 'missing', 'label' => 'Mancante', 'message' => '', 'time' => 0 );
+			return array(
+				'state'   => 'missing',
+				'label'   => 'Mancante',
+				'message' => '',
+				'time'    => 0,
+			);
 		}
 	}
 	$all  = get_option( 'ntn_api_status', array() );
 	$info = is_array( $all ) && isset( $all[ $service ] ) && is_array( $all[ $service ] ) ? $all[ $service ] : null;
 	if ( ! $info ) {
-		return array( 'state' => 'saved', 'label' => 'Salvata, non verificata', 'message' => '', 'time' => 0 );
+		return array(
+			'state'   => 'saved',
+			'label'   => 'Salvata, non verificata',
+			'message' => '',
+			'time'    => 0,
+		);
 	}
 	return array(
 		'state'   => 'active' === $info['state'] ? 'active' : 'error',
@@ -146,7 +163,7 @@ function ntn_core_api_verify( $service ) {
 				'timeout' => 10,
 			)
 		);
-		$reason = ntn_core_api_error_reason( $response );
+		$reason   = ntn_core_api_error_reason( $response );
 		ntn_core_api_status_set( 'gemini', '' === $reason, $reason );
 	} elseif ( 'groq' === $service ) {
 		$response = wp_remote_get(
@@ -156,7 +173,7 @@ function ntn_core_api_verify( $service ) {
 				'timeout' => 10,
 			)
 		);
-		$reason = ntn_core_api_error_reason( $response );
+		$reason   = ntn_core_api_error_reason( $response );
 		ntn_core_api_status_set( 'groq', '' === $reason, $reason );
 	} elseif ( 'youtube' === $service && function_exists( 'ntn_core_youtube_verify_key' ) ) {
 		$reason = ntn_core_youtube_verify_key();

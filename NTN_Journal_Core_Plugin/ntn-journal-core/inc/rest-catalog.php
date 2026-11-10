@@ -18,35 +18,73 @@ class NTN_Catalog_REST_Controller {
 	}
 
 	public function register_routes(): void {
-		register_rest_route( 'ntn-journal/v1', '/games', array(
-			'methods'             => WP_REST_Server::READABLE,
-			'callback'            => array( $this, 'get_games' ),
-			'permission_callback' => '__return_true',
-			'args'                => array(
-				'page'      => array( 'type' => 'integer', 'default' => 1, 'sanitize_callback' => 'absint' ),
-				'per_page'  => array( 'type' => 'integer', 'default' => 20, 'sanitize_callback' => 'absint' ),
-				'franchise' => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_title' ),
-				'developer' => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_title' ),
-				'publisher' => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_title' ),
-				'engine'    => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_title' ),
-				'year'      => array( 'type' => 'integer', 'sanitize_callback' => 'absint' ),
-				'search'    => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
-				'sort'      => array( 
-					'type'    => 'string', 
-					'enum'    => array( 'title_asc', 'title_desc', 'year_desc', 'year_asc' ), 
-					'default' => 'year_desc' 
+		register_rest_route(
+			'ntn-journal/v1',
+			'/games',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'get_games' ),
+				'permission_callback' => '__return_true',
+				'args'                => array(
+					'page'      => array(
+						'type'              => 'integer',
+						'default'           => 1,
+						'sanitize_callback' => 'absint',
+					),
+					'per_page'  => array(
+						'type'              => 'integer',
+						'default'           => 20,
+						'sanitize_callback' => 'absint',
+					),
+					'franchise' => array(
+						'type'              => 'string',
+						'sanitize_callback' => 'sanitize_title',
+					),
+					'developer' => array(
+						'type'              => 'string',
+						'sanitize_callback' => 'sanitize_title',
+					),
+					'publisher' => array(
+						'type'              => 'string',
+						'sanitize_callback' => 'sanitize_title',
+					),
+					'engine'    => array(
+						'type'              => 'string',
+						'sanitize_callback' => 'sanitize_title',
+					),
+					'year'      => array(
+						'type'              => 'integer',
+						'sanitize_callback' => 'absint',
+					),
+					'search'    => array(
+						'type'              => 'string',
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+					'sort'      => array(
+						'type'    => 'string',
+						'enum'    => array( 'title_asc', 'title_desc', 'year_desc', 'year_asc' ),
+						'default' => 'year_desc',
+					),
 				),
-			),
-		) );
+			)
+		);
 
-		register_rest_route( 'ntn-journal/v1', '/live-search', array(
-			'methods'             => WP_REST_Server::READABLE,
-			'callback'            => array( $this, 'get_live_search' ),
-			'permission_callback' => '__return_true',
-			'args'                => array(
-				'query' => array( 'type' => 'string', 'required' => true, 'sanitize_callback' => 'sanitize_text_field' ),
-			),
-		) );
+		register_rest_route(
+			'ntn-journal/v1',
+			'/live-search',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'get_live_search' ),
+				'permission_callback' => '__return_true',
+				'args'                => array(
+					'query' => array(
+						'type'              => 'string',
+						'required'          => true,
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+				),
+			)
+		);
 	}
 
 	public function get_games( WP_REST_Request $request ): WP_REST_Response|WP_Error {
@@ -81,30 +119,35 @@ class NTN_Catalog_REST_Controller {
 		if ( $query->have_posts() ) {
 			while ( $query->have_posts() ) {
 				$query->the_post();
-				get_template_part( 'template-parts/content', 'game-card', array( 'position' => (int) $query->current_post, 'first_page' => ( isset( $params['page'] ) ? absint( $params['page'] ) : 1 ) <= 1 ) );
+				get_template_part(
+					'template-parts/content',
+					'game-card',
+					array(
+						'position'   => (int) $query->current_post,
+						'first_page' => ( isset( $params['page'] ) ? absint( $params['page'] ) : 1 ) <= 1,
+					)
+				);
 			}
-		} else {
-			if ( $params['page'] === 1 ) {
+		} elseif ( $params['page'] === 1 ) {
 				echo '<div class="ntn-empty col-span-full"><span>VUOTO</span><p>Nessun videogioco corrisponde ai criteri di ricerca.</p></div>';
-			}
 		}
 		$html = ob_get_clean();
 
 		wp_reset_postdata();
 
 		$payload = array(
-			'success'   => true,
-			'data'      => array(
+			'success' => true,
+			'data'    => array(
 				'html'        => $html,
 				'max_pages'   => $query->max_num_pages,
 				'found_posts' => $query->found_posts,
-			)
+			),
 		);
 		ntn_core_rest_cache_set( $cache_key, $payload, 300, $cache_in_db );
 
 		$response = new WP_REST_Response( $payload, 200 );
 		$response->header( 'Cache-Control', 'public, max-age=300, stale-while-revalidate=60' );
-		
+
 		return $response;
 	}
 
@@ -117,7 +160,18 @@ class NTN_Catalog_REST_Controller {
 		$search_term = function_exists( 'mb_substr' ) ? mb_substr( $search_term, 0, 80 ) : substr( $search_term, 0, 80 );
 
 		if ( strlen( $search_term ) < 2 ) {
-			return new WP_REST_Response( array( 'success' => true, 'data' => array( 'results' => array(), 'articles' => array(), 'total_articles' => 0, 'total_games' => 0 ) ), 200 );
+			return new WP_REST_Response(
+				array(
+					'success' => true,
+					'data'    => array(
+						'results'        => array(),
+						'articles'       => array(),
+						'total_articles' => 0,
+						'total_games'    => 0,
+					),
+				),
+				200
+			);
 		}
 
 		$cache_key = 'ntn_livesearch2_' . md5( strtolower( $search_term ) );
@@ -171,15 +225,15 @@ class NTN_Catalog_REST_Controller {
 			'update_post_term_cache' => false,
 		);
 
-		$query = new WP_Query( $args );
+		$query       = new WP_Query( $args );
 		$total_games = (int) $query->found_posts;
-		$results = array();
+		$results     = array();
 
 		if ( $query->have_posts() ) {
 			while ( $query->have_posts() ) {
 				$query->the_post();
 				$post_id = get_the_ID();
-				
+
 				$cover = get_post_meta( $post_id, '_ntn_game_cover', true );
 				if ( empty( $cover ) ) {
 					$igdb_info = ntn_get_hub_igdb_info( $post_id );
@@ -232,4 +286,3 @@ class NTN_Catalog_REST_Controller {
 }
 
 new NTN_Catalog_REST_Controller();
-

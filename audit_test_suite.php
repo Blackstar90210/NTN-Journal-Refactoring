@@ -1655,24 +1655,24 @@ echo "\n--- 24. SEMVER SIMULTANEOUS 4-HEADER SYNCHRONIZATION ---\n";
 $parent_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $parent_css, $m_parent );
 $parent_ver = isset( $m_parent[1] ) ? trim( $m_parent[1] ) : '';
-assert_test( $parent_ver === '4.25.3', "24.1: Parent Theme style.css declares Version: 4.25.3(found: {$parent_ver})" );
+assert_test( $parent_ver === '4.25.4', "24.1: Parent Theme style.css declares Version: 4.25.4(found: {$parent_ver})" );
 
 $child_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $child_css, $m_child );
 $child_ver = isset( $m_child[1] ) ? trim( $m_child[1] ) : '';
-assert_test( $child_ver === '4.25.3', "24.2: Child Theme style.css declares Version: 4.25.3(found: {$child_ver})" );
+assert_test( $child_ver === '4.25.4', "24.2: Child Theme style.css declares Version: 4.25.4(found: {$child_ver})" );
 
 $core_php = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' );
 preg_match( '/\*\s*Version:\s*([0-9\.]+)/', $core_php, $m_core_hdr );
 $core_hdr_ver = isset( $m_core_hdr[1] ) ? trim( $m_core_hdr[1] ) : '';
-assert_test( $core_hdr_ver === '4.25.3', "24.3: Core Plugin header declares Version: 4.25.3(found: {$core_hdr_ver})" );
+assert_test( $core_hdr_ver === '4.25.4', "24.3: Core Plugin header declares Version: 4.25.4(found: {$core_hdr_ver})" );
 
 preg_match( "/define\(\s*'NTN_JOURNAL_CORE_VERSION',\s*'([^']+)'\s*\);/", $core_php, $m_core_const );
 $core_const_ver = isset( $m_core_const[1] ) ? trim( $m_core_const[1] ) : '';
-assert_test( $core_const_ver === '4.25.3', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.25.3(found: {$core_const_ver})" );
+assert_test( $core_const_ver === '4.25.4', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.25.4(found: {$core_const_ver})" );
 
 assert_test(
-	$parent_ver === '4.25.3' && $child_ver === '4.25.3' && $core_hdr_ver === '4.25.3' && $core_const_ver === '4.25.3',
+	$parent_ver === '4.25.4' && $child_ver === '4.25.4' && $core_hdr_ver === '4.25.4' && $core_const_ver === '4.25.4',
 	'24.5: All 4 version headers are 100% synchronized and atomic according to Rule 2 of GEMINI.md'
 );
 
@@ -1900,7 +1900,7 @@ $parent_style_ver = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( AB
 $child_style_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' ), $m2 ) ? $m2[1] : '';
 $core_plugin_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m3 ) ? $m3[1] : '';
 $core_const_ver   = preg_match( '/define\(\s*[\'"]NTN_JOURNAL_CORE_VERSION[\'"]\s*,\s*[\'"]([0-9\.]+)[\'"]\s*\)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m4 ) ? $m4[1] : '';
-assert_test( $parent_style_ver === '4.25.3' && $child_style_ver === '4.25.3' && $core_plugin_ver === '4.25.3' && $core_const_ver === '4.25.3', '29.1: All 4 version headers are synchronized to 4.25.3' );
+assert_test( $parent_style_ver === '4.25.4' && $child_style_ver === '4.25.4' && $core_plugin_ver === '4.25.4' && $core_const_ver === '4.25.4', '29.1: All 4 version headers are synchronized to 4.25.4' );
 
 // 29.2: single.php sequence is Google Feed -> Social CTA -> Bottom Related Posts
 $single_php = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/single.php' );
@@ -2518,8 +2518,8 @@ assert_test(
 
 // 37.4 (aggiornato in 4.10.0): il catalogo del parent è quello con i filtri e disegna la scheda comune
 assert_test(
-	strpos( $cat_parent, "'template-parts/archive-head'" ) !== false && strpos( $cat_parent, "get_template_part( 'template-parts/content', 'game-card'" ) !== false &&
-	strpos( $cat_parent, '<div id="ntn-catalog-grid" class="ntn-games">' ) !== false && strpos( $cat_parent, 'bg-black/85' ) === false,
+	ntn_t_fpos( $cat_parent, "'template-parts/archive-head'" ) !== false && ntn_t_fpos( $cat_parent, "get_template_part( 'template-parts/content', 'game-card'" ) !== false &&
+	ntn_t_fpos( $cat_parent, '<div id="ntn-catalog-grid" class="ntn-games">' ) !== false && ntn_t_fpos( $cat_parent, 'bg-black/85' ) === false,
 	'37.4: Parent catalog uses the shared header and the shared game card template'
 );
 
@@ -2621,9 +2621,9 @@ assert_test(
 
 // 39.6: testo visibile nella Hub, "Tutti gli articoli" come H2 (parent e child), alt nelle immagini delle schede
 assert_test(
-	strpos( $hs_head, "ntn_get_hub_auto_summary( (int) \$args['id'] )" ) !== false && strpos( $hs_head, '<p class="ntn-specs-p">' ) !== false && strpos( $hs_head, '<span class="ntn-specs-k">In breve</span>' ) !== false &&
-	strpos( file_get_contents( $theme_dir . 'ntn-journal/single-videogioco.php' ), '<h2 id="ntn-h-all"' ) !== false &&
-	strpos( file_get_contents( $theme_dir . 'ntn-journal/template-parts/content.php' ), "'alt' => ntn_get_image_alt( get_the_ID() )" ) !== false,
+	ntn_t_fpos( $hs_head, "ntn_get_hub_auto_summary( (int) \$args['id'] )" ) !== false && ntn_t_fpos( $hs_head, '<p class="ntn-specs-p">' ) !== false && ntn_t_fpos( $hs_head, '<span class="ntn-specs-k">In breve</span>' ) !== false &&
+	ntn_t_fpos( file_get_contents( $theme_dir . 'ntn-journal/single-videogioco.php' ), '<h2 id="ntn-h-all"' ) !== false &&
+	ntn_t_fpos( file_get_contents( $theme_dir . 'ntn-journal/template-parts/content.php' ), "'alt' => ntn_get_image_alt( get_the_ID() )" ) !== false,
 	'39.6: Hub shows the auto summary as the "In breve" spec cell, "Tutti gli articoli" is an H2, card images always have alt text'
 );
 
@@ -3481,21 +3481,21 @@ assert_test(
 
 // 56.2: Hub Mobile e PC Gaming: marchi senza sottocategorie come piattaforme, disegno proprio senza marchi, illustrazioni automatiche
 assert_test(
-	strpos( $pf_hub, '$brand_platforms = array( $brand );' ) !== false && strpos( $pf_hub, "\t\t\t\t\$platforms = array( \$brand );" ) !== false &&
-	strpos( $pf_hub, 'Marchio senza piattaforme sotto' ) === false &&strpos( $pf_hub, "\$own = ntn_core_category_hub_illustration( \$focus, 'console' );" ) !== false &&
-	strpos( $pf_hub, "return 'android,ios';" ) !== false && strpos( $pf_hub, "'pc'       => 'Postazione PC (v3.22.0)'," ) !== false &&
-	strpos( $pf_hub, "NTN_JOURNAL_CORE_VERSION : '' ) );" ) !== false &&
-	strpos( file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/category-hub.php' ), "'Tutte le piattaforme'" ) !== false,
+	ntn_t_fpos( $pf_hub, '$brand_platforms = array( $brand );' ) !== false && ntn_t_fpos( $pf_hub, "\t\t\t\t\$platforms = array( \$brand );" ) !== false &&
+	ntn_t_fpos( $pf_hub, 'Marchio senza piattaforme sotto' ) === false &&ntn_t_fpos( $pf_hub, "\$own = ntn_core_category_hub_illustration( \$focus, 'console' );" ) !== false &&
+	ntn_t_fpos( $pf_hub, "return 'android,ios';" ) !== false && ntn_t_fpos( $pf_hub, "'pc'       => 'Postazione PC (v3.22.0)'," ) !== false &&
+	ntn_t_fpos( $pf_hub, "NTN_JOURNAL_CORE_VERSION : '' ) );" ) !== false &&
+	ntn_t_fpos( file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/category-hub.php' ), "'Tutte le piattaforme'" ) !== false,
 	'56.2: Mobile and PC Gaming hubs work like Console: brands without children become platforms, hubs without brands use their own drawing'
 );
 
 // 56.3: tendina Piattaforme: pannello largo dal menu, icone a punti, numeri, marchi con le console; in memoria per un'ora
 assert_test(
-	strpos( $hm_tool, 'class="ntn-submenu ntn-nav-drop-panel ntn-pdrop" id="ntn-pdrop"' ) !== false && strpos( $hm_tool, 'ntn-pdrop-icon is-mini' ) !== false &&
-	strpos( $hm_tool, '<span class="ntn-tools-sep" aria-hidden="true"></span>' ) !== false &&
-	strpos( ntn_t_read( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/header.php' ), "<div class=\"ntn-header-tools\">\n\t\t\t\t<?php if ( function_exists( 'ntn_journal_header_platform_drop' ) )" ) !== false &&
-	strpos( $pf_mf, "set_transient( \$cache_key, \$html, HOUR_IN_SECONDS );" ) !== false && strpos( $pf_mf, "'<span class=\"ntn-pdrop-plats\">'" ) !== false &&
-	strpos( file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/assets/js/main.js' ), "drop.classList.contains('is-mega')" ) !== false,
+	ntn_t_fpos( $hm_tool, 'class="ntn-submenu ntn-nav-drop-panel ntn-pdrop" id="ntn-pdrop"' ) !== false && ntn_t_fpos( $hm_tool, 'ntn-pdrop-icon is-mini' ) !== false &&
+	ntn_t_fpos( $hm_tool, '<span class="ntn-tools-sep" aria-hidden="true"></span>' ) !== false &&
+	ntn_t_fpos( ntn_t_read( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/header.php' ), "<div class=\"ntn-header-tools\">\n\t\t\t\t<?php if ( function_exists( 'ntn_journal_header_platform_drop' ) )" ) !== false &&
+	ntn_t_fpos( $pf_mf, "set_transient( \$cache_key, \$html, HOUR_IN_SECONDS );" ) !== false && ntn_t_fpos( $pf_mf, "'<span class=\"ntn-pdrop-plats\">'" ) !== false &&
+	ntn_t_fpos( file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/assets/js/main.js' ), "drop.classList.contains('is-mega')" ) !== false,
 	'56.3: Piattaforme dropdown is a wide panel built from the menu, with dot icons, counts and brands with their consoles'
 );
 
@@ -4257,10 +4257,10 @@ $pg_hub_tpl = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journ
 $pg_stat_src = file_get_contents( $pg_file );
 $pg_part    = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/template-parts/hub-article-feed.php' );
 assert_test(
-	false === strpos( $pg_stat_src, 'hub-article-feed' ) && false !== strpos( $pg_stat_src, "get_template_part( 'template-parts/content' )" ) &&
-	false !== strpos( $pg_hub_tpl, "get_template_part( 'template-parts/hub-article-feed', null, array( 'row_tag' => \$hub_row_tag," ) && false === strpos( $pg_hub_tpl, 'ntn-stats-' ) &&
-	false !== strpos( $pg_part, 'ntn-chub-feed' ) && false !== strpos( $pg_stat_src, "'prev_text' => '&larr; Precedente'" ) && false !== strpos( $pg_stat_src, "'next_text' => 'Successivo &rarr;'" ) &&
-	false === strpos( $pg_stat_src, "ntn_core_get_category_hub_data()['featured']" ) && false === strpos( $pg_stat_src, "\$hub['featured']" ),
+	false === ntn_t_fpos( $pg_stat_src, 'hub-article-feed' ) && false !== ntn_t_fpos( $pg_stat_src, "get_template_part( 'template-parts/content' )" ) &&
+	false !== ntn_t_fpos( $pg_hub_tpl, "get_template_part( 'template-parts/hub-article-feed', null, array( 'row_tag' => \$hub_row_tag," ) && false === ntn_t_fpos( $pg_hub_tpl, 'ntn-stats-' ) &&
+	false !== ntn_t_fpos( $pg_part, 'ntn-chub-feed' ) && false !== ntn_t_fpos( $pg_stat_src, "'prev_text' => '&larr; Precedente'" ) && false !== ntn_t_fpos( $pg_stat_src, "'next_text' => 'Successivo &rarr;'" ) &&
+	false === ntn_t_fpos( $pg_stat_src, "ntn_core_get_category_hub_data()['featured']" ) && false === ntn_t_fpos( $pg_stat_src, "\$hub['featured']" ),
 	'65.13: Statistiche Hubs use their own list and always open with the latest article; other Hubs stay on the shared list'
 );
 
@@ -4919,12 +4919,12 @@ assert_test( $fx_ok && ! file_exists( $fx_child . 'single-videogioco.php' ), '72
 // 72.2: il parent carica ricerca e filtri dal proprio percorso, con la sua versione e le stesse regole di prima
 $fx_enq = file_get_contents( $fx_parent . 'inc/enqueue.php' );
 assert_test(
-	false !== strpos( $fx_enq, "wp_enqueue_script( 'ntn-live-search', get_template_directory_uri() . '/assets/js/live-search.js'" ) &&
-	false !== strpos( $fx_enq, "wp_enqueue_script( 'ntn-catalog-filters', get_template_directory_uri() . '/assets/js/catalog-filters.js', array( 'ntn-live-search' )" ) &&
-	false !== strpos( $fx_enq, "wp_localize_script( 'ntn-live-search', 'ntn_catalog_vars'" ) &&
-	false !== strpos( $fx_enq, "is_post_type_archive( 'videogioco' ) || is_tax( 'game_engine' ) || is_tax( 'game_franchise' ) || is_tax( 'game_developer' ) || is_tax( 'game_publisher' )" ) &&
-	false !== strpos( $fx_enq, '$ver = wp_get_theme( get_template() )->get( \'Version\' );' ) &&
-	false === strpos( $fx_enq, 'get_stylesheet_directory' ),
+	false !== ntn_t_fpos( $fx_enq, "wp_enqueue_script( 'ntn-live-search', get_template_directory_uri() . '/assets/js/live-search.js'" ) &&
+	false !== ntn_t_fpos( $fx_enq, "wp_enqueue_script( 'ntn-catalog-filters', get_template_directory_uri() . '/assets/js/catalog-filters.js', array( 'ntn-live-search' )" ) &&
+	false !== ntn_t_fpos( $fx_enq, "wp_localize_script( 'ntn-live-search', 'ntn_catalog_vars'" ) &&
+	false !== ntn_t_fpos( $fx_enq, "is_post_type_archive( 'videogioco' ) || is_tax( 'game_engine' ) || is_tax( 'game_franchise' ) || is_tax( 'game_developer' ) || is_tax( 'game_publisher' )" ) &&
+	false !== ntn_t_fpos( $fx_enq, '$ver = wp_get_theme( get_template() )->get( \'Version\' );' ) &&
+	false === ntn_t_fpos( $fx_enq, 'get_stylesheet_directory' ),
 	'72.2: Parent enqueues live search everywhere and catalog filters on catalog pages, from its own folder and with its own version'
 );
 
@@ -4949,7 +4949,7 @@ assert_test(
 
 // 72.5: l'endpoint REST del plugin trova la scheda del gioco nel parent
 assert_test(
-	false !== strpos( file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/rest-catalog.php' ), "get_template_part( 'template-parts/content', 'game-card'" ) && file_exists( $fx_parent . 'template-parts/content-game-card.php' ),
+	false !== ntn_t_fpos( file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/rest-catalog.php' ), "get_template_part( 'template-parts/content', 'game-card'" ) && file_exists( $fx_parent . 'template-parts/content-game-card.php' ),
 	'72.5: The plugin REST catalog renders the game card that now ships with the parent theme'
 );
 
@@ -4957,6 +4957,22 @@ assert_test(
 // Legge un file normalizzando a capo di Windows (CRLF) in LF: i controlli su testo a più righe valgono su entrambi
 function ntn_t_read( $path ) {
 	return str_replace( "\r\n", "\n", (string) file_get_contents( $path ) );
+}
+
+// Dalla 4.25.4 (formattazione WordPress con phpcbf): i controlli sul testo del codice ignorano
+// a capo, rientri, allineamenti e la virgola finale prima di ")", che la formattazione cambia
+// senza cambiare il codice. Il contenuto cercato resta lo stesso, parola per parola.
+function ntn_t_flat( $code ) {
+	$code = preg_replace( '/\s+/', ' ', str_replace( "\r\n", "\n", (string) $code ) );
+	$code = preg_replace( '/\(\s+/', '( ', $code );
+	$code = preg_replace( '/,?\s*\)/', ' )', $code );
+	return $code;
+}
+function ntn_t_fpos( $haystack, $needle ) {
+	return strpos( ntn_t_flat( $haystack ), ntn_t_flat( $needle ) );
+}
+function ntn_t_fcount( $haystack, $needle ) {
+	return substr_count( ntn_t_flat( $haystack ), ntn_t_flat( $needle ) );
 }
 
 // 73. helpers.php del tema genitore ha solo funzioni di presentazione (v4.10.1, completato nella v4.13.0)
@@ -5334,8 +5350,8 @@ assert_test(
 	'80.5: All four scanner requests check nonce and manage_options, none is open to visitors'
 );
 assert_test(
-	false !== strpos( $sc_src, 'ntn_igdb_link_tag_to_game( $tag_id, $igdb_id )' ) && false === strpos( $sc_src, 'wp_insert_post' ) && false === strpos( $sc_src, "'_ntn_igdb_game_id', " ) &&
-	false !== strpos( $sc_ajax, '$post_id = ntn_igdb_link_tag_to_game( $tag_id, $igdb_id );' ) && 1 === substr_count( $sc_ajax, "'post_type'   => 'videogioco',\n\t\t\t'post_status' => 'publish'" ),
+	false !== ntn_t_fpos( $sc_src, 'ntn_igdb_link_tag_to_game( $tag_id, $igdb_id )' ) && false === ntn_t_fpos( $sc_src, 'wp_insert_post' ) && false === ntn_t_fpos( $sc_src, "'_ntn_igdb_game_id', " ) &&
+	false !== ntn_t_fpos( $sc_ajax, '$post_id = ntn_igdb_link_tag_to_game( $tag_id, $igdb_id );' ) && 1 === ntn_t_fcount( $sc_ajax, "'post_type'   => 'videogioco',\n\t\t\t'post_status' => 'publish'" ),
 	'80.6: Confirming reuses the panel save (tag data and Hub): the scanner writes neither by itself and the panel calls the same function'
 );
 preg_match( '/function ntn_ajax_igdb_scan_tags\(\) \{.*?\n\}/s', $sc_src, $sc_scan );
@@ -5797,9 +5813,9 @@ assert_test(
 );
 
 assert_test(
-	false !== strpos( ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/rest-catalog.php' ), "'position' => (int) \$query->current_post" ) &&
-	false !== strpos( ntn_t_read( $gc_theme . 'archive-videogioco.php' ), "'position' => (int) \$query->current_post" ) &&
-	false === strpos( ntn_t_read( $gc_theme . 'template-parts/content-game-card.php' ), 'global $wp_query;' ),
+	false !== ntn_t_fpos( ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/rest-catalog.php' ), "'position' => (int) \$query->current_post" ) &&
+	false !== ntn_t_fpos( ntn_t_read( $gc_theme . 'archive-videogioco.php' ), "'position' => (int) \$query->current_post" ) &&
+	false === ntn_t_fpos( ntn_t_read( $gc_theme . 'template-parts/content-game-card.php' ), 'global $wp_query;' ),
 	'86.3: The catalog page and the REST catalog both pass the card position; the card no longer reads the wrong global query'
 );
 
@@ -5809,7 +5825,7 @@ $ig_dir = ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/';
 $ig_files = array( 'ajax-igdb.php', 'admin/igdb-ajax-handlers.php', 'igdb-tag-scanner.php', 'migrazione-igdb.php' );
 $ig_calls = 0;
 foreach ( glob( $ig_dir . '{,*/}*.php', GLOB_BRACE ) as $ig_f ) {
-	$ig_calls += substr_count( ntn_t_read( $ig_f ), "wp_remote_post( 'https://api.igdb.com/v4/games'" );
+	$ig_calls += ntn_t_fcount( ntn_t_read( $ig_f ), "wp_remote_post( 'https://api.igdb.com/v4/games'" );
 }
 assert_test( 1 === $ig_calls, "87.1: Only one place in the plugin sends requests to the IGDB games endpoint (found: {$ig_calls})" );
 
@@ -6500,7 +6516,7 @@ assert_test(
 $mf_theme = ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/';
 $mf_hubt  = ntn_t_read( $mf_theme . 'inc/category-hub-template.php' );
 assert_test(
-	false !== strpos( $mf_hubt, "'/assets/js/dot-art.js', array(), wp_get_theme( get_template() )->get( 'Version' )," ) && false === strpos( $mf_hubt, 'wp_get_theme()->' ),
+	false !== ntn_t_fpos( $mf_hubt, "'/assets/js/dot-art.js', array(), wp_get_theme( get_template() )->get( 'Version' )," ) && false === ntn_t_fpos( $mf_hubt, 'wp_get_theme()->' ),
 	'98.3: dot-art.js (a parent theme file) is versioned with the parent theme version, also when the child theme is active'
 );
 
@@ -6707,6 +6723,35 @@ assert_test(
 	'100.5: AGENTS.md states the prefix rule: new plugin code uses ntn_core_, existing ntn_ / ntn_journal_ names are not renamed, ntn_journal_ stays for what is shared with the theme'
 );
 
+
+// --- TEST SUITE 101: regole di stile WordPress (PHPCS) v4.25.4 ---
+echo "\n--- 101. REGOLE DI STILE WORDPRESS (PHPCS) V4.25.4 ---\n";
+$cs_rules = ntn_t_read( ABSPATH . 'phpcs.xml.dist' );
+assert_test(
+	false !== strpos( $cs_rules, '<rule ref="WordPress"/>' ) &&
+	false !== strpos( $cs_rules, '<file>NTN_Journal_Core_Plugin/ntn-journal-core</file>' ) &&
+	false !== strpos( $cs_rules, '<file>NTN_Journal_Theme_Reloaded/ntn-journal</file>' ) &&
+	false !== strpos( $cs_rules, '<file>NTN_Journal_Theme_Reloaded/ntn-journal-reloaded</file>' ) &&
+	false === strpos( $cs_rules, 'audit_test_suite' ) &&
+	false !== strpos( $cs_rules, '<element value="ntn-journal-core"/>' ) && false !== strpos( $cs_rules, '<element value="ntn-journal"/>' ) &&
+	false !== strpos( $cs_rules, '<config name="minimum_wp_version" value="6.0"/>' ) && false !== strpos( $cs_rules, '<config name="testVersion" value="8.0-"/>' ),
+	'101.1: phpcs.xml.dist checks plugin, parent and child with the WordPress rules, the three text domains, WordPress 6.0+ and PHP 8.0+ (the test suite is not checked)'
+);
+$cs_nonce_ok = true;
+$cs_plugin   = '';
+foreach ( glob( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/{,*/}*.php', GLOB_BRACE ) as $cs_f ) {
+	$cs_plugin .= ntn_t_read( $cs_f );
+}
+foreach ( array( 'ntn_journal_core_admin_nonce_ok', 'ntn_igdb_scan_guard', 'ntn_core_png_repair_guard', 'ntn_core_image_report_guard' ) as $cs_fn ) {
+	$cs_nonce_ok = $cs_nonce_ok && false !== strpos( $cs_rules, '<element value="' . $cs_fn . '"/>' ) && false !== strpos( $cs_plugin, 'function ' . $cs_fn . '(' );
+}
+assert_test( $cs_nonce_ok, '101.2: The project functions that check the nonce are declared to PHPCS (no false "nonce missing" alarms) and still exist in the plugin' );
+assert_test(
+	ntn_t_fpos( "wp_enqueue_script(\n\t\t'a',\n\t\tarray(\n\t\t\t'x'  => 1,\n\t\t)\n\t);", "wp_enqueue_script( 'a', array( 'x' => 1 ) );" ) === 0 &&
+	false === ntn_t_fpos( "wp_enqueue_script( 'a', array( 'x' => 2 ) );", "wp_enqueue_script( 'a', array( 'x' => 1 ) );" ) &&
+	false === ntn_t_fpos( "wp_enqueue_script( 'ab' );", "wp_enqueue_script( 'a' );" ),
+	'101.3: Source checks ignore only line breaks, indentation, alignment and the trailing comma: different code still does not match'
+);
 
 echo "\n=======================================================================\n";
 echo " AUDIT SUMMARY: {$passed} PASSED, {$failed} FAILED\n";

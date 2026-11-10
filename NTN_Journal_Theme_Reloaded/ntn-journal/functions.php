@@ -36,10 +36,12 @@ require_once NTN_INC_DIR . 'breaking-news.php';
 require_once NTN_INC_DIR . 'gallery-lightbox.php';
 
 // Consenti lettura dei campi meta protetti (es. _thumbnail_id) solo per quelli specifici
-add_filter( 'is_protected_meta', function( $protected, $meta_key ) {
-	$allowed = array( '_thumbnail_id', 'rating', 'pros', 'cons', 'verdict', 'reviewed_item' );
-	return in_array( $meta_key, $allowed, true ) ? false : $protected;
-}, 10, 2 );
-
-
-
+add_filter(
+	'is_protected_meta',
+	function ( $protected, $meta_key ) {
+		$allowed = array( '_thumbnail_id', 'rating', 'pros', 'cons', 'verdict', 'reviewed_item' );
+		return in_array( $meta_key, $allowed, true ) ? false : $protected;
+	},
+	10,
+	2
+);

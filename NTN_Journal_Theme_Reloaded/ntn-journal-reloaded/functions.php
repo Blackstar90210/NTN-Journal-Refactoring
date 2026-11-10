@@ -4,9 +4,7 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-    exit;
+	exit;
 }
 
 require_once get_stylesheet_directory() . '/inc/enqueue.php';
-
-

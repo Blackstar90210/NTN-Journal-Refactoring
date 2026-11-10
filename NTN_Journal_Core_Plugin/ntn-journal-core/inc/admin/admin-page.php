@@ -276,10 +276,32 @@ function ntn_journal_core_admin_handle_post() {
 	if ( ntn_journal_core_admin_nonce_ok( 'ntn_hub_new_nonce', 'ntn_hub_new' ) && function_exists( 'ntn_core_category_hub_save_settings' ) ) {
 		$term = get_term( absint( ntn_journal_core_admin_field( 'ntn_hub_term' ) ), 'category' );
 		if ( $term instanceof WP_Term ) {
-			ntn_core_category_hub_save_settings( (int) $term->term_id, array( 'enabled' => true, 'type' => ntn_journal_core_admin_field( 'ntn_hub_type' ) ) );
+			ntn_core_category_hub_save_settings(
+				(int) $term->term_id,
+				array(
+					'enabled' => true,
+					'type'    => ntn_journal_core_admin_field( 'ntn_hub_type' ),
+				)
+			);
 			$message = 'Hub "' . $term->name . '" accesa: completala qui sotto.';
-			set_transient( 'ntn_admin_notice_' . get_current_user_id(), array( 'type' => 'success', 'text' => $message ), MINUTE_IN_SECONDS );
-			wp_safe_redirect( add_query_arg( array( 'page' => 'ntn-journal-functions', 'tab' => 'hub', 'edit' => (int) $term->term_id ), admin_url( 'admin.php' ) ) );
+			set_transient(
+				'ntn_admin_notice_' . get_current_user_id(),
+				array(
+					'type' => 'success',
+					'text' => $message,
+				),
+				MINUTE_IN_SECONDS
+			);
+			wp_safe_redirect(
+				add_query_arg(
+					array(
+						'page' => 'ntn-journal-functions',
+						'tab'  => 'hub',
+						'edit' => (int) $term->term_id,
+					),
+					admin_url( 'admin.php' )
+				)
+			);
 			exit;
 		}
 		$message = 'Scegli una categoria da trasformare in Hub.';
@@ -330,8 +352,23 @@ function ntn_journal_core_admin_handle_post() {
 		ntn_core_flush_all_caches();
 		$message = $written > 0 ? sprintf( 'Voto scritto su %d recensioni: ora compare nella pagina e nei dati per Google.', $written ) : 'Nessun voto scritto: scegli un voto per le recensioni selezionate.';
 		$type    = $written > 0 ? 'success' : 'error';
-		set_transient( 'ntn_admin_notice_' . get_current_user_id(), array( 'type' => $type, 'text' => $message ), MINUTE_IN_SECONDS );
-		wp_safe_redirect( add_query_arg( array( 'page' => 'ntn-journal-functions', 'tab' => 'reviews' ), admin_url( 'admin.php' ) ) );
+		set_transient(
+			'ntn_admin_notice_' . get_current_user_id(),
+			array(
+				'type' => $type,
+				'text' => $message,
+			),
+			MINUTE_IN_SECONDS
+		);
+		wp_safe_redirect(
+			add_query_arg(
+				array(
+					'page' => 'ntn-journal-functions',
+					'tab'  => 'reviews',
+				),
+				admin_url( 'admin.php' )
+			)
+		);
 		exit;
 	}
 
@@ -344,8 +381,23 @@ function ntn_journal_core_admin_handle_post() {
 	if ( '' === $message ) {
 		return; // Moduli di altre schede (Redirect, Backup…) si gestiscono da soli
 	}
-	set_transient( 'ntn_admin_notice_' . get_current_user_id(), array( 'type' => $type, 'text' => $message ), MINUTE_IN_SECONDS );
-	wp_safe_redirect( add_query_arg( array( 'page' => 'ntn-journal-functions', 'tab' => ntn_journal_core_admin_current_tab() ), admin_url( 'admin.php' ) ) );
+	set_transient(
+		'ntn_admin_notice_' . get_current_user_id(),
+		array(
+			'type' => $type,
+			'text' => $message,
+		),
+		MINUTE_IN_SECONDS
+	);
+	wp_safe_redirect(
+		add_query_arg(
+			array(
+				'page' => 'ntn-journal-functions',
+				'tab'  => ntn_journal_core_admin_current_tab(),
+			),
+			admin_url( 'admin.php' )
+		)
+	);
 	exit;
 }
 add_action( 'admin_init', 'ntn_journal_core_admin_handle_post' );
@@ -387,10 +439,10 @@ function ntn_core_clear_hub_cache_on_save( $post_id ) {
 	if ( $tags ) {
 		foreach ( $tags as $tag ) {
 			delete_transient( ntn_core_featured_cache_key( 'term', $tag->term_id ) );
-			
+
 			// Invalida anche il CPT videogioco corrispondente al tag usando i transienti o cache_key basata sullo slug
 			$cache_key = 'ntn_vg_link_' . md5( $tag->slug );
-			$cpt_id = get_transient( $cache_key );
+			$cpt_id    = get_transient( $cache_key );
 			if ( $cpt_id ) {
 				delete_transient( ntn_core_featured_cache_key( 'post', $cpt_id ) );
 			}
@@ -405,7 +457,7 @@ function ntn_journal_core_admin_page_html() {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		return;
 	}
-	
+
 	// I salvataggi si fanno prima, in admin_init (ntn_journal_core_admin_handle_post)
 	$active_tab = ntn_journal_core_admin_current_tab();
 	?>
@@ -418,7 +470,19 @@ function ntn_journal_core_admin_page_html() {
 
 		<nav class="ntn-adm-tabs" aria-label="<?php esc_attr_e( 'Schede di NTN Journal Funzioni', 'ntn-journal-core' ); ?>">
 			<?php foreach ( ntn_journal_core_admin_tabs() as $tab_key => $tab_label ) : ?>
-				<a href="<?php echo esc_url( add_query_arg( array( 'page' => 'ntn-journal-functions', 'tab' => $tab_key ), admin_url( 'admin.php' ) ) ); ?>"<?php echo $active_tab === $tab_key ? ' aria-current="page"' : ''; ?>><?php echo esc_html( $tab_label ); ?></a>
+				<a href="
+				<?php
+				echo esc_url(
+					add_query_arg(
+						array(
+							'page' => 'ntn-journal-functions',
+							'tab'  => $tab_key,
+						),
+						admin_url( 'admin.php' )
+					)
+				);
+				?>
+							"<?php echo $active_tab === $tab_key ? ' aria-current="page"' : ''; ?>><?php echo esc_html( $tab_label ); ?></a>
 			<?php endforeach; ?>
 		</nav>
 

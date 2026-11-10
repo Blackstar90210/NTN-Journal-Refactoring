@@ -1,5 +1,7 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 /**
  * The header for our theme
  *
@@ -58,7 +60,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 		<div class="ntn-topbar">
 			<div class="ntn-wrap ntn-topbar-in">
 				<span class="ntn-topbar-text"><?php echo esc_html( get_theme_mod( 'ntn_journal_top_banner_text', '// NOME SITO V1.00' ) ); ?></span>
-				<span id="wp-header-clock" class="ntn-topbar-clock" data-date="<?php echo esc_attr( function_exists('ntn_journal_get_italian_date') ? ntn_journal_get_italian_date() : date('d M Y') ); ?>">--:--:-- | <?php echo esc_html( function_exists('ntn_journal_get_italian_date') ? ntn_journal_get_italian_date() : date('d M Y') ); ?></span>
+				<span id="wp-header-clock" class="ntn-topbar-clock" data-date="<?php echo esc_attr( function_exists( 'ntn_journal_get_italian_date' ) ? ntn_journal_get_italian_date() : date( 'd M Y' ) ); ?>">--:--:-- | <?php echo esc_html( function_exists( 'ntn_journal_get_italian_date' ) ? ntn_journal_get_italian_date() : date( 'd M Y' ) ); ?></span>
 			</div>
 		</div>
 
@@ -96,9 +98,8 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 							</<?php echo esc_html( $title_tag ); ?>>
 							<?php
 						endif;
-					else :
-						if ( $show_site_title ) :
-							?>
+					elseif ( $show_site_title ) :
+						?>
 							<<?php echo esc_html( $title_tag ); ?> class="ntn-logo-text">
 								<?php
 								$ntn_logo = get_theme_mod( 'ntn_journal_main_logo_text', 'NOME-SITO' );
@@ -110,7 +111,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 								?>
 							</<?php echo esc_html( $title_tag ); ?>>
 							<?php
-						endif;
+
 					endif;
 
 					if ( $show_site_tagline ) :
@@ -122,11 +123,17 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 			<!-- Menu: voci "Articoli" e voci del menu Primary -->
 			<nav class="ntn-nav" aria-label="<?php esc_attr_e( 'Menu principale', 'ntn-journal' ); ?>">
-				<?php if ( function_exists( 'ntn_journal_header_menus' ) ) { ntn_journal_header_menus( 'desktop' ); } ?>
+				<?php
+				if ( function_exists( 'ntn_journal_header_menus' ) ) {
+					ntn_journal_header_menus( 'desktop' ); }
+				?>
 			</nav>
 
 			<div class="ntn-header-tools">
-				<?php if ( function_exists( 'ntn_journal_header_platform_drop' ) ) { ntn_journal_header_platform_drop(); } ?>
+				<?php
+				if ( function_exists( 'ntn_journal_header_platform_drop' ) ) {
+					ntn_journal_header_platform_drop(); }
+				?>
 				<button type="button" class="ntn-sq ntn-search-toggle" aria-controls="ntn-search-panel" aria-expanded="<?php echo get_search_query() ? 'true' : 'false'; ?>" aria-label="<?php esc_attr_e( 'Apri la ricerca', 'ntn-journal' ); ?>">
 					<svg class="ntn-ic-lens" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>
 					<svg class="ntn-ic-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg>
@@ -150,7 +157,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 		</div>
 
 		<!-- Ricerca (v3.19.0): scende dalla lente con una linea rossa; aperta sulla pagina dei risultati.
-		     I suggerimenti (articoli e giochi) li disegna assets/js/live-search.js. -->
+			I suggerimenti (articoli e giochi) li disegna assets/js/live-search.js. -->
 		<div id="ntn-search-panel" class="ntn-search-panel<?php echo get_search_query() ? ' is-open is-done' : ''; ?>"<?php echo get_search_query() ? '' : ' hidden'; ?>>
 			<span class="ntn-search-line" aria-hidden="true"></span>
 			<div class="ntn-search-clip">
@@ -183,7 +190,10 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 		<!-- Menu da telefono e tablet -->
 		<div id="ntn-mobile-nav" class="ntn-mobile-nav" hidden>
 			<div class="ntn-wrap ntn-mobile-nav-in">
-				<?php if ( function_exists( 'ntn_journal_header_menus' ) ) { ntn_journal_header_menus( 'mobile' ); } ?>
+				<?php
+				if ( function_exists( 'ntn_journal_header_menus' ) ) {
+					ntn_journal_header_menus( 'mobile' ); }
+				?>
 			</div>
 		</div>
 
