@@ -7189,12 +7189,13 @@ add_filter( 'ntn_core_steam_revenue_params', function ( $p ) { return array( 'co
 $st_par  = ntn_core_steam_params();
 $GLOBALS['wp_filters']['ntn_core_steam_revenue_params'] = array();
 assert_test(
-	array( 'status' => 'ok', 'min' => 626724529, 'max' => 1253449057 ) === $st_er &&
-	array( 'status' => 'ok', 'min' => 31238, 'max' => 62475 ) === $st_hd &&
+	array( 'status' => 'ok', 'min' => 369767472, 'max' => 739534944 ) === $st_er &&
+	array( 'status' => 'ok', 'min' => 18430, 'max' => 36860 ) === $st_hd && 0.295 === NTN_CORE_STEAM_NET_SHARE &&
+	array( 'status' => 'ok', 'min' => 399679026, 'max' => 799358051 ) === ntn_core_steam_estimate( 903380, 5999 ) &&
 	array( 'status' => 'free' ) === ntn_core_steam_estimate( 900000, 0, true ) && array( 'status' => 'no_price' ) === ntn_core_steam_estimate( 900000, 0 ) &&
 	array( 'status' => 'few_reviews' ) === ntn_core_steam_estimate( 49, 1999 ) && 'ok' === ntn_core_steam_estimate( 50, 1999 )['status'] &&
 	array( 'copies_min' => 30, 'copies_max' => 30, 'net_share' => 1.0, 'min_reviews' => 1 ) === $st_par && 25 === ntn_core_steam_params()['copies_min'],
-	'110.2: Estimate = reviews x 25..50 x list price x 0.5; free, priceless and under-50-review games get no estimate; the numbers can be changed with a filter but stay sane (max >= min, share <= 1)'
+	'110.2: Estimate = reviews x 25..50 x list price x 0.295 (Cyberpunk 2077: 400-800 million, like steam-revenue-calculator.com 767 million); free, priceless and under-50-review games get no estimate; the numbers can be changed with a filter but stay sane (max >= min, share <= 1)'
 );
 
 // 110.3: lettura delle risposte di Steam (recensioni a lotti con GetItems, prezzi a lotti con appdetails)

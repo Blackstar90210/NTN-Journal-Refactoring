@@ -6,7 +6,9 @@
  * - l'ID Steam del gioco arriva da IGDB (external_games con external_game_source = 1, cioè Steam);
  * - il numero di recensioni e il prezzo di listino in dollari arrivano da Steam, senza chiave API;
  * - copie vendute: da recensioni x 25 a recensioni x 50 (metodo di Boxleiter);
- * - incasso netto: copie x prezzo x 0,5 (quota tolta di Steam, sconti, rimborsi e tasse).
+ * - incasso netto: copie x prezzo x 0,295. Come steam-revenue-calculator.com: dal lordo si tolgono
+ *   prezzi regionali (-9%), sconti (-20%) e rimborsi (-12%), e resta 0,59 del lordo; da questo resto
+ *   si tolgono la quota di Steam (30%) e l'IVA (20%), e ne resta metà: 0,59 x 0,5 = 0,295.
  *
  * Il sito non chiede mai niente a Steam mentre una pagina si carica: le stime sono salvate nei dati
  * del tag e si aggiornano in secondo piano (WP-Cron) una volta a settimana, a lotti di 20 giochi con due
@@ -28,7 +30,7 @@ if ( ! defined( 'NTN_CORE_STEAM_COPIES_MAX' ) ) {
 	define( 'NTN_CORE_STEAM_COPIES_MAX', 50 ); // Copie per recensione, stima alta.
 }
 if ( ! defined( 'NTN_CORE_STEAM_NET_SHARE' ) ) {
-	define( 'NTN_CORE_STEAM_NET_SHARE', 0.5 ); // Parte del prezzo che resta come incasso netto.
+	define( 'NTN_CORE_STEAM_NET_SHARE', 0.295 ); // Parte del lordo che resta come incasso netto (vedi in alto).
 }
 if ( ! defined( 'NTN_CORE_STEAM_MIN_REVIEWS' ) ) {
 	define( 'NTN_CORE_STEAM_MIN_REVIEWS', 50 ); // Sotto questo numero di recensioni la stima non è affidabile.
