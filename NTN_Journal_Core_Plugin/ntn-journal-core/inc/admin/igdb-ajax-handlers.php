@@ -228,6 +228,7 @@ function ntn_core_ajax_reset_tag_igdb() {
 		'_ntn_game_screenshots',
 		'_ntn_game_url',
 		'_ntn_featured_review_id',
+		'_ntn_core_igdb_fingerprint',
 	);
 
 	foreach ( $keys as $key ) {
@@ -254,7 +255,8 @@ function ntn_core_ajax_update_single_tag_igdb() {
 		wp_send_json_error( 'Dati mancanti' );
 	}
 
-	$apicalypse = 'fields id, name, url, cover.url, first_release_date, release_dates.date, release_dates.human, platforms.name, involved_companies.company.name, involved_companies.developer, involved_companies.publisher, genres.name, game_engines.name, videos.video_id, screenshots.image_id; where id = ' . $igdb_id . '; limit 1;';
+	// v4.34.0: anche updated_at e checksum, per l'azione "Aggiorna solo i collegamenti con modifiche".
+	$apicalypse = 'fields id, updated_at, checksum, name, url, cover.url, first_release_date, release_dates.date, release_dates.human, platforms.name, involved_companies.company.name, involved_companies.developer, involved_companies.publisher, genres.name, game_engines.name, videos.video_id, screenshots.image_id; where id = ' . $igdb_id . '; limit 1;';
 
 	$data = ntn_core_igdb_request( $apicalypse );
 	if ( is_wp_error( $data ) ) {
@@ -340,6 +342,7 @@ function ntn_core_ajax_update_single_tag_igdb() {
 	update_term_meta( $tag_id, '_ntn_game_video', $video_id );
 	update_term_meta( $tag_id, '_ntn_game_screenshots', implode( ',', $screenshots ) );
 	update_term_meta( $tag_id, '_ntn_igdb_last_sync', time() );
+	ntn_core_igdb_save_fingerprint( $tag_id, $game );
 	if ( isset( $game['url'] ) ) {
 		update_term_meta( $tag_id, '_ntn_game_url', esc_url_raw( $game['url'] ) );
 	}
@@ -608,6 +611,133 @@ function ntn_core_ajax_repair_reconnect_igdb_tags() {
 			'message'     => "Operazione completata: $reconnected metadati riconnessi, $merged tag unificati.",
 			'reconnected' => $reconnected,
 			'merged'      => $merged,
+		)
+	);
+}
+
+/**
+ * v4.34.0: salva sul tag l'impronta del gioco IGDB (id, updated_at, checksum) al momento della sincronizzazione.
+ *
+ * @param int   $tag_id ID del tag.
+ * @param array $game   Gioco restituito da IGDB (servono id, updated_at e checksum).
+ */
+function ntn_core_igdb_save_fingerprint( $tag_id, $game ) {
+	if ( ! is_array( $game ) || empty( $game['id'] ) ) {
+		return;
+	}
+	update_term_meta(
+		(int) $tag_id,
+		'_ntn_core_igdb_fingerprint',
+		array(
+			'id'         => (int) $game['id'],
+			'updated_at' => isset( $game['updated_at'] ) ? (int) $game['updated_at'] : 0,
+			'checksum'   => isset( $game['checksum'] ) ? sanitize_text_field( (string) $game['checksum'] ) : '',
+		)
+	);
+}
+
+/**
+ * v4.34.0: trova i tag collegati il cui gioco è cambiato su IGDB dall'ultima sincronizzazione.
+ * Interroga IGDB a blocchi di 500 (solo id, updated_at, checksum) e non scarica né modifica i dati del gioco.
+ *
+ * Criterio: se il tag ha un'impronta salvata per lo stesso gioco, è cambiato quando checksum (o, in mancanza,
+ * updated_at) è diverso. Se non c'è impronta (tag sincronizzati prima della 4.34.0), è cambiato quando updated_at
+ * su IGDB è più recente dell'ultima sincronizzazione; se non lo è, si salva l'impronta attuale come base.
+ */
+add_action( 'wp_ajax_ntn_core_igdb_changed_tags', 'ntn_core_ajax_igdb_changed_tags' );
+function ntn_core_ajax_igdb_changed_tags() {
+	check_ajax_referer( 'ntn_batch_scan_igdb_nonce', '_ajax_nonce' );
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_send_json_error( 'Permessi insufficienti' );
+	}
+
+	$terms = get_terms(
+		array(
+			'taxonomy'   => get_taxonomies(),
+			'hide_empty' => false,
+			'meta_query' => array(
+				array(
+					'key'     => '_ntn_game_title',
+					'value'   => '',
+					'compare' => '!=',
+				),
+			),
+		)
+	);
+	if ( is_wp_error( $terms ) ) {
+		wp_send_json_error( $terms->get_error_message() );
+	}
+
+	// Tag per gioco IGDB (più tag possono puntare allo stesso gioco).
+	$by_game = array();
+	foreach ( $terms as $term ) {
+		$igdb_id = (int) get_term_meta( $term->term_id, '_ntn_igdb_game_id', true );
+		if ( $igdb_id > 0 ) {
+			$by_game[ $igdb_id ][] = $term;
+		}
+	}
+
+	$changed   = array();
+	$checked   = 0;
+	$not_found = 0;
+
+	foreach ( array_chunk( array_keys( $by_game ), 500 ) as $chunk ) {
+		$data = ntn_core_igdb_request( 'fields id, updated_at, checksum; where id = (' . implode( ',', array_map( 'intval', $chunk ) ) . '); limit 500;' );
+		if ( is_wp_error( $data ) ) {
+			wp_send_json_error( 'ntn_igdb_credentials' === $data->get_error_code() ? 'Credenziali IGDB mancanti o errate' : $data->get_error_message() );
+		}
+
+		$remote = array();
+		foreach ( (array) $data as $game ) {
+			if ( isset( $game['id'] ) ) {
+				$remote[ (int) $game['id'] ] = $game;
+			}
+		}
+
+		foreach ( $chunk as $igdb_id ) {
+			if ( ! isset( $remote[ $igdb_id ] ) ) {
+				// Gioco non più su IGDB: non si risincronizza (la risincronizzazione fallirebbe).
+				$not_found += count( $by_game[ $igdb_id ] );
+				continue;
+			}
+			$game       = $remote[ $igdb_id ];
+			$updated_at = isset( $game['updated_at'] ) ? (int) $game['updated_at'] : 0;
+			$checksum   = isset( $game['checksum'] ) ? (string) $game['checksum'] : '';
+
+			foreach ( $by_game[ $igdb_id ] as $term ) {
+				++$checked;
+				$print = get_term_meta( $term->term_id, '_ntn_core_igdb_fingerprint', true );
+
+				if ( is_array( $print ) && isset( $print['id'] ) && (int) $print['id'] === $igdb_id ) {
+					if ( '' !== $checksum && ! empty( $print['checksum'] ) ) {
+						$is_changed = ( (string) $print['checksum'] !== $checksum );
+					} else {
+						$is_changed = ( (int) ( $print['updated_at'] ?? 0 ) !== $updated_at );
+					}
+				} else {
+					$last_sync  = (int) get_term_meta( $term->term_id, '_ntn_igdb_last_sync', true );
+					$is_changed = ( 0 === $last_sync || $updated_at > $last_sync );
+					if ( ! $is_changed ) {
+						ntn_core_igdb_save_fingerprint( $term->term_id, $game );
+					}
+				}
+
+				if ( $is_changed ) {
+					$changed[] = array(
+						'tag_id'  => (int) $term->term_id,
+						'igdb_id' => $igdb_id,
+						'name'    => $term->name,
+					);
+				}
+			}
+		}
+	}
+
+	wp_send_json_success(
+		array(
+			'changed'   => $changed,
+			'checked'   => $checked,
+			'not_found' => $not_found,
 		)
 	);
 }

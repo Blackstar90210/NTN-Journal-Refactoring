@@ -13,8 +13,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<button type="button" id="ntn-scan-start" class="button button-primary">Scansiona</button>
 	<button type="button" id="ntn-scan-confirm-all" class="button button-primary" style="display: none;">Conferma selezionati</button>
 	<button type="button" id="ntn-scan-reset" class="button button-secondary">Rimetti in lista i tag esclusi</button>
+	<button type="button" id="ntn-scan-toggle" class="button button-secondary" aria-expanded="true" aria-controls="ntn-scan-results">Nascondi risultati</button>
 	<span id="ntn-scan-status" role="status" style="margin-left: 10px; font-weight: bold;"></span>
-	<div id="ntn-scan-lists" style="margin-top: 15px;"></div>
+	<div id="ntn-scan-results"><?php // v4.34.0: tabella dei risultati che si chiude e si riapre. ?>
+		<div id="ntn-scan-lists" style="margin-top: 15px;"></div>
+	</div>
 </div>
 
 <?php

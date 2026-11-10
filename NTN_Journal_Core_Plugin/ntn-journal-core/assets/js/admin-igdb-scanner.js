@@ -651,4 +651,79 @@
 			});
 		}
 
+		// v4.34.0: "Aggiorna solo i collegamenti con modifiche". Chiede al server quali tag hanno il gioco
+		// cambiato su IGDB, poi li risincronizza uno alla volta con la stessa azione del pulsante "Aggiorna".
+		const updateChangedBtn = document.getElementById('ntn-core-update-changed-tags');
+		const updateChangedStatus = document.getElementById('ntn-core-update-changed-status');
+		if (updateChangedBtn && updateChangedStatus) {
+			const postForm = function (fields) {
+				const data = new URLSearchParams();
+				Object.keys(fields).forEach(k => data.append(k, fields[k]));
+				return fetch(ajaxurl, { method: 'POST', body: data }).then(r => r.json());
+			};
+			const setStatus = function (text, isError) {
+				updateChangedStatus.textContent = text;
+				updateChangedStatus.style.color = isError ? 'var(--nadm-accent)' : '';
+			};
+
+			updateChangedBtn.addEventListener('click', async function (e) {
+				e.preventDefault();
+				updateChangedBtn.disabled = true;
+				setStatus('Controllo delle modifiche su IGDB...', false);
+
+				let res;
+				try {
+					res = await postForm({ action: 'ntn_core_igdb_changed_tags', _ajax_nonce: ntnIgdbScanner.batchNonce });
+				} catch (err) {
+					setStatus('Errore di rete.', true);
+					updateChangedBtn.disabled = false;
+					return;
+				}
+				if (!res || !res.success) {
+					setStatus('Errore: ' + ((res && res.data) || 'sconosciuto'), true);
+					updateChangedBtn.disabled = false;
+					return;
+				}
+
+				const changed = res.data.changed || [];
+				const notFound = parseInt(res.data.not_found || 0, 10);
+				const notFoundText = notFound > 0 ? ' (' + notFound + ' non più presenti su IGDB, saltati)' : '';
+				if (changed.length === 0) {
+					setStatus('Nessuna modifica: ' + res.data.checked + ' tag controllati, tutti aggiornati' + notFoundText + '.', false);
+					updateChangedBtn.disabled = false;
+					return;
+				}
+				if (!confirm(changed.length + ' tag hanno dati cambiati su IGDB. Risincronizzarli ora?')) {
+					setStatus(changed.length + ' tag da aggiornare, operazione annullata.', false);
+					updateChangedBtn.disabled = false;
+					return;
+				}
+
+				let ok = 0;
+				const failed = [];
+				for (let i = 0; i < changed.length; i++) {
+					const item = changed[i];
+					setStatus('Aggiornamento ' + (i + 1) + '/' + changed.length + ': ' + item.name, false);
+					try {
+						const r = await postForm({
+							action: 'ntn_update_single_tag_igdb',
+							_ajax_nonce: ntnIgdbScanner.batchNonce,
+							tag_id: item.tag_id,
+							igdb_id: item.igdb_id
+						});
+						if (r && r.success) { ok++; } else { failed.push(item.name); }
+					} catch (err) {
+						failed.push(item.name);
+					}
+					// Pausa breve per non sovraccaricare il server e IGDB, come in "Aggiorna tutti".
+					await new Promise(r => setTimeout(r, 1000));
+				}
+
+				let msg = 'Completato: ' + ok + ' tag aggiornati su ' + changed.length + notFoundText + '.';
+				if (failed.length) { msg += ' Non riusciti: ' + failed.join(', ') + '.'; }
+				setStatus(msg, failed.length > 0);
+				updateChangedBtn.disabled = false;
+			});
+		}
+
 	});
