@@ -567,6 +567,17 @@ function ntn_redirect_strip_paged( string $path, string $base = 'page' ): string
 }
 
 /**
+ * Ultima parte di un percorso di termini ("genitore/figlia" → "figlia").
+ *
+ * @param string $path Percorso o slug del termine.
+ * @return string
+ */
+function ntn_core_redirect_leaf_slug( string $path ): string {
+	$parts = array_values( array_filter( explode( '/', $path ), 'strlen' ) );
+	return empty( $parts ) ? '' : sanitize_title( (string) end( $parts ) );
+}
+
+/**
  * L'archivio indicato dalla richiesta (senza il numero di pagina) esiste?
  *
  * @param array $qv Variabili della richiesta riconosciute da WordPress ($wp->query_vars).
@@ -574,7 +585,9 @@ function ntn_redirect_strip_paged( string $path, string $base = 'page' ): string
  */
 function ntn_redirect_archive_exists( array $qv ): bool {
 	if ( ! empty( $qv['category_name'] ) ) {
-		return get_category_by_path( (string) $qv['category_name'], true ) instanceof WP_Term;
+		// Come fa WordPress: basta l'ultima parte del percorso, così valgono anche le sottocategorie
+		// raggiunte con un indirizzo corto (es. /sezione/microsoft/ per una figlia di "Piattaforme").
+		return get_term_by( 'slug', ntn_core_redirect_leaf_slug( (string) $qv['category_name'] ), 'category' ) instanceof WP_Term;
 	}
 	if ( ! empty( $qv['tag'] ) ) {
 		return get_term_by( 'slug', (string) $qv['tag'], 'post_tag' ) instanceof WP_Term;
@@ -590,7 +603,7 @@ function ntn_redirect_archive_exists( array $qv ): bool {
 		'objects'
 	) as $taxonomy ) {
 		if ( ! empty( $taxonomy->query_var ) && ! empty( $qv[ $taxonomy->query_var ] ) ) {
-			return get_term_by( 'slug', (string) $qv[ $taxonomy->query_var ], $taxonomy->name ) instanceof WP_Term;
+			return get_term_by( 'slug', ntn_core_redirect_leaf_slug( (string) $qv[ $taxonomy->query_var ] ), $taxonomy->name ) instanceof WP_Term;
 		}
 	}
 	if ( ! empty( $qv['pagename'] ) ) {

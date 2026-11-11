@@ -1655,24 +1655,24 @@ echo "\n--- 24. SEMVER SIMULTANEOUS 4-HEADER SYNCHRONIZATION ---\n";
 $parent_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $parent_css, $m_parent );
 $parent_ver = isset( $m_parent[1] ) ? trim( $m_parent[1] ) : '';
-assert_test( $parent_ver === '4.34.0', "24.1: Parent Theme style.css declares Version: 4.34.0(found: {$parent_ver})" );
+assert_test( $parent_ver === '4.34.1', "24.1: Parent Theme style.css declares Version: 4.34.1(found: {$parent_ver})" );
 
 $child_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $child_css, $m_child );
 $child_ver = isset( $m_child[1] ) ? trim( $m_child[1] ) : '';
-assert_test( $child_ver === '4.34.0', "24.2: Child Theme style.css declares Version: 4.34.0(found: {$child_ver})" );
+assert_test( $child_ver === '4.34.1', "24.2: Child Theme style.css declares Version: 4.34.1(found: {$child_ver})" );
 
 $core_php = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' );
 preg_match( '/\*\s*Version:\s*([0-9\.]+)/', $core_php, $m_core_hdr );
 $core_hdr_ver = isset( $m_core_hdr[1] ) ? trim( $m_core_hdr[1] ) : '';
-assert_test( $core_hdr_ver === '4.34.0', "24.3: Core Plugin header declares Version: 4.34.0(found: {$core_hdr_ver})" );
+assert_test( $core_hdr_ver === '4.34.1', "24.3: Core Plugin header declares Version: 4.34.1(found: {$core_hdr_ver})" );
 
 preg_match( "/define\(\s*'NTN_JOURNAL_CORE_VERSION',\s*'([^']+)'\s*\);/", $core_php, $m_core_const );
 $core_const_ver = isset( $m_core_const[1] ) ? trim( $m_core_const[1] ) : '';
-assert_test( $core_const_ver === '4.34.0', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.34.0(found: {$core_const_ver})" );
+assert_test( $core_const_ver === '4.34.1', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.34.1(found: {$core_const_ver})" );
 
 assert_test(
-	$parent_ver === '4.34.0' && $child_ver === '4.34.0' && $core_hdr_ver === '4.34.0' && $core_const_ver === '4.34.0',
+	$parent_ver === '4.34.1' && $child_ver === '4.34.1' && $core_hdr_ver === '4.34.1' && $core_const_ver === '4.34.1',
 	'24.5: All 4 version headers are 100% synchronized and atomic according to Rule 2 of GEMINI.md'
 );
 
@@ -1900,7 +1900,7 @@ $parent_style_ver = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( AB
 $child_style_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' ), $m2 ) ? $m2[1] : '';
 $core_plugin_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m3 ) ? $m3[1] : '';
 $core_const_ver   = preg_match( '/define\(\s*[\'"]NTN_JOURNAL_CORE_VERSION[\'"]\s*,\s*[\'"]([0-9\.]+)[\'"]\s*\)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m4 ) ? $m4[1] : '';
-assert_test( $parent_style_ver === '4.34.0' && $child_style_ver === '4.34.0' && $core_plugin_ver === '4.34.0' && $core_const_ver === '4.34.0', '29.1: All 4 version headers are synchronized to 4.34.0' );
+assert_test( $parent_style_ver === '4.34.1' && $child_style_ver === '4.34.1' && $core_plugin_ver === '4.34.1' && $core_const_ver === '4.34.1', '29.1: All 4 version headers are synchronized to 4.34.1' );
 
 // 29.2: single.php sequence is Google Feed -> Social CTA -> Bottom Related Posts
 $single_php = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/single.php' );
@@ -3693,6 +3693,18 @@ assert_test(
 	'/sezione/console/' === ntn_redirect_strip_paged( '/sezione/console/' ) && '/a/' === ntn_redirect_strip_paged( '/a/pagina/3/', 'pagina' ),
 	'62.5: Paged archive URLs are stripped back to the first page'
 );
+
+// 62.5b: le sottocategorie raggiunte con l'indirizzo corto (/sezione/microsoft/page/315/) contano come archivio esistente
+$mock_terms[9201] = new WP_Term( array( 'term_id' => 9201, 'name' => 'Piattaforme', 'slug' => 'piattaforme', 'taxonomy' => 'category', 'parent' => 0 ) );
+$mock_terms[9202] = new WP_Term( array( 'term_id' => 9202, 'name' => 'Microsoft', 'slug' => 'microsoft', 'taxonomy' => 'category', 'parent' => 9201 ) );
+assert_test(
+	ntn_redirect_archive_exists( array( 'category_name' => 'microsoft', 'paged' => 315 ) ) &&
+	ntn_redirect_archive_exists( array( 'category_name' => 'piattaforme/microsoft', 'paged' => 2 ) ) &&
+	! ntn_redirect_archive_exists( array( 'category_name' => 'non-esiste', 'paged' => 2 ) ) &&
+	'microsoft' === ntn_core_redirect_leaf_slug( '/piattaforme/microsoft/' ) && '' === ntn_core_redirect_leaf_slug( '/' ),
+	'62.5b: Paged fallback recognises child categories reached by their short address'
+);
+unset( $mock_terms[9201], $mock_terms[9202] );
 
 // 62.6: ordine e interruttori: singoli prima delle cartelle, poi pagine numerate; indovinello spento di serie
 assert_test(
