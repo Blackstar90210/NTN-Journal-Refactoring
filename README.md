@@ -15,8 +15,12 @@ Il principio è **"il tema mostra, il plugin pensa"**: il tema legge i dati chia
 > **Versione attuale:** 4.34.0 · **Requisiti:** WordPress 6.0+ (provato fino alla 7.x), PHP 8.0+ (provato fino alla 8.5) · **Facoltativo:** The SEO Framework 5.x · **Licenza:** GPL-2.0-or-later
 
 > Le immagini qui sotto sono **mockup**: usano l'HTML e il CSS veri del tema, ma articoli, giochi, studi, autori e immagini sono inventati.
+> Ogni immagine esiste in versione **chiara** e **scura**: GitHub mostra quella che corrisponde al tema che hai scelto (le versioni scure sono i file `*-scuro.png` in `.github/readme/`).
 
-![Home](.github/readme/home.png)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/readme/home-scuro.png">
+  <img src=".github/readme/home.png" alt="Home">
+</picture>
 
 ---
 
@@ -38,19 +42,28 @@ Il principio è **"il tema mostra, il plugin pensa"**: il tema legge i dati chia
 
 Testata sulla fascia a punti con titolo grande e sottotitolo, riga dati in JetBrains Mono (gioco collegato, autore, data, tempo di lettura, "Aggiornato"), foto a tutta larghezza con filigrana, sottotitoli numerati 01, 02…, colonna laterale con indice, scheda del gioco, condivisione e fonti Google. A fine testo: tag, "// Seguici", "// Leggi anche" e commenti.
 
-![Articolo](.github/readme/articolo.png)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/readme/articolo-scuro.png">
+  <img src=".github/readme/articolo.png" alt="Articolo">
+</picture>
 
 ### Recensione
 
 Box del voto con cinque LED quadrati e voto in numero, etichetta di giudizio (Bocciato, Consigliato con riserva, Consigliato, Must Play), pro e contro uno per riga, verdetto. Nella colonna laterale la **Scheda videogioco**: se l'articolo parla di più giochi diventa una scheda che scorre (frecce e indicatori a LED su computer, schede con i nomi e scorrimento con il dito da telefono), con la riga "Leggi la recensione" o "Non recensito" per ogni gioco.
 
-![Recensione](.github/readme/recensione.png)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/readme/recensione-scuro.png">
+  <img src=".github/readme/recensione.png" alt="Recensione">
+</picture>
 
 ### Hub del videogioco
 
 Indirizzo `/videogioco/nome-gioco/`. Copertina IGDB in cornice e link "Vedi su IGDB.com", contatori (articoli, recensioni, anteprime, ultimo articolo), scheda tecnica a celle (uscita con la precisione nota, sviluppatore, editore, genere, piattaforme, motore grafico), "// Panoramica" scritta dalla redazione o cella "In breve" automatica, contenuto in evidenza, "// Scheda media" con trailer e screenshot ingrandibili, tutti gli articoli del gioco.
 
-![Hub del videogioco](.github/readme/hub-videogioco.png)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/readme/hub-videogioco-scuro.png">
+  <img src=".github/readme/hub-videogioco.png" alt="Hub del videogioco">
+</picture>
 
 ### Hub di categoria
 
@@ -62,26 +75,41 @@ Una categoria si può trasformare in Hub dal pannello. Tipi disponibili:
 
 Sul tag di uno studio c'è anche la **Hub dello studio**, con i suoi giochi e i suoi articoli.
 
-![Hub di categoria](.github/readme/hub-categoria.png)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/readme/hub-categoria-scuro.png">
+  <img src=".github/readme/hub-categoria.png" alt="Hub di categoria">
+</picture>
 
 ### Catalogo dei videogiochi
 
 Totale dei giochi in testata, barra dei filtri che segue lo scorrimento (da telefono si apre con "[ Filtri ]"), griglia a linee condivise da 2 a 5 colonne, filtri senza ricaricare la pagina e salvati nell'indirizzo, scorrimento infinito, ricerca con suggerimenti su giochi e articoli.
 
-![Catalogo](.github/readme/catalogo.png)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/readme/catalogo-scuro.png">
+  <img src=".github/readme/catalogo.png" alt="Catalogo">
+</picture>
 
 ### Redazione
 
 Elenco "// Le firme" diviso in gruppi, con ultimo articolo e link di ogni persona; ordine alfabetico, a mano o per numero di articoli.
 
-![Redazione](.github/readme/redazione.png)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/readme/redazione-scuro.png">
+  <img src=".github/readme/redazione.png" alt="Redazione">
+</picture>
 
 ### Da telefono
 
 <p>
-  <img src=".github/readme/mobile-home.png" alt="Home da telefono" width="300">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset=".github/readme/mobile-home-scuro.png">
+    <img src=".github/readme/mobile-home.png" alt="Home da telefono" width="300">
+  </picture>
   &nbsp;
-  <img src=".github/readme/mobile-articolo.png" alt="Articolo da telefono" width="300">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset=".github/readme/mobile-articolo-scuro.png">
+    <img src=".github/readme/mobile-articolo.png" alt="Articolo da telefono" width="300">
+  </picture>
 </p>
 
 ---
