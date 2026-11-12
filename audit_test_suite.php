@@ -1655,24 +1655,24 @@ echo "\n--- 24. SEMVER SIMULTANEOUS 4-HEADER SYNCHRONIZATION ---\n";
 $parent_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $parent_css, $m_parent );
 $parent_ver = isset( $m_parent[1] ) ? trim( $m_parent[1] ) : '';
-assert_test( $parent_ver === '4.34.1', "24.1: Parent Theme style.css declares Version: 4.34.1(found: {$parent_ver})" );
+assert_test( $parent_ver === '4.34.2', "24.1: Parent Theme style.css declares Version: 4.34.2(found: {$parent_ver})" );
 
 $child_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $child_css, $m_child );
 $child_ver = isset( $m_child[1] ) ? trim( $m_child[1] ) : '';
-assert_test( $child_ver === '4.34.1', "24.2: Child Theme style.css declares Version: 4.34.1(found: {$child_ver})" );
+assert_test( $child_ver === '4.34.2', "24.2: Child Theme style.css declares Version: 4.34.2(found: {$child_ver})" );
 
 $core_php = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' );
 preg_match( '/\*\s*Version:\s*([0-9\.]+)/', $core_php, $m_core_hdr );
 $core_hdr_ver = isset( $m_core_hdr[1] ) ? trim( $m_core_hdr[1] ) : '';
-assert_test( $core_hdr_ver === '4.34.1', "24.3: Core Plugin header declares Version: 4.34.1(found: {$core_hdr_ver})" );
+assert_test( $core_hdr_ver === '4.34.2', "24.3: Core Plugin header declares Version: 4.34.2(found: {$core_hdr_ver})" );
 
 preg_match( "/define\(\s*'NTN_JOURNAL_CORE_VERSION',\s*'([^']+)'\s*\);/", $core_php, $m_core_const );
 $core_const_ver = isset( $m_core_const[1] ) ? trim( $m_core_const[1] ) : '';
-assert_test( $core_const_ver === '4.34.1', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.34.1(found: {$core_const_ver})" );
+assert_test( $core_const_ver === '4.34.2', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.34.2(found: {$core_const_ver})" );
 
 assert_test(
-	$parent_ver === '4.34.1' && $child_ver === '4.34.1' && $core_hdr_ver === '4.34.1' && $core_const_ver === '4.34.1',
+	$parent_ver === '4.34.2' && $child_ver === '4.34.2' && $core_hdr_ver === '4.34.2' && $core_const_ver === '4.34.2',
 	'24.5: All 4 version headers are 100% synchronized and atomic according to Rule 2 of GEMINI.md'
 );
 
@@ -1900,7 +1900,7 @@ $parent_style_ver = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( AB
 $child_style_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' ), $m2 ) ? $m2[1] : '';
 $core_plugin_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m3 ) ? $m3[1] : '';
 $core_const_ver   = preg_match( '/define\(\s*[\'"]NTN_JOURNAL_CORE_VERSION[\'"]\s*,\s*[\'"]([0-9\.]+)[\'"]\s*\)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m4 ) ? $m4[1] : '';
-assert_test( $parent_style_ver === '4.34.1' && $child_style_ver === '4.34.1' && $core_plugin_ver === '4.34.1' && $core_const_ver === '4.34.1', '29.1: All 4 version headers are synchronized to 4.34.1' );
+assert_test( $parent_style_ver === '4.34.2' && $child_style_ver === '4.34.2' && $core_plugin_ver === '4.34.2' && $core_const_ver === '4.34.2', '29.1: All 4 version headers are synchronized to 4.34.2' );
 
 // 29.2: single.php sequence is Google Feed -> Social CTA -> Bottom Related Posts
 $single_php = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/single.php' );
@@ -3705,6 +3705,41 @@ assert_test(
 	'62.5b: Paged fallback recognises child categories reached by their short address'
 );
 unset( $mock_terms[9201], $mock_terms[9202] );
+
+if ( ! function_exists( 'get_taxonomies' ) ) {
+	function get_taxonomies( $args = array(), $output = 'names' ) {
+		return array();
+	}
+}
+// 62.5c: doppioni cancellati con suffisso numerico (nome-2) → termine originale; i termini veri col numero restano
+$mock_terms[9211] = new WP_Term( array( 'term_id' => 9211, 'name' => 'Resident Evil Requiem', 'slug' => 'resident-evil-requiem', 'taxonomy' => 'post_tag' ) );
+$mock_terms[9212] = new WP_Term( array( 'term_id' => 9212, 'name' => 'Alan Wake', 'slug' => 'alan-wake', 'taxonomy' => 'post_tag' ) );
+$mock_terms[9213] = new WP_Term( array( 'term_id' => 9213, 'name' => 'Alan Wake 2', 'slug' => 'alan-wake-2', 'taxonomy' => 'post_tag' ) );
+$mock_terms[9214] = new WP_Term( array( 'term_id' => 9214, 'name' => 'Notizie', 'slug' => 'notizie', 'taxonomy' => 'category' ) );
+$fr_sfx_re   = ntn_core_redirect_suffix_base_term( array( 'tag' => 'resident-evil-requiem-2' ) );
+$fr_sfx_cat  = ntn_core_redirect_suffix_base_term( array( 'category_name' => 'notizie-3' ) );
+$fr_sfx_cat2 = ntn_core_redirect_suffix_base_term( array( 'category_name' => 'genitore/notizie-3', 'paged' => 2 ) );
+assert_test(
+	$fr_sfx_re instanceof WP_Term && 9211 === $fr_sfx_re->term_id &&
+	$fr_sfx_cat instanceof WP_Term && 9214 === $fr_sfx_cat->term_id &&
+	$fr_sfx_cat2 instanceof WP_Term && 9214 === $fr_sfx_cat2->term_id &&
+	null === ntn_core_redirect_suffix_base_term( array( 'tag' => 'alan-wake-2' ) ) &&
+	null === ntn_core_redirect_suffix_base_term( array( 'tag' => 'inesistente-xyz-2' ) ) &&
+	null === ntn_core_redirect_suffix_base_term( array( 'tag' => 'resident-evil-requiem' ) ) &&
+	null === ntn_core_redirect_suffix_base_term( array( 'tag' => 'resident-evil-requiem-2+alan-wake' ) ) &&
+	null === ntn_core_redirect_suffix_base_term( array( 'category_name' => 'resident-evil-requiem-2' ) ) &&
+	null === ntn_core_redirect_suffix_base_term( array( 'pagename' => 'notizie-2' ) ),
+	'62.5c: Deleted duplicate terms with a numeric suffix point to the original term; real numbered terms, other taxonomies and missing bases are left alone'
+);
+unset( $mock_terms[9211], $mock_terms[9212], $mock_terms[9213], $mock_terms[9214] );
+assert_test(
+	strpos( $fr_src, "add_action( 'template_redirect', 'ntn_journal_process_term_suffix_fallback', 4 );" ) !== false &&
+	strpos( $fr_src, "get_option( 'ntn_redirect_term_suffix_fallback', 'yes' )" ) !== false &&
+	strpos( $fr_src, 'wp_safe_redirect( $link, 301 );' ) !== false &&
+	strpos( $fr_src, 'name="ntn_redirect_term_suffix_fallback"' ) !== false &&
+	in_array( 'ntn_redirect_term_suffix_fallback', ntn_get_core_backup_options_keys(), true ),
+	'62.5d: Duplicate-term fallback runs after the paged fallback (301), is on by default, has its switch in the redirects tab and is in the backup'
+);
 
 // 62.6: ordine e interruttori: singoli prima delle cartelle, poi pagine numerate; indovinello spento di serie
 assert_test(

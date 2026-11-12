@@ -647,6 +647,77 @@ function ntn_journal_process_paged_fallback() {
 add_action( 'template_redirect', 'ntn_journal_process_paged_fallback', 3 );
 
 /**
+ * Termine originale di un doppione cancellato: per "nome-2" che non esiste più restituisce "nome",
+ * se esiste nella stessa tassonomia. Vale per tag, categorie e tassonomie pubbliche del plugin.
+ * Il suffisso numerico si toglie una volta sola ("nome-2-3" → "nome-2").
+ *
+ * @param array $qv Variabili della richiesta riconosciute da WordPress ($wp->query_vars).
+ * @return WP_Term|null
+ */
+function ntn_core_redirect_suffix_base_term( array $qv ): ?WP_Term {
+	$slug     = '';
+	$taxonomy = '';
+	if ( ! empty( $qv['category_name'] ) ) {
+		$slug     = ntn_core_redirect_leaf_slug( (string) $qv['category_name'] );
+		$taxonomy = 'category';
+	} elseif ( ! empty( $qv['tag'] ) ) {
+		$raw = (string) $qv['tag'];
+		if ( false !== strpbrk( $raw, ',+ ' ) ) {
+			return null; // Più tag insieme (es. /argomento/a+b/): non è un doppione
+		}
+		$slug     = sanitize_title( $raw );
+		$taxonomy = 'post_tag';
+	} else {
+		foreach ( get_taxonomies(
+			array(
+				'public'   => true,
+				'_builtin' => false,
+			),
+			'objects'
+		) as $tax ) {
+			if ( ! empty( $tax->query_var ) && ! empty( $qv[ $tax->query_var ] ) ) {
+				$slug     = ntn_core_redirect_leaf_slug( (string) $qv[ $tax->query_var ] );
+				$taxonomy = $tax->name;
+				break;
+			}
+		}
+	}
+	if ( '' === $slug || ! preg_match( '/^(.+)-[0-9]+$/', $slug, $m ) ) {
+		return null;
+	}
+	if ( get_term_by( 'slug', $slug, $taxonomy ) instanceof WP_Term ) {
+		return null; // Il termine col numero esiste davvero (es. "alan-wake-2"): non si tocca
+	}
+	$base = get_term_by( 'slug', $m[1], $taxonomy );
+	return $base instanceof WP_Term ? $base : null;
+}
+
+/**
+ * Tag e sezioni doppioni cancellati: /argomento/nome-2/ (unito o eliminato) porta a /argomento/nome/.
+ * 301 perché il doppione non tornerà; si va alla prima pagina del termine originale.
+ *
+ * @return void
+ */
+function ntn_journal_process_term_suffix_fallback() {
+	if ( ! is_404() || 'yes' !== get_option( 'ntn_redirect_term_suffix_fallback', 'yes' ) ) {
+		return;
+	}
+	global $wp;
+	$qv   = ( $wp instanceof WP && is_array( $wp->query_vars ) ) ? $wp->query_vars : array();
+	$base = ntn_core_redirect_suffix_base_term( $qv );
+	if ( null === $base ) {
+		return;
+	}
+	$link = get_term_link( $base );
+	if ( ! is_string( $link ) || '' === $link ) {
+		return;
+	}
+	wp_safe_redirect( $link, 301 );
+	exit;
+}
+add_action( 'template_redirect', 'ntn_journal_process_term_suffix_fallback', 4 );
+
+/**
  * Interruttore "non tirare a indovinare": un indirizzo che non esiste resta un errore 404
  * invece di finire sulla pagina dal nome più simile. Spento di serie.
  *
@@ -675,6 +746,7 @@ function ntn_journal_folder_redirects_handle_post(): ?array {
 
 	if ( 'options' === $action ) {
 		update_option( 'ntn_redirect_paged_fallback', isset( $_POST['ntn_redirect_paged_fallback'] ) ? 'yes' : 'no' );
+		update_option( 'ntn_redirect_term_suffix_fallback', isset( $_POST['ntn_redirect_term_suffix_fallback'] ) ? 'yes' : 'no' );
 		update_option( 'ntn_redirect_no_guess', isset( $_POST['ntn_redirect_no_guess'] ) ? 'yes' : 'no' );
 		return array(
 			'type' => 'success',
@@ -895,6 +967,12 @@ function ntn_journal_render_folder_redirects_ui() {
 				<label>
 					<input type="checkbox" name="ntn_redirect_paged_fallback" value="1" <?php checked( 'yes', get_option( 'ntn_redirect_paged_fallback', 'yes' ) ); ?>>
 					<strong>Pagine numerate oltre la fine:</strong> se un archivio esiste ma la sua pagina numerata no (es. <code>/sezione/notizie/page/999/</code>), porta alla prima pagina dell'archivio invece che all'errore.
+				</label>
+			</p>
+			<p>
+				<label>
+					<input type="checkbox" name="ntn_redirect_term_suffix_fallback" value="1" <?php checked( 'yes', get_option( 'ntn_redirect_term_suffix_fallback', 'yes' ) ); ?>>
+					<strong>Tag e sezioni doppioni cancellati (es. nome-2) → al tag originale:</strong> se un indirizzo come <code>/argomento/nome-2/</code> non esiste più ma <code>/argomento/nome/</code> sì, porta lì con un redirect permanente (301). I tag che hanno davvero un numero nel nome (es. <code>alan-wake-2</code>) non vengono toccati.
 				</label>
 			</p>
 			<p>
