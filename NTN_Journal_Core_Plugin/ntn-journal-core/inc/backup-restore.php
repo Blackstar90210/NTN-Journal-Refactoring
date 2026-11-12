@@ -33,6 +33,7 @@ function ntn_get_core_backup_options_keys() {
 		'ntn_journal_redirects',
 		'ntn_redirect_folder_rules',
 		'ntn_redirect_paged_fallback',
+		'ntn_redirect_term_suffix_fallback',
 		'ntn_redirect_no_guess',
 
 		// Breaking News
@@ -478,6 +479,7 @@ function _ntn_restore_option( $key, $value ) {
 			'ntn_seo_cleanup_og_duplicates',
 			'ntn_journal_enable_comments',
 			'ntn_redirect_paged_fallback',
+			'ntn_redirect_term_suffix_fallback',
 			'ntn_redirect_no_guess',
 		),
 		true

@@ -12,7 +12,7 @@ Tema WordPress per siti di informazione videoludica, con estetica **brutalista i
 
 Il principio è **"il tema mostra, il plugin pensa"**: il tema legge i dati chiamando funzioni del plugin protette da `function_exists()` (con riserve vuote in `inc/plugin-fallbacks.php`), quindi il sito resta visibile anche a plugin spento. I dati IGDB sono conservati nel sito: le pagine non dipendono da IGDB per essere mostrate.
 
-> **Versione attuale:** 4.34.1 · **Requisiti:** WordPress 6.0+ (provato fino alla 7.x), PHP 8.0+ (provato fino alla 8.5) · **Facoltativo:** The SEO Framework 5.x · **Licenza:** GPL-2.0-or-later
+> **Versione attuale:** 4.34.2 · **Requisiti:** WordPress 6.0+ (provato fino alla 7.x), PHP 8.0+ (provato fino alla 8.5) · **Facoltativo:** The SEO Framework 5.x · **Licenza:** GPL-2.0-or-later
 
 > Le immagini qui sotto sono **mockup**: usano l'HTML e il CSS veri del tema, ma articoli, giochi, studi, autori e immagini sono inventati.
 

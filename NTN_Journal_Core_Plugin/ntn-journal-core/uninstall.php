@@ -67,6 +67,7 @@ function ntn_core_uninstall_current_site( $remove_settings ) {
 		'ntn_redirect_folder_rules',
 		'ntn_redirect_no_guess',
 		'ntn_redirect_paged_fallback',
+		'ntn_redirect_term_suffix_fallback',
 		'ntn_redirects_map',
 		'ntn_redirects_migrated',
 		'ntn_rewrite_rules_version',
