@@ -1655,24 +1655,24 @@ echo "\n--- 24. SEMVER SIMULTANEOUS 4-HEADER SYNCHRONIZATION ---\n";
 $parent_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $parent_css, $m_parent );
 $parent_ver = isset( $m_parent[1] ) ? trim( $m_parent[1] ) : '';
-assert_test( $parent_ver === '4.34.2', "24.1: Parent Theme style.css declares Version: 4.34.2(found: {$parent_ver})" );
+assert_test( $parent_ver === '4.34.3', "24.1: Parent Theme style.css declares Version: 4.34.3(found: {$parent_ver})" );
 
 $child_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $child_css, $m_child );
 $child_ver = isset( $m_child[1] ) ? trim( $m_child[1] ) : '';
-assert_test( $child_ver === '4.34.2', "24.2: Child Theme style.css declares Version: 4.34.2(found: {$child_ver})" );
+assert_test( $child_ver === '4.34.3', "24.2: Child Theme style.css declares Version: 4.34.3(found: {$child_ver})" );
 
 $core_php = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' );
 preg_match( '/\*\s*Version:\s*([0-9\.]+)/', $core_php, $m_core_hdr );
 $core_hdr_ver = isset( $m_core_hdr[1] ) ? trim( $m_core_hdr[1] ) : '';
-assert_test( $core_hdr_ver === '4.34.2', "24.3: Core Plugin header declares Version: 4.34.2(found: {$core_hdr_ver})" );
+assert_test( $core_hdr_ver === '4.34.3', "24.3: Core Plugin header declares Version: 4.34.3(found: {$core_hdr_ver})" );
 
 preg_match( "/define\(\s*'NTN_JOURNAL_CORE_VERSION',\s*'([^']+)'\s*\);/", $core_php, $m_core_const );
 $core_const_ver = isset( $m_core_const[1] ) ? trim( $m_core_const[1] ) : '';
-assert_test( $core_const_ver === '4.34.2', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.34.2(found: {$core_const_ver})" );
+assert_test( $core_const_ver === '4.34.3', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.34.3(found: {$core_const_ver})" );
 
 assert_test(
-	$parent_ver === '4.34.2' && $child_ver === '4.34.2' && $core_hdr_ver === '4.34.2' && $core_const_ver === '4.34.2',
+	$parent_ver === '4.34.3' && $child_ver === '4.34.3' && $core_hdr_ver === '4.34.3' && $core_const_ver === '4.34.3',
 	'24.5: All 4 version headers are 100% synchronized and atomic according to Rule 2 of GEMINI.md'
 );
 
@@ -1900,7 +1900,7 @@ $parent_style_ver = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( AB
 $child_style_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' ), $m2 ) ? $m2[1] : '';
 $core_plugin_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m3 ) ? $m3[1] : '';
 $core_const_ver   = preg_match( '/define\(\s*[\'"]NTN_JOURNAL_CORE_VERSION[\'"]\s*,\s*[\'"]([0-9\.]+)[\'"]\s*\)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m4 ) ? $m4[1] : '';
-assert_test( $parent_style_ver === '4.34.2' && $child_style_ver === '4.34.2' && $core_plugin_ver === '4.34.2' && $core_const_ver === '4.34.2', '29.1: All 4 version headers are synchronized to 4.34.2' );
+assert_test( $parent_style_ver === '4.34.3' && $child_style_ver === '4.34.3' && $core_plugin_ver === '4.34.3' && $core_const_ver === '4.34.3', '29.1: All 4 version headers are synchronized to 4.34.3' );
 
 // 29.2: single.php sequence is Google Feed -> Social CTA -> Bottom Related Posts
 $single_php = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/single.php' );
@@ -5677,8 +5677,9 @@ $GLOBALS['post']           = $mock_posts[9311];
 $rt_out_news = ntn_tsf_add_videogame_schema( $rt_graph, array() );
 assert_test(
 	array( 'WebPage', 'NewsArticle' ) === $rt_out_rev[0]['@type'] && ! empty( $rt_out_rev[0]['datePublished'] ) && ! empty( $rt_out_rev[0]['headline'] ) && 1 === count( $rt_out_rev ) && ! isset( $rt_out_rev[0]['about'] ) &&
-	$rt_graph === $rt_out_news,
-	'82.5: A review with no linked game is still an article with headline and dates (and no VideoGame); an ordinary article without a game is left as it was'
+	array( 'WebPage', 'NewsArticle' ) === $rt_out_news[0]['@type'] && ! empty( $rt_out_news[0]['headline'] ) && ! empty( $rt_out_news[0]['datePublished'] ) && ! empty( $rt_out_news[0]['dateModified'] ) &&
+	! empty( $rt_out_news[0]['publisher'] ) && 1 === count( $rt_out_news ) && ! isset( $rt_out_news[0]['about'] ),
+	'82.5 (v4.34.3): Reviews and ordinary articles without a linked game are a NewsArticle with headline, dates and publisher, with no VideoGame node and no about'
 );
 $GLOBALS['queried_object'] = null;
 $GLOBALS['post']           = null;
@@ -5822,8 +5823,19 @@ $GLOBALS['post']           = null;
 assert_test(
 	false !== strpos( $lc_out, 'rel="preload" as="image" href="https://example.com/a-1024.jpg"' ) && false !== strpos( $lc_out, 'imagesrcset="https://example.com/a-1024.jpg 1024w, https://example.com/a-768.jpg 768w"' ) &&
 	false !== strpos( $lc_out, 'imagesizes="(max-width: 1024px) 100vw, 1024px"' ) && false !== strpos( $lc_out, 'fetchpriority="high"' ) && false === strpos( $lc_out, 'a-full.jpg' ) &&
-	'' === $lc_out_game && false !== strpos( $lc_src, "is_singular( array( 'post', 'page', 'comunicato_stampa' ) )" ) && false === strpos( $lc_src, "'full' );\n\t\tif ( \$image_url )" ),
-	'85.2: The LCP preload uses the displayed size ("large") with its srcset and sizes, and only on templates that show the featured image'
+	'' === $lc_out_game && false !== strpos( $lc_src, "is_singular( array( 'post', 'page', 'comunicato_stampa' ) )" ) && false === strpos( $lc_src, "'full' );\n\t\tif ( \$image_url )" ) &&
+	false !== strpos( $lc_src, "wp_get_attachment_image_src( \$thumb_id, 'full' )" ) && false !== strpos( $lc_src, "wp_get_attachment_image_srcset( \$thumb_id, 'full' )" ) && false === strpos( $lc_src, "'large'" ),
+	'85.2 (v4.34.3): The LCP preload uses the same image as the page header ("full", same srcset, fixed 1024px sizes), and only on templates that show the featured image'
+);
+// 85.3 (v4.34.3): le tre testate usano "full" con lo stesso sizes fisso del preload
+$lc_hero_ok = true;
+foreach ( array( 'single.php', 'page.php', 'single-comunicato_stampa.php' ) as $lc_tpl ) {
+	$lc_tpl_src = ntn_t_flat( ntn_t_read( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/' . $lc_tpl ) );
+	$lc_hero_ok = $lc_hero_ok && 1 === preg_match( "/the_post_thumbnail\( 'full', array\( 'class' => 'w-full h-full object-cover', 'sizes' => '\(max-width: 1024px \) 100vw, 1024px',/", $lc_tpl_src ) && false === strpos( $lc_tpl_src, "the_post_thumbnail( 'large'" );
+}
+assert_test(
+	$lc_hero_ok && false !== strpos( $lc_src, "\$sizes  = '(max-width: 1024px) 100vw, 1024px';" ),
+	'85.3 (v4.34.3): The header image of articles, pages and press releases is the full original (Google Discover sees its real width) with the same fixed sizes as the preload'
 );
 
 // --- TEST SUITE 86: apostrofi nei dati per Google e copertine del catalogo v4.16.4 ---
@@ -7243,6 +7255,65 @@ assert_test(
 	false !== strpos( $sc_jsf, "action: 'ntn_core_igdb_changed_tags', _ajax_nonce: ntnIgdbScanner.batchNonce" ) &&
 	false !== strpos( $sc_jsf, "action: 'ntn_update_single_tag_igdb', _ajax_nonce: ntnIgdbScanner.batchNonce, tag_id: item.tag_id, igdb_id: item.igdb_id" ),
 	'110.4: single-tag resync stores the IGDB fingerprint (id, updated_at, checksum), the tag reset deletes it, and the JS runs the check and then the existing single-tag resync with the batch nonce'
+);
+
+// --- TEST SUITE 111: requisiti di Google Discover v4.34.3 ---
+echo "\n--- 111. REQUISITI DI GOOGLE DISCOVER V4.34.3 ---\n";
+$gd_core = ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/';
+$gd_seo  = ntn_t_flat( ntn_t_read( $gd_core . 'inc/seo-extras.php' ) );
+$gd_rep  = ntn_t_flat( ntn_t_read( $gd_core . 'inc/image-report.php' ) );
+$gd_js   = ntn_t_read( $gd_core . 'assets/js/admin-image-report.js' );
+$gd_node = trim( (string) shell_exec( 'node --check ' . escapeshellarg( $gd_core . 'assets/js/admin-image-report.js' ) . ' 2>&1 && echo OK' ) );
+
+// 111.1: le date di The SEO Framework hanno sempre ora e fuso orario
+assert_test(
+	'Y-m-d\TH:i:sP' === ntn_core_tsf_full_timestamps() && has_filter( 'the_seo_framework_timestamp_format', 'ntn_core_tsf_full_timestamps' ) &&
+	'2026-11-11T16:55:35+01:00' === ( new DateTime( '2026-11-11 16:55:35', new DateTimeZone( '+01:00' ) ) )->format( ntn_core_tsf_full_timestamps() ),
+	'111.1: The SEO Framework dates (article:published_time, article:modified_time, schema, sitemap) always carry time and timezone, even with the date-only option'
+);
+
+// 111.2: il feed RSS dichiara lo spazio "media", aggiunge media:content e mette l'immagine in testa al testo
+ob_start();
+ntn_core_rss_media_namespace();
+$gd_ns = ob_get_clean();
+assert_test(
+	false !== strpos( $gd_ns, 'xmlns:media="http://search.yahoo.com/mrss/"' ) &&
+	has_filter( 'rss2_ns', 'ntn_core_rss_media_namespace' ) && has_filter( 'rss2_item', 'ntn_core_rss_featured_image_item' ) &&
+	has_filter( 'the_excerpt_rss', 'ntn_core_rss_prepend_featured_image' ) && has_filter( 'the_content_feed', 'ntn_core_rss_prepend_featured_image' ) &&
+	false !== strpos( $gd_seo, "wp_get_attachment_image_src( \$thumbnail_id, 'full' )" ) && false !== strpos( $gd_seo, '<media:content url="\' . esc_url( $image[0] ) . \'" medium="image"\'' ) &&
+	false !== strpos( $gd_seo, "' width=\"' . absint( \$image[1] ) . '\" height=\"' . absint( \$image[2] ) . '\"'" ) &&
+	1 === preg_match( "/function ntn_core_rss_prepend_featured_image\( \\\$content \) \{ if \( ! is_feed\( \) \|\| ! has_post_thumbnail\( \) \)/", $gd_seo ) &&
+	false !== strpos( $gd_seo, 'false !== strpos( $content, $image_url )' ) && false !== strpos( $gd_seo, "wp_get_attachment_image( \$thumbnail_id, 'full' )" ),
+	'111.2: The RSS feed declares the media namespace, adds media:content (full image, escaped URL, width and height) and puts the full featured image before the text only in feeds and only if it is not already there'
+);
+
+// 111.3: nei dati strutturati l'immagine dell'articolo dichiara larghezza e altezza originali
+assert_test(
+	false !== strpos( $gd_seo, "\$image_obj['width'] = (int ) \$image_src[1];" ) && false !== strpos( $gd_seo, "\$image_obj['height'] = (int ) \$image_src[2];" ) &&
+	false !== strpos( $gd_seo, "if ( is_singular( array( 'videogioco', 'attachment' ) ) ) { return \$data; }" ) && false === strpos( $gd_seo, "! has_category( array( 'recensioni', 'recensione' ), \$post_id )" ),
+	'111.3: The article ImageObject in JSON-LD has the real width and height of the full image; only game Hubs and attachments skip the NewsArticle upgrade'
+);
+
+// 111.4: il Rapporto Immagini elenca le immagini in evidenza sotto 1200 px, le più strette per prime; i rapporti vecchi non danno errori
+if ( ! function_exists( 'get_edit_post_link' ) ) {
+	function get_edit_post_link( $id = 0, $context = 'display' ) { return 'https://example.com/wp-admin/post.php?post=' . (int) $id . '&action=edit'; }
+}
+if ( ! function_exists( 'get_attached_file' ) ) {
+	function get_attached_file( $id ) { return 'C:/uploads/img-' . (int) $id . '.jpg'; }
+}
+if ( ! function_exists( 'wp_basename' ) ) {
+	function wp_basename( $path, $suffix = '' ) { return basename( (string) $path, $suffix ); }
+}
+$gd_view = ntn_core_image_report_scan_view( array( 'small_featured_count' => 2, 'small_featured' => array( array( 9311, 5, 800, 450 ), array( 9310, 6, 460, 215 ) ) ) );
+$gd_old  = ntn_core_image_report_scan_view( array() );
+assert_test(
+	1200 === NTN_IMAGE_REPORT_DISCOVER_WIDTH && 2 === $gd_view['small_featured_count'] && 2 === count( $gd_view['small_featured'] ) &&
+	'460 × 215 px' === $gd_view['small_featured'][0]['size'] && isset( $gd_view['small_featured'][0]['title'], $gd_view['small_featured'][0]['edit'], $gd_view['small_featured'][0]['name'] ) &&
+	null === $gd_old['small_featured_count'] && array() === $gd_old['small_featured'] &&
+	false !== strpos( $gd_rep, "INNER JOIN {\$wpdb->posts} p ON p.ID = pm.post_id WHERE pm.meta_key = '_thumbnail_id' AND pm.meta_value = %d AND p.post_status = 'publish' AND p.post_type IN ('post','comunicato_stampa' )" ) &&
+	false !== strpos( $gd_rep, '$width > 0 && $width < NTN_IMAGE_REPORT_DISCOVER_WIDTH' ) && false !== strpos( $gd_rep, "'Immagini in evidenza sotto %1\$s px: %2\$s'" ) &&
+	false !== strpos( $gd_js, 'Immagini in evidenza sotto' ) && false !== strpos( $gd_js, '+ smallHtml( d )' ) && false === strpos( $gd_js, 'i.title +' ) && 'OK' === $gd_node,
+	'111.4: The image report counts published articles whose featured image is under 1200 px (one prepared query), lists the narrowest first with title, edit link, size and file, old saved reports work, valid JavaScript (' . $gd_node . ')'
 );
 
 echo "\n=======================================================================\n";

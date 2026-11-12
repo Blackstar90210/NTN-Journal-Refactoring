@@ -16,18 +16,23 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Dalla 4.16.3 il preload usa la stessa misura ("large") e lo stesso srcset della pagina: prima scaricava
  * la misura "full" e il browser poteva scaricare l'immagine due volte. Solo sui modelli che mostrano
  * davvero l'immagine in evidenza in testata (single.php, page.php, single-comunicato_stampa.php).
+ *
+ * Dalla 4.34.3 testata e preload usano la misura originale ("full"): Google Discover vuole un'immagine
+ * principale larga almeno 1200 px e legge la larghezza dichiarata nella pagina. Il "sizes" resta fisso a
+ * 1024 px, così il browser sceglie dal srcset la stessa variante leggera di prima e il caricamento non rallenta.
+ * Preload e immagine della testata usano gli stessi valori, così l'immagine si scarica una volta sola.
  */
 function ntn_preload_lcp_image() {
 	if ( ! is_singular( array( 'post', 'page', 'comunicato_stampa' ) ) || is_front_page() || ! has_post_thumbnail() ) {
 		return;
 	}
 	$thumb_id = (int) get_post_thumbnail_id();
-	$image    = $thumb_id ? wp_get_attachment_image_src( $thumb_id, 'large' ) : false;
+	$image    = $thumb_id ? wp_get_attachment_image_src( $thumb_id, 'full' ) : false;
 	if ( empty( $image[0] ) ) {
 		return;
 	}
-	$srcset = wp_get_attachment_image_srcset( $thumb_id, 'large' );
-	$sizes  = wp_get_attachment_image_sizes( $thumb_id, 'large' );
+	$srcset = wp_get_attachment_image_srcset( $thumb_id, 'full' );
+	$sizes  = '(max-width: 1024px) 100vw, 1024px';
 	$extra  = '';
 	if ( $srcset ) {
 		$extra .= ' imagesrcset="' . esc_attr( $srcset ) . '"';

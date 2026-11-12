@@ -128,10 +128,13 @@ get_header();
 					<figure class="ntn-art-hero">
 						<div class="ntn-art-hero-img">
 							<?php
+							// v4.34.3: misura originale ("full") perché Google Discover legga la larghezza vera (almeno 1200 px);
+							// "sizes" fisso fa scaricare al browser la stessa variante leggera di prima (vedi ntn_preload_lcp_image()).
 							the_post_thumbnail(
-								'large',
+								'full',
 								array(
 									'class'         => 'w-full h-full object-cover',
+									'sizes'         => '(max-width: 1024px) 100vw, 1024px',
 									'fetchpriority' => 'high',
 									'loading'       => 'eager',
 								)
