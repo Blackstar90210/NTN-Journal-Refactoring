@@ -48,10 +48,12 @@ get_header();
 						<figure class="ntn-art-hero">
 							<div class="ntn-art-hero-img">
 								<?php
+								// v4.34.3: misura originale con "sizes" fisso, come in single.php e nel preload.
 								the_post_thumbnail(
-									'large',
+									'full',
 									array(
 										'class'         => 'w-full h-full object-cover',
+										'sizes'         => '(max-width: 1024px) 100vw, 1024px',
 										'fetchpriority' => 'high',
 										'loading'       => 'eager',
 									)

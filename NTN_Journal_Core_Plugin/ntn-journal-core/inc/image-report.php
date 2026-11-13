@@ -16,6 +16,74 @@ define( 'NTN_IMAGE_REPORT_SCAN_BATCH', 25 );
 define( 'NTN_IMAGE_REPORT_UNUSED_BATCH', 10 );
 define( 'NTN_IMAGE_REPORT_HEAVY_BYTES', 1572864 ); // 1,5 MB per il file originale
 define( 'NTN_IMAGE_REPORT_LIST_MAX', 200 );        // quante voci per elenco restano salvate
+define( 'NTN_IMAGE_REPORT_DISCOVER_WIDTH', 1200 ); // larghezza minima dell'immagine in evidenza per Google Discover (v4.34.3)
+
+/**
+ * Articoli e comunicati pubblicati che usano un'immagine come immagine in evidenza (v4.34.3, sola lettura).
+ *
+ * @param int $attachment_id Allegato.
+ * @return int[] ID dei contenuti pubblicati.
+ */
+function ntn_core_image_report_featured_posts( $attachment_id ) {
+	global $wpdb;
+	$ids = $wpdb->get_col(
+		$wpdb->prepare(
+			"SELECT p.ID FROM {$wpdb->postmeta} pm INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id WHERE pm.meta_key = '_thumbnail_id' AND pm.meta_value = %d AND p.post_status = 'publish' AND p.post_type IN ('post','comunicato_stampa') ORDER BY p.ID DESC LIMIT %d",
+			(int) $attachment_id,
+			(int) NTN_IMAGE_REPORT_LIST_MAX
+		)
+	);
+	return array_map( 'intval', (array) $ids );
+}
+
+/**
+ * Aggiunge una voce all'elenco delle immagini in evidenza troppo strette, tenendo le più strette (v4.34.3).
+ *
+ * @param array $list   Voci [articolo, immagine, larghezza, altezza].
+ * @param int   $post   Articolo.
+ * @param int   $image  Immagine.
+ * @param int   $width  Larghezza originale.
+ * @param int   $height Altezza originale.
+ */
+function ntn_core_image_report_push_small( array &$list, $post, $image, $width, $height ) {
+	$list[] = array( (int) $post, (int) $image, (int) $width, (int) $height );
+	if ( count( $list ) > NTN_IMAGE_REPORT_LIST_MAX * 2 ) {
+		usort(
+			$list,
+			static function ( $a, $b ) {
+				return $a[2] <=> $b[2];
+			}
+		);
+		$list = array_slice( $list, 0, NTN_IMAGE_REPORT_LIST_MAX );
+	}
+}
+
+/**
+ * Le voci dell'elenco delle immagini in evidenza troppo strette, le più strette per prime (v4.34.3).
+ *
+ * @param array $list  Voci [articolo, immagine, larghezza, altezza].
+ * @param int   $limit Quante.
+ * @return array[]
+ */
+function ntn_core_image_report_small_items( array $list, $limit = 30 ) {
+	usort(
+		$list,
+		static function ( $a, $b ) {
+			return $a[2] <=> $b[2];
+		}
+	);
+	$out = array();
+	foreach ( array_slice( $list, 0, $limit ) as $row ) {
+		$out[] = array(
+			// Testo semplice: lo protegge poi il JavaScript della pagina (gli apostrofi non devono restare "&#8217;").
+			'title' => html_entity_decode( wp_strip_all_tags( (string) get_the_title( (int) $row[0] ) ), ENT_QUOTES | ENT_HTML5, 'UTF-8' ),
+			'edit'  => (string) get_edit_post_link( (int) $row[0], 'raw' ),
+			'size'  => sprintf( '%1$d × %2$d px', (int) $row[2], (int) $row[3] ),
+			'name'  => (string) wp_basename( (string) get_attached_file( (int) $row[1] ) ),
+		);
+	}
+	return $out;
+}
 
 /**
  * Rapporto salvato.
@@ -155,18 +223,20 @@ function ntn_core_ajax_image_report_scan() {
 	$new   = 0 === $last;
 	$scan  = $new ? array() : (array) ( ntn_core_image_report_get()['scan'] ?? array() );
 	$scan += array(
-		'total'           => 0,
-		'checked'         => 0,
-		'bytes_all'       => 0,
-		'bytes_originals' => 0,
-		'heavy'           => array(),
-		'heavy_count'     => 0,
-		'no_alt'          => array(),
-		'no_alt_count'    => 0,
-		'missing'         => array(),
-		'missing_count'   => 0,
-		'done'            => false,
-		'at'              => 0,
+		'total'                => 0,
+		'checked'              => 0,
+		'bytes_all'            => 0,
+		'bytes_originals'      => 0,
+		'heavy'                => array(),
+		'heavy_count'          => 0,
+		'no_alt'               => array(),
+		'no_alt_count'         => 0,
+		'missing'              => array(),
+		'missing_count'        => 0,
+		'small_featured'       => array(),
+		'small_featured_count' => 0,
+		'done'                 => false,
+		'at'                   => 0,
 	);
 	if ( $new ) {
 		$scan['total'] = ntn_core_image_report_total();
@@ -189,6 +259,16 @@ function ntn_core_ajax_image_report_scan() {
 		if ( '' === trim( (string) get_post_meta( $id, '_wp_attachment_image_alt', true ) ) ) {
 			++$scan['no_alt_count'];
 			ntn_core_image_report_push( $scan['no_alt'], $id, $sizes['original'] );
+		}
+		// Immagini in evidenza più strette di 1200 px negli articoli pubblicati (v4.34.3): Google Discover non le usa.
+		$meta   = wp_get_attachment_metadata( $id );
+		$width  = is_array( $meta ) ? (int) ( $meta['width'] ?? 0 ) : 0;
+		$height = is_array( $meta ) ? (int) ( $meta['height'] ?? 0 ) : 0;
+		if ( $width > 0 && $width < NTN_IMAGE_REPORT_DISCOVER_WIDTH ) {
+			foreach ( ntn_core_image_report_featured_posts( $id ) as $featured_post ) {
+				++$scan['small_featured_count'];
+				ntn_core_image_report_push_small( $scan['small_featured'], $featured_post, $id, $width, $height );
+			}
 		}
 		$last = $id;
 	}
@@ -218,16 +298,20 @@ add_action( 'wp_ajax_ntn_image_report_scan', 'ntn_core_ajax_image_report_scan' )
  */
 function ntn_core_image_report_scan_view( array $scan ) {
 	return array(
-		'total'           => (int) ( $scan['total'] ?? 0 ),
-		'checked'         => (int) ( $scan['checked'] ?? 0 ),
-		'bytes_all'       => (int) ( $scan['bytes_all'] ?? 0 ),
-		'bytes_originals' => (int) ( $scan['bytes_originals'] ?? 0 ),
-		'heavy_count'     => (int) ( $scan['heavy_count'] ?? 0 ),
-		'no_alt_count'    => (int) ( $scan['no_alt_count'] ?? 0 ),
-		'missing_count'   => (int) ( $scan['missing_count'] ?? 0 ),
-		'heavy'           => ntn_core_image_report_items( (array) ( $scan['heavy'] ?? array() ) ),
-		'no_alt'          => ntn_core_image_report_items( (array) ( $scan['no_alt'] ?? array() ) ),
-		'missing'         => ntn_core_image_report_items( (array) ( $scan['missing'] ?? array() ) ),
+		'total'                => (int) ( $scan['total'] ?? 0 ),
+		'checked'              => (int) ( $scan['checked'] ?? 0 ),
+		'bytes_all'            => (int) ( $scan['bytes_all'] ?? 0 ),
+		'bytes_originals'      => (int) ( $scan['bytes_originals'] ?? 0 ),
+		'heavy_count'          => (int) ( $scan['heavy_count'] ?? 0 ),
+		'no_alt_count'         => (int) ( $scan['no_alt_count'] ?? 0 ),
+		'missing_count'        => (int) ( $scan['missing_count'] ?? 0 ),
+		'heavy'                => ntn_core_image_report_items( (array) ( $scan['heavy'] ?? array() ) ),
+		'no_alt'               => ntn_core_image_report_items( (array) ( $scan['no_alt'] ?? array() ) ),
+		'missing'              => ntn_core_image_report_items( (array) ( $scan['missing'] ?? array() ) ),
+		// v4.34.3: null = analisi salvata prima della 4.34.3, che non conteneva ancora questo controllo.
+		'small_featured_count' => isset( $scan['small_featured_count'] ) ? (int) $scan['small_featured_count'] : null,
+		'small_featured'       => ntn_core_image_report_small_items( (array) ( $scan['small_featured'] ?? array() ) ),
+		'discover_width'       => NTN_IMAGE_REPORT_DISCOVER_WIDTH,
 	);
 }
 
@@ -370,6 +454,9 @@ function ntn_core_image_report_dashboard_summary() {
 		);
 		if ( ! empty( $scan['missing_count'] ) ) {
 			$lines[] = sprintf( 'File mancanti sul disco: %s', number_format_i18n( (int) $scan['missing_count'] ) );
+		}
+		if ( isset( $scan['small_featured_count'] ) ) {
+			$lines[] = sprintf( 'Immagini in evidenza sotto %1$s px: %2$s', number_format_i18n( NTN_IMAGE_REPORT_DISCOVER_WIDTH ), number_format_i18n( (int) $scan['small_featured_count'] ) );
 		}
 	} else {
 		$lines[] = 'Nessuna analisi ancora fatta';

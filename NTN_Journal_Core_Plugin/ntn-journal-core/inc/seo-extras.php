@@ -1335,8 +1335,10 @@ function ntn_tsf_add_videogame_schema( $data, $context = array() ) {
 	} else {
 		$single_entity = ntn_core_schema_single_game_entity( $post_id );
 		if ( null === $single_entity ) {
-			// Nessun gioco associato. Una recensione resta comunque un articolo con autore e data (v4.16.0), senza VideoGame.
-			if ( is_singular( 'videogioco' ) || ! has_category( array( 'recensioni', 'recensione' ), $post_id ) ) {
+			// Nessun gioco associato (v4.34.3): ogni articolo, comunicato o recensione resta comunque un NewsArticle
+			// con titolo, immagine, editore e date complete (serve a Google Discover), solo senza VideoGame e senza "about".
+			// Prima della 4.34.3 questo valeva solo per le recensioni: le notizie senza gioco restavano una semplice WebPage.
+			if ( is_singular( array( 'videogioco', 'attachment' ) ) ) {
 				return $data;
 			}
 		} else {
@@ -1386,12 +1388,19 @@ function ntn_tsf_add_videogame_schema( $data, $context = array() ) {
 						if ( empty( $data[ $key ]['image'] ) ) {
 							$thumbnail_id = get_post_thumbnail_id( $post_id );
 							if ( $thumbnail_id ) {
-								$image_url = wp_get_attachment_image_url( $thumbnail_id, 'full' );
+								// Immagine originale con larghezza e altezza (v4.34.3): Google Discover vuole sapere che è larga almeno 1200 px.
+								$image_src = wp_get_attachment_image_src( $thumbnail_id, 'full' );
+								$image_url = is_array( $image_src ) && ! empty( $image_src[0] ) ? $image_src[0] : wp_get_attachment_image_url( $thumbnail_id, 'full' );
 								if ( $image_url ) {
-									$data[ $key ]['image'] = array(
+									$image_obj = array(
 										'@type' => 'ImageObject',
 										'url'   => esc_url( $image_url ),
 									);
+									if ( is_array( $image_src ) && ! empty( $image_src[0] ) && ! empty( $image_src[1] ) && ! empty( $image_src[2] ) ) {
+										$image_obj['width']  = (int) $image_src[1];
+										$image_obj['height'] = (int) $image_src[2];
+									}
+									$data[ $key ]['image'] = $image_obj;
 								}
 							}
 						}
@@ -1558,4 +1567,78 @@ function ntn_core_schema_decode_entities( $data ) {
 	return $data;
 }
 add_filter( 'the_seo_framework_schema_graph_data', 'ntn_core_schema_decode_entities', 99 );
+
+/**
+ * Date complete per Google (v4.34.3): giorno, ora e fuso orario.
+ *
+ * In The SEO Framework l'opzione "timestamps_format" può chiedere la sola data ("2026-11-11"). Così i tag
+ * article:published_time e article:modified_time, le date dei dati strutturati e della sitemap perdono l'ora,
+ * che Google Discover e Google News usano per capire quanto è fresca una notizia. Si chiede sempre il formato completo.
+ *
+ * @return string Formato PHP della data (ISO 8601 con fuso orario).
+ */
+function ntn_core_tsf_full_timestamps() {
+	return 'Y-m-d\TH:i:sP';
+}
+add_filter( 'the_seo_framework_timestamp_format', 'ntn_core_tsf_full_timestamps' );
+
+/**
+ * Feed RSS con l'immagine in evidenza (v4.34.3).
+ *
+ * Google Discover e Google News leggono anche il feed: senza immagine gli articoli arrivano come solo testo.
+ * 1. Lo spazio dei nomi "media" nell'intestazione del feed.
+ */
+function ntn_core_rss_media_namespace() {
+	echo 'xmlns:media="http://search.yahoo.com/mrss/"' . "\n\t";
+}
+add_action( 'rss2_ns', 'ntn_core_rss_media_namespace' );
+
+/**
+ * 2. Per ogni articolo del feed, l'immagine in evidenza originale con le sue misure.
+ */
+function ntn_core_rss_featured_image_item() {
+	$thumbnail_id = (int) get_post_thumbnail_id();
+	if ( ! $thumbnail_id ) {
+		return;
+	}
+	$image = wp_get_attachment_image_src( $thumbnail_id, 'full' );
+	if ( ! is_array( $image ) || empty( $image[0] ) ) {
+		return;
+	}
+	$size = '';
+	if ( ! empty( $image[1] ) && ! empty( $image[2] ) ) {
+		$size = ' width="' . absint( $image[1] ) . '" height="' . absint( $image[2] ) . '"';
+	}
+	echo "\t\t" . '<media:content url="' . esc_url( $image[0] ) . '" medium="image"' . $size . ' />' . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput -- valori già filtrati con esc_url e absint.
+}
+add_action( 'rss2_item', 'ntn_core_rss_featured_image_item' );
+
+/**
+ * 3. L'immagine in evidenza in testa al testo del feed, se non c'è già.
+ *
+ * @param string $content Testo dell'articolo (o riassunto) per il feed.
+ * @return string
+ */
+function ntn_core_rss_prepend_featured_image( $content ) {
+	if ( ! is_feed() || ! has_post_thumbnail() ) {
+		return $content;
+	}
+	$thumbnail_id = (int) get_post_thumbnail_id();
+	$image_url    = $thumbnail_id ? wp_get_attachment_image_url( $thumbnail_id, 'full' ) : '';
+	if ( ! $image_url ) {
+		return $content;
+	}
+	$content = (string) $content;
+	if ( false !== strpos( $content, $image_url ) || false !== strpos( $content, 'wp-image-' . $thumbnail_id . '"' ) || false !== strpos( $content, 'wp-image-' . $thumbnail_id . ' ' ) ) {
+		return $content;
+	}
+	$image = wp_get_attachment_image( $thumbnail_id, 'full' );
+	if ( '' === $image ) {
+		return $content;
+	}
+	return '<p>' . $image . '</p>' . $content;
+}
+// Priorità 20: dopo The SEO Framework, che con l'opzione "riassunto nel feed" toglie tutto l'HTML dal testo (immagine compresa).
+add_filter( 'the_excerpt_rss', 'ntn_core_rss_prepend_featured_image', 20 );
+add_filter( 'the_content_feed', 'ntn_core_rss_prepend_featured_image', 20 );
 

@@ -23,12 +23,26 @@
 			return '<li>' + ( url ? '<a href="' + esc( url ) + '" target="_blank" rel="noopener noreferrer">' + name + '</a>' : name ) + ( showBytes ? ' (' + kb( i.bytes ) + ')' : '' ) + '</li>';
 		} ).join( '' ) + '</ul>';
 	}
+	// v4.34.3: immagini in evidenza più strette di 1200 px negli articoli pubblicati (Google Discover).
+	function smallHtml( d ) {
+		var min = d.discover_width || 1200;
+		var html = '<h3>Immagini in evidenza sotto ' + esc( min ) + ' px (Google Discover)</h3>';
+		if ( null === d.small_featured_count || undefined === d.small_featured_count ) {
+			return html + '<p>Questa analisi è precedente al controllo: premi «1. Analizza» per rifarla.</p>';
+		}
+		html += '<p>Google Discover vuole immagini in evidenza larghe almeno ' + esc( min ) + ' px: queste vanno sostituite con una versione più grande. Articoli trovati: <strong>' + esc( d.small_featured_count ) + '</strong>.</p>';
+		if ( ! d.small_featured || ! d.small_featured.length ) { return html; }
+		return html + '<p><strong>Le più strette (prime 30):</strong></p><ul style="list-style:disc;margin-left:20px">' + d.small_featured.map( function ( i ) {
+			var title = esc( i.title || '(senza titolo)' ), url = safeUrl( i.edit || '' );
+			return '<li>' + ( url ? '<a href="' + esc( url ) + '" target="_blank" rel="noopener noreferrer">' + title + '</a>' : title ) + ' — ' + esc( i.size || '' ) + ' — ' + esc( i.name || '' ) + '</li>';
+		} ).join( '' ) + '</ul>';
+	}
 	function scanHtml( d, final ) {
 		if ( ! final ) { return '<p>Analisi… ' + d.checked + ' / ' + d.total + ' immagini</p>'; }
 		return '<h3>Analisi' + ( d.at ? ' del ' + esc( when( d.at ) ) : '' ) + '</h3>' +
 			'<p>' + d.checked + ' immagini. Peso totale su disco con le miniature: <strong>' + kb( d.bytes_all ) + '</strong> (solo gli originali: ' + kb( d.bytes_originals ) + ').</p>' +
 			'<ul style="list-style:disc;margin-left:20px"><li>Originali sopra ' + esc( heavy ) + ': <strong>' + d.heavy_count + '</strong></li><li>Senza testo alternativo: <strong>' + d.no_alt_count + '</strong> (alcune immagini decorative possono non averlo)</li><li>File mancanti sul disco: <strong>' + d.missing_count + '</strong></li></ul>' +
-			list( 'Le più pesanti (prime 30):', d.heavy, true ) + list( 'Senza testo alternativo (le più pesanti, prime 30):', d.no_alt, true ) + list( 'File mancanti (prime 30):', d.missing, false );
+			list( 'Le più pesanti (prime 30):', d.heavy, true ) + list( 'Senza testo alternativo (le più pesanti, prime 30):', d.no_alt, true ) + list( 'File mancanti (prime 30):', d.missing, false ) + smallHtml( d );
 	}
 	function unusedHtml( d, final ) {
 		if ( ! final ) { return '<p>Ricerca… ' + d.checked + ' / ' + d.total + ' immagini</p>'; }
