@@ -1655,24 +1655,24 @@ echo "\n--- 24. SEMVER SIMULTANEOUS 4-HEADER SYNCHRONIZATION ---\n";
 $parent_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $parent_css, $m_parent );
 $parent_ver = isset( $m_parent[1] ) ? trim( $m_parent[1] ) : '';
-assert_test( $parent_ver === '4.34.3', "24.1: Parent Theme style.css declares Version: 4.34.3(found: {$parent_ver})" );
+assert_test( $parent_ver === '4.34.4', "24.1: Parent Theme style.css declares Version: 4.34.4(found: {$parent_ver})" );
 
 $child_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $child_css, $m_child );
 $child_ver = isset( $m_child[1] ) ? trim( $m_child[1] ) : '';
-assert_test( $child_ver === '4.34.3', "24.2: Child Theme style.css declares Version: 4.34.3(found: {$child_ver})" );
+assert_test( $child_ver === '4.34.4', "24.2: Child Theme style.css declares Version: 4.34.4(found: {$child_ver})" );
 
 $core_php = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' );
 preg_match( '/\*\s*Version:\s*([0-9\.]+)/', $core_php, $m_core_hdr );
 $core_hdr_ver = isset( $m_core_hdr[1] ) ? trim( $m_core_hdr[1] ) : '';
-assert_test( $core_hdr_ver === '4.34.3', "24.3: Core Plugin header declares Version: 4.34.3(found: {$core_hdr_ver})" );
+assert_test( $core_hdr_ver === '4.34.4', "24.3: Core Plugin header declares Version: 4.34.4(found: {$core_hdr_ver})" );
 
 preg_match( "/define\(\s*'NTN_JOURNAL_CORE_VERSION',\s*'([^']+)'\s*\);/", $core_php, $m_core_const );
 $core_const_ver = isset( $m_core_const[1] ) ? trim( $m_core_const[1] ) : '';
-assert_test( $core_const_ver === '4.34.3', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.34.3(found: {$core_const_ver})" );
+assert_test( $core_const_ver === '4.34.4', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.34.4(found: {$core_const_ver})" );
 
 assert_test(
-	$parent_ver === '4.34.3' && $child_ver === '4.34.3' && $core_hdr_ver === '4.34.3' && $core_const_ver === '4.34.3',
+	$parent_ver === '4.34.4' && $child_ver === '4.34.4' && $core_hdr_ver === '4.34.4' && $core_const_ver === '4.34.4',
 	'24.5: All 4 version headers are 100% synchronized and atomic according to Rule 2 of GEMINI.md'
 );
 
@@ -1900,7 +1900,7 @@ $parent_style_ver = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( AB
 $child_style_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' ), $m2 ) ? $m2[1] : '';
 $core_plugin_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m3 ) ? $m3[1] : '';
 $core_const_ver   = preg_match( '/define\(\s*[\'"]NTN_JOURNAL_CORE_VERSION[\'"]\s*,\s*[\'"]([0-9\.]+)[\'"]\s*\)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m4 ) ? $m4[1] : '';
-assert_test( $parent_style_ver === '4.34.3' && $child_style_ver === '4.34.3' && $core_plugin_ver === '4.34.3' && $core_const_ver === '4.34.3', '29.1: All 4 version headers are synchronized to 4.34.3' );
+assert_test( $parent_style_ver === '4.34.4' && $child_style_ver === '4.34.4' && $core_plugin_ver === '4.34.4' && $core_const_ver === '4.34.4', '29.1: All 4 version headers are synchronized to 4.34.4' );
 
 // 29.2: single.php sequence is Google Feed -> Social CTA -> Bottom Related Posts
 $single_php = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/single.php' );
@@ -7314,6 +7314,57 @@ assert_test(
 	false !== strpos( $gd_rep, '$width > 0 && $width < NTN_IMAGE_REPORT_DISCOVER_WIDTH' ) && false !== strpos( $gd_rep, "'Immagini in evidenza sotto %1\$s px: %2\$s'" ) &&
 	false !== strpos( $gd_js, 'Immagini in evidenza sotto' ) && false !== strpos( $gd_js, '+ smallHtml( d )' ) && false === strpos( $gd_js, 'i.title +' ) && 'OK' === $gd_node,
 	'111.4: The image report counts published articles whose featured image is under 1200 px (one prepared query), lists the narrowest first with title, edit link, size and file, old saved reports work, valid JavaScript (' . $gd_node . ')'
+);
+
+// --- TEST SUITE 112: Freccia link autore/comunicati e tag multi-gioco v4.34.4 ---
+echo "\n--- 112. FRECCIA LINK AUTORE E TAG MULTI-GIOCO V4.34.4 ---\n";
+$v4344_author = (string) file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/author.php' );
+$v4344_press  = (string) file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/single-comunicato_stampa.php' );
+
+// 112.1: author.php e single-comunicato_stampa.php usano il simbolo diretto "↗" e non "&nearr;" (evita doppia codifica DOMDocument/iubenda)
+assert_test(
+	false === strpos( $v4344_author, '&nearr;' ) && false !== strpos( $v4344_author, "esc_html( \$label ) . ' ↗</a>'" ) && false !== strpos( $v4344_author, 'Sito web ↗</a>' ) &&
+	false === strpos( $v4344_press, '&nearr;' ) && false !== strpos( $v4344_press, 'Vai alla fonte ↗</a>' ) && false !== strpos( $v4344_press, 'Scarica i materiali ↗</a>' ),
+	'112.1: Author social/website chips and press release links use the direct UTF-8 arrow ↗ instead of &nearr;'
+);
+
+// 112.2: template-parts/article-tags.php mostra in rosso con il pallino tutti i videogiochi collegati, seguiti dai tag normali con #
+if ( ! function_exists( 'get_tag_link' ) ) {
+	function get_tag_link( $tag ) {
+		$id = is_object( $tag ) ? (int) $tag->term_id : (int) $tag;
+		return 'https://example.com/tag/tag-' . $id . '/';
+	}
+}
+$v4344_t1 = new WP_Term( array( 'term_id' => 9401, 'name' => 'News', 'slug' => 'news', 'taxonomy' => 'post_tag' ) );
+$v4344_t2 = new WP_Term( array( 'term_id' => 9402, 'name' => 'Monster Hunter Wilds', 'slug' => 'monster-hunter-wilds', 'taxonomy' => 'post_tag' ) );
+$v4344_t3 = new WP_Term( array( 'term_id' => 9403, 'name' => 'Capcom', 'slug' => 'capcom', 'taxonomy' => 'post_tag' ) );
+$v4344_t4 = new WP_Term( array( 'term_id' => 9404, 'name' => 'Dragon\'s Dogma 2', 'slug' => 'dragons-dogma-2', 'taxonomy' => 'post_tag' ) );
+$mock_terms[9401]    = $v4344_t1;
+$mock_terms[9402]    = $v4344_t2;
+$mock_terms[9403]    = $v4344_t3;
+$mock_terms[9404]    = $v4344_t4;
+$mock_termmeta[9402] = array( '_ntn_igdb_game_id' => '228530', '_ntn_game_title' => 'Monster Hunter Wilds' );
+$mock_termmeta[9404] = array( '_ntn_igdb_game_id' => '204350', '_ntn_game_title' => "Dragon's Dogma 2" );
+$v4344_post          = new WP_Post( array( 'ID' => 9400, 'post_title' => 'Articolo multi-gioco', 'post_name' => 'articolo-multi-gioco', 'post_type' => 'post', 'post_status' => 'publish' ) );
+$mock_posts[9400]    = $v4344_post;
+$mock_post_tags[9400] = array( $v4344_t1, $v4344_t2, $v4344_t3, $v4344_t4 );
+$v4344_prev_post     = $post ?? null;
+$post                = $v4344_post;
+$mock_options['ntn_igdb_scanner_active'] = 'yes';
+ob_start();
+include ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/template-parts/article-tags.php';
+$v4344_tags_html = (string) ob_get_clean();
+$post            = $v4344_prev_post;
+
+$v4344_pos_g1 = strpos( $v4344_tags_html, 'class="ntn-tag is-game" href="https://example.com/tag/tag-9402/" rel="tag"><span class="ntn-dot" aria-hidden="true"></span>Monster Hunter Wilds</a>' );
+$v4344_pos_g2 = strpos( $v4344_tags_html, 'class="ntn-tag is-game" href="https://example.com/tag/tag-9404/" rel="tag"><span class="ntn-dot" aria-hidden="true"></span>Dragon&#039;s Dogma 2</a>' );
+$v4344_pos_n1 = strpos( $v4344_tags_html, 'class="ntn-tag" href="https://example.com/tag/tag-9401/" rel="tag">#News</a>' );
+$v4344_pos_n2 = strpos( $v4344_tags_html, 'class="ntn-tag" href="https://example.com/tag/tag-9403/" rel="tag">#Capcom</a>' );
+assert_test(
+	false !== $v4344_pos_g1 && false !== $v4344_pos_g2 && false !== $v4344_pos_n1 && false !== $v4344_pos_n2 &&
+	$v4344_pos_g1 < $v4344_pos_n1 && $v4344_pos_g2 < $v4344_pos_n1 &&
+	false === strpos( $v4344_tags_html, '#Monster Hunter Wilds' ) && false === strpos( $v4344_tags_html, '#Dragon' ),
+	'112.2: Article bottom tags render all linked games in red with the dot first, followed by regular #tags without duplicating games'
 );
 
 echo "\n=======================================================================\n";

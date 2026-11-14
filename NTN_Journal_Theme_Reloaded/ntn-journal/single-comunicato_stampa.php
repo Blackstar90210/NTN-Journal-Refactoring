@@ -79,13 +79,13 @@ $press_facts = array_filter(
 								<?php if ( ! empty( $source_link ) ) : ?>
 									<div>
 										<dt>Fonte ufficiale</dt>
-										<dd><a href="<?php echo esc_url( $source_link ); ?>" target="_blank" rel="nofollow noopener noreferrer">Vai alla fonte &nearr;</a></dd>
+										<dd><a href="<?php echo esc_url( $source_link ); ?>" target="_blank" rel="nofollow noopener noreferrer">Vai alla fonte ↗</a></dd>
 									</div>
 								<?php endif; ?>
 								<?php if ( ! empty( $assets_link ) ) : ?>
 									<div>
 										<dt>Press kit</dt>
-										<dd><a href="<?php echo esc_url( $assets_link ); ?>" target="_blank" rel="nofollow noopener noreferrer">Scarica i materiali &nearr;</a></dd>
+										<dd><a href="<?php echo esc_url( $assets_link ); ?>" target="_blank" rel="nofollow noopener noreferrer">Scarica i materiali ↗</a></dd>
 									</div>
 								<?php endif; ?>
 							</dl>

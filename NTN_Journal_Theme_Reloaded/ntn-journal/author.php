@@ -142,11 +142,11 @@ $social_keys = array(
 					foreach ( $social_keys as $key => $label ) {
 						$url = get_the_author_meta( $key, $author_id );
 						if ( ! empty( $url ) && is_string( $url ) ) {
-							$author_links[] = '<a class="ntn-chip ntn-chip-link" href="' . esc_url( $url ) . '" target="_blank" rel="noopener noreferrer" itemprop="sameAs">' . esc_html( $label ) . ' &nearr;</a>';
+							$author_links[] = '<a class="ntn-chip ntn-chip-link" href="' . esc_url( $url ) . '" target="_blank" rel="noopener noreferrer" itemprop="sameAs">' . esc_html( $label ) . ' ↗</a>';
 						}
 					}
 					if ( ! empty( $author_url ) ) {
-						$author_links[] = '<a class="ntn-chip ntn-chip-link" href="' . esc_url( $author_url ) . '" target="_blank" rel="noopener noreferrer" itemprop="url">Sito web &nearr;</a>';
+						$author_links[] = '<a class="ntn-chip ntn-chip-link" href="' . esc_url( $author_url ) . '" target="_blank" rel="noopener noreferrer" itemprop="url">Sito web ↗</a>';
 					}
 					if ( $author_links ) {
 						echo '<div class="ntn-authorpage-links">' . implode( '', $author_links ) . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput -- ogni link è già protetto.
