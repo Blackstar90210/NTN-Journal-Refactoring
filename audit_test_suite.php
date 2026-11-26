@@ -1655,24 +1655,24 @@ echo "\n--- 24. SEMVER SIMULTANEOUS 4-HEADER SYNCHRONIZATION ---\n";
 $parent_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $parent_css, $m_parent );
 $parent_ver = isset( $m_parent[1] ) ? trim( $m_parent[1] ) : '';
-assert_test( $parent_ver === '4.34.4', "24.1: Parent Theme style.css declares Version: 4.34.4(found: {$parent_ver})" );
+assert_test( $parent_ver === '4.35.1', "24.1: Parent Theme style.css declares Version: 4.35.1(found: {$parent_ver})" );
 
 $child_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $child_css, $m_child );
 $child_ver = isset( $m_child[1] ) ? trim( $m_child[1] ) : '';
-assert_test( $child_ver === '4.34.4', "24.2: Child Theme style.css declares Version: 4.34.4(found: {$child_ver})" );
+assert_test( $child_ver === '4.35.1', "24.2: Child Theme style.css declares Version: 4.35.1(found: {$child_ver})" );
 
 $core_php = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' );
 preg_match( '/\*\s*Version:\s*([0-9\.]+)/', $core_php, $m_core_hdr );
 $core_hdr_ver = isset( $m_core_hdr[1] ) ? trim( $m_core_hdr[1] ) : '';
-assert_test( $core_hdr_ver === '4.34.4', "24.3: Core Plugin header declares Version: 4.34.4(found: {$core_hdr_ver})" );
+assert_test( $core_hdr_ver === '4.35.1', "24.3: Core Plugin header declares Version: 4.35.1(found: {$core_hdr_ver})" );
 
 preg_match( "/define\(\s*'NTN_JOURNAL_CORE_VERSION',\s*'([^']+)'\s*\);/", $core_php, $m_core_const );
 $core_const_ver = isset( $m_core_const[1] ) ? trim( $m_core_const[1] ) : '';
-assert_test( $core_const_ver === '4.34.4', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.34.4(found: {$core_const_ver})" );
+assert_test( $core_const_ver === '4.35.1', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.35.1(found: {$core_const_ver})" );
 
 assert_test(
-	$parent_ver === '4.34.4' && $child_ver === '4.34.4' && $core_hdr_ver === '4.34.4' && $core_const_ver === '4.34.4',
+	$parent_ver === '4.35.1' && $child_ver === '4.35.1' && $core_hdr_ver === '4.35.1' && $core_const_ver === '4.35.1',
 	'24.5: All 4 version headers are 100% synchronized and atomic according to Rule 2 of GEMINI.md'
 );
 
@@ -1900,7 +1900,7 @@ $parent_style_ver = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( AB
 $child_style_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' ), $m2 ) ? $m2[1] : '';
 $core_plugin_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m3 ) ? $m3[1] : '';
 $core_const_ver   = preg_match( '/define\(\s*[\'"]NTN_JOURNAL_CORE_VERSION[\'"]\s*,\s*[\'"]([0-9\.]+)[\'"]\s*\)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m4 ) ? $m4[1] : '';
-assert_test( $parent_style_ver === '4.34.4' && $child_style_ver === '4.34.4' && $core_plugin_ver === '4.34.4' && $core_const_ver === '4.34.4', '29.1: All 4 version headers are synchronized to 4.34.4' );
+assert_test( $parent_style_ver === '4.35.1' && $child_style_ver === '4.35.1' && $core_plugin_ver === '4.35.1' && $core_const_ver === '4.35.1', '29.1: All 4 version headers are synchronized to 4.35.1' );
 
 // 29.2: single.php sequence is Google Feed -> Social CTA -> Bottom Related Posts
 $single_php = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/single.php' );
@@ -5516,52 +5516,61 @@ assert_test(
 	'81.5d: A collection that only mentions one game gets all its linked games; a review picks the game named in its title'
 );
 
-// 81.6: nel grafo di Google, più giochi = più VideoGame, ognuno con i propri dati, collegati con "about"
+// 81.6: nel grafo di Google, più giochi (modalità "always" su raccolta) = più VideoGame collegati via about al nodo NewsArticle separato da WebPage
+$mock_postmeta[9112]['_ntn_core_schema_game_mode'] = 'always';
 $GLOBALS['queried_object'] = $mock_posts[9112];
 $GLOBALS['post']           = $mock_posts[9112];
 $mock_post_categories[9112] = array();
 $gg_graph = array( array( '@type' => 'WebPage', '@id' => 'https://example.com/#webpage' ) );
 $gg_out   = ntn_tsf_add_videogame_schema( $gg_graph, array() );
+$gg_news  = array_values( array_filter( $gg_out, static function ( $e ) { return isset( $e['@type'] ) && 'NewsArticle' === $e['@type']; } ) );
 $gg_games = array_values( array_filter( $gg_out, static function ( $e ) { return isset( $e['@type'] ) && 'VideoGame' === $e['@type']; } ) );
 $gg_names = array_column( $gg_games, 'name' );
 sort( $gg_names );
 $gg_by    = array_column( $gg_games, null, 'name' );
-$gg_about = array_column( $gg_out[0]['about'] ?? array(), '@id' );
+$gg_about = array_column( $gg_news[0]['about'] ?? array(), '@id' );
 $gg_ids   = array_column( $gg_games, '@id' );
 sort( $gg_about );
 sort( $gg_ids );
 assert_test(
+	'WebPage' === $gg_out[0]['@type'] && 1 === count( $gg_news ) && ( $gg_news[0]['mainEntityOfPage']['@id'] ?? '' ) === 'https://example.com/#webpage' &&
 	array( 'Haven', 'Returnal', 'Saros' ) === $gg_names &&
 	false !== strpos( $gg_by['Haven']['image'], 'co9103' ) && 'Studio Haven' === $gg_by['Haven']['author']['name'] &&
 	false !== strpos( $gg_by['Saros']['image'], 'co9101' ) && 'Studio Saros' === $gg_by['Saros']['author']['name'] &&
 	3 === count( $gg_about ) && $gg_about === $gg_ids,
-	'81.6: The Google graph gets one VideoGame per described game, each with its own image and developer, all linked from the article'
+	'81.6 (v4.35.0): The Google graph keeps WebPage separate, adds NewsArticle linked via mainEntityOfPage, and attaches one VideoGame per described game in always mode'
 );
 
-// 81.7: recensione con "Gioco recensito": un solo VideoGame, e itemReviewed lo indica
+// 81.7: recensione con "Gioco recensito": mantiene NewsArticle + aggiunge Review separata che punta al solo VideoGame scelto via itemReviewed
 $GLOBALS['queried_object'] = $mock_posts[9111];
 $GLOBALS['post']           = $mock_posts[9111];
 $mock_postmeta[9111]['rating'] = 4;
-$gg_graph = array( array( '@type' => array( 'WebPage', 'NewsArticle' ), '@id' => 'https://example.com/#webpage' ) );
+$gg_graph = array( array( '@type' => 'WebPage', '@id' => 'https://example.com/#webpage' ) );
 $gg_out   = ntn_tsf_add_videogame_schema( $gg_graph, array() );
+$gg_news  = array_values( array_filter( $gg_out, static function ( $e ) { return isset( $e['@type'] ) && 'NewsArticle' === $e['@type']; } ) );
+$gg_revs  = array_values( array_filter( $gg_out, static function ( $e ) { return isset( $e['@type'] ) && 'Review' === $e['@type']; } ) );
 $gg_games = array_values( array_filter( $gg_out, static function ( $e ) { return isset( $e['@type'] ) && 'VideoGame' === $e['@type']; } ) );
 assert_test(
-	1 === count( $gg_games ) && 'Returnal' === $gg_games[0]['name'] && ( $gg_out[0]['itemReviewed']['@id'] ?? '' ) === $gg_games[0]['@id'],
-	'81.7: A review with its reviewed game set describes that game only and points itemReviewed at it'
+	'WebPage' === $gg_out[0]['@type'] && 1 === count( $gg_news ) && 1 === count( $gg_revs ) &&
+	1 === count( $gg_games ) && 'Returnal' === $gg_games[0]['name'] && ( $gg_revs[0]['itemReviewed']['@id'] ?? '' ) === $gg_games[0]['@id'],
+	'81.7 (v4.35.0): A review with its reviewed game set keeps NewsArticle and adds a separate Review node pointing itemReviewed at that game only'
 );
 
-// 81.8: recensione con più giochi e nessuno scelto: niente itemReviewed a caso, l'articolo parla di tutti
+// 81.8: recensione con più giochi e nessuno scelto: niente Review né itemReviewed a caso, NewsArticle parla di tutti
 $mock_postmeta[9112]['rating'] = 4;
 $GLOBALS['queried_object'] = $mock_posts[9112];
 $GLOBALS['post']           = $mock_posts[9112];
-$gg_graph = array( array( '@type' => array( 'WebPage', 'NewsArticle' ), '@id' => 'https://example.com/#webpage' ) );
+$gg_graph = array( array( '@type' => 'WebPage', '@id' => 'https://example.com/#webpage' ) );
 $gg_out   = ntn_tsf_add_videogame_schema( $gg_graph, array() );
+$gg_news  = array_values( array_filter( $gg_out, static function ( $e ) { return isset( $e['@type'] ) && 'NewsArticle' === $e['@type']; } ) );
+$gg_revs  = array_values( array_filter( $gg_out, static function ( $e ) { return isset( $e['@type'] ) && 'Review' === $e['@type']; } ) );
 assert_test(
-	! isset( $gg_out[0]['itemReviewed'] ) && ! isset( $gg_out[0]['reviewRating'] ) && ! in_array( 'Review', (array) $gg_out[0]['@type'], true ) && 3 === count( $gg_out[0]['about'] ?? array() ),
-	'81.8: A rated article with several games and no reviewed game is a plain article about all of them: no Review, no rating, no random reviewed item'
+	0 === count( $gg_revs ) && ! isset( $gg_news[0]['itemReviewed'] ) && ! isset( $gg_news[0]['reviewRating'] ) && 3 === count( $gg_news[0]['about'] ?? array() ),
+	'81.8 (v4.35.0): A rated article with several games and no reviewed game stays NewsArticle about all of them: no Review, no rating, no random reviewed item'
 );
+unset( $mock_postmeta[9112]['_ntn_core_schema_game_mode'] );
 
-// 81.9: "Gioco recensito" con il nome del gioco lungo e il nome corto (serie) tra i tag: vince il gioco lungo e il voto resta
+// 81.9: "Gioco recensito" con il nome del gioco lungo e il nome corto (serie) tra i tag: vince il gioco lungo e il voto resta nel nodo Review
 $mg_post( 9124, 'post', 'publish', 'gg-ac-rev', '2026-01-01', array( $gg_ac, $gg_bf ), array( 'recensioni' ) );
 $mock_posts[9124]->post_title = 'Recensione di un ritorno al mare';
 $mock_postmeta[9124]['reviewed_item'] = "Assassin's Creed Black Flag Resynced";
@@ -5569,11 +5578,13 @@ $mock_postmeta[9124]['rating'] = 4;
 $GLOBALS['queried_object'] = $mock_posts[9124];
 $GLOBALS['post']           = $mock_posts[9124];
 $gg_pick  = ntn_core_schema_pick_games( 9124 );
-$gg_out   = ntn_tsf_add_videogame_schema( array( array( '@type' => array( 'WebPage', 'NewsArticle' ), '@id' => 'https://example.com/#webpage' ) ), array() );
+$gg_out   = ntn_tsf_add_videogame_schema( array( array( '@type' => 'WebPage', '@id' => 'https://example.com/#webpage' ) ), array() );
+$gg_revs  = array_values( array_filter( $gg_out, static function ( $e ) { return isset( $e['@type'] ) && 'Review' === $e['@type']; } ) );
 $gg_games = array_values( array_filter( $gg_out, static function ( $e ) { return isset( $e['@type'] ) && 'VideoGame' === $e['@type']; } ) );
 assert_test(
-	1 === count( $gg_pick ) && 'Black Flag Resynced' === $gg_pick[0]['title'] && 1 === count( $gg_games ) && 4 === ( $gg_out[0]['reviewRating']['ratingValue'] ?? 0 ) && ( $gg_out[0]['itemReviewed']['@id'] ?? '' ) === ( $gg_games[0]['@id'] ?? 'x' ),
-	'81.9: The reviewed-game field naming the long game wins over the short series tag, so the review keeps its rating and itemReviewed'
+	1 === count( $gg_pick ) && 'Black Flag Resynced' === $gg_pick[0]['title'] && 1 === count( $gg_games ) && 1 === count( $gg_revs ) &&
+	4 === ( $gg_revs[0]['reviewRating']['ratingValue'] ?? 0 ) && ( $gg_revs[0]['itemReviewed']['@id'] ?? '' ) === ( $gg_games[0]['@id'] ?? 'x' ),
+	'81.9 (v4.35.0): The reviewed-game field naming the long game wins over the short series tag, so the separate Review keeps its rating and itemReviewed'
 );
 
 // 81.10: nomi scritti due volte nel database ("Pok&amp;#233;mon") escono con le lettere vere
@@ -5663,7 +5674,7 @@ assert_test(
 	false !== strpos( $rt_main, "inc/review-rating-backfill.php" ) && false === strpos( $rt_view, 'innerHTML' ),
 	'82.4: The ratings list needs the nonce and manage_options, offers confirm selected and confirm all, and writes nothing without confirmation'
 );
-// 82.5: una recensione senza gioco resta un articolo con autore e data, un articolo normale senza gioco non cambia
+// 82.5: una recensione senza gioco e un articolo normale senza gioco tengono WebPage separata e aggiungono NewsArticle con autore, titolo, editore e date
 $mock_posts[9310] = new WP_Post( array( 'ID' => 9310, 'post_title' => 'Recensione di un accessorio', 'post_name' => 'rec-accessorio', 'post_type' => 'post', 'post_status' => 'publish', 'post_author' => 1 ) );
 $mock_post_categories[9310] = array( $rt_cat( 'recensioni' ) );
 $mock_posts[9311] = new WP_Post( array( 'ID' => 9311, 'post_title' => 'Una notizia senza gioco', 'post_name' => 'notizia-no-gioco', 'post_type' => 'post', 'post_status' => 'publish', 'post_author' => 1 ) );
@@ -5676,10 +5687,13 @@ $GLOBALS['queried_object'] = $mock_posts[9311];
 $GLOBALS['post']           = $mock_posts[9311];
 $rt_out_news = ntn_tsf_add_videogame_schema( $rt_graph, array() );
 assert_test(
-	array( 'WebPage', 'NewsArticle' ) === $rt_out_rev[0]['@type'] && ! empty( $rt_out_rev[0]['datePublished'] ) && ! empty( $rt_out_rev[0]['headline'] ) && 1 === count( $rt_out_rev ) && ! isset( $rt_out_rev[0]['about'] ) &&
-	array( 'WebPage', 'NewsArticle' ) === $rt_out_news[0]['@type'] && ! empty( $rt_out_news[0]['headline'] ) && ! empty( $rt_out_news[0]['datePublished'] ) && ! empty( $rt_out_news[0]['dateModified'] ) &&
-	! empty( $rt_out_news[0]['publisher'] ) && 1 === count( $rt_out_news ) && ! isset( $rt_out_news[0]['about'] ),
-	'82.5 (v4.34.3): Reviews and ordinary articles without a linked game are a NewsArticle with headline, dates and publisher, with no VideoGame node and no about'
+	'WebPage' === $rt_out_rev[0]['@type'] && 2 === count( $rt_out_rev ) && 'NewsArticle' === ( $rt_out_rev[1]['@type'] ?? '' ) &&
+	! empty( $rt_out_rev[1]['datePublished'] ) && ! empty( $rt_out_rev[1]['headline'] ) && ! isset( $rt_out_rev[1]['about'] ) &&
+	'WebPage' === $rt_out_news[0]['@type'] && 2 === count( $rt_out_news ) && 'NewsArticle' === ( $rt_out_news[1]['@type'] ?? '' ) &&
+	( $rt_out_news[1]['mainEntityOfPage']['@id'] ?? '' ) === 'https://example.com/#webpage' &&
+	! empty( $rt_out_news[1]['headline'] ) && ! empty( $rt_out_news[1]['datePublished'] ) && ! empty( $rt_out_news[1]['dateModified'] ) &&
+	! empty( $rt_out_news[1]['publisher'] ) && ! isset( $rt_out_news[1]['about'] ),
+	'82.5 (v4.35.0): Reviews and ordinary articles without a linked game keep WebPage separate and add a NewsArticle node with headline, dates, publisher and mainEntityOfPage, with no VideoGame node and no about'
 );
 $GLOBALS['queried_object'] = null;
 $GLOBALS['post']           = null;
@@ -7365,6 +7379,231 @@ assert_test(
 	$v4344_pos_g1 < $v4344_pos_n1 && $v4344_pos_g2 < $v4344_pos_n1 &&
 	false === strpos( $v4344_tags_html, '#Monster Hunter Wilds' ) && false === strpos( $v4344_tags_html, '#Dragon' ),
 	'112.2: Article bottom tags render all linked games in red with the dot first, followed by regular #tags without duplicating games'
+);
+
+// --- TEST SUITE 113: Sitemap, robots.txt, IGDB smart lastmod, Schema JSON-LD Soluzione A, articleBody e tabelle mobile v4.35.0 ---
+echo "\n--- 113. SITEMAP, ROBOTS, IGDB LASTMOD, SCHEMA SOLUZIONE A E TABELLE MOBILE V4.35.0 ---\n";
+require_once ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/sitemap.php';
+if ( ! function_exists( 'wp_parse_url' ) ) {
+	function wp_parse_url( $url, $component = -1 ) { return parse_url( $url, $component ); }
+}
+if ( ! function_exists( 'wp_update_post' ) ) {
+	function wp_update_post( $postarr = array() ) {
+		$GLOBALS['ntn_test_wp_update_calls'][] = (int) ( $postarr['ID'] ?? 0 );
+		return (int) ( $postarr['ID'] ?? 0 );
+	}
+}
+if ( ! function_exists( 'clean_post_cache' ) ) {
+	function clean_post_cache( $post ) {}
+}
+
+// 113.1: IGDB smart lastmod non richiama wp_update_post se i dati sono invariati, ma lo richiama se cambia un campo vero
+$mock_posts[9510] = new WP_Post( array( 'ID' => 9510, 'post_title' => 'Hades II', 'post_name' => 'hades-ii', 'post_type' => 'videogioco', 'post_status' => 'publish' ) );
+$mock_postmeta[9510] = array(
+	'_ntn_igdb_game_id' => '252855',
+	'_ntn_game_title'   => 'Hades II',
+	'_ntn_game_release' => '2026-09-25',
+);
+$GLOBALS['ntn_test_wp_update_calls'] = array();
+$snap_same = ntn_core_igdb_videogioco_snapshot( 9510 );
+$did_same  = ntn_core_igdb_maybe_update_videogioco_post( 9510, 'Hades II', $snap_same );
+$calls_after_same = count( $GLOBALS['ntn_test_wp_update_calls'] );
+$mock_postmeta[9510]['_ntn_game_release'] = '2026-10-10';
+$did_diff = ntn_core_igdb_maybe_update_videogioco_post( 9510, 'Hades II', $snap_same );
+$calls_after_diff = count( $GLOBALS['ntn_test_wp_update_calls'] );
+$v435_ajax = ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/ajax-igdb.php' );
+$v435_mig  = ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/migrazione-igdb.php' );
+$v435_hand = ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/admin/igdb-ajax-handlers.php' );
+assert_test(
+	false === $did_same && 0 === $calls_after_same && true === $did_diff && 1 === $calls_after_diff &&
+	false !== strpos( $v435_ajax, 'ntn_core_igdb_maybe_update_videogioco_post' ) &&
+	false !== strpos( $v435_mig, 'ntn_core_igdb_maybe_update_videogioco_post' ) &&
+	false !== strpos( $v435_hand, 'ntn_core_igdb_maybe_update_videogioco_post' ),
+	'113.1: IGDB sync skips wp_update_post when game metadata is unchanged and updates post_modified only on real changes across panel, migration and single-tag resync'
+);
+
+// 113.2: robots.txt include news-sitemap.xml (se attiva) e i disallow anti-spreco sia per TSF sia per WordPress nativo
+$mock_options['ntn_seo_enable_news_sitemap'] = 'yes';
+$v435_tsf_rob = ntn_core_tsf_robots_txt_sections(
+	array(
+		'default'  => array( 'user-agent' => array( '*' ), 'disallow' => array( '/wp-admin/' ) ),
+		'sitemaps' => array( 'sitemaps' => array( 'https://example.com/sitemap.xml' ), 'priority' => 1000 ),
+	),
+	''
+);
+$v435_wp_rob = ntn_core_wp_robots_txt( "User-agent: *\nDisallow: /wp-admin/\n", true );
+$mock_options['ntn_seo_enable_news_sitemap'] = 'no';
+$v435_tsf_rob_off = ntn_core_tsf_robots_txt_sections(
+	array(
+		'default'  => array( 'user-agent' => array( '*' ), 'disallow' => array( '/wp-admin/' ) ),
+		'sitemaps' => array( 'sitemaps' => array( 'https://example.com/sitemap.xml' ), 'priority' => 1000 ),
+	),
+	''
+);
+$mock_options['ntn_seo_enable_news_sitemap'] = 'yes';
+assert_test(
+	in_array( '/?s=', $v435_tsf_rob['default']['disallow'], true ) &&
+	in_array( '/search/', $v435_tsf_rob['default']['disallow'], true ) &&
+	in_array( '/*?replytocom=', $v435_tsf_rob['default']['disallow'], true ) &&
+	in_array( '/wp-login.php', $v435_tsf_rob['default']['disallow'], true ) &&
+	in_array( 'https://example.com/news-sitemap.xml', $v435_tsf_rob['sitemaps']['sitemaps'], true ) &&
+	! in_array( 'https://example.com/news-sitemap.xml', $v435_tsf_rob_off['sitemaps']['sitemaps'], true ) &&
+	false !== strpos( $v435_wp_rob, 'Disallow: /?s=' ) &&
+	false !== strpos( $v435_wp_rob, 'Sitemap: https://example.com/news-sitemap.xml' ) &&
+	false === strpos( $v435_wp_rob, 'Disallow: /wp-content/uploads' ),
+	'113.2: robots.txt enrichment adds news-sitemap.xml (only when enabled) and crawl-budget disallow paths for both TSF and native WordPress, keeping uploads/feeds open'
+);
+
+// 113.3: sitemap.php gestisce lastmod homepage statica e Hub collegate senza regressioni
+$v435_smap = ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/sitemap.php' );
+assert_test(
+	false !== strpos( $v435_smap, 'ntn_core_find_linked_videogioco_id' ) &&
+	false !== strpos( $v435_smap, 'ntn_core_bump_linked_videogioco_hubs' ) &&
+	false !== strpos( $v435_smap, 'ntn_core_sync_sitemap_lastmod_on_save' ) &&
+	false !== strpos( $v435_smap, 'ntn_core_sync_sitemap_lastmod_on_terms' ) &&
+	false !== strpos( $v435_smap, 'ntn_core_maybe_sync_front_page_lastmod_once' ) &&
+	false !== strpos( $v435_smap, 'ntn_core_bump_post_modified_direct' ) &&
+	false !== strpos( $v435_smap, 'ntn_core_clear_tsf_sitemap_cache' ) &&
+	has_filter( 'the_seo_framework_robots_txt_sections', 'ntn_core_tsf_robots_txt_sections' ) &&
+	has_filter( 'robots_txt', 'ntn_core_wp_robots_txt' ) &&
+	has_filter( 'set_object_terms', 'ntn_core_sync_sitemap_lastmod_on_terms' ),
+	'113.3: sitemap.php hooks static homepage lastmod sync, linked game Hub lastmod bump (save_post + set_object_terms), TSF cache clear and robots.txt filters'
+);
+
+// 113.4: Soluzione A per about: VideoGame (anti-paragoni nel titolo, anti fuori-tema Ubisoft, override manuale Always/Exclude)
+$v435_ac_tag = $mg_term( 9520, "Assassin's Creed", 'assassins-creed', array( '_ntn_igdb_game_id' => '1970', '_ntn_game_title' => "Assassin's Creed", '_ntn_game_release' => '2007-11-13' ) );
+$v435_hd_tag = $mg_term( 9521, 'Hades', 'hades', array( '_ntn_igdb_game_id' => '113112', '_ntn_game_title' => 'Hades', '_ntn_game_release' => '2020-09-17' ) );
+$v435_fb_tag = $mg_term( 9522, 'Fable', 'fable', array( '_ntn_igdb_game_id' => '136154', '_ntn_game_title' => 'Fable', '_ntn_game_release' => '2026-10-01' ) );
+$v435_g6_tag = $mg_term( 9523, 'GTA 6', 'gta-6', array( '_ntn_igdb_game_id' => '100006', '_ntn_game_title' => 'GTA 6' ) );
+$v435_g5_tag = $mg_term( 9524, 'GTA V', 'gta-v', array( '_ntn_igdb_game_id' => '1020', '_ntn_game_title' => 'GTA V' ) );
+
+// 9530: Ubisoft layoffs tagged Assassin's Creed (auto) -> must NOT attach Assassin's Creed 2007
+$mg_post( 9530, 'post', 'publish', 'ubisoft-tagli', '2026-11-19', array( $v435_ac_tag ) );
+$mock_posts[9530]->post_title = 'Ubisoft taglia 166 posti: colpiti Montréal e Québec';
+$GLOBALS['queried_object'] = $mock_posts[9530];
+$GLOBALS['post']           = $mock_posts[9530];
+$v435_out_ub = ntn_tsf_add_videogame_schema( array( array( '@type' => 'WebPage', '@id' => 'https://example.com/ubisoft/#webpage' ) ), array() );
+
+// 9531: Indie game similar to Hades (auto) -> must NOT attach Hades
+$mg_post( 9531, 'post', 'publish', 'indie-simile-hades', '2026-11-19', array( $v435_hd_tag ) );
+$mock_posts[9531]->post_title = 'NuovoIndie, il roguelike simile a Hades, esce su Steam';
+$GLOBALS['queried_object'] = $mock_posts[9531];
+$GLOBALS['post']           = $mock_posts[9531];
+$v435_out_hd = ntn_tsf_add_videogame_schema( array( array( '@type' => 'WebPage', '@id' => 'https://example.com/indie/#webpage' ) ), array() );
+
+// 9532: Fable trailer (auto) -> SHOULD attach Fable
+$mg_post( 9532, 'post', 'publish', 'fable-trailer', '2026-11-14', array( $v435_fb_tag ) );
+$mock_posts[9532]->post_title = 'Fable: “il nuovo trailer è un disastro!”';
+$GLOBALS['queried_object'] = $mock_posts[9532];
+$GLOBALS['post']           = $mock_posts[9532];
+$v435_out_fb = ntn_tsf_add_videogame_schema( array( array( '@type' => 'WebPage', '@id' => 'https://example.com/fable/#webpage' ) ), array() );
+
+// 9533: Manual override "always" on Ubisoft -> attaches Assassin's Creed; "exclude" on Fable -> omits Fable
+$mock_postmeta[9530]['_ntn_core_schema_game_mode'] = 'always';
+$GLOBALS['queried_object'] = $mock_posts[9530];
+$GLOBALS['post']           = $mock_posts[9530];
+$v435_out_ub_always = ntn_tsf_add_videogame_schema( array( array( '@type' => 'WebPage', '@id' => 'https://example.com/ubisoft/#webpage' ) ), array() );
+unset( $mock_postmeta[9530]['_ntn_core_schema_game_mode'] );
+
+$mock_postmeta[9532]['_ntn_core_schema_game_mode'] = 'exclude';
+$GLOBALS['queried_object'] = $mock_posts[9532];
+$GLOBALS['post']           = $mock_posts[9532];
+$v435_out_fb_excl = ntn_tsf_add_videogame_schema( array( array( '@type' => 'WebPage', '@id' => 'https://example.com/fable/#webpage' ) ), array() );
+unset( $mock_postmeta[9532]['_ntn_core_schema_game_mode'] );
+
+$GLOBALS['queried_object'] = null;
+$GLOBALS['post']           = null;
+
+$v435_has_vg = static function ( $graph ) {
+	return count( array_filter( $graph, static function ( $e ) { return isset( $e['@type'] ) && 'VideoGame' === $e['@type']; } ) );
+};
+$v435_seo_src = ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/seo-extras.php' );
+assert_test(
+	0 === $v435_has_vg( $v435_out_ub ) && 0 === $v435_has_vg( $v435_out_hd ) && 1 === $v435_has_vg( $v435_out_fb ) &&
+	1 === $v435_has_vg( $v435_out_ub_always ) && 0 === $v435_has_vg( $v435_out_fb_excl ) &&
+	true === ntn_core_schema_title_matches_game( 'GTA 6: dopo GTA V cosa cambia', 'GTA 6' ) &&
+	false === ntn_core_schema_title_matches_game( 'GTA 6: dopo GTA V cosa cambia', 'GTA V' ) &&
+	false === ntn_core_schema_title_matches_game( 'NuovoIndie ispirato al primo Hades', 'Hades' ) &&
+	false === ntn_core_schema_title_matches_game( 'Un RPG dai creatori di Elden Ring', 'Elden Ring' ) &&
+	false !== strpos( $v435_seo_src, "wp_verify_nonce( sanitize_text_field( wp_unslash( \$_POST['ntn_core_schema_game_nonce'] ) ), 'ntn_core_save_schema_game_mode' )" ) &&
+	false !== strpos( $v435_seo_src, "register_post_meta(" ) && false !== strpos( $v435_seo_src, "'_ntn_core_schema_game_mode'" ),
+	'113.4: Solution A blocks off-topic and comparison game links ("simile a Hades", "dopo GTA V", Ubisoft/Assassin\'s Creed) while matching real subjects and supporting Always/Exclude editor override with nonce and permissions'
+);
+
+// 113.5: tabelle responsive su mobile in style.css e assenza di itemprop="articleBody" orfano nei template
+$v435_single = ntn_t_read( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/single.php' );
+$v435_press  = ntn_t_read( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/single-comunicato_stampa.php' );
+$v435_css    = ntn_t_read( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/style.css' );
+assert_test(
+	false !== strpos( $v435_single, 'dynamic-content-body' ) && false === strpos( $v435_single, 'itemprop="articleBody"' ) &&
+	false !== strpos( $v435_press, 'dynamic-content-body' ) && false === strpos( $v435_press, 'itemprop="articleBody"' ) &&
+	false !== strpos( $v435_css, '.ntn-prose .wp-block-table' ) && false !== strpos( $v435_css, 'overflow-x: auto;' ) && false !== strpos( $v435_css, 'table-layout: auto;' ),
+	'113.5: single.php and single-comunicato_stampa.php keep .dynamic-content-body without orphan itemprop="articleBody" and style.css makes .wp-block-table horizontally scrollable on mobile'
+);
+
+// --- TEST SUITE 114: Fix Schema TSF singolo, tutela recensioni monogioco e pulizia microdati v4.35.1 ---
+echo "\n--- 114. FIX SCHEMA TSF, TUTELA RECENSIONI MONOGIOCO E MICRODATI V4.35.1 ---\n";
+
+// 114.1: grafo TSF con WebPage + Article separati -> aggiorna Article sul posto a NewsArticle senza duplicati
+$v4351_tsf_both = array(
+	array(
+		'@type' => 'WebPage',
+		'@id'   => 'https://example.com/fable/#webpage',
+		'url'   => 'https://example.com/fable/',
+	),
+	array(
+		'@type'         => 'Article',
+		'@id'           => 'https://example.com/fable/#article',
+		'url'           => 'https://example.com/fable/',
+		'headline'      => 'Fable: nuovo trailer',
+		'datePublished' => '2026-11-14',
+		'dateModified'  => '2026-11-14',
+	),
+);
+$GLOBALS['queried_object'] = $mock_posts[9532];
+$GLOBALS['post']           = $mock_posts[9532];
+$v4351_out_both = ntn_tsf_add_videogame_schema( $v4351_tsf_both, array() );
+$v4351_wp_nodes = array_values( array_filter( $v4351_out_both, static function ( $e ) { return isset( $e['@type'] ) && 'WebPage' === $e['@type']; } ) );
+$v4351_na_nodes = array_values( array_filter( $v4351_out_both, static function ( $e ) { return isset( $e['@type'] ) && 'NewsArticle' === $e['@type']; } ) );
+$v4351_ar_nodes = array_values( array_filter( $v4351_out_both, static function ( $e ) { return isset( $e['@type'] ) && 'Article' === $e['@type']; } ) );
+$v4351_vg_nodes = array_values( array_filter( $v4351_out_both, static function ( $e ) { return isset( $e['@type'] ) && 'VideoGame' === $e['@type']; } ) );
+assert_test(
+	1 === count( $v4351_wp_nodes ) && 1 === count( $v4351_na_nodes ) && 0 === count( $v4351_ar_nodes ) && 1 === count( $v4351_vg_nodes ) &&
+	( $v4351_wp_nodes[0]['mainEntity']['@id'] ?? '' ) === ( $v4351_na_nodes[0]['@id'] ?? '' ) &&
+	false !== strpos( (string) ( $v4351_na_nodes[0]['datePublished'] ?? '' ), 'T' ) &&
+	! empty( $v4351_na_nodes[0]['about'] ),
+	'114.1: TSF graph with separate WebPage and Article upgrades Article in place to NewsArticle with full dates, VideoGame and about, without duplicate article nodes'
+);
+
+// 114.2: recensione con voto e 1 solo gioco nei tag, titolo creativo e reviewed_item vuoto
+$mg_post( 9535, 'post', 'publish', 'ritorno-atteso', '2026-11-25', array( $v435_fb_tag ), array( 'recensioni' ) );
+$mock_posts[9535]->post_title = 'Un ritorno atteso da anni';
+$mock_postmeta[9535]['rating'] = 4;
+$GLOBALS['queried_object'] = $mock_posts[9535];
+$GLOBALS['post']           = $mock_posts[9535];
+$v4351_rev_auto = ntn_tsf_add_videogame_schema( array( array( '@type' => 'WebPage', '@id' => 'https://example.com/ritorno/#webpage' ) ), array() );
+$mock_postmeta[9535]['_ntn_core_schema_game_mode'] = 'exclude';
+$v4351_rev_excl = ntn_tsf_add_videogame_schema( array( array( '@type' => 'WebPage', '@id' => 'https://example.com/ritorno/#webpage' ) ), array() );
+unset( $mock_postmeta[9535]['_ntn_core_schema_game_mode'], $mock_postmeta[9535]['rating'] );
+$v4351_art_norm = ntn_tsf_add_videogame_schema( array( array( '@type' => 'WebPage', '@id' => 'https://example.com/ritorno/#webpage' ) ), array() );
+$GLOBALS['queried_object'] = null;
+$GLOBALS['post']           = null;
+$v4351_count_type = static function ( $graph, $type ) {
+	return count( array_filter( $graph, static function ( $e ) use ( $type ) { return isset( $e['@type'] ) && $type === $e['@type']; } ) );
+};
+$v4351_rev_node = array_values( array_filter( $v4351_rev_auto, static function ( $e ) { return isset( $e['@type'] ) && 'Review' === $e['@type']; } ) );
+assert_test(
+	1 === $v4351_count_type( $v4351_rev_auto, 'VideoGame' ) && 1 === count( $v4351_rev_node ) &&
+	4 === ( $v4351_rev_node[0]['reviewRating']['ratingValue'] ?? 0 ) &&
+	0 === $v4351_count_type( $v4351_rev_excl, 'VideoGame' ) && 0 === $v4351_count_type( $v4351_rev_excl, 'Review' ) &&
+	0 === $v4351_count_type( $v4351_art_norm, 'VideoGame' ),
+	'114.2: A rated review with a single linked game keeps VideoGame and Review even with a creative title and empty reviewed_item, respects exclude mode, and keeps Solution A active for unrated articles'
+);
+
+// 114.3: nessun itemprop="articleBody" orfano senza itemscope nei template single
+assert_test(
+	false === strpos( $v435_single, 'itemprop="articleBody"' ) && false === strpos( $v435_press, 'itemprop="articleBody"' ),
+	'114.3: single.php and single-comunicato_stampa.php do not emit orphan itemprop="articleBody" without itemscope'
 );
 
 echo "\n=======================================================================\n";

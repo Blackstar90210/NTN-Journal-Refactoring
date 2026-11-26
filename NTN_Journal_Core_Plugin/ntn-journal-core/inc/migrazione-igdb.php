@@ -162,15 +162,11 @@ function ntn_ajax_migrate_tags_to_cpt() {
 			)
 		);
 
-		$post_id = 0;
+		$post_id      = 0;
+		$old_snapshot = null;
 		if ( $cpt_post ) {
-			$post_id = $cpt_post[0]->ID;
-			wp_update_post(
-				array(
-					'ID'         => $post_id,
-					'post_title' => $title,
-				)
-			);
+			$post_id      = $cpt_post[0]->ID;
+			$old_snapshot = function_exists( 'ntn_core_igdb_videogioco_snapshot' ) ? ntn_core_igdb_videogioco_snapshot( $post_id ) : null;
 		} else {
 			$post_id = wp_insert_post(
 				array(
@@ -200,6 +196,16 @@ function ntn_ajax_migrate_tags_to_cpt() {
 			}
 			if ( $review_id ) {
 				update_post_meta( $post_id, '_ntn_featured_review_id', $review_id );
+			}
+			if ( is_array( $old_snapshot ) && function_exists( 'ntn_core_igdb_maybe_update_videogioco_post' ) ) {
+				ntn_core_igdb_maybe_update_videogioco_post( $post_id, $title, $old_snapshot );
+			} elseif ( $cpt_post && $old_snapshot === null ) {
+				wp_update_post(
+					array(
+						'ID'         => $post_id,
+						'post_title' => $title,
+					)
+				);
 			}
 			if ( ! empty( $engine ) && taxonomy_exists( 'game_engine' ) ) {
 				$engines = array_filter( array_map( 'trim', explode( ',', $engine ) ) );

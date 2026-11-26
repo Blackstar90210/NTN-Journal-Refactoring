@@ -1311,7 +1311,325 @@ function ntn_core_schema_single_game_entity( $post_id ) {
 }
 
 /**
- * Inietta l'entità VideoGame e la collega tramite 'about' nel Graph JSON-LD di The SEO Framework.
+ * Modalità di collegamento dei videogiochi nei dati per Google (v4.35.0):
+ * - 'auto' (predefinita): collega un gioco solo se è nel titolo senza paragoni o è il gioco recensito;
+ * - 'always': forza il collegamento dei giochi associati (es. raccolte o articoli con titolo indiretto);
+ * - 'exclude': non collega alcun videogioco nei dati strutturati dell'articolo.
+ *
+ * @param int $post_id ID dell'articolo.
+ * @return string auto|always|exclude
+ */
+function ntn_core_schema_get_game_mode( $post_id ) {
+	$mode = (string) get_post_meta( (int) $post_id, '_ntn_core_schema_game_mode', true );
+	return in_array( $mode, array( 'auto', 'always', 'exclude' ), true ) ? $mode : 'auto';
+}
+
+/**
+ * Sanitizza il selettore _ntn_core_schema_game_mode (v4.35.0).
+ *
+ * @param mixed $value Valore salvato.
+ * @return string
+ */
+function ntn_core_sanitize_schema_game_mode( $value ) {
+	$val = is_scalar( $value ) ? sanitize_key( (string) $value ) : 'auto';
+	return in_array( $val, array( 'auto', 'always', 'exclude' ), true ) ? $val : 'auto';
+}
+
+/**
+ * Permessi di scrittura per il meta _ntn_core_schema_game_mode (v4.35.0).
+ *
+ * @param bool   $allowed  Valore proposto.
+ * @param string $meta_key Nome del campo.
+ * @param int    $post_id  ID articolo.
+ * @return bool
+ */
+function ntn_core_schema_game_mode_auth( $allowed, $meta_key, $post_id ) {
+	return current_user_can( 'edit_post', (int) $post_id );
+}
+
+/**
+ * Registra il campo meta _ntn_core_schema_game_mode per articoli e comunicati (v4.35.0).
+ */
+function ntn_core_register_schema_game_mode_meta() {
+	foreach ( array( 'post', 'comunicato_stampa' ) as $pt ) {
+		register_post_meta(
+			$pt,
+			'_ntn_core_schema_game_mode',
+			array(
+				'type'              => 'string',
+				'single'            => true,
+				'default'           => 'auto',
+				'sanitize_callback' => 'ntn_core_sanitize_schema_game_mode',
+				'auth_callback'     => 'ntn_core_schema_game_mode_auth',
+				'show_in_rest'      => false,
+			)
+		);
+	}
+}
+add_action( 'init', 'ntn_core_register_schema_game_mode_meta' );
+
+/**
+ * Aggiunge il selettore "Dati Google — Videogioco" nella barra laterale dell'editor (v4.35.0).
+ */
+function ntn_core_add_schema_game_meta_box() {
+	add_meta_box(
+		'ntn_core_schema_game_box',
+		'Dati Google — Videogioco',
+		'ntn_core_render_schema_game_meta_box',
+		array( 'post', 'comunicato_stampa' ),
+		'side',
+		'default'
+	);
+}
+add_action( 'add_meta_boxes', 'ntn_core_add_schema_game_meta_box' );
+
+/**
+ * Contenuto del riquadro "Dati Google — Videogioco" (v4.35.0).
+ *
+ * @param WP_Post $post Articolo corrente.
+ */
+function ntn_core_render_schema_game_meta_box( $post ) {
+	$mode = ntn_core_schema_get_game_mode( $post->ID );
+	wp_nonce_field( 'ntn_core_save_schema_game_mode', 'ntn_core_schema_game_nonce' );
+	?>
+	<p>
+		<label for="ntn_core_schema_game_mode" style="display:block;font-weight:600;margin-bottom:6px;">Collegamento scheda gioco per Google:</label>
+		<select id="ntn_core_schema_game_mode" name="ntn_core_schema_game_mode" style="width:100%;">
+			<option value="auto" <?php selected( $mode, 'auto' ); ?>>Automatico (consigliato)</option>
+			<option value="always" <?php selected( $mode, 'always' ); ?>>Sempre (forza il collegamento)</option>
+			<option value="exclude" <?php selected( $mode, 'exclude' ); ?>>Escludi dai dati Google</option>
+		</select>
+	</p>
+	<p class="description" style="margin-top:6px;">In modalità Automatico, il gioco viene collegato nei dati per Google solo se compare nel titolo senza paragoni («simile a…») o se è indicato come Gioco recensito. I tag visibili a fine articolo non cambiano.</p>
+	<?php
+}
+
+/**
+ * Salva il selettore "Dati Google — Videogioco" con controllo nonce e permessi (v4.35.0).
+ *
+ * @param int $post_id ID dell'articolo.
+ */
+function ntn_core_save_schema_game_meta_box( $post_id ) {
+	if ( ! isset( $_POST['ntn_core_schema_game_nonce'] ) ) {
+		return;
+	}
+	if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['ntn_core_schema_game_nonce'] ) ), 'ntn_core_save_schema_game_mode' ) ) {
+		return;
+	}
+	if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+		return;
+	}
+	if ( wp_is_post_revision( $post_id ) || ! current_user_can( 'edit_post', $post_id ) ) {
+		return;
+	}
+	if ( isset( $_POST['ntn_core_schema_game_mode'] ) ) {
+		$mode = ntn_core_sanitize_schema_game_mode( wp_unslash( $_POST['ntn_core_schema_game_mode'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitizzato da ntn_core_sanitize_schema_game_mode().
+		if ( 'auto' === $mode ) {
+			delete_post_meta( $post_id, '_ntn_core_schema_game_mode' );
+		} else {
+			update_post_meta( $post_id, '_ntn_core_schema_game_mode', $mode );
+		}
+	}
+}
+add_action( 'save_post', 'ntn_core_save_schema_game_meta_box' );
+
+/**
+ * Verifica se il nome di un gioco compare nel titolo come soggetto reale e non dentro un paragone
+ * o citazione indiretta ("simile a Hades", "dopo GTA V", "dai creatori di Elden Ring") (v4.35.0, Soluzione A).
+ *
+ * @param string $article_title Titolo dell'articolo.
+ * @param string $game_title    Titolo del videogioco.
+ * @return bool
+ */
+function ntn_core_schema_title_matches_game( $article_title, $game_title ) {
+	$norm_title = ntn_core_schema_norm( $article_title );
+	if ( '' === $norm_title ) {
+		return false;
+	}
+
+	$raw_game = html_entity_decode( (string) $game_title, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+	$full_key = ntn_core_schema_norm( $raw_game );
+	if ( '' === $full_key ) {
+		return false;
+	}
+
+	$keys     = array( $full_key );
+	$base_raw = preg_split( '/\s*(?::|\s[-–—]\s)\s*/u', $raw_game, 2 );
+	$base_key = ntn_core_schema_norm( $base_raw[0] ?? '' );
+	if ( '' !== $base_key && $base_key !== $full_key && strlen( $base_key ) >= 3 ) {
+		$keys[] = $base_key;
+	}
+
+	$haystack         = ' ' . $norm_title . ' ';
+	$comparison_regex = '/(?:^|\s)(?:simile a|simili a|simile al|simile alla|simile all|simile ai|simile agli|simile alle|ispirat[oaie] a|ispirat[oaie] al|ispirat[oaie] alla|ispirat[oaie] all|in stile|stile|come|erede di|eredi di|dai creatori di|dai creatori del|dai creatori della|dai creatori dell|dal creatore di|dagli autori di|degli autori di|dello studio di|dopo|tipo|alla|sulla scia di|sulle orme di|clone di|cloni di|alternativa a|alternativa al|alternativa alla|l alternativa a|l alternativa al|meglio di|peggio di)(?:\s+(?:il|lo|la|i|gli|le|l|un|uno|una|primo|secondo|vecchio|storico|successo di|uscita di|lancio di|arrivo di))*$/i';
+
+	foreach ( $keys as $key ) {
+		$needle = ' ' . $key . ' ';
+		$offset = 0;
+		while ( false !== ( $pos = strpos( $haystack, $needle, $offset ) ) ) {
+			$before = trim( substr( $norm_title, 0, $pos ) );
+			if ( 1 !== preg_match( $comparison_regex, $before ) ) {
+				return true;
+			}
+			$offset = $pos + strlen( $key );
+		}
+	}
+
+	return false;
+}
+
+/**
+ * Decide se collegare un videogioco nei dati strutturati di un articolo secondo la Soluzione A (v4.35.0).
+ *
+ * @param int    $post_id    ID dell'articolo.
+ * @param string $game_title Nome del gioco.
+ * @return bool
+ */
+function ntn_core_schema_allows_game_title( $post_id, $game_title ) {
+	$post_id = (int) $post_id;
+	$mode    = ntn_core_schema_get_game_mode( $post_id );
+	if ( 'exclude' === $mode ) {
+		return false;
+	}
+	if ( 'always' === $mode ) {
+		return true;
+	}
+	$reviewed = trim( (string) get_post_meta( $post_id, 'reviewed_item', true ) );
+	if ( '' !== $reviewed ) {
+		return true;
+	}
+	return ntn_core_schema_title_matches_game( get_the_title( $post_id ), $game_title );
+}
+
+/**
+ * Costruisce il blocco JSON-LD Review separato per le recensioni (v4.35.0).
+ *
+ * @param int    $post_id        ID dell'articolo.
+ * @param string $article_url    URL canonico dell'articolo.
+ * @param string $webpage_id     @id del nodo WebPage.
+ * @param string $headline       Titolo pulito.
+ * @param mixed  $author_val     Valore author già preparato.
+ * @param mixed  $publisher_val  Valore publisher già preparato.
+ * @param int    $rating         Voto da 1 a 5.
+ * @param string $game_schema_id @id del nodo VideoGame recensito.
+ * @return array<string, mixed>
+ */
+function ntn_core_schema_build_review_entity( $post_id, $article_url, $webpage_id, $headline, $author_val, $publisher_val, $rating, $game_schema_id ) {
+	$review = array(
+		'@type'            => 'Review',
+		'@id'              => $article_url . '#review',
+		'url'              => $article_url,
+		'mainEntityOfPage' => array( '@id' => $webpage_id ),
+		'name'             => $headline,
+		'author'           => $author_val,
+		'publisher'        => $publisher_val,
+		'datePublished'    => get_the_time( 'c', $post_id ),
+		'dateModified'     => get_the_modified_time( 'c', $post_id ),
+		'reviewRating'     => array(
+			'@type'       => 'Rating',
+			'ratingValue' => intval( $rating ),
+			'bestRating'  => '5',
+			'worstRating' => '1',
+		),
+		'itemReviewed'     => array( '@id' => $game_schema_id ),
+	);
+
+	$verdict = get_post_meta( $post_id, 'verdict', true );
+	if ( ! empty( $verdict ) ) {
+		$review['reviewBody'] = wp_strip_all_tags( wp_trim_words( $verdict, 150 ) );
+	}
+
+	$pros = get_post_meta( $post_id, 'pros', true );
+	if ( ! empty( $pros ) ) {
+		$pros_arr = is_array( $pros ) ? $pros : array_filter( array_map( 'trim', explode( "\n", $pros ) ) );
+		if ( ! empty( $pros_arr ) ) {
+			$review['positiveNotes'] = array(
+				'@type'           => 'ItemList',
+				'itemListElement' => array(),
+			);
+			$i                       = 1;
+			foreach ( $pros_arr as $pro ) {
+				$review['positiveNotes']['itemListElement'][] = array(
+					'@type'    => 'ListItem',
+					'position' => $i++,
+					'name'     => wp_strip_all_tags( $pro ),
+				);
+			}
+		}
+	}
+
+	$cons = get_post_meta( $post_id, 'cons', true );
+	if ( ! empty( $cons ) ) {
+		$cons_arr = is_array( $cons ) ? $cons : array_filter( array_map( 'trim', explode( "\n", $cons ) ) );
+		if ( ! empty( $cons_arr ) ) {
+			$review['negativeNotes'] = array(
+				'@type'           => 'ItemList',
+				'itemListElement' => array(),
+			);
+			$j                       = 1;
+			foreach ( $cons_arr as $con ) {
+				$review['negativeNotes']['itemListElement'][] = array(
+					'@type'    => 'ListItem',
+					'position' => $j++,
+					'name'     => wp_strip_all_tags( $con ),
+				);
+			}
+		}
+	}
+
+	return $review;
+}
+
+/**
+ * Aggiunge gli @id VideoGame al campo 'about' di un nodo schema senza sovrascrivere valori esistenti (v4.35.0).
+ *
+ * @param array<string, mixed> $node            Nodo articolo.
+ * @param string[]             $game_schema_ids Lista di @id VideoGame.
+ * @return array<string, mixed>
+ */
+function ntn_core_schema_attach_about( array $node, array $game_schema_ids ) {
+	if ( empty( $game_schema_ids ) ) {
+		return $node;
+	}
+	if ( ! isset( $node['about'] ) ) {
+		$node['about'] = array();
+	}
+
+	$is_numeric = true;
+	if ( is_array( $node['about'] ) ) {
+		foreach ( array_keys( $node['about'] ) as $k ) {
+			if ( ! is_int( $k ) ) {
+				$is_numeric = false;
+				break;
+			}
+		}
+	} else {
+		$is_numeric = false;
+	}
+
+	if ( empty( $node['about'] ) || $is_numeric ) {
+		if ( ! is_array( $node['about'] ) ) {
+			$node['about'] = array( $node['about'] );
+		}
+		if ( count( $node['about'] ) === 1 && empty( $node['about'][0] ) ) {
+			$node['about'] = array();
+		}
+		foreach ( $game_schema_ids as $game_schema_id ) {
+			$node['about'][] = array( '@id' => $game_schema_id );
+		}
+	} else {
+		$existing_about = $node['about'];
+		$node['about']  = array( $existing_about );
+		foreach ( $game_schema_ids as $game_schema_id ) {
+			$node['about'][] = array( '@id' => $game_schema_id );
+		}
+	}
+
+	return $node;
+}
+
+/**
+ * Inietta l'entità NewsArticle (separata da WebPage), l'eventuale Review e gli eventuali VideoGame nel Graph JSON-LD di The SEO Framework.
  */
 function ntn_tsf_add_videogame_schema( $data, $context = array() ) {
 	if ( ! is_single() || ! ntn_core_schema_enabled() ) {
@@ -1345,6 +1663,26 @@ function ntn_tsf_add_videogame_schema( $data, $context = array() ) {
 			$videogame_entities[] = $single_entity;
 		}
 	}
+
+	$rating = get_post_meta( $post_id, 'rating', true );
+
+	// Soluzione A (v4.35.0): filtra i giochi collegati per evitare about fuori tema o da paragone.
+	// v4.35.1: una recensione con voto e un solo gioco nei tag mantiene quel gioco anche con titolo creativo
+	// e campo "Gioco recensito" vuoto, a meno che l'editor non scelga "Escludi dai dati Google".
+	if ( ! is_singular( array( 'videogioco', 'attachment' ) ) && ! empty( $videogame_entities ) ) {
+		$schema_mode          = ntn_core_schema_get_game_mode( $post_id );
+		$is_single_game_rated = ! empty( $rating ) && 1 === count( $videogame_entities ) && 'exclude' !== $schema_mode;
+		if ( ! $is_single_game_rated ) {
+			$videogame_entities = array_values(
+				array_filter(
+					$videogame_entities,
+					static function ( $vg ) use ( $post_id ) {
+						return ntn_core_schema_allows_game_title( $post_id, isset( $vg['name'] ) ? (string) $vg['name'] : '' );
+					}
+				)
+			);
+		}
+	}
 	$game_schema_ids = array_values( array_unique( array_column( $videogame_entities, '@id' ) ) );
 
 	// 2b. Hub del videogioco (v3.11.0): non è un articolo ma una pagina di raccolta che parla del gioco
@@ -1365,170 +1703,189 @@ function ntn_tsf_add_videogame_schema( $data, $context = array() ) {
 		return $data;
 	}
 
-	// 3. Collega l'entità VideoGame all'Article
-	$article_found = false;
-	if ( is_array( $data ) ) {
-		foreach ( $data as $key => $entity ) {
-			if ( is_array( $entity ) && isset( $entity['@type'] ) ) {
-				$types = (array) $entity['@type'];
-				if ( in_array( 'Article', $types, true ) || in_array( 'NewsArticle', $types, true ) || in_array( 'BlogPosting', $types, true ) || in_array( 'WebPage', $types, true ) ) {
+	if ( is_singular( 'attachment' ) ) {
+		return $data;
+	}
 
-					// Upgrade WebPage to NewsArticle if it's missing the Article nature
-					if ( in_array( 'WebPage', $types, true ) && count( array_intersect( array( 'Article', 'NewsArticle', 'BlogPosting' ), $types ) ) === 0 ) {
-						$data[ $key ]['@type'] = array( 'WebPage', 'NewsArticle' );
-					}
+	// 3. Separa WebPage e NewsArticle (v4.35.0 / v4.35.1), evitando doppi Article + NewsArticle con TSF
+	$article_found  = false;
+	$extra_entities = array();
+	$headline       = ntn_core_schema_plain_text( get_the_title( $post_id ) );
+	$permalink      = get_permalink( $post_id );
+	$date_published = get_the_time( 'c', $post_id );
+	$date_modified  = get_the_modified_time( 'c', $post_id );
+	$is_review      = ! empty( $rating ) && 1 === count( $game_schema_ids ) && get_option( 'ntn_seo_enable_review_schema', 'yes' ) === 'yes';
 
-					// Fix for Google Rich Results requirements on Article/NewsArticle/Review
-					$current_types = (array) $data[ $key ]['@type'];
-					if ( count( array_intersect( array( 'Article', 'NewsArticle', 'BlogPosting', 'Review' ), $current_types ) ) > 0 ) {
-						if ( empty( $data[ $key ]['headline'] ) ) {
-							$data[ $key ]['headline'] = ntn_core_schema_plain_text( get_the_title( $post_id ) );
-						}
-
-						if ( empty( $data[ $key ]['image'] ) ) {
-							$thumbnail_id = get_post_thumbnail_id( $post_id );
-							if ( $thumbnail_id ) {
-								// Immagine originale con larghezza e altezza (v4.34.3): Google Discover vuole sapere che è larga almeno 1200 px.
-								$image_src = wp_get_attachment_image_src( $thumbnail_id, 'full' );
-								$image_url = is_array( $image_src ) && ! empty( $image_src[0] ) ? $image_src[0] : wp_get_attachment_image_url( $thumbnail_id, 'full' );
-								if ( $image_url ) {
-									$image_obj = array(
-										'@type' => 'ImageObject',
-										'url'   => esc_url( $image_url ),
-									);
-									if ( is_array( $image_src ) && ! empty( $image_src[0] ) && ! empty( $image_src[1] ) && ! empty( $image_src[2] ) ) {
-										$image_obj['width']  = (int) $image_src[1];
-										$image_obj['height'] = (int) $image_src[2];
-									}
-									$data[ $key ]['image'] = $image_obj;
-								}
-							}
-						}
-
-						if ( empty( $data[ $key ]['publisher'] ) ) {
-							$data[ $key ]['publisher'] = array(
-								'@id' => home_url( '/#/schema/Organization' ),
-							);
-						}
-
-						// Fix date timezones (Google Rich Results recommends ISO 8601 with timezone)
-						$data[ $key ]['datePublished'] = get_the_time( 'c', $post_id );
-						$data[ $key ]['dateModified']  = get_the_modified_time( 'c', $post_id );
-
-						// Fix missing author URL
-						if ( isset( $data[ $key ]['author'] ) && is_array( $data[ $key ]['author'] ) ) {
-							if ( empty( $data[ $key ]['author']['url'] ) ) {
-								$author_id                     = get_post_field( 'post_author', $post_id );
-								$data[ $key ]['author']['url'] = esc_url( get_author_posts_url( $author_id ) );
-							}
-						}
-					}
-
-					$rating = get_post_meta( $post_id, 'rating', true );
-					// v4.15.1: una Review dice quale gioco recensisce; con più giochi e nessuno scelto resta un articolo normale (about), senza voto
-					if ( ! empty( $rating ) && 1 === count( $game_schema_ids ) && get_option( 'ntn_seo_enable_review_schema', 'yes' ) === 'yes' ) {
-						// Upgrade Article to Review
-						$data[ $key ]['@type']        = array( 'WebPage', 'Review' );
-						$data[ $key ]['reviewRating'] = array(
-							'@type'       => 'Rating',
-							'ratingValue' => intval( $rating ),
-							'bestRating'  => '5',
-							'worstRating' => '1',
-						);
-
-						$verdict = get_post_meta( $post_id, 'verdict', true );
-						if ( ! empty( $verdict ) ) {
-							$data[ $key ]['reviewBody'] = wp_strip_all_tags( wp_trim_words( $verdict, 150 ) );
-						}
-
-						$pros = get_post_meta( $post_id, 'pros', true );
-						if ( ! empty( $pros ) ) {
-							$pros_arr = is_array( $pros ) ? $pros : array_filter( array_map( 'trim', explode( "\n", $pros ) ) );
-							if ( ! empty( $pros_arr ) ) {
-								$data[ $key ]['positiveNotes'] = array(
-									'@type'           => 'ItemList',
-									'itemListElement' => array(),
-								);
-								$i                             = 1;
-								foreach ( $pros_arr as $pro ) {
-									$data[ $key ]['positiveNotes']['itemListElement'][] = array(
-										'@type'    => 'ListItem',
-										'position' => $i++,
-										'name'     => wp_strip_all_tags( $pro ),
-									);
-								}
-							}
-						}
-
-						$cons = get_post_meta( $post_id, 'cons', true );
-						if ( ! empty( $cons ) ) {
-							$cons_arr = is_array( $cons ) ? $cons : array_filter( array_map( 'trim', explode( "\n", $cons ) ) );
-							if ( ! empty( $cons_arr ) ) {
-								$data[ $key ]['negativeNotes'] = array(
-									'@type'           => 'ItemList',
-									'itemListElement' => array(),
-								);
-								$j                             = 1;
-								foreach ( $cons_arr as $con ) {
-									$data[ $key ]['negativeNotes']['itemListElement'][] = array(
-										'@type'    => 'ListItem',
-										'position' => $j++,
-										'name'     => wp_strip_all_tags( $con ),
-									);
-								}
-							}
-						}
-
-						// Link to VideoGame via itemReviewed
-						$data[ $key ]['itemReviewed'] = array( '@id' => $game_schema_ids[0] );
-					} elseif ( ! empty( $game_schema_ids ) ) {
-						// Normal Article -> about -> VideoGame
-						if ( ! isset( $data[ $key ]['about'] ) ) {
-							$data[ $key ]['about'] = array();
-						}
-
-						$is_numeric = true;
-						if ( is_array( $data[ $key ]['about'] ) ) {
-							foreach ( array_keys( $data[ $key ]['about'] ) as $k ) {
-								if ( ! is_int( $k ) ) {
-									$is_numeric = false;
-									break;
-								}
-							}
-						} else {
-							$is_numeric = false;
-						}
-
-						if ( empty( $data[ $key ]['about'] ) || $is_numeric ) {
-							if ( ! is_array( $data[ $key ]['about'] ) ) {
-								$data[ $key ]['about'] = array( $data[ $key ]['about'] );
-							}
-							if ( count( $data[ $key ]['about'] ) === 1 && empty( $data[ $key ]['about'][0] ) ) {
-								$data[ $key ]['about'] = array();
-							}
-							foreach ( $game_schema_ids as $game_schema_id ) {
-								$data[ $key ]['about'][] = array( '@id' => $game_schema_id );
-							}
-						} else {
-							$existing_about        = $data[ $key ]['about'];
-							$data[ $key ]['about'] = array( $existing_about );
-							foreach ( $game_schema_ids as $game_schema_id ) {
-								$data[ $key ]['about'][] = array( '@id' => $game_schema_id );
-							}
-						}
-					}
-
-					$article_found = true;
-					break;
-				}
+	$image_obj    = null;
+	$thumbnail_id = get_post_thumbnail_id( $post_id );
+	if ( $thumbnail_id ) {
+		// Immagine originale con larghezza e altezza (v4.34.3): Google Discover vuole sapere che è larga almeno 1200 px.
+		$image_src = wp_get_attachment_image_src( $thumbnail_id, 'full' );
+		$image_url = is_array( $image_src ) && ! empty( $image_src[0] ) ? $image_src[0] : wp_get_attachment_image_url( $thumbnail_id, 'full' );
+		if ( $image_url ) {
+			$image_obj = array(
+				'@type' => 'ImageObject',
+				'url'   => esc_url( $image_url ),
+			);
+			if ( is_array( $image_src ) && ! empty( $image_src[0] ) && ! empty( $image_src[1] ) && ! empty( $image_src[2] ) ) {
+				$image_obj['width']  = (int) $image_src[1];
+				$image_obj['height'] = (int) $image_src[2];
 			}
 		}
 	}
 
-	// 4. Se abbiamo trovato l'articolo, iniettiamo il VideoGame nel grafo
+	$webpage_key = null;
+	$article_key = null;
+	if ( is_array( $data ) ) {
+		foreach ( $data as $key => $entity ) {
+			if ( ! is_array( $entity ) || ! isset( $entity['@type'] ) ) {
+				continue;
+			}
+			$types       = (array) $entity['@type'];
+			$has_webpage = in_array( 'WebPage', $types, true );
+			$has_article = in_array( 'Article', $types, true ) || in_array( 'NewsArticle', $types, true ) || in_array( 'BlogPosting', $types, true );
+			if ( $has_webpage && null === $webpage_key ) {
+				$webpage_key = $key;
+			}
+			if ( $has_article && ! $has_webpage && null === $article_key ) {
+				$article_key = $key;
+			}
+		}
+	}
+
+	$resolve_author = static function ( $author_val ) use ( $post_id ) {
+		if ( is_array( $author_val ) ) {
+			if ( empty( $author_val['url'] ) && ( ! isset( $author_val['@id'] ) || isset( $author_val['name'] ) ) ) {
+				$author_id         = get_post_field( 'post_author', $post_id );
+				$author_val['url'] = esc_url( get_author_posts_url( $author_id ) );
+			}
+			return $author_val;
+		}
+		if ( empty( $author_val ) ) {
+			$author_id = (int) get_post_field( 'post_author', $post_id );
+			return array(
+				'@type' => 'Person',
+				'name'  => ntn_core_schema_plain_text( get_the_author_meta( 'display_name', $author_id ) ),
+				'url'   => esc_url( get_author_posts_url( $author_id ) ),
+			);
+		}
+		return $author_val;
+	};
+
+	if ( null !== $article_key ) {
+		$entity         = $data[ $article_key ];
+		$webpage_entity = ( null !== $webpage_key && isset( $data[ $webpage_key ] ) && is_array( $data[ $webpage_key ] ) ) ? $data[ $webpage_key ] : array();
+		$article_url    = ! empty( $entity['url'] ) ? (string) $entity['url'] : ( ! empty( $webpage_entity['url'] ) ? (string) $webpage_entity['url'] : (string) $permalink );
+		$webpage_id     = ! empty( $webpage_entity['@id'] ) ? (string) $webpage_entity['@id'] : $article_url;
+		$newsarticle_id = ! empty( $entity['@id'] ) ? (string) $entity['@id'] : $article_url . '#newsarticle';
+		$publisher_val  = ! empty( $entity['publisher'] ) ? $entity['publisher'] : ( ! empty( $webpage_entity['publisher'] ) ? $webpage_entity['publisher'] : array(
+			'@id' => home_url( '/#/schema/Organization' ),
+		) );
+		$author_val     = $resolve_author( isset( $entity['author'] ) ? $entity['author'] : ( isset( $webpage_entity['author'] ) ? $webpage_entity['author'] : null ) );
+		$final_image    = ! empty( $entity['image'] ) ? $entity['image'] : ( ! empty( $webpage_entity['image'] ) ? $webpage_entity['image'] : $image_obj );
+
+		$data[ $article_key ]['@type']         = 'NewsArticle';
+		$data[ $article_key ]['@id']           = $newsarticle_id;
+		$data[ $article_key ]['headline']      = ! empty( $entity['headline'] ) ? $entity['headline'] : $headline;
+		$data[ $article_key ]['publisher']     = $publisher_val;
+		$data[ $article_key ]['datePublished'] = $date_published;
+		$data[ $article_key ]['dateModified']  = $date_modified;
+		$data[ $article_key ]['author']        = $author_val;
+
+		if ( empty( $data[ $article_key ]['mainEntityOfPage'] ) ) {
+			$data[ $article_key ]['mainEntityOfPage'] = array( '@id' => $webpage_id );
+		}
+		if ( null !== $webpage_key && empty( $data[ $article_key ]['isPartOf'] ) ) {
+			$data[ $article_key ]['isPartOf'] = array( '@id' => $webpage_id );
+		}
+		if ( empty( $data[ $article_key ]['image'] ) && ! empty( $final_image ) ) {
+			$data[ $article_key ]['image'] = $final_image;
+		}
+		if ( ! empty( $game_schema_ids ) ) {
+			$data[ $article_key ] = ntn_core_schema_attach_about( $data[ $article_key ], $game_schema_ids );
+		}
+
+		if ( null !== $webpage_key ) {
+			$data[ $webpage_key ]['@type']      = 'WebPage';
+			$data[ $webpage_key ]['mainEntity'] = array( '@id' => $newsarticle_id );
+		}
+
+		if ( $is_review ) {
+			$extra_entities[] = ntn_core_schema_build_review_entity(
+				$post_id,
+				$article_url,
+				$webpage_id,
+				$headline,
+				$author_val,
+				$publisher_val,
+				$rating,
+				$game_schema_ids[0]
+			);
+		}
+
+		$article_found = true;
+	} elseif ( null !== $webpage_key ) {
+		$entity         = $data[ $webpage_key ];
+		$article_url    = ! empty( $entity['url'] ) ? (string) $entity['url'] : (string) $permalink;
+		$webpage_id     = ! empty( $entity['@id'] ) ? (string) $entity['@id'] : $article_url;
+		$publisher_val  = ! empty( $entity['publisher'] ) ? $entity['publisher'] : array(
+			'@id' => home_url( '/#/schema/Organization' ),
+		);
+		$author_val     = $resolve_author( isset( $entity['author'] ) ? $entity['author'] : null );
+		$final_image    = ! empty( $entity['image'] ) ? $entity['image'] : $image_obj;
+		$newsarticle_id = $article_url . '#newsarticle';
+
+		$data[ $webpage_key ]['@type']      = 'WebPage';
+		$data[ $webpage_key ]['mainEntity'] = array( '@id' => $newsarticle_id );
+
+		$newsarticle = array(
+			'@type'            => 'NewsArticle',
+			'@id'              => $newsarticle_id,
+			'isPartOf'         => array( '@id' => $webpage_id ),
+			'mainEntityOfPage' => array( '@id' => $webpage_id ),
+			'headline'         => $headline,
+			'datePublished'    => $date_published,
+			'dateModified'     => $date_modified,
+			'author'           => $author_val,
+			'publisher'        => $publisher_val,
+		);
+		if ( ! empty( $entity['description'] ) ) {
+			$newsarticle['description'] = $entity['description'];
+		}
+		if ( ! empty( $entity['inLanguage'] ) ) {
+			$newsarticle['inLanguage'] = $entity['inLanguage'];
+		}
+		if ( ! empty( $final_image ) ) {
+			$newsarticle['image'] = $final_image;
+		}
+		if ( ! empty( $game_schema_ids ) ) {
+			$newsarticle = ntn_core_schema_attach_about( $newsarticle, $game_schema_ids );
+		}
+		$extra_entities[] = $newsarticle;
+
+		if ( $is_review ) {
+			$extra_entities[] = ntn_core_schema_build_review_entity(
+				$post_id,
+				$article_url,
+				$webpage_id,
+				$headline,
+				$author_val,
+				$publisher_val,
+				$rating,
+				$game_schema_ids[0]
+			);
+		}
+
+		$article_found = true;
+	}
+
+	// 4. Se abbiamo trovato l'articolo, iniettiamo NewsArticle / Review / VideoGame nel grafo
 	if ( $article_found ) {
 		// IMPORTANT: Usa l'append array [] (numerico) e non una chiave stringa come 'ntn_videogame'
 		// per evitare che l'intero @graph diventi un Oggetto invece che un Array in JSON.
+		foreach ( $extra_entities as $extra_entity ) {
+			$data[] = $extra_entity;
+		}
 		foreach ( $videogame_entities as $videogame_entity ) {
 			$data[] = $videogame_entity;
 		}

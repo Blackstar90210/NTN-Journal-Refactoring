@@ -488,15 +488,11 @@ function ntn_igdb_link_tag_to_game( $tag_id, $igdb_id ) {
 		)
 	);
 
-	$post_id = 0;
+	$post_id      = 0;
+	$old_snapshot = null;
 	if ( $cpt_post ) {
-		$post_id = $cpt_post[0]->ID;
-		wp_update_post(
-			array(
-				'ID'         => $post_id,
-				'post_title' => $details['title'],
-			)
-		);
+		$post_id      = $cpt_post[0]->ID;
+		$old_snapshot = function_exists( 'ntn_core_igdb_videogioco_snapshot' ) ? ntn_core_igdb_videogioco_snapshot( $post_id ) : null;
 	} else {
 		$post_id = wp_insert_post(
 			array(
@@ -525,6 +521,17 @@ function ntn_igdb_link_tag_to_game( $tag_id, $igdb_id ) {
 		update_post_meta( $post_id, '_ntn_igdb_last_sync', time() );
 		if ( isset( $details['raw_url'] ) ) {
 			update_post_meta( $post_id, '_ntn_game_url', $details['raw_url'] );
+		}
+
+		if ( is_array( $old_snapshot ) && function_exists( 'ntn_core_igdb_maybe_update_videogioco_post' ) ) {
+			ntn_core_igdb_maybe_update_videogioco_post( $post_id, $details['title'], $old_snapshot );
+		} elseif ( $cpt_post && $old_snapshot === null ) {
+			wp_update_post(
+				array(
+					'ID'         => $post_id,
+					'post_title' => $details['title'],
+				)
+			);
 		}
 
 		if ( ! empty( $details['release'] ) && taxonomy_exists( 'game_year' ) ) {

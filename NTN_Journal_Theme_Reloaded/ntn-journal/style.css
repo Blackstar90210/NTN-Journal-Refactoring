@@ -4,7 +4,7 @@ Theme URI: https://github.com/Blackstar90210/ntn-journal
 Author: Luca Maiolini & Divisione_WP
 Author URI: https://github.com/Blackstar90210
 Description: Tema Parent minimalista per il Network, con estetica brutalista e integrazione Tailwind CSS.
-Version: 4.34.4
+Version: 4.35.1
 Requires at least: 6.0
 Requires PHP: 8.0
 License: GNU General Public License v2 or later
@@ -660,5 +660,35 @@ figure.wp-block-image figcaption {
   left: 0 !important;
   width: 100% !important;
   height: 100% !important;
+}
+
+/* Tabelle leggibili e scorrevoli su smartphone (v4.35.0): evita colonne schiacciate e parole spezzate */
+@media (max-width: 767px) {
+  .ntn-prose .wp-block-table {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+  }
+
+  .ntn-prose .wp-block-table table.has-fixed-layout,
+  .ntn-prose .wp-block-table table {
+    table-layout: auto;
+    min-width: 560px;
+    word-break: normal;
+  }
+
+  .ntn-prose .wp-block-table th,
+  .ntn-prose .wp-block-table td {
+    min-width: 130px;
+    padding: 0.625rem 0.75rem;
+    vertical-align: top;
+  }
+
+  .ntn-prose > table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+  }
 }
 

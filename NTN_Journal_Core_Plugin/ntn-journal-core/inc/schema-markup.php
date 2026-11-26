@@ -448,7 +448,7 @@ function ntn_journal_review_article_schema() {
 				}
 			}
 
-			if ( ! empty( $game_title ) ) {
+			if ( ! empty( $game_title ) && ( ! function_exists( 'ntn_core_schema_allows_game_title' ) || ntn_core_schema_allows_game_title( get_the_ID(), $game_title ) ) ) {
 				$game_entity = array(
 					'@type'               => 'VideoGame',
 					'name'                => ntn_clean_json_ld_text( $game_title ),
