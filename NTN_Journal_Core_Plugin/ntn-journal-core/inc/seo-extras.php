@@ -997,22 +997,24 @@ function ntn_core_schema_pick_games( $post_id ) {
 		$contains = static function ( $haystack, $needle ) {
 			return '' !== $needle && false !== strpos( ' ' . $haystack . ' ', ' ' . $needle . ' ' );
 		};
-		// Nome intero e parte prima dei due punti o del trattino ("Death Stranding 2: On the Beach" -> "Death Stranding 2").
+		// Nome intero, parte prima dei due punti o del trattino, numeri romani normalizzati e sigle note (v4.36.0).
 		$keys = static function ( $title ) {
-			$full = ntn_core_schema_norm( $title );
-			$list = array( $full );
-			$base = ntn_core_schema_norm( preg_split( '/\s*(?::|\s[-–—]\s)\s*/u', html_entity_decode( (string) $title, ENT_QUOTES, 'UTF-8' ), 2 )[0] );
-			if ( '' !== $base && $base !== $full && strlen( $base ) >= 3 ) {
-				$list[] = $base;
-			}
-			return $list;
+			return ntn_core_schema_game_aliases( $title );
+		};
+
+		// Preserva i separatori di elenco (, ; : / |) per non fondere due titoli vicini ("Gioco A, Gioco B") (v4.36.0).
+		$norm_with_seps = static function ( $raw ) {
+			$decoded = html_entity_decode( wp_strip_all_tags( (string) $raw ), ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+			$marked  = preg_replace( '/[,;:\/|\(\)\[\]]+/', ' ntnsep ', $decoded );
+			return ntn_core_schema_normalize_numerals( ntn_core_schema_norm( $marked ) );
 		};
 
 		// Vince il nome più lungo: via i nomi contenuti in un altro o seguiti da un altro gioco dentro $text.
-		$prune = static function ( array $candidates, $text ) use ( $keys, $contains ) {
-			$kept = array();
+		$prune = static function ( array $candidates, $raw_text ) use ( $keys, $contains, $norm_with_seps ) {
+			$norm_text = $norm_with_seps( $raw_text );
+			$kept      = array();
 			foreach ( $candidates as $game ) {
-				$name    = ntn_core_schema_norm( $game['title'] );
+				$name    = ntn_core_schema_normalize_numerals( ntn_core_schema_norm( $game['title'] ) );
 				$dropped = false;
 				foreach ( $candidates as $other ) {
 					if ( $other === $game ) {
@@ -1023,7 +1025,7 @@ function ntn_core_schema_pick_games( $post_id ) {
 							$dropped = true;
 						}
 					}
-					if ( $contains( $text, $name . ' ' . ntn_core_schema_norm( $other['title'] ) ) ) {
+					if ( $contains( $norm_text, $name . ' ' . ntn_core_schema_normalize_numerals( ntn_core_schema_norm( $other['title'] ) ) ) ) {
 						$dropped = true;
 					}
 				}
@@ -1034,31 +1036,33 @@ function ntn_core_schema_pick_games( $post_id ) {
 			return $kept;
 		};
 
-		$reviewed = ntn_core_schema_norm( get_post_meta( $post_id, 'reviewed_item', true ) );
-		$matched  = array();
+		$raw_reviewed = get_post_meta( $post_id, 'reviewed_item', true );
+		$reviewed     = ntn_core_schema_normalize_numerals( ntn_core_schema_norm( $raw_reviewed ) );
+		$matched      = array();
 		if ( '' !== $reviewed ) {
 			$in_field = array();
 			foreach ( $games as $game ) {
-				$name = ntn_core_schema_norm( $game['title'] );
+				$name = ntn_core_schema_normalize_numerals( ntn_core_schema_norm( $game['title'] ) );
 				if ( $name === $reviewed || $contains( $reviewed, $name ) || $contains( $name, $reviewed ) ) {
 					$in_field[] = $game;
 				}
 			}
 			// Il nome scritto uguale nel campo vince su tutti; altrimenti il più lungo.
 			foreach ( $in_field as $game ) {
-				if ( ntn_core_schema_norm( $game['title'] ) === $reviewed ) {
+				if ( ntn_core_schema_normalize_numerals( ntn_core_schema_norm( $game['title'] ) ) === $reviewed ) {
 					$matched = array( $game );
 					break;
 				}
 			}
 			if ( empty( $matched ) ) {
-				$matched = $prune( $in_field, $reviewed );
+				$matched = $prune( $in_field, $raw_reviewed );
 			}
 		}
 
 		$decided = ! empty( $matched );
 		if ( ! $decided ) {
-			$article_title = ntn_core_schema_norm( get_the_title( $post_id ) );
+			$raw_title     = get_the_title( $post_id );
+			$article_title = ntn_core_schema_normalize_numerals( ntn_core_schema_norm( $raw_title ) );
 			$in_title      = array();
 			foreach ( $games as $game ) {
 				foreach ( $keys( $game['title'] ) as $key ) {
@@ -1069,7 +1073,7 @@ function ntn_core_schema_pick_games( $post_id ) {
 				}
 			}
 
-			$matched = $prune( $in_title, $article_title );
+			$matched = $prune( $in_title, $raw_title );
 
 			if ( ! empty( $matched ) ) {
 				$is_review = function_exists( 'has_category' ) && has_category( array( 'recensioni', 'recensione' ), $post_id );
@@ -1369,12 +1373,12 @@ function ntn_core_register_schema_game_mode_meta() {
 add_action( 'init', 'ntn_core_register_schema_game_mode_meta' );
 
 /**
- * Aggiunge il selettore "Dati Google — Videogioco" nella barra laterale dell'editor (v4.35.0).
+ * Aggiunge il selettore "Scheda gioco per Google" nella barra laterale dell'editor (v4.35.0 / v4.36.0).
  */
 function ntn_core_add_schema_game_meta_box() {
 	add_meta_box(
 		'ntn_core_schema_game_box',
-		'Dati Google — Videogioco',
+		'Scheda gioco per Google',
 		'ntn_core_render_schema_game_meta_box',
 		array( 'post', 'comunicato_stampa' ),
 		'side',
@@ -1384,7 +1388,7 @@ function ntn_core_add_schema_game_meta_box() {
 add_action( 'add_meta_boxes', 'ntn_core_add_schema_game_meta_box' );
 
 /**
- * Contenuto del riquadro "Dati Google — Videogioco" (v4.35.0).
+ * Contenuto del riquadro "Scheda gioco per Google" (v4.35.0 / v4.36.0).
  *
  * @param WP_Post $post Articolo corrente.
  */
@@ -1393,14 +1397,19 @@ function ntn_core_render_schema_game_meta_box( $post ) {
 	wp_nonce_field( 'ntn_core_save_schema_game_mode', 'ntn_core_schema_game_nonce' );
 	?>
 	<p>
-		<label for="ntn_core_schema_game_mode" style="display:block;font-weight:600;margin-bottom:6px;">Collegamento scheda gioco per Google:</label>
+		<label for="ntn_core_schema_game_mode" style="display:block;font-weight:600;margin-bottom:6px;">Quali giochi segnalare a Google:</label>
 		<select id="ntn_core_schema_game_mode" name="ntn_core_schema_game_mode" style="width:100%;">
-			<option value="auto" <?php selected( $mode, 'auto' ); ?>>Automatico (consigliato)</option>
-			<option value="always" <?php selected( $mode, 'always' ); ?>>Sempre (forza il collegamento)</option>
-			<option value="exclude" <?php selected( $mode, 'exclude' ); ?>>Escludi dai dati Google</option>
+			<option value="auto" <?php selected( $mode, 'auto' ); ?>>Scegli in automatico (consigliato)</option>
+			<option value="always" <?php selected( $mode, 'always' ); ?>>Includi tutti i giochi nei tag</option>
+			<option value="exclude" <?php selected( $mode, 'exclude' ); ?>>Non segnalare nessun gioco</option>
 		</select>
 	</p>
-	<p class="description" style="margin-top:6px;">In modalità Automatico, il gioco viene collegato nei dati per Google solo se compare nel titolo senza paragoni («simile a…») o se è indicato come Gioco recensito. I tag visibili a fine articolo non cambiano.</p>
+	<p class="description" style="margin-top:6px;">Indica solo a Google di quali giochi parla l'articolo (non cambia i tag né le schede visibili ai lettori).</p>
+	<ul class="description" style="margin:6px 0 0 16px;list-style:disc;font-size:12px;">
+		<li><strong>Automatico:</strong> segnala i giochi nominati nel titolo (anche con sigle come GTA VI), il gioco di una recensione e tutti i giochi delle raccolte.</li>
+		<li><strong>Includi tutti:</strong> utile se il titolo non nomina il gioco ma l'articolo parla proprio di quel gioco.</li>
+		<li><strong>Nessuno:</strong> utile per notizie aziendali o di settore in cui i giochi nei tag sono solo citati.</li>
+	</ul>
 	<?php
 }
 
@@ -1434,34 +1443,148 @@ function ntn_core_save_schema_game_meta_box( $post_id ) {
 add_action( 'save_post', 'ntn_core_save_schema_game_meta_box' );
 
 /**
+ * Converte i numeri romani isolati (ii..x) in cifre arabe su testo già normalizzato (v4.36.0).
+ * Esclude intenzionalmente "i" per non alterare l'articolo italiano "i".
+ *
+ * @param string $norm_text Testo già passato da ntn_core_schema_norm().
+ * @return string
+ */
+function ntn_core_schema_normalize_numerals( $norm_text ) {
+	$norm_text = (string) $norm_text;
+	if ( '' === $norm_text ) {
+		return '';
+	}
+	$map = array(
+		'ii'   => '2',
+		'iii'  => '3',
+		'iv'   => '4',
+		'v'    => '5',
+		'vi'   => '6',
+		'vii'  => '7',
+		'viii' => '8',
+		'ix'   => '9',
+		'x'    => '10',
+	);
+	return (string) preg_replace_callback(
+		'/\b(ii|iii|iv|v|vi|vii|viii|ix|x)\b/i',
+		static function ( $m ) use ( $map ) {
+			$low = strtolower( $m[1] );
+			return $map[ $low ] ?? $low;
+		},
+		$norm_text
+	);
+}
+
+/**
+ * Restituisce tutte le chiavi normalizzate di ricerca per un titolo di gioco, includendo
+ * numeri romani/arabi equivalenti e sigle videoludiche comuni (v4.36.0).
+ *
+ * @param string $game_title Titolo del videogioco.
+ * @return string[]
+ */
+function ntn_core_schema_game_aliases( $game_title ) {
+	$raw_game = html_entity_decode( (string) $game_title, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+	$full_key = ntn_core_schema_normalize_numerals( ntn_core_schema_norm( $raw_game ) );
+	if ( '' === $full_key ) {
+		return array();
+	}
+
+	$bases    = array( $full_key );
+	$base_raw = preg_split( '/\s*(?::|\s[-–—]\s)\s*/u', $raw_game, 2 );
+	$base_key = ntn_core_schema_normalize_numerals( ntn_core_schema_norm( $base_raw[0] ?? '' ) );
+	if ( '' !== $base_key && $base_key !== $full_key && strlen( $base_key ) >= 3 ) {
+		$bases[] = $base_key;
+	}
+
+	$franchise_aliases = array(
+		'grand theft auto'         => array( 'gta' ),
+		'call of duty'             => array( 'cod' ),
+		'red dead redemption'      => array( 'rdr' ),
+		'the last of us'           => array( 'tlou' ),
+		'final fantasy'            => array( 'ff' ),
+		'resident evil'            => array( 're' ),
+		'metal gear solid'         => array( 'mgs' ),
+		'the elder scrolls'        => array( 'tes' ),
+		'god of war'               => array( 'gow' ),
+		'baldur s gate'            => array( 'bg' ),
+		'baldurs gate'             => array( 'bg' ),
+		'world of warcraft'        => array( 'wow' ),
+		'league of legends'        => array( 'lol' ),
+		'ea sports fc'             => array( 'ea fc', 'fc' ),
+		'counter strike'           => array( 'cs' ),
+		'kingdom come deliverance' => array( 'kcd' ),
+		'monster hunter'           => array( 'mh' ),
+		'kingdom hearts'           => array( 'kh' ),
+		'devil may cry'            => array( 'dmc' ),
+		'assassin s creed'         => array( 'ac' ),
+		'assassins creed'          => array( 'ac' ),
+		'star wars'                => array( 'sw' ),
+		'the lord of the rings'    => array( 'lotr' ),
+		'gran turismo'             => array( 'gt' ),
+		'street fighter'           => array( 'sf' ),
+		'mortal kombat'            => array( 'mk' ),
+		'gears of war'             => array( 'gears' ),
+		'world of tanks'           => array( 'wot' ),
+		'age of empires'           => array( 'aoe' ),
+		'path of exile'            => array( 'poe' ),
+	);
+
+	$keys = $bases;
+	foreach ( $bases as $candidate ) {
+		foreach ( $franchise_aliases as $franchise => $aliases ) {
+			if ( $candidate === $franchise ) {
+				foreach ( $aliases as $alias ) {
+					if ( strlen( $alias ) >= 3 ) {
+						$keys[] = $alias;
+					}
+				}
+			} elseif ( 0 === strpos( $candidate, $franchise . ' ' ) ) {
+				$rest = trim( substr( $candidate, strlen( $franchise . ' ' ) ) );
+				if ( '' !== $rest ) {
+					foreach ( $aliases as $alias ) {
+						$keys[] = $alias . ' ' . $rest;
+						if ( 1 === preg_match( '/^\d/', $rest ) ) {
+							$keys[] = $alias . $rest;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return array_values( array_unique( array_filter( $keys ) ) );
+}
+
+/**
+ * Pattern che individua un gioco citato nel titolo solo come paragone o riferimento indiretto (v4.36.0).
+ *
+ * @return string
+ */
+function ntn_core_schema_comparison_regex() {
+	return '/(?:^|\s)(?:simile a|simili a|simile al|simile alla|simile all|simile ai|simile agli|simile alle|ispirat[oaie] a|ispirat[oaie] al|ispirat[oaie] alla|ispirat[oaie] all|in stile|stile|come|erede di|eredi di|dai creatori di|dai creatori del|dai creatori della|dai creatori dell|dal creatore di|dagli autori di|degli autori di|dello studio di|dopo|tipo|alla|sulla scia di|sulle orme di|clone di|cloni di|alternativa a|alternativa al|alternativa alla|l alternativa a|l alternativa al|meglio di|peggio di)(?:\s+(?:il|lo|la|i|gli|le|l|un|uno|una|primo|secondo|vecchio|storico|successo di|uscita di|lancio di|arrivo di))*$/i';
+}
+
+/**
  * Verifica se il nome di un gioco compare nel titolo come soggetto reale e non dentro un paragone
- * o citazione indiretta ("simile a Hades", "dopo GTA V", "dai creatori di Elden Ring") (v4.35.0, Soluzione A).
+ * o citazione indiretta ("simile a Hades", "dopo GTA V", "dai creatori di Elden Ring") (v4.35.0 / v4.36.0).
  *
  * @param string $article_title Titolo dell'articolo.
  * @param string $game_title    Titolo del videogioco.
  * @return bool
  */
 function ntn_core_schema_title_matches_game( $article_title, $game_title ) {
-	$norm_title = ntn_core_schema_norm( $article_title );
+	$norm_title = ntn_core_schema_normalize_numerals( ntn_core_schema_norm( $article_title ) );
 	if ( '' === $norm_title ) {
 		return false;
 	}
 
-	$raw_game = html_entity_decode( (string) $game_title, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
-	$full_key = ntn_core_schema_norm( $raw_game );
-	if ( '' === $full_key ) {
+	$keys = ntn_core_schema_game_aliases( $game_title );
+	if ( empty( $keys ) ) {
 		return false;
 	}
 
-	$keys     = array( $full_key );
-	$base_raw = preg_split( '/\s*(?::|\s[-–—]\s)\s*/u', $raw_game, 2 );
-	$base_key = ntn_core_schema_norm( $base_raw[0] ?? '' );
-	if ( '' !== $base_key && $base_key !== $full_key && strlen( $base_key ) >= 3 ) {
-		$keys[] = $base_key;
-	}
-
 	$haystack         = ' ' . $norm_title . ' ';
-	$comparison_regex = '/(?:^|\s)(?:simile a|simili a|simile al|simile alla|simile all|simile ai|simile agli|simile alle|ispirat[oaie] a|ispirat[oaie] al|ispirat[oaie] alla|ispirat[oaie] all|in stile|stile|come|erede di|eredi di|dai creatori di|dai creatori del|dai creatori della|dai creatori dell|dal creatore di|dagli autori di|degli autori di|dello studio di|dopo|tipo|alla|sulla scia di|sulle orme di|clone di|cloni di|alternativa a|alternativa al|alternativa alla|l alternativa a|l alternativa al|meglio di|peggio di)(?:\s+(?:il|lo|la|i|gli|le|l|un|uno|una|primo|secondo|vecchio|storico|successo di|uscita di|lancio di|arrivo di))*$/i';
+	$comparison_regex = ntn_core_schema_comparison_regex();
 
 	foreach ( $keys as $key ) {
 		$needle = ' ' . $key . ' ';
@@ -1475,6 +1598,70 @@ function ntn_core_schema_title_matches_game( $article_title, $game_title ) {
 		}
 	}
 
+	return false;
+}
+
+/**
+ * Verifica se un gioco compare nel titolo esclusivamente preceduto da formule di paragone
+ * (es. "3 roguelike in stile Hades da provare") (v4.36.0).
+ *
+ * @param string $article_title Titolo dell'articolo.
+ * @param string $game_title    Titolo del videogioco.
+ * @return bool
+ */
+function ntn_core_schema_title_is_comparison_only( $article_title, $game_title ) {
+	$norm_title = ntn_core_schema_normalize_numerals( ntn_core_schema_norm( $article_title ) );
+	if ( '' === $norm_title ) {
+		return false;
+	}
+
+	$keys = ntn_core_schema_game_aliases( $game_title );
+	if ( empty( $keys ) ) {
+		return false;
+	}
+
+	$haystack         = ' ' . $norm_title . ' ';
+	$comparison_regex = ntn_core_schema_comparison_regex();
+	$saw_match        = false;
+
+	foreach ( $keys as $key ) {
+		$needle = ' ' . $key . ' ';
+		$offset = 0;
+		while ( false !== ( $pos = strpos( $haystack, $needle, $offset ) ) ) {
+			$saw_match = true;
+			$before    = trim( substr( $norm_title, 0, $pos ) );
+			if ( 1 !== preg_match( $comparison_regex, $before ) ) {
+				return false;
+			}
+			$offset = $pos + strlen( $key );
+		}
+	}
+
+	return $saw_match;
+}
+
+/**
+ * Indica se l'articolo è una raccolta multi-gioco o un editoriale/speciale multi-gioco
+ * in modalità automatica (v4.36.0). Gli editoriali con un solo gioco restano gestiti dal filtro sul titolo.
+ *
+ * @param int   $post_id            ID dell'articolo.
+ * @param array $videogame_entities Entità VideoGame candidate.
+ * @return bool
+ */
+function ntn_core_schema_is_multigame_collection( $post_id, array $videogame_entities ) {
+	if ( is_singular( array( 'videogioco', 'attachment' ) ) ) {
+		return false;
+	}
+	if ( 'auto' !== ntn_core_schema_get_game_mode( $post_id ) ) {
+		return false;
+	}
+	$count = count( $videogame_entities );
+	if ( $count >= 3 ) {
+		return true;
+	}
+	if ( $count >= 2 && function_exists( 'has_category' ) ) {
+		return has_category( array( 'editoriali', 'editoriale', 'speciali', 'speciale', 'rubriche', 'rubrica', 'guide', 'guida' ), $post_id );
+	}
 	return false;
 }
 
@@ -1666,21 +1853,31 @@ function ntn_tsf_add_videogame_schema( $data, $context = array() ) {
 
 	$rating = get_post_meta( $post_id, 'rating', true );
 
-	// Soluzione A (v4.35.0): filtra i giochi collegati per evitare about fuori tema o da paragone.
-	// v4.35.1: una recensione con voto e un solo gioco nei tag mantiene quel gioco anche con titolo creativo
-	// e campo "Gioco recensito" vuoto, a meno che l'editor non scelga "Escludi dai dati Google".
+	// Soluzione A (v4.35.0) + tutela recensioni monogioco (v4.35.1) + raccolte ed editoriali multi-gioco (v4.36.0).
 	if ( ! is_singular( array( 'videogioco', 'attachment' ) ) && ! empty( $videogame_entities ) ) {
 		$schema_mode          = ntn_core_schema_get_game_mode( $post_id );
 		$is_single_game_rated = ! empty( $rating ) && 1 === count( $videogame_entities ) && 'exclude' !== $schema_mode;
 		if ( ! $is_single_game_rated ) {
-			$videogame_entities = array_values(
-				array_filter(
-					$videogame_entities,
-					static function ( $vg ) use ( $post_id ) {
-						return ntn_core_schema_allows_game_title( $post_id, isset( $vg['name'] ) ? (string) $vg['name'] : '' );
-					}
-				)
-			);
+			if ( ntn_core_schema_is_multigame_collection( $post_id, $videogame_entities ) ) {
+				$article_title      = get_the_title( $post_id );
+				$videogame_entities = array_values(
+					array_filter(
+						$videogame_entities,
+						static function ( $vg ) use ( $article_title ) {
+							return ! ntn_core_schema_title_is_comparison_only( $article_title, isset( $vg['name'] ) ? (string) $vg['name'] : '' );
+						}
+					)
+				);
+			} else {
+				$videogame_entities = array_values(
+					array_filter(
+						$videogame_entities,
+						static function ( $vg ) use ( $post_id ) {
+							return ntn_core_schema_allows_game_title( $post_id, isset( $vg['name'] ) ? (string) $vg['name'] : '' );
+						}
+					)
+				);
+			}
 		}
 	}
 	$game_schema_ids = array_values( array_unique( array_column( $videogame_entities, '@id' ) ) );

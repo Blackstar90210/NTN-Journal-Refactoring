@@ -1655,24 +1655,24 @@ echo "\n--- 24. SEMVER SIMULTANEOUS 4-HEADER SYNCHRONIZATION ---\n";
 $parent_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $parent_css, $m_parent );
 $parent_ver = isset( $m_parent[1] ) ? trim( $m_parent[1] ) : '';
-assert_test( $parent_ver === '4.35.1', "24.1: Parent Theme style.css declares Version: 4.35.1(found: {$parent_ver})" );
+assert_test( $parent_ver === '4.36.0', "24.1: Parent Theme style.css declares Version: 4.36.0(found: {$parent_ver})" );
 
 $child_css = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' );
 preg_match( '/Version:\s*([0-9\.]+)/', $child_css, $m_child );
 $child_ver = isset( $m_child[1] ) ? trim( $m_child[1] ) : '';
-assert_test( $child_ver === '4.35.1', "24.2: Child Theme style.css declares Version: 4.35.1(found: {$child_ver})" );
+assert_test( $child_ver === '4.36.0', "24.2: Child Theme style.css declares Version: 4.36.0(found: {$child_ver})" );
 
 $core_php = file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' );
 preg_match( '/\*\s*Version:\s*([0-9\.]+)/', $core_php, $m_core_hdr );
 $core_hdr_ver = isset( $m_core_hdr[1] ) ? trim( $m_core_hdr[1] ) : '';
-assert_test( $core_hdr_ver === '4.35.1', "24.3: Core Plugin header declares Version: 4.35.1(found: {$core_hdr_ver})" );
+assert_test( $core_hdr_ver === '4.36.0', "24.3: Core Plugin header declares Version: 4.36.0(found: {$core_hdr_ver})" );
 
 preg_match( "/define\(\s*'NTN_JOURNAL_CORE_VERSION',\s*'([^']+)'\s*\);/", $core_php, $m_core_const );
 $core_const_ver = isset( $m_core_const[1] ) ? trim( $m_core_const[1] ) : '';
-assert_test( $core_const_ver === '4.35.1', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.35.1(found: {$core_const_ver})" );
+assert_test( $core_const_ver === '4.36.0', "24.4: Core Plugin NTN_JOURNAL_CORE_VERSION constant equals 4.36.0(found: {$core_const_ver})" );
 
 assert_test(
-	$parent_ver === '4.35.1' && $child_ver === '4.35.1' && $core_hdr_ver === '4.35.1' && $core_const_ver === '4.35.1',
+	$parent_ver === '4.36.0' && $child_ver === '4.36.0' && $core_hdr_ver === '4.36.0' && $core_const_ver === '4.36.0',
 	'24.5: All 4 version headers are 100% synchronized and atomic according to Rule 2 of GEMINI.md'
 );
 
@@ -1900,7 +1900,7 @@ $parent_style_ver = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( AB
 $child_style_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal-reloaded/style.css' ), $m2 ) ? $m2[1] : '';
 $core_plugin_ver  = preg_match( '/Version:\s*([0-9\.]+)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m3 ) ? $m3[1] : '';
 $core_const_ver   = preg_match( '/define\(\s*[\'"]NTN_JOURNAL_CORE_VERSION[\'"]\s*,\s*[\'"]([0-9\.]+)[\'"]\s*\)/', file_get_contents( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/ntn-journal-core.php' ), $m4 ) ? $m4[1] : '';
-assert_test( $parent_style_ver === '4.35.1' && $child_style_ver === '4.35.1' && $core_plugin_ver === '4.35.1' && $core_const_ver === '4.35.1', '29.1: All 4 version headers are synchronized to 4.35.1' );
+assert_test( $parent_style_ver === '4.36.0' && $child_style_ver === '4.36.0' && $core_plugin_ver === '4.36.0' && $core_const_ver === '4.36.0', '29.1: All 4 version headers are synchronized to 4.36.0' );
 
 // 29.2: single.php sequence is Google Feed -> Social CTA -> Bottom Related Posts
 $single_php = file_get_contents( ABSPATH . 'NTN_Journal_Theme_Reloaded/ntn-journal/single.php' );
@@ -7604,6 +7604,79 @@ assert_test(
 assert_test(
 	false === strpos( $v435_single, 'itemprop="articleBody"' ) && false === strpos( $v435_press, 'itemprop="articleBody"' ),
 	'114.3: single.php and single-comunicato_stampa.php do not emit orphan itemprop="articleBody" without itemscope'
+);
+
+// --- TEST SUITE 115: Sigle/numeri romani, raccolte ed editoriali multi-gioco e testi editor v4.36.0 ---
+echo "\n--- 115. SIGLE, RACCOLTE/EDITORIALI MULTI-GIOCO E TESTI EDITOR V4.36.0 ---\n";
+
+// 115.1: riconoscimento automatico di sigle e numeri romani/arabi (senza falsi positivi da 2 lettere e anti-paragone)
+assert_test(
+	true === ntn_core_schema_title_matches_game( 'GTA VI gira meglio su Xbox Series X che su PS5', 'Grand Theft Auto VI' ) &&
+	true === ntn_core_schema_title_matches_game( 'GTA 6: data di uscita e trailer', 'Grand Theft Auto VI' ) &&
+	false === ntn_core_schema_title_matches_game( 'GTA VI: dopo GTA V cosa cambia', 'Grand Theft Auto V' ) &&
+	true === ntn_core_schema_title_matches_game( 'BG3 riceve la patch finale', "Baldur's Gate 3" ) &&
+	true === ntn_core_schema_title_matches_game( 'FF VII Rebirth su PC', 'Final Fantasy VII Rebirth' ) &&
+	true === ntn_core_schema_title_matches_game( 'RE9: primi dettagli sul gioco', 'Resident Evil 9' ) &&
+	false === ntn_core_schema_title_matches_game( 'Il re dei roguelike su Steam', 'Resident Evil' ),
+	'115.1: Abbreviations (GTA, BG3, FF, RE9) and Roman/Arabic numerals match catalog titles automatically while keeping comparison guard and avoiding 2-letter false positives'
+);
+
+// 115.2: raccolta multi-gioco (3+ giochi) collega tutti i giochi tranne quelli citati solo come paragone
+$v436_for = $mg_term( 9540, 'Forsaken Lands', 'forsaken-lands', array( '_ntn_igdb_game_id' => '9540', '_ntn_game_title' => 'Forsaken Lands' ) );
+$v436_cal = $mg_term( 9541, 'Calame', 'calame', array( '_ntn_igdb_game_id' => '9541', '_ntn_game_title' => 'Calame' ) );
+$v436_blk = $mg_term( 9542, 'Black Lake', 'black-lake', array( '_ntn_igdb_game_id' => '9542', '_ntn_game_title' => 'Black Lake' ) );
+$mg_post( 9545, 'post', 'publish', 'indie-settimana', '2026-11-22', array( $v436_for, $v436_cal, $v436_blk ), array( 'editoriali' ) );
+$mock_posts[9545]->post_title = 'Indie della settimana: Forsaken Lands, Calame e altri 7 videogiochi';
+$GLOBALS['queried_object'] = $mock_posts[9545];
+$GLOBALS['post']           = $mock_posts[9545];
+$v436_out_indie = ntn_tsf_add_videogame_schema( array( array( '@type' => 'WebPage', '@id' => 'https://example.com/indie-week/#webpage' ) ), array() );
+
+$mg_post( 9546, 'post', 'publish', 'roguelike-hades', '2026-11-23', array( $v436_for, $v436_cal, $v436_blk, $v435_hd_tag ), array( 'speciali' ) );
+$mock_posts[9546]->post_title = '3 roguelike in stile Hades da provare';
+$GLOBALS['queried_object'] = $mock_posts[9546];
+$GLOBALS['post']           = $mock_posts[9546];
+$v436_out_comp = ntn_tsf_add_videogame_schema( array( array( '@type' => 'WebPage', '@id' => 'https://example.com/roguelike/#webpage' ) ), array() );
+$v436_comp_names = array_column( array_values( array_filter( $v436_out_comp, static function ( $e ) { return isset( $e['@type'] ) && 'VideoGame' === $e['@type']; } ) ), 'name' );
+sort( $v436_comp_names );
+assert_test(
+	3 === $v4351_count_type( $v436_out_indie, 'VideoGame' ) &&
+	array( 'Black Lake', 'Calame', 'Forsaken Lands' ) === $v436_comp_names,
+	'115.2: Multi-game collections (3+ games) attach all linked games in auto mode while still excluding any game mentioned in the title strictly as a comparison'
+);
+
+// 115.3: editoriale con 2 giochi vs editoriale con 1 solo gioco e titolo riflessivo (Opzione Consigliata)
+$mg_post( 9547, 'post', 'publish', 'ed-due-giochi', '2026-11-24', array( $v436_for, $v436_cal ), array( 'editoriali' ) );
+$mock_posts[9547]->post_title = 'Due esperienze indie a confronto';
+$GLOBALS['queried_object'] = $mock_posts[9547];
+$GLOBALS['post']           = $mock_posts[9547];
+$v436_ed2 = ntn_tsf_add_videogame_schema( array( array( '@type' => 'WebPage', '@id' => 'https://example.com/ed2/#webpage' ) ), array() );
+
+$mg_post( 9548, 'post', 'publish', 'ed-uno-riflessivo', '2026-11-24', array( $v436_cal ), array( 'editoriali' ) );
+$mock_posts[9548]->post_title = 'Perché il design minimalista funziona sempre';
+$GLOBALS['queried_object'] = $mock_posts[9548];
+$GLOBALS['post']           = $mock_posts[9548];
+$v436_ed1_auto = ntn_tsf_add_videogame_schema( array( array( '@type' => 'WebPage', '@id' => 'https://example.com/ed1/#webpage' ) ), array() );
+$mock_postmeta[9548]['_ntn_core_schema_game_mode'] = 'always';
+$v436_ed1_always = ntn_tsf_add_videogame_schema( array( array( '@type' => 'WebPage', '@id' => 'https://example.com/ed1/#webpage' ) ), array() );
+unset( $mock_postmeta[9548]['_ntn_core_schema_game_mode'] );
+$GLOBALS['queried_object'] = null;
+$GLOBALS['post']           = null;
+assert_test(
+	2 === $v4351_count_type( $v436_ed2, 'VideoGame' ) &&
+	0 === $v4351_count_type( $v436_ed1_auto, 'VideoGame' ) &&
+	1 === $v4351_count_type( $v436_ed1_always, 'VideoGame' ),
+	'115.3: Editorials with 2+ games attach all games automatically, while a 1-game editorial with a generic title omits it in auto mode and attaches it with always mode'
+);
+
+// 115.4: testi chiari del riquadro editor "Scheda gioco per Google"
+$v436_seo_src = ntn_t_read( ABSPATH . 'NTN_Journal_Core_Plugin/ntn-journal-core/inc/seo-extras.php' );
+assert_test(
+	false !== strpos( $v436_seo_src, 'Scheda gioco per Google' ) &&
+	false !== strpos( $v436_seo_src, 'Quali giochi segnalare a Google:' ) &&
+	false !== strpos( $v436_seo_src, 'Scegli in automatico (consigliato)' ) &&
+	false !== strpos( $v436_seo_src, 'Includi tutti i giochi nei tag' ) &&
+	false !== strpos( $v436_seo_src, 'Non segnalare nessun gioco' ),
+	'115.4: Editor meta box uses clear Italian labels and options ("Scheda gioco per Google")'
 );
 
 echo "\n=======================================================================\n";
